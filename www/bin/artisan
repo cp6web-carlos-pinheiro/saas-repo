@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+exec php -d pcov.enabled=0 artisan "$@"

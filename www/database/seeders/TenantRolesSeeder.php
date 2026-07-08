@@ -1,0 +1,191 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Seeders;
+
+use App\Modules\Identity\Infrastructure\Persistence\Models\Permission;
+use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use Illuminate\Database\Seeder;
+
+final class TenantRolesSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $roleMatrix = [
+            'planner' => [
+                'name' => 'Planner',
+                'description' => 'Production planning role',
+                'permissions' => [
+                    'work-centers.read',
+                    'production-calendar.read',
+                    'production-calendar.generate',
+                    'production-scheduling.run',
+                    'bom.explode',
+                    'mrp.plan',
+                    'routing-versions.read',
+                    'routing-operations.read',
+                    'inventory.read',
+                    'inventory.lots.read',
+                    'inventory.lots.trace',
+                    'inventory.serials.read',
+                    'inventory.serials.trace',
+                    'production-orders.read',
+                    'production-orders.consumption.read',
+                    'genealogy.trace',
+                    'eco.read',
+                    'eco.create',
+                    'eco.update',
+                    'eco.submit',
+                    'eco.impact.read',
+                    'purchasing.suppliers.read',
+                    'purchasing.requisitions.read',
+                    'purchasing.requisitions.create',
+                    'purchasing.requisitions.from-mrp',
+                    'purchasing.orders.read',
+                ],
+            ],
+            'supervisor' => [
+                'name' => 'Supervisor',
+                'description' => 'Shop floor supervision role',
+                'permissions' => [
+                    'work-centers.read',
+                    'work-centers.create',
+                    'work-centers.update',
+                    'work-centers.shifts.create',
+                    'production-calendar.read',
+                    'production-calendar.update',
+                    'production-calendar.generate',
+                    'production-scheduling.run',
+                    'bom.explode',
+                    'mrp.plan',
+                    'routing-versions.read',
+                    'routing-versions.create',
+                    'routing-versions.approve',
+                    'routing-operations.read',
+                    'routing-operations.create',
+                    'routing-operations.update',
+                    'inventory.read',
+                    'inventory.update',
+                    'inventory.lots.read',
+                    'inventory.lots.create',
+                    'inventory.lots.trace',
+                    'inventory.serials.read',
+                    'inventory.serials.create',
+                    'inventory.serials.trace',
+                    'production-orders.read',
+                    'production-orders.create',
+                    'production-orders.release',
+                    'production-orders.partial',
+                    'production-orders.complete',
+                    'production-orders.consumption.create',
+                    'production-orders.consumption.read',
+                    'genealogy.trace',
+                    'genealogy.relations.create',
+                    'eco.read',
+                    'eco.create',
+                    'eco.update',
+                    'eco.submit',
+                    'eco.impact.read',
+                    'purchasing.suppliers.read',
+                    'purchasing.suppliers.create',
+                    'purchasing.suppliers.update',
+                    'purchasing.suppliers.rules.manage',
+                    'purchasing.requisitions.read',
+                    'purchasing.requisitions.create',
+                    'purchasing.requisitions.from-mrp',
+                    'purchasing.requisitions.convert',
+                    'purchasing.orders.read',
+                ],
+            ],
+            'admin' => [
+                'name' => 'Admin',
+                'description' => 'Tenant administration role',
+                'permissions' => [
+                    'work-centers.read',
+                    'work-centers.create',
+                    'work-centers.update',
+                    'work-centers.delete',
+                    'work-centers.shifts.create',
+                    'production-calendar.read',
+                    'production-calendar.update',
+                    'production-calendar.generate',
+                    'production-scheduling.run',
+                    'bom.explode',
+                    'mrp.plan',
+                    'routing-versions.read',
+                    'routing-versions.create',
+                    'routing-versions.approve',
+                    'routing-versions.obsolete',
+                    'routing-operations.read',
+                    'routing-operations.create',
+                    'routing-operations.update',
+                    'routing-operations.delete',
+                    'inventory.read',
+                    'inventory.update',
+                    'inventory.lots.read',
+                    'inventory.lots.create',
+                    'inventory.lots.trace',
+                    'inventory.serials.read',
+                    'inventory.serials.create',
+                    'inventory.serials.trace',
+                    'production-orders.read',
+                    'production-orders.create',
+                    'production-orders.release',
+                    'production-orders.partial',
+                    'production-orders.complete',
+                    'production-orders.consumption.create',
+                    'production-orders.consumption.read',
+                    'genealogy.trace',
+                    'genealogy.relations.create',
+                    'eco.read',
+                    'eco.create',
+                    'eco.update',
+                    'eco.submit',
+                    'eco.approve',
+                    'eco.reject',
+                    'eco.implement',
+                    'eco.impact.read',
+                    'purchasing.suppliers.read',
+                    'purchasing.suppliers.create',
+                    'purchasing.suppliers.update',
+                    'purchasing.suppliers.rules.manage',
+                    'purchasing.requisitions.read',
+                    'purchasing.requisitions.create',
+                    'purchasing.requisitions.from-mrp',
+                    'purchasing.requisitions.convert',
+                    'purchasing.orders.read',
+                    'purchasing.orders.approve',
+                ],
+            ],
+        ];
+
+        $permissionIdsBySlug = Permission::query()
+            ->whereIn('slug', collect($roleMatrix)->pluck('permissions')->flatten()->unique()->values())
+            ->pluck('id', 'slug');
+
+        Company::query()->each(function (Company $company) use ($roleMatrix, $permissionIdsBySlug): void {
+            foreach ($roleMatrix as $roleSlug => $definition) {
+                $role = Role::query()->updateOrCreate(
+                    [
+                        'company_id' => $company->id,
+                        'slug' => $roleSlug,
+                    ],
+                    [
+                        'name' => $definition['name'],
+                        'description' => $definition['description'],
+                    ]
+                );
+
+                $rolePermissionIds = collect($definition['permissions'])
+                    ->map(static fn (string $slug): ?int => $permissionIdsBySlug->get($slug))
+                    ->filter()
+                    ->values()
+                    ->all();
+
+                $role->permissions()->sync($rolePermissionIds);
+            }
+        });
+    }
+}
