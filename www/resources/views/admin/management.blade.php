@@ -1,98 +1,85 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ __('admin.title') }} | {{ __('ui.app_name') }}</title>
-  @vite(['resources/css/app.css', 'resources/js/app.js'])
-  <style>
-    .admin-nav-link {
-      color: #334155;
-      border-color: #cbd5e1;
-    }
+@extends('layouts.google')
 
-    .admin-nav-link:hover {
-      background: #f1f5f9;
-      color: #0f172a;
-    }
+@section('title', __('admin.title').' | '.__('ui.app_name'))
 
-    .admin-nav-link.is-active {
-      background: #e2e8f0;
-      border-color: #38bdf8;
-      color: #0f172a;
-      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.3);
-    }
-  </style>
-</head>
-<body class="bg-slate-100 text-slate-900">
+@section('bodyClass', 'bg-slate-100 text-slate-900')
+
+@section('content')
   <div class="flex min-h-screen">
-    <aside class="w-72 shrink-0 bg-slate-50 border-r border-slate-200 text-slate-900 p-6 flex flex-col">
-      <div>
-        <h1 class="font-display text-2xl font-bold">{{ __('admin.heading') }}</h1>
-        <p class="text-sm text-slate-500 mt-2">{{ __('admin.menu_description') }}</p>
-      </div>
+    <x-ui.sidebar variant="admin">
+      <x-slot:header>
+        <div>
+          <h1 class="font-display text-2xl font-bold">{{ __('admin.heading') }}</h1>
+          <p class="text-sm text-slate-500 mt-2">{{ __('admin.menu_description') }}</p>
+        </div>
+      </x-slot:header>
 
-      <nav class="mt-8 space-y-2 text-xl">
-        <a href="#visao-geral" data-section-link="visao-geral" class="admin-nav-link block rounded-lg px-4 py-2.5 border transition">
+      <x-ui.menu variant="admin">
+        <x-ui.menu-item variant="admin" href="#visao-geral" data-section-link="visao-geral">
           <span class="inline-flex items-center gap-2">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5h7v6H4V5Zm9 0h7v14h-7V5ZM4 13h7v6H4v-6Z" fill="currentColor"/></svg>
             <span>{{ __('admin.overview') }}</span>
           </span>
-        </a>
-        <a href="#sec-empresas" data-section-link="sec-empresas" class="admin-nav-link block rounded-lg px-4 py-2.5 border transition">
+        </x-ui.menu-item>
+        <x-ui.menu-item variant="admin" href="#sec-empresas" data-section-link="sec-empresas">
           <span class="inline-flex items-center gap-2">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <span>{{ __('admin.companies_plans') }}</span>
           </span>
-        </a>
-        <a href="#sec-usuarios" data-section-link="sec-usuarios" class="admin-nav-link block rounded-lg px-4 py-2.5 border transition">
+        </x-ui.menu-item>
+        <x-ui.menu-item variant="admin" href="#sec-usuarios" data-section-link="sec-usuarios">
           <span class="inline-flex items-center gap-2">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 19a4 4 0 0 0-8 0m11 0a3 3 0 0 0-6 0m6 0v1H5v-1m14 0a3 3 0 0 0-3-3M5 19a3 3 0 0 1 3-3m0 0a4 4 0 1 1 8 0M9 9a3 3 0 1 0 0 .01M17 9a2 2 0 1 0 0 .01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
             <span>{{ __('admin.users_admins') }}</span>
           </span>
-        </a>
-        <a href="{{ route('admin.management') }}" class="admin-nav-link block rounded-lg px-4 py-2.5 border transition">
+        </x-ui.menu-item>
+        <x-ui.menu-item variant="admin" :href="route('admin.management')">
           <span class="inline-flex items-center gap-2">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span>{{ __('admin.refresh_panel') }}</span>
           </span>
-        </a>
-        <a href="{{ route('dashboard.industrial') }}" class="admin-nav-link block rounded-lg px-4 py-2.5 border transition">
+        </x-ui.menu-item>
+        <x-ui.menu-item variant="admin" :href="route('dashboard.industrial')">
           <span class="inline-flex items-center gap-2">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 17 5 12l5-5M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span>{{ __('admin.back_dashboard') }}</span>
           </span>
-        </a>
-      </nav>
+        </x-ui.menu-item>
+      </x-ui.menu>
 
-      <div class="mt-auto pt-6">
+      <x-slot:footer>
         <form method="POST" action="{{ route('logout') }}">
           @csrf
           <button type="submit" class="w-full rounded-lg bg-coral px-4 py-2.5 text-sm font-semibold hover:brightness-110 transition">{{ __('admin.logout') }}</button>
         </form>
-      </div>
-    </aside>
+      </x-slot:footer>
+    </x-ui.sidebar>
 
     <main class="flex-1 px-8 py-8 space-y-6">
+      <x-ui.breadcrumb :items="[
+        ['label' => __('ui.app_name'), 'href' => route('dashboard.industrial')],
+        ['label' => __('admin.title')],
+      ]" />
+
       @if (session('status'))
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-700 px-5 py-4 text-sm">
-          {{ session('status') }}
-        </div>
+        <x-ui.alert variant="success">{{ session('status') }}</x-ui.alert>
       @endif
 
       @if ($errors->any())
-        <div class="rounded-2xl border border-rose-200 bg-rose-50 text-rose-700 px-5 py-4 text-sm">
+        <x-ui.alert variant="error">
           <ul class="list-disc ml-5">
             @foreach ($errors->all() as $error)
               <li>{{ $error }}</li>
             @endforeach
           </ul>
-        </div>
+        </x-ui.alert>
       @endif
 
-      <section id="visao-geral" class="rounded-3xl bg-white border border-slate-200 shadow-soft p-6">
-        <h2 class="font-display text-2xl font-bold">{{ __('admin.overview') }}</h2>
-        <p class="text-sm text-slate-500 mt-1">{{ __('admin.overview_description') }}</p>
+      <x-ui.panel id="visao-geral">
+        <x-ui.page-heading
+          :title="__('admin.overview')"
+          :subtitle="__('admin.overview_description')"
+        />
 
         <div class="mt-5 grid md:grid-cols-2 xl:grid-cols-4 gap-3">
           <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -112,9 +99,9 @@
             <p class="mt-1 text-2xl font-bold">{{ $users->currentPage() }}/{{ $users->lastPage() }}</p>
           </article>
         </div>
-      </section>
+      </x-ui.panel>
 
-      <section id="sec-empresas" class="rounded-3xl bg-white border border-slate-200 shadow-soft p-6">
+      <x-ui.panel id="sec-empresas">
         <div class="flex items-center justify-between mb-5">
           <h2 class="font-display text-2xl font-bold">{{ __('admin.companies_plans') }}</h2>
           <p class="text-sm text-slate-500">{{ __('admin.manage_customers') }}</p>
@@ -151,13 +138,13 @@
           </div>
 
           <div class="md:col-span-4 flex gap-2">
-            <button type="submit" class="px-4 py-2 rounded-xl bg-night text-white text-sm font-semibold hover:opacity-90 transition">{{ __('admin.filter_companies') }}</button>
+            <x-ui.button type="submit" variant="primary">{{ __('admin.filter_companies') }}</x-ui.button>
             <a href="{{ route('admin.management', [
               'user_search' => $userFilters['search'],
               'user_is_active' => $userFilters['is_active'],
               'user_email_verified' => $userFilters['email_verified'],
               'user_is_platform_admin' => $userFilters['is_platform_admin'],
-            ]) }}" class="px-4 py-2 rounded-xl border border-slate-300 text-sm font-semibold hover:bg-slate-50 transition">{{ __('admin.clear_company_filters') }}</a>
+            ]) }}" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold transition hover:bg-slate-50">{{ __('admin.clear_company_filters') }}</a>
           </div>
         </form>
 
@@ -253,9 +240,9 @@
         <div class="mt-4">
           {{ $companies->links() }}
         </div>
-      </section>
+      </x-ui.panel>
 
-      <section id="sec-usuarios" class="rounded-3xl bg-white border border-slate-200 shadow-soft p-6">
+      <x-ui.panel id="sec-usuarios">
         <div class="flex items-center justify-between mb-5">
           <h2 class="font-display text-2xl font-bold">{{ __('admin.users_admins') }}</h2>
           <p class="text-sm text-slate-500">{{ __('admin.manage_users_description') }}</p>
@@ -299,12 +286,12 @@
           </div>
 
           <div class="md:col-span-5 flex gap-2">
-            <button type="submit" class="px-4 py-2 rounded-xl bg-night text-white text-sm font-semibold hover:opacity-90 transition">{{ __('admin.filter_users') }}</button>
+            <x-ui.button type="submit" variant="primary">{{ __('admin.filter_users') }}</x-ui.button>
             <a href="{{ route('admin.management', [
               'company_search' => $companyFilters['search'],
               'company_is_active' => $companyFilters['is_active'],
               'company_plan_status' => $companyFilters['plan_status'],
-            ]) }}" class="px-4 py-2 rounded-xl border border-slate-300 text-sm font-semibold hover:bg-slate-50 transition">{{ __('admin.clear_user_filters') }}</a>
+            ]) }}" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold transition hover:bg-slate-50">{{ __('admin.clear_user_filters') }}</a>
           </div>
         </form>
 
@@ -382,10 +369,13 @@
         <div class="mt-4">
           {{ $users->links() }}
         </div>
-      </section>
+      </x-ui.panel>
     </main>
   </div>
 
+@endsection
+
+@section('scripts')
   <script>
     const sectionLinks = Array.from(document.querySelectorAll('[data-section-link]'));
     const sections = sectionLinks
@@ -429,5 +419,4 @@
       }
     });
   </script>
-</body>
-</html>
+@endsection

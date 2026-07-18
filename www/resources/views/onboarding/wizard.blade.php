@@ -1,14 +1,20 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ __('onboarding.title') }} | {{ __('ui.app_name') }}</title>
-  @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-slate-100 min-h-screen p-6 text-slate-900">
+@extends('layouts.google')
+
+@section('title', __('onboarding.title').' | '.__('ui.app_name'))
+
+@section('head')
+@endsection
+
+@section('bodyClass', 'bg-slate-100 min-h-screen p-6 text-slate-900')
+
+@section('content')
   <main class="max-w-6xl mx-auto">
-    <div class="rounded-3xl bg-white border border-slate-200 shadow-soft p-6 md:p-10">
+    <x-ui.breadcrumb :items="[
+      ['label' => __('ui.app_name'), 'href' => route('dashboard.industrial')],
+      ['label' => __('onboarding.title')],
+    ]" />
+
+    <x-ui.panel padding="p-6 md:p-10">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p class="text-sm text-slate-500">{{ __('onboarding.account_onboarding') }}</p>
@@ -27,17 +33,17 @@
       </div>
 
       @if (session('status'))
-        <div class="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-700 px-4 py-3 text-sm">{{ session('status') }}</div>
+        <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
       @endif
 
       @if ($errors->any())
-        <div class="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-700 text-sm">
+        <x-ui.alert class="mt-5" variant="error">
           <ul class="list-disc ml-5">
             @foreach ($errors->all() as $error)
               <li>{{ $error }}</li>
             @endforeach
           </ul>
-        </div>
+        </x-ui.alert>
       @endif
 
       @if ($step === 2)
@@ -163,7 +169,6 @@
           </div>
         </div>
       @endif
-    </div>
+    </x-ui.panel>
   </main>
-</body>
-</html>
+@endsection

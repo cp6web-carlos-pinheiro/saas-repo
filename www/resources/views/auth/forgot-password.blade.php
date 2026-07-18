@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ __('auth.forgot_password_title') }}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-  @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="auth-shell p-6" style="font-family: 'Roboto', sans-serif;">
+@extends('layouts.google')
+
+@section('title', __('auth.forgot_password_title'))
+
+@section('head')
+@endsection
+
+@section('bodyClass', 'auth-shell p-6')
+
+@section('content')
   <main class="mx-auto flex min-h-screen w-full max-w-md items-center justify-center">
   <section class="auth-card p-8">
     <div class="mb-6 text-center">
@@ -21,7 +19,7 @@
     </div>
 
     @if (session('status'))
-      <div class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 px-4 py-3 text-sm">{{ session('status') }}</div>
+      <x-ui.alert class="mt-4" variant="success">{{ session('status') }}</x-ui.alert>
     @endif
 
     <form method="POST" action="{{ route('password.email') }}" class="mt-6 space-y-4">
@@ -43,5 +41,4 @@
     </form>
   </section>
   </main>
-</body>
-</html>
+@endsection

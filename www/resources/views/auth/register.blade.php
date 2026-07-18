@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ __('ui.register_admin_title') }} | {{ __('ui.app_name') }}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-  @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="auth-shell text-slate-900" style="font-family: 'Roboto', sans-serif;">
+@extends('layouts.google')
+
+@section('title', __('ui.register_admin_title').' | '.__('ui.app_name'))
+
+@section('head')
+@endsection
+
+@section('bodyClass', 'auth-shell text-slate-900')
+
+@section('content')
   <main class="min-h-screen grid lg:grid-cols-2">
     <section class="hidden lg:flex relative overflow-hidden bg-[#0f172a] text-white p-12">
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(66,133,244,.35),transparent_35%),radial-gradient(circle_at_90%_10%,rgba(26,115,232,.25),transparent_40%)]"></div>
@@ -125,6 +123,9 @@
     </section>
   </main>
 
+@endsection
+
+@section('scripts')
   <script>
     const passwordInput = document.getElementById('password');
     const meter = document.getElementById('password-meter');
@@ -141,5 +142,4 @@
       meter.className = 'h-full transition-all ' + (score < 50 ? 'bg-rose-400' : score < 75 ? 'bg-amber-400' : 'bg-emerald-500');
     });
   </script>
-</body>
-</html>
+@endsection

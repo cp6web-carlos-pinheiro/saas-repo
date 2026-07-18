@@ -11,7 +11,6 @@ use App\Http\Controllers\Web\Admin\AdminManagementController;
 use App\Http\Controllers\Web\Onboarding\AccountInvitationController;
 use App\Http\Controllers\Web\Documentation\DocumentationController;
 use App\Http\Controllers\Web\Onboarding\OnboardingController;
-use App\Http\Controllers\Web\Onboarding\TrialDashboardController;
 use App\Http\Middleware\EnsureTrialIsActive;
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\ResolveWebTenant;
@@ -67,7 +66,7 @@ Route::middleware('auth:web')->group(function (): void {
     Route::post('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
 
     Route::middleware(ResolveWebTenant::class)->group(function (): void {
-        Route::get('/trial/dashboard', TrialDashboardController::class)
+        Route::redirect('/trial/dashboard', '/dashboard')
             ->middleware(EnsureTrialIsActive::class)
             ->name('trial.dashboard');
 

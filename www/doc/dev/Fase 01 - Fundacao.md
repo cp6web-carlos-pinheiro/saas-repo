@@ -7,12 +7,12 @@ Definir a fundacao tecnica e visual que sera reutilizada por todo o sistema.
 
 | Item | Status | Situacao no projeto |
 | --- | --- | --- |
-| Layout | Parcial | Existem telas com estrutura propria em Blade para dashboard, admin, onboarding e docs, mas ainda nao ha um layout base unico reutilizavel para toda a plataforma. |
-| Componentes Blade | Parcial | Ha views bem estruturadas e padronizadas, porem o projeto ainda nao expõe uma biblioteca clara de componentes Blade compartilhados. |
-| Tema | Parcial | O visual ja tem direcao consistente nas telas principais, com Tailwind e estilos locais, mas ainda nao existe um tema centralizado e totalmente unificado. |
-| Sidebar | Parcial | Ha sidebars funcionais no dashboard, admin e docs, mas cada uma e implementada de forma especifica e nao como componente global. |
-| Menu | Parcial | Existem menus de navegação nas areas principais, mas ainda nao ha um menu global consolidado com estado, slots ou composição reutilizavel. |
-| Breadcrumb | Nao implementado | Nao foi encontrado breadcrumb funcional no fluxo atual. |
+| Layout | Implementado | Foi criado um layout base reutilizavel no padrao visual Google e aplicado nas telas de dashboard, admin, onboarding e docs, padronizando estrutura e cabecalho HTML com seções Blade compartilhadas. |
+| Componentes Blade | Implementado | Foi criada e aplicada uma biblioteca compartilhada em `resources/views/components/ui` (alert, panel, page-heading, button), com uso real em autenticacao, onboarding e admin, e documentacao dedicada no arquivo `doc/dev/Biblioteca de Componentes Blade.md`. |
+| Tema | Implementado | O tema foi centralizado em `resources/css/app.css` com tokens globais (cores, tipografia e estados) e aplicado via `layouts/google.blade.php`, removendo duplicacoes de estilos inline e unificando dashboard, docs, auth, onboarding, admin e landing. |
+| Sidebar | Implementado | Foi criado o componente global `x-ui.sidebar` em `resources/views/components/ui/sidebar.blade.php` e aplicado nas areas de dashboard industrial, administracao e visualizador de documentacao, mantendo variacoes de layout por contexto. |
+| Menu | Implementado | Foi criada uma composicao global de menu com `x-ui.menu` e `x-ui.menu-item`, incluindo estado ativo (`active`/`is-active`) e aplicacao consolidada em dashboard industrial, administracao e visualizador de documentacao. |
+| Breadcrumb | Implementado | Foi criado o componente global `x-ui.breadcrumb` em `resources/views/components/ui/breadcrumb.blade.php` e aplicado nas paginas internas de dashboard industrial, dashboard trial, onboarding, administracao e documentacao. |
 | Dashboard | Implementado | O projeto ja possui dashboard industrial e dashboard de trial ligados as rotas web. |
 
 ## Arquitetura Base

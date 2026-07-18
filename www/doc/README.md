@@ -20,3 +20,4 @@ Este diretório concentra documentos funcionais dos módulos do sistema Beyond M
 14. [Módulo Genealogia](Modulo%20Genealogia.md)
 15. [Módulo Observabilidade](Modulo%20Observabilidade.md)
 16. [Dicionário do Banco de Dados](Dicionario%20do%20Banco%20de%20Dados.md)
+17. [Biblioteca de Componentes Blade (Dev)](dev/Biblioteca%20de%20Componentes%20Blade.md)
