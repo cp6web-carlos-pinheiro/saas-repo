@@ -1,27 +1,33 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cadastro | Trial de 14 dias</title>
+  <title>{{ __('ui.register_admin_title') }} | {{ __('ui.app_name') }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-full bg-slate-100 text-slate-900">
+<body class="auth-shell text-slate-900" style="font-family: 'Roboto', sans-serif;">
   <main class="min-h-screen grid lg:grid-cols-2">
-    <section class="hidden lg:flex relative overflow-hidden bg-night text-white p-12">
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(0,179,255,.35),transparent_35%),radial-gradient(circle_at_90%_10%,rgba(25,216,157,.25),transparent_40%)]"></div>
+    <section class="hidden lg:flex relative overflow-hidden bg-[#0f172a] text-white p-12">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(66,133,244,.35),transparent_35%),radial-gradient(circle_at_90%_10%,rgba(26,115,232,.25),transparent_40%)]"></div>
       <div class="relative max-w-md">
-        <p class="text-xs uppercase tracking-[0.2em] text-mist">Beyond MRP Enterprise</p>
-        <h1 class="mt-6 font-display text-5xl leading-tight font-bold">Comece seu TESTE GRATIS POR 14 DIAS.</h1>
-        <p class="mt-6 text-mist/90 text-lg">Sem cartao de credito, onboarding assistido e setup rapido para sua operacao.</p>
+        <p class="text-xs uppercase tracking-[0.2em] text-slate-200">{{ __('ui.app_name') }}</p>
+        <h1 class="mt-6 text-5xl leading-tight font-semibold">{{ __('ui.register_heading') }}</h1>
+        <p class="mt-6 text-slate-200/90 text-lg">{{ __('ui.register_intro') }}</p>
       </div>
     </section>
 
     <section class="p-6 md:p-10 flex items-center justify-center">
-      <div class="w-full max-w-xl rounded-3xl bg-white border border-slate-200 shadow-soft p-7 md:p-10">
+      <div class="auth-card max-w-xl p-7 md:p-10">
         <div class="flex items-center justify-between gap-4 mb-6">
-          <h2 class="font-display text-3xl font-bold">Criar conta</h2>
-          <a href="{{ route('login') }}" class="text-sm text-slate-600 hover:text-slate-900">Ja tenho conta</a>
+          <div>
+            <h2 class="text-3xl font-semibold tracking-tight">{{ __('ui.register_card_title') }}</h2>
+            <p class="mt-1 text-sm text-slate-600">{{ __('ui.register_card_subtitle') }}</p>
+          </div>
+          <a href="{{ route('login') }}" class="text-sm font-medium text-[#1a73e8] hover:underline">{{ __('ui.already_have_account') }}</a>
         </div>
 
         @if ($errors->any())
@@ -36,55 +42,83 @@
 
         <form method="POST" action="{{ route('start-trial.store') }}" class="space-y-4" id="register-form">
           @csrf
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium mb-2" for="name">Nome completo</label>
-              <input id="name" name="name" type="text" value="{{ old('name') }}" required class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-2" for="company">Empresa</label>
-              <input id="company" name="company" type="text" value="{{ old('company') }}" required class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400" />
+          <div>
+            <label class="auth-label" for="name">{{ __('ui.full_name') }}</label>
+            <div class="auth-input-wrap">
+              <x-heroicon-o-user class="auth-input-icon" />
+              <input id="name" name="name" type="text" value="{{ old('name') }}" required class="auth-input" placeholder="{{ __('ui.your_name') }}" />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-2" for="email">Email corporativo</label>
-            <input id="email" name="email" type="email" value="{{ old('email') }}" required class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400" />
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium mb-2" for="password">Senha</label>
-              <input id="password" name="password" type="password" required class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-2" for="password_confirmation">Confirmar senha</label>
-              <input id="password_confirmation" name="password_confirmation" type="password" required class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400" />
+            <label class="auth-label" for="email">{{ __('ui.corporate_email') }}</label>
+            <div class="auth-input-wrap">
+              <x-heroicon-o-envelope class="auth-input-icon" />
+              <input id="email" name="email" type="email" value="{{ old('email') }}" required class="auth-input" placeholder="{{ __('ui.email_placeholder') }}" />
             </div>
           </div>
 
           <div>
-            <p class="text-sm text-slate-600 mb-1">Forca da senha</p>
+            <label class="auth-label" for="preferred_locale">{{ __('ui.language') }}</label>
+            <div class="auth-input-wrap">
+              <x-heroicon-o-language class="auth-input-icon" />
+              <select id="preferred_locale" name="preferred_locale" class="auth-input" required>
+                @php($selectedLocale = old('preferred_locale', 'pt_BR'))
+                <option value="pt_BR" @selected($selectedLocale === 'pt_BR')>{{ __('ui.portuguese') }}</option>
+                <option value="en" @selected($selectedLocale === 'en')>{{ __('ui.english') }}</option>
+                <option value="es" @selected($selectedLocale === 'es')>{{ __('ui.spanish') }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="auth-label" for="password">{{ __('ui.password') }}</label>
+              <div class="auth-input-wrap">
+                <x-heroicon-o-lock-closed class="auth-input-icon" />
+                <input id="password" name="password" type="password" required class="auth-input" placeholder="{{ __('ui.password_placeholder') }}" />
+              </div>
+            </div>
+            <div>
+              <label class="auth-label" for="password_confirmation">{{ __('ui.password_confirmation') }}</label>
+              <div class="auth-input-wrap">
+                <x-heroicon-o-check-circle class="auth-input-icon" />
+                <input id="password_confirmation" name="password_confirmation" type="password" required class="auth-input" placeholder="{{ __('ui.password_confirmation_placeholder') }}" />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-sm text-slate-600 mb-1">{{ __('ui.password_strength') }}</p>
             <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
               <div id="password-meter" class="h-full w-0 bg-rose-400 transition-all"></div>
             </div>
           </div>
 
           <label class="flex items-start gap-3 text-sm text-slate-600">
-            <input type="checkbox" name="terms" value="1" class="mt-1" required />
-            <span>Li e aceito os Termos de Uso e a Politica de Privacidade.</span>
+            <input type="checkbox" name="terms" value="1" class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" required />
+            <span>{{ __('ui.accept_terms') }}</span>
           </label>
 
-          <button type="submit" class="w-full rounded-full bg-coral text-white py-3.5 font-bold text-sm tracking-wide hover:brightness-110 transition">TESTE GRATIS POR 14 DIAS</button>
+          <button type="submit" class="auth-btn-primary">
+            {{ __('ui.continue_to_company') }}
+            <x-heroicon-o-arrow-right class="h-4 w-4" />
+          </button>
 
           <div class="relative py-1">
             <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
-            <p class="relative text-center text-xs text-slate-500 bg-white w-fit mx-auto px-3">ou continue com</p>
+            <p class="relative text-center text-xs text-slate-500 bg-white w-fit mx-auto px-3">{{ __('ui.or_continue_with') }}</p>
           </div>
 
           <div class="grid sm:grid-cols-2 gap-3">
-            <a href="{{ route('social.redirect', ['provider' => 'google']) }}" class="rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-semibold hover:bg-slate-50">Google</a>
-            <a href="{{ route('social.redirect', ['provider' => 'microsoft']) }}" class="rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-semibold hover:bg-slate-50">Microsoft</a>
+            <a href="{{ route('social.redirect', ['provider' => 'google']) }}" class="auth-btn-secondary">
+              <x-heroicon-o-globe-alt class="h-4 w-4" />
+              {{ __('ui.google') }}
+            </a>
+            <a href="{{ route('social.redirect', ['provider' => 'microsoft']) }}" class="auth-btn-secondary">
+              <x-heroicon-o-window class="h-4 w-4" />
+              {{ __('ui.microsoft') }}
+            </a>
           </div>
         </form>
       </div>

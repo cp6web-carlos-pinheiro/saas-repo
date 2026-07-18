@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -271,5 +272,33 @@ final class SaaSOnboardingApiController
             'tenant' => $organization->tenants()->first(),
             'users' => $organization->company?->users()->paginate(15),
         ], 'Tenant management context');
+    }
+
+    public function createTenantUser(Request $request, TrialOnboardingService $service): JsonResponse
+    {
+        /** @var User $actor */
+        $actor = $request->user();
+
+        if (! $service->isMasterUser($actor)) {
+            return ApiResponse::error('Apenas usuario master pode cadastrar usuarios nesta conta', 403, null, 'FORBIDDEN');
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:150'],
+            'email' => ['required', 'email:rfc,dns', 'max:190'],
+            'password' => ['required', 'confirmed', PasswordRule::min(10)->mixedCase()->numbers()->symbols()],
+            'role' => ['nullable', 'in:member,master'],
+            'activate' => ['nullable', 'boolean'],
+        ]);
+
+        try {
+            $user = $service->registerTeamMember($actor, $validated, $request);
+        } catch (ValidationException $exception) {
+            return ApiResponse::error('Validation error', 422, $exception->errors(), 'VALIDATION_ERROR');
+        }
+
+        return ApiResponse::success([
+            'user' => $user,
+        ], 'Usuario cadastrado com sucesso', 201);
     }
 }

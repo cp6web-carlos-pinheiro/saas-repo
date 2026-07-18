@@ -32,7 +32,7 @@ final class LoginController extends Controller
 
         if (RateLimiter::tooManyAttempts($throttleKey, 8)) {
             throw ValidationException::withMessages([
-                'email' => 'Muitas tentativas de login. Tente novamente em alguns minutos.',
+                'email' => __('messages.login_too_many_attempts'),
             ]);
         }
 
@@ -54,15 +54,18 @@ final class LoginController extends Controller
             );
 
             throw ValidationException::withMessages([
-                'email' => 'Credenciais invalidas.',
+                'email' => __('messages.invalid_credentials'),
             ]);
         }
 
         RateLimiter::clear($throttleKey);
 
-        $request->session()->regenerate();
-
         $user = Auth::user();
+        $request->session()->regenerate();
+        if (is_string($user?->preferred_locale)) {
+            $request->session()->put('locale', $user->preferred_locale);
+        }
+
         $audit->record(
             event: 'auth.login.success',
             context: ['channel' => 'web'],
@@ -71,7 +74,11 @@ final class LoginController extends Controller
             userAgent: $request->userAgent(),
         );
 
-        return redirect()->intended(route('onboarding.wizard'));
+        $redirectTo = $user && (int) $user->current_company_id > 0
+            ? route('dashboard.industrial')
+            : route('onboarding.wizard');
+
+        return redirect()->intended($redirectTo);
     }
 
     public function destroy(Request $request, AuditLogService $audit): RedirectResponse

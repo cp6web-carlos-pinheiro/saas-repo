@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'invitation_subject' => 'You have been invited to access a Beyond MRP account',
+    'verification_subject' => 'Verify your email and activate your 14-day trial',
+    'invitation_title' => 'Access invitation',
+    'invitation_heading' => 'You received an invitation',
+    'invitation_subheading' => 'Access your account securely and complete activation in a few steps.',
+    'hello' => 'Hello,',
+    'invitation_body' => 'You were invited to access the :company account.',
+    'accept_invitation' => 'ACCEPT INVITATION',
+    'link_expire_notice' => 'This link expires in 7 days. If the button does not work, copy and paste the link below into your browser.',
+    'ignore_invitation' => 'If you did not expect this invitation, ignore this email.',
+    'verify_title' => 'Verify your email',
+    'verify_heading' => 'Your trial is almost ready',
+    'verify_subheading' => 'Verify your email to unlock full access for 14 days.',
+    'hello_user' => 'Hello, :name.',
+    'verify_body' => 'Click the button below to verify your account and start assisted onboarding.',
+    'verify_action' => 'VERIFY EMAIL AND START TRIAL',
+    'link_copy_notice' => 'If the button does not work, copy and paste the link below into your browser.',
+    'ignore_verification' => 'If you did not create this account, ignore this email.',
+    'trial_expiring' => 'Your trial will expire soon. Ensure continuity by upgrading your plan.',
+    'trial_expired' => 'Your trial has expired. Reactivate access by upgrading your plan.',
+    'trial_started' => 'Your 14-day trial has been activated. Start now and validate operational gains.',
+    'reset_password' => 'We received your password reset request. Use the secure link sent to create a new password.',
+    'welcome' => 'Welcome, :name. Your trial has started and your workspace is now available.',
+];

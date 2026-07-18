@@ -28,7 +28,7 @@ final class PasswordRecoveryController extends Controller
             'email' => (string) $request->input('email'),
         ]);
 
-        return back()->with('status', 'Se o e-mail existir, enviaremos as instrucoes de redefinicao.');
+        return back()->with('status', __('messages.password_reset_link_sent'));
     }
 
     public function resetForm(Request $request): View
@@ -57,9 +57,9 @@ final class PasswordRecoveryController extends Controller
         );
 
         if ($status !== Password::PASSWORD_RESET) {
-            return back()->withErrors(['email' => 'Token invalido ou expirado.']);
+            return back()->withErrors(['email' => __('messages.reset_token_invalid_or_expired')]);
         }
 
-        return redirect()->route('login')->with('status', 'Senha redefinida com sucesso.');
+        return redirect()->route('login')->with('status', __('messages.password_reset_success'));
     }
 }

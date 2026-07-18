@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Tenant\Infrastructure\Persistence\Models;
 
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Models\SaaS\Organization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 final class Company extends Model
 {
@@ -41,5 +43,10 @@ final class Company extends Model
         return $this->belongsToMany(User::class, 'company_user')
             ->withPivot(['is_default'])
             ->withTimestamps();
+    }
+
+    public function organization(): HasOne
+    {
+        return $this->hasOne(Organization::class, 'company_id');
     }
 }

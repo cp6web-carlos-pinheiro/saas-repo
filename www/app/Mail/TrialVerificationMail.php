@@ -24,7 +24,7 @@ final class TrialVerificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Confirme seu email e ative seu trial de 14 dias',
+            subject: __('emails.verification_subject'),
         );
     }
 

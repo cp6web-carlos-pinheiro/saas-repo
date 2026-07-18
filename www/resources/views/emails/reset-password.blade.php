@@ -1,1 +1,1 @@
-<p>Recebemos sua solicitacao de redefinicao de senha. Use o link seguro enviado para criar uma nova senha.</p>
+<p>{{ __('emails.reset_password') }}</p>

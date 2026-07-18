@@ -25,8 +25,10 @@ final class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'preferred_locale',
         'current_company_id',
         'is_active',
+        'is_platform_admin',
     ];
 
     protected $hidden = [
@@ -37,7 +39,9 @@ final class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'preferred_locale' => 'string',
         'is_active' => 'bool',
+        'is_platform_admin' => 'bool',
     ];
 
     public function currentCompany(): BelongsTo

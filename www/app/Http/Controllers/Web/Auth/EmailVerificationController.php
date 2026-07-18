@@ -32,7 +32,7 @@ final class EmailVerificationController extends Controller
 
         if (! $verification || $verification->expires_at->isPast()) {
             return redirect()->route('verification.notice')->withErrors([
-                'email' => 'Link de verificacao invalido ou expirado.',
+                'email' => __('messages.verification_link_invalid_or_expired'),
             ]);
         }
 
@@ -46,7 +46,7 @@ final class EmailVerificationController extends Controller
             request()->session()->regenerate();
         }
 
-        return redirect()->route('onboarding.wizard')->with('status', 'Email confirmado com sucesso.');
+        return redirect()->route('onboarding.wizard')->with('status', __('messages.email_verified_success'));
     }
 
     public function resend(Request $request): RedirectResponse
@@ -75,6 +75,6 @@ final class EmailVerificationController extends Controller
             route('verification.verify-token', ['token' => $plainToken]),
         ));
 
-        return back()->with('status', 'Novo e-mail de confirmacao enviado.');
+        return back()->with('status', __('messages.verification_email_resent'));
     }
 }

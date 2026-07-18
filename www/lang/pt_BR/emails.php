@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'invitation_subject' => 'Você foi convidado para acessar uma conta Beyond MRP',
+    'verification_subject' => 'Confirme seu e-mail e ative seu trial de 14 dias',
+    'invitation_title' => 'Convite de acesso',
+    'invitation_heading' => 'Você recebeu um convite',
+    'invitation_subheading' => 'Acesse sua conta com seguranca e conclua a ativação em poucos passos.',
+    'hello' => 'Ola,',
+    'invitation_body' => 'Você foi convidado para acessar a conta :company.',
+    'accept_invitation' => 'ACEITAR CONVITE',
+    'link_expire_notice' => 'Este link expira em 7 dias. Se o botao não funcionar, copie e cole o link abaixo no navegador.',
+    'ignore_invitation' => 'Se você não esperava este convite, ignore este e-mail.',
+    'verify_title' => 'Confirme seu e-mail',
+    'verify_heading' => 'Seu trial esta quase pronto',
+    'verify_subheading' => 'Confirme seu e-mail para liberar o acesso completo por 14 dias.',
+    'hello_user' => 'Ola, :name.',
+    'verify_body' => 'Clique no botao abaixo para confirmar sua conta e iniciar seu onboarding assistido.',
+    'verify_action' => 'CONFIRMAR EMAIL E INICIAR TRIAL',
+    'link_copy_notice' => 'Se o botao não funcionar, copie e cole o link abaixo no navegador.',
+    'ignore_verification' => 'Se você não criou esta conta, ignore este e-mail.',
+    'trial_expiring' => 'Seu trial expira em breve. Garanta continuidade com upgrade de plano.',
+    'trial_expired' => 'Seu trial expirou. Reative o acesso com upgrade para retomar a operação.',
+    'trial_started' => 'Seu trial de 14 dias foi ativado. Comece agora e valide os ganhos operacionais.',
+    'reset_password' => 'Recebemos sua solicitação de redefinição de senha. Use o link seguro enviado para criar uma nova senha.',
+    'welcome' => 'Bem-vindo(a), :name. Seu trial foi iniciado e seu workspace já esta disponivel.',
+];

@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Web\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\SaaS\SocialAccount;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
-use App\Services\SaaS\TrialOnboardingService;
+use App\Services\SaaS\AccountOnboardingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +23,7 @@ final class SocialAuthController extends Controller
         return Socialite::driver($provider)->redirect();
     }
 
-    public function callback(string $provider, Request $request, TrialOnboardingService $service): RedirectResponse
+    public function callback(string $provider, Request $request, AccountOnboardingService $service): RedirectResponse
     {
         abort_unless(in_array($provider, ['google', 'microsoft'], true), 404);
 
@@ -37,6 +37,10 @@ final class SocialAuthController extends Controller
         if ($linked) {
             Auth::guard('web')->loginUsingId($linked->user_id, true);
             $request->session()->regenerate();
+            $linkedUser = Auth::user();
+            if (is_string($linkedUser?->preferred_locale)) {
+                $request->session()->put('locale', $linkedUser->preferred_locale);
+            }
 
             return redirect()->route('onboarding.wizard');
         }
@@ -45,7 +49,7 @@ final class SocialAuthController extends Controller
 
         if ($email === '') {
             return redirect()->route('login')->withErrors([
-                'email' => 'Seu provedor social nao retornou email verificavel.',
+                'email' => __('messages.social_provider_no_email'),
             ]);
         }
 
@@ -53,12 +57,13 @@ final class SocialAuthController extends Controller
 
         if (! $user) {
             $name = (string) ($oauthUser->getName() ?: 'Novo Usuario');
-            $companyHint = Str::title(Str::before($email, '@')).' Company';
-
-            $result = $service->registerFromSocial($name, $companyHint, $email, $request);
+            $result = $service->createSocialUser($name, $email, $request);
 
             $user = $result['user'];
             $user->forceFill(['email_verified_at' => now()])->save();
+
+            $request->session()->put('onboarding.step', 2);
+            $request->session()->put('onboarding.user_id', $user->id);
         }
 
         SocialAccount::query()->firstOrCreate([
@@ -76,6 +81,9 @@ final class SocialAuthController extends Controller
 
         Auth::guard('web')->login($user, true);
         $request->session()->regenerate();
+        if (is_string($user->preferred_locale)) {
+            $request->session()->put('locale', $user->preferred_locale);
+        }
 
         return redirect()->route('onboarding.wizard');
     }

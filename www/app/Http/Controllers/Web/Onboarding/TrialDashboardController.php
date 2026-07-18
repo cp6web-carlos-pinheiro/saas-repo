@@ -20,7 +20,6 @@ final class TrialDashboardController extends Controller
 
         $trial = Trial::query()
             ->where('organization_id', $organization->id)
-            ->where('user_id', $user->id)
             ->latest('id')
             ->firstOrFail();
 

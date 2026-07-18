@@ -32,6 +32,6 @@ final class SessionManagementController extends Controller
             ->where('id', $id)
             ->delete();
 
-        return back()->with('status', 'Sessao encerrada com sucesso.');
+        return back()->with('status', __('messages.session_ended_successfully'));
     }
 }

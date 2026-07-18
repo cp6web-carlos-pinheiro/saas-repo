@@ -23,6 +23,12 @@ final class TrialOnboardingService
 {
     public function __construct(private readonly AuditLogService $audit) {}
 
+    private const MASTER_ROLE_SLUG = 'account-master';
+
+    private const LEGACY_MASTER_ROLE_SLUG = 'organization-admin';
+
+    private const MEMBER_ROLE_SLUG = 'organization-member';
+
     /**
      * @return array{user: User, organization: Organization, trial: Trial, emailVerificationToken: string}
      */
@@ -68,16 +74,7 @@ final class TrialOnboardingService
 
             $company->users()->attach($user->id, ['is_default' => true]);
 
-            $adminRole = Role::query()->withoutGlobalScope('tenant')->firstOrCreate(
-                [
-                    'company_id' => $company->id,
-                    'slug' => 'organization-admin',
-                ],
-                [
-                    'name' => 'Organization Admin',
-                    'description' => 'Initial tenant administrator',
-                ]
-            );
+            $adminRole = $this->ensureMasterRole($company->id);
 
             $user->roles()->attach($adminRole->id, ['company_id' => $company->id]);
 
@@ -193,6 +190,114 @@ final class TrialOnboardingService
         return $profile;
     }
 
+    public function isMasterUser(User $user): bool
+    {
+        $companyId = (int) ($user->current_company_id ?? 0);
+
+        if ($companyId <= 0) {
+            return false;
+        }
+
+        return $user->roles()
+            ->wherePivot('company_id', $companyId)
+            ->whereIn('slug', [self::MASTER_ROLE_SLUG, self::LEGACY_MASTER_ROLE_SLUG])
+            ->exists();
+    }
+
+    public function registerTeamMember(User $actor, array $data, Request $request): User
+    {
+        $companyId = (int) ($actor->current_company_id ?? 0);
+
+        if ($companyId <= 0) {
+            throw ValidationException::withMessages([
+                'company' => __('messages.user_without_active_company_for_member_registration'),
+            ]);
+        }
+
+        if (! $this->isMasterUser($actor)) {
+            throw ValidationException::withMessages([
+                'authorization' => __('messages.only_master_user_can_register_members'),
+            ]);
+        }
+
+        $email = mb_strtolower(trim((string) $data['email']));
+
+        return DB::transaction(function () use ($actor, $companyId, $data, $email, $request): User {
+            $company = Company::query()->findOrFail($companyId);
+            $role = ($data['role'] ?? 'member') === 'master'
+                ? $this->ensureMasterRole($companyId)
+                : $this->ensureMemberRole($companyId);
+
+            $user = User::query()->where('email', $email)->first();
+
+            if ($user !== null) {
+                $alreadyBelongsToCompany = $user->companies()
+                    ->where('companies.id', $companyId)
+                    ->exists();
+
+                if ($alreadyBelongsToCompany) {
+                    throw ValidationException::withMessages([
+                        'email' => __('messages.user_already_belongs_to_account'),
+                    ]);
+                }
+
+                if ((bool) ($data['activate'] ?? true) && ! $user->is_active) {
+                    $user->forceFill(['is_active' => true])->save();
+                }
+
+                if ($user->current_company_id === null) {
+                    $user->forceFill(['current_company_id' => $companyId])->save();
+                }
+            } else {
+                $user = User::query()->create([
+                    'name' => $data['name'],
+                    'email' => $email,
+                    'password' => Hash::make((string) $data['password']),
+                    'current_company_id' => $companyId,
+                    'is_active' => (bool) ($data['activate'] ?? true),
+                ]);
+            }
+
+            $company->users()->syncWithoutDetaching([
+                $user->id => ['is_default' => false],
+            ]);
+
+            $user->roles()->syncWithoutDetaching([
+                $role->id => ['company_id' => $companyId],
+            ]);
+
+            $organization = Organization::query()->where('company_id', $companyId)->first();
+
+            if ($organization !== null) {
+                OnboardingProfile::query()->firstOrCreate(
+                    [
+                        'organization_id' => $organization->id,
+                        'user_id' => $user->id,
+                    ],
+                    [
+                        'progress' => 0,
+                        'timezone' => $organization->timezone,
+                    ]
+                );
+            }
+
+            $this->audit->record(
+                event: 'tenant.user.created',
+                context: [
+                    'created_user_id' => $user->id,
+                    'role' => $role->slug,
+                    'created_by' => $actor->id,
+                ],
+                userId: $actor->id,
+                organizationId: $organization?->id,
+                ipAddress: $request->ip(),
+                userAgent: $request->userAgent(),
+            );
+
+            return $user->fresh();
+        });
+    }
+
     private function guardAgainstTrialAbuse(string $email, string $domain): void
     {
         if (User::query()->where('email', $email)->exists()) {
@@ -237,5 +342,33 @@ final class TrialOnboardingService
         }
 
         return $code;
+    }
+
+    private function ensureMasterRole(int $companyId): Role
+    {
+        return Role::query()->withoutGlobalScope('tenant')->firstOrCreate(
+            [
+                'company_id' => $companyId,
+                'slug' => self::MASTER_ROLE_SLUG,
+            ],
+            [
+                'name' => 'Account Master',
+                'description' => 'Conta principal com permissao para gerenciar usuarios',
+            ]
+        );
+    }
+
+    private function ensureMemberRole(int $companyId): Role
+    {
+        return Role::query()->withoutGlobalScope('tenant')->firstOrCreate(
+            [
+                'company_id' => $companyId,
+                'slug' => self::MEMBER_ROLE_SLUG,
+            ],
+            [
+                'name' => 'Organization Member',
+                'description' => 'Usuario padrao da organizacao',
+            ]
+        );
     }
 }

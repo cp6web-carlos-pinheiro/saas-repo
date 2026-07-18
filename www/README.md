@@ -61,3 +61,8 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 ## Local commands
 
 Use [bin/artisan](bin/artisan) for local CLI commands. It forces `pcov` off and keeps the app on the MySQL connection defined in [.env](.env).
+
+## Documentation
+
+- [Functional docs index](doc/README.md)
+- [Database dictionary](doc/Dicionario%20do%20Banco%20de%20Dados.md)

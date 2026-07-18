@@ -1,552 +1,465 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Industrial Control Tower</title>
+    <title>{{ __('ui.dashboard') }} | {{ __('ui.app_name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #081018;
-            --panel: #0f1e2b;
-            --panel-strong: #13283b;
-            --line: #21405b;
-            --text: #dbebf6;
-            --muted: #9db5c9;
-            --accent: #1eb4a5;
-            --accent-alt: #ff8e3c;
-            --critical: #f35b69;
-            --ok: #6bd18f;
+            --bg: #f8fafd;
+            --surface: #ffffff;
+            --surface-muted: #f1f3f4;
+            --text: #202124;
+            --text-muted: #5f6368;
+            --line: #dadce0;
+            --primary: #1a73e8;
+            --primary-soft: #e8f0fe;
+            --danger: #d93025;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: "Roboto", sans-serif;
             color: var(--text);
             background:
-                radial-gradient(circle at 92% 8%, rgba(30, 180, 165, 0.18), transparent 32%),
-                radial-gradient(circle at 18% 2%, rgba(255, 142, 60, 0.2), transparent 28%),
-                linear-gradient(180deg, #060d15 0%, #09131d 100%);
+                radial-gradient(circle at 100% 0%, #e8f0fe 0%, rgba(232, 240, 254, 0) 34%),
+                radial-gradient(circle at 0% 100%, #fce8e6 0%, rgba(252, 232, 230, 0) 30%),
+                var(--bg);
             min-height: 100vh;
         }
 
-        .shell {
+        .layout {
             display: grid;
-            grid-template-columns: 260px 1fr;
-            gap: 1.2rem;
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 1.2rem;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
         }
 
-        .nav {
-            position: sticky;
-            top: 1rem;
-            height: fit-content;
-            background: rgba(15, 30, 43, 0.92);
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            padding: 1rem;
+        .main-area {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            min-width: 0;
+        }
+
+        .topbar {
+            height: 64px;
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 0.9rem;
+        }
+
+        .topbar-left,
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 999px;
+            background: transparent;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .icon-button:hover {
+            background: var(--surface-muted);
+            color: var(--text);
+        }
+
+        .topbar-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--line);
+            padding: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
 
         .brand {
             display: flex;
             flex-direction: column;
             gap: 0.2rem;
-            margin-bottom: 1rem;
-        }
-
-        .brand strong {
-            color: #fff;
-            font-size: 1.05rem;
-            letter-spacing: 0.02em;
-        }
-
-        .brand span {
-            color: var(--muted);
-            font-size: 0.78rem;
-            font-family: 'IBM Plex Mono', monospace;
-        }
-
-        .nav a {
-            display: block;
-            padding: 0.62rem 0.72rem;
-            margin-bottom: 0.32rem;
-            text-decoration: none;
-            color: var(--text);
-            border-radius: 10px;
-            border: 1px solid transparent;
-            transition: all .2s ease;
-        }
-
-        .nav a:hover {
-            border-color: var(--line);
-            background: rgba(30, 180, 165, 0.11);
-        }
-
-        .content {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .panel {
-            background: rgba(15, 30, 43, 0.92);
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            overflow: hidden;
-        }
-
-        .panel-header {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: 1rem 1rem 0.5rem;
-        }
-
-        .panel-header h2 {
-            margin: 0;
-            font-size: 1.1rem;
-        }
-
-        .panel-header small {
-            color: var(--muted);
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.73rem;
-        }
-
-        .panel-body {
-            padding: 0.9rem 1rem 1rem;
-        }
-
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.7rem;
-        }
-
-        .kpi {
-            background: var(--panel-strong);
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 0.72rem;
-        }
-
-        .kpi .label {
-            font-size: 0.74rem;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 0.25rem;
-        }
-
-        .kpi .value {
-            font-size: 1.28rem;
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.7rem;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 720px;
-        }
-
-        th, td {
-            padding: 0.6rem 0.7rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(33, 64, 91, 0.62);
-            font-size: 0.86rem;
-        }
-
-        th {
-            color: var(--muted);
-            font-weight: 500;
-            background: #0b1824;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            font-size: 0.72rem;
-        }
-
-        .tag {
-            display: inline-flex;
-            align-items: center;
-            border: 1px solid var(--line);
-            border-radius: 999px;
-            font-size: 0.72rem;
-            padding: 0.22rem 0.54rem;
-            font-family: 'IBM Plex Mono', monospace;
-        }
-
-        .tag-critical {
-            border-color: rgba(243, 91, 105, 0.5);
-            color: #ffb7bf;
-            background: rgba(243, 91, 105, 0.14);
-        }
-
-        .tag-ok {
-            border-color: rgba(107, 209, 143, 0.5);
-            color: #c2ffd6;
-            background: rgba(107, 209, 143, 0.14);
-        }
-
-        .gantt {
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .gantt-head {
-            padding: 0.55rem 0.7rem;
-            background: #0b1824;
-            color: var(--muted);
-            font-size: 0.72rem;
-            font-family: 'IBM Plex Mono', monospace;
+            padding: 0.3rem 0.4rem 0.7rem;
             border-bottom: 1px solid var(--line);
         }
 
-        .gantt-row {
-            display: grid;
-            grid-template-columns: 220px 1fr;
-            min-height: 38px;
-            border-bottom: 1px solid rgba(33, 64, 91, 0.45);
+        .brand strong {
+            font-size: 1.02rem;
+            font-weight: 700;
+            color: var(--text);
         }
 
-        .gantt-label {
-            padding: 0.58rem 0.7rem;
-            display: flex;
-            align-items: center;
-            gap: 0.52rem;
-            border-right: 1px solid rgba(33, 64, 91, 0.45);
+        .brand span {
             font-size: 0.82rem;
+            color: var(--text-muted);
         }
 
-        .gantt-track {
-            position: relative;
-            padding: 0.38rem 0.42rem;
-            background-image: linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px);
-            background-size: 7.5% 100%;
+        .module-list {
+            display: grid;
+            gap: 0.25rem;
+            padding-right: 0.2rem;
+            overflow: auto;
         }
 
-        .gantt-bar {
-            position: absolute;
-            top: 7px;
-            height: 22px;
-            border-radius: 9px;
-            background: linear-gradient(90deg, var(--accent), var(--accent-alt));
-            border: 1px solid rgba(255,255,255,0.15);
-            font-size: 0.7rem;
-            display: inline-flex;
+        .module-list a {
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.9rem;
+            padding: 0.55rem 0.8rem;
+            border-radius: 999px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .module-list a:hover {
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+
+        .logout-area {
+            margin-top: auto;
+            padding-top: 0.6rem;
+            border-top: 1px solid var(--line);
+        }
+
+        .logout-button {
+            width: 100%;
+            border: 1px solid #f6aea9;
+            background: #fce8e6;
+            color: var(--danger);
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.62rem 0.85rem;
+            cursor: pointer;
+            transition: filter 0.2s ease;
+        }
+
+        .logout-button:hover {
+            filter: brightness(0.98);
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
             align-items: center;
             justify-content: center;
-            color: #04131a;
-            font-weight: 700;
-            min-width: 44px;
+            padding: 2rem;
+            text-align: center;
         }
 
-        .empty {
-            padding: 1rem;
-            border: 1px dashed var(--line);
+        .status-banner {
+            width: min(620px, 100%);
+            border: 1px solid #c7e8d3;
+            background: #eaf8ef;
+            color: #196a3f;
             border-radius: 12px;
-            color: var(--muted);
-            font-size: 0.85rem;
+            padding: 0.8rem 1rem;
+            font-size: 0.92rem;
         }
 
-        @media (max-width: 1180px) {
-            .shell { grid-template-columns: 1fr; }
-            .nav { position: static; }
-            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .grid-2 { grid-template-columns: 1fr; }
+        .welcome {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 500;
+            color: var(--text);
         }
 
-        @media (max-width: 780px) {
-            .kpi-grid { grid-template-columns: 1fr; }
-            .gantt-row { grid-template-columns: 1fr; }
-            .gantt-label { border-right: none; border-bottom: 1px solid rgba(33, 64, 91, 0.45); }
+        .settings-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.24);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease;
+            z-index: 24;
+        }
+
+        .settings-overlay.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: min(360px, 100%);
+            height: 100vh;
+            background: var(--surface);
+            border-left: 1px solid var(--line);
+            box-shadow: -10px 0 30px rgba(15, 23, 42, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.22s ease;
+            z-index: 25;
+            padding: 1.2rem;
+            display: grid;
+            grid-template-rows: auto auto 1fr;
+            gap: 1rem;
+        }
+
+        .settings-panel.is-open {
+            transform: translateX(0);
+        }
+
+        .settings-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+        }
+
+        .settings-panel h2 {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .settings-panel p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .settings-field {
+            display: grid;
+            gap: 0.5rem;
+            align-content: start;
+        }
+
+        .settings-field label {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        .settings-field select {
+            width: 100%;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text);
+            border-radius: 12px;
+            min-height: 42px;
+            padding: 0 0.8rem;
+            font-size: 0.92rem;
+        }
+
+        .settings-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+        }
+
+        .settings-save {
+            border: none;
+            border-radius: 999px;
+            padding: 0.55rem 1rem;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .settings-close {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 0.55rem 1rem;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 920px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 64px;
+                left: 0;
+                bottom: 0;
+                width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+                z-index: 15;
+                box-shadow: 0 6px 16px rgba(60, 64, 67, 0.25);
+            }
+
+            .sidebar.is-open {
+                transform: translateX(0);
+            }
+
+            .content {
+                padding-top: 1.5rem;
+            }
+
+            .welcome {
+                width: 100%;
+                max-width: 480px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="shell">
-        <aside class="nav">
+    <div class="layout">
+        <aside id="sidebar" class="sidebar" aria-label="{{ __('ui.modules') }}">
             <div class="brand">
-                <strong>Industrial Control Tower</strong>
-                <span>{{ $today->toDateString() }} → {{ $windowEnd->toDateString() }}</span>
+                <strong>{{ __('ui.app_name') }}</strong>
+                <span>{{ __('ui.modules') }}</span>
             </div>
-            <a href="#mrp">MRP Cockpit</a>
-            <a href="#production">Production View</a>
-            <a href="#inventory">Inventory View</a>
-            <a href="#bom">BOM Explorer</a>
-            <a href="#genealogy">Genealogy Explorer</a>
-            <a href="#gantt">Scheduling Gantt</a>
+
+            <nav class="module-list" aria-label="{{ __('ui.modules') }}">
+                <a href="#">{{ __('ui.module_bom') }}</a>
+                <a href="#">{{ __('ui.module_eco') }}</a>
+                <a href="#">{{ __('ui.module_engineering_change') }}</a>
+                <a href="#">{{ __('ui.module_genealogy') }}</a>
+                <a href="#">{{ __('ui.module_identity') }}</a>
+                <a href="#">{{ __('ui.module_inventory') }}</a>
+                <a href="#">{{ __('ui.module_mes') }}</a>
+                <a href="#">{{ __('ui.module_mrp') }}</a>
+                <a href="#">{{ __('ui.module_observability') }}</a>
+                <a href="#">{{ __('ui.module_product') }}</a>
+                <a href="#">{{ __('ui.module_production') }}</a>
+                <a href="#">{{ __('ui.module_purchasing') }}</a>
+                <a href="#">{{ __('ui.module_routing') }}</a>
+                <a href="#">{{ __('ui.module_scheduling') }}</a>
+                <a href="#">{{ __('ui.module_tenant') }}</a>
+            </nav>
+
+            <div class="logout-area">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button class="logout-button" type="submit">{{ __('ui.logout') }}</button>
+                </form>
+            </div>
         </aside>
 
-        <main class="content">
-            <section id="mrp" class="panel">
-                <div class="panel-header">
-                    <h2>MRP Cockpit</h2>
-                    <small>Demand pressure, material risk, replenishment readiness</small>
+        <div class="main-area">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button id="menuToggle" class="icon-button" type="button" aria-label="{{ __('ui.open_menu') }}">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M4 7H20M4 12H20M4 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <span class="topbar-title">{{ __('ui.dashboard') }}</span>
                 </div>
-                <div class="panel-body">
-                    <div class="kpi-grid">
-                        <div class="kpi"><div class="label">Purchase Signals</div><div class="value">{{ $mrpCockpit['purchase_signals'] }}</div></div>
-                        <div class="kpi"><div class="label">Production Signals</div><div class="value">{{ $mrpCockpit['production_signals'] }}</div></div>
-                        <div class="kpi"><div class="label">At-Risk Materials</div><div class="value">{{ $mrpCockpit['material_shortages']->count() }}</div></div>
-                        <div class="kpi"><div class="label">Avg Material Lead Time</div><div class="value">{{ number_format($mrpCockpit['avg_material_lead_time'], 1) }} d</div></div>
-                    </div>
-                    <div style="margin-top: .8rem;" class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Material</th>
-                                    <th>Type</th>
-                                    <th>Free Qty</th>
-                                    <th>Safety Stock</th>
-                                    <th>Lead Time</th>
-                                    <th>Signal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($mrpCockpit['material_shortages'] as $shortage)
-                                    @php
-                                        $free = (float) $shortage->qty_available - (float) $shortage->qty_reserved;
-                                    @endphp
-                                    <tr>
-                                        <td>{{ $shortage->product?->sku }} — {{ $shortage->product?->description }}</td>
-                                        <td>{{ $shortage->product?->product_type }}</td>
-                                        <td>{{ number_format($free, 2) }}</td>
-                                        <td>{{ number_format((float) ($shortage->product?->safety_stock ?? 0), 2) }}</td>
-                                        <td>{{ (int) ($shortage->product?->lead_time_days ?? 0) }} d</td>
-                                        <td><span class="tag tag-critical">Replenish</span></td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="6"><span class="tag tag-ok">No material shortages detected</span></td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
 
-            <section id="production" class="panel">
-                <div class="panel-header">
-                    <h2>Production View</h2>
-                    <small>Open orders, execution status, completion pressure</small>
+                <div class="topbar-right">
+                    <a class="icon-button" href="{{ route('docs.index') }}" aria-label="{{ __('ui.open_documentation') }}" title="{{ __('ui.documentation') }}">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M7 4.75h8.4a2.85 2.85 0 0 1 2.85 2.85v11.65H8.6a2.85 2.85 0 0 0-2.85 2.85V7.6A2.85 2.85 0 0 1 8.6 4.75h.15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8.25 7.75h6.5M8.25 10.75h6.5M8.25 13.75h4.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                    </a>
+                    <button id="settingsToggle" class="icon-button" type="button" aria-label="{{ __('ui.settings') }}" aria-controls="settingsPanel" aria-expanded="false">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z" stroke="currentColor" stroke-width="2"/>
+                            <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.2 1.2 0 0 1 0 1.7l-1 1a1.2 1.2 0 0 1-1.7 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a1.2 1.2 0 0 1-1.2 1.2h-1.4A1.2 1.2 0 0 1 11.4 20v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.2 1.2 0 0 1-1.7 0l-1-1a1.2 1.2 0 0 1 0-1.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H6A1.2 1.2 0 0 1 4.8 13v-1.4A1.2 1.2 0 0 1 6 10.4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1.2 1.2 0 0 1 0-1.7l1-1a1.2 1.2 0 0 1 1.7 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4A1.2 1.2 0 0 1 12.6 2.8H14A1.2 1.2 0 0 1 15.2 4v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.2 1.2 0 0 1 1.7 0l1 1a1.2 1.2 0 0 1 0 1.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2A1.2 1.2 0 0 1 21.2 11.6V13a1.2 1.2 0 0 1-1.2 1.2h-.2a1 1 0 0 0-.9.8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                 </div>
-                <div class="panel-body">
-                    <div class="grid-2">
-                        <div class="kpi-grid" style="grid-template-columns: repeat(2,minmax(0,1fr));">
-                            @forelse($production['status_breakdown'] as $status => $total)
-                                <div class="kpi">
-                                    <div class="label">{{ str_replace('_', ' ', $status) }}</div>
-                                    <div class="value">{{ $total }}</div>
-                                </div>
-                            @empty
-                                <div class="empty">No production status data available.</div>
-                            @endforelse
-                        </div>
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Order</th>
-                                        <th>Product</th>
-                                        <th>Status</th>
-                                        <th>Planned</th>
-                                        <th>Produced</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($production['open_orders'] as $order)
-                                        <tr>
-                                            <td>{{ $order->order_number }}</td>
-                                            <td>{{ $order->product?->sku }}</td>
-                                            <td>{{ $order->status }}</td>
-                                            <td>{{ number_format((float) $order->quantity_planned, 2) }}</td>
-                                            <td>{{ number_format((float) $order->quantity_produced, 2) }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr><td colspan="5">No open production orders.</td></tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            </header>
 
-            <section id="inventory" class="panel">
-                <div class="panel-header">
-                    <h2>Inventory View</h2>
-                    <small>Availability, reserves, in-transit and quality gate stock</small>
-                </div>
-                <div class="panel-body">
-                    <div class="kpi-grid">
-                        <div class="kpi"><div class="label">Available</div><div class="value">{{ number_format($inventory['kpis']['available'], 2) }}</div></div>
-                        <div class="kpi"><div class="label">Reserved</div><div class="value">{{ number_format($inventory['kpis']['reserved'], 2) }}</div></div>
-                        <div class="kpi"><div class="label">In Transit</div><div class="value">{{ number_format($inventory['kpis']['in_transit'], 2) }}</div></div>
-                        <div class="kpi"><div class="label">Inspection</div><div class="value">{{ number_format($inventory['kpis']['inspection'], 2) }}</div></div>
-                    </div>
-                    <div style="margin-top: .8rem;" class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>SKU</th>
-                                    <th>Description</th>
-                                    <th>Available</th>
-                                    <th>Reserved</th>
-                                    <th>Free</th>
-                                    <th>Health</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($inventory['rows'] as $row)
-                                    @php
-                                        $free = (float) $row->qty_available - (float) $row->qty_reserved;
-                                        $safety = (float) ($row->product?->safety_stock ?? 0);
-                                    @endphp
-                                    <tr>
-                                        <td>{{ $row->product?->sku }}</td>
-                                        <td>{{ $row->product?->description }}</td>
-                                        <td>{{ number_format((float) $row->qty_available, 2) }}</td>
-                                        <td>{{ number_format((float) $row->qty_reserved, 2) }}</td>
-                                        <td>{{ number_format($free, 2) }}</td>
-                                        <td>
-                                            @if($free < $safety)
-                                                <span class="tag tag-critical">Below safety</span>
-                                            @else
-                                                <span class="tag tag-ok">Healthy</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="6">No inventory balance data.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="bom" class="panel">
-                <div class="panel-header">
-                    <h2>BOM Explorer</h2>
-                    <small>Versioned structures and component depth snapshot</small>
-                </div>
-                <div class="panel-body table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>BOM</th>
-                                <th>Product</th>
-                                <th>Version</th>
-                                <th>Status</th>
-                                <th>Items</th>
-                                <th>Effective</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($bom['headers'] as $header)
-                                <tr>
-                                    <td>#{{ $header->id }}</td>
-                                    <td>{{ $header->product?->sku }} — {{ $header->product?->description }}</td>
-                                    <td>v{{ $header->version_number }}</td>
-                                    <td>{{ $header->status }}</td>
-                                    <td>{{ $header->items_count }}</td>
-                                    <td>{{ optional($header->effective_from)->toDateString() ?? '-' }} → {{ optional($header->effective_to)->toDateString() ?? 'open' }}</td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="6">No BOM versions registered.</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="genealogy" class="panel">
-                <div class="panel-header">
-                    <h2>Genealogy Explorer</h2>
-                    <small>Forward and backward trace relation graph preview</small>
-                </div>
-                <div class="panel-body table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Relation</th>
-                                <th>Parent Node</th>
-                                <th>Child Node</th>
-                                <th>Qty</th>
-                                <th>UoM</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($genealogy['relations'] as $relation)
-                                <tr>
-                                    <td>{{ $relation->relation_type }}</td>
-                                    <td>{{ $relation->parentNode?->node_type }} / {{ $relation->parentNode?->source_reference ?? ('#'.$relation->parent_node_id) }}</td>
-                                    <td>{{ $relation->childNode?->node_type }} / {{ $relation->childNode?->source_reference ?? ('#'.$relation->child_node_id) }}</td>
-                                    <td>{{ number_format((float) $relation->quantity, 2) }}</td>
-                                    <td>{{ $relation->uom ?? '-' }}</td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="5">No genealogy relations available.</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="gantt" class="panel">
-                <div class="panel-header">
-                    <h2>Scheduling Gantt</h2>
-                    <small>Finite schedule horizon: {{ $today->toDateString() }} to {{ $windowEnd->toDateString() }}</small>
-                </div>
-                <div class="panel-body">
-                    <div class="kpi-grid" style="grid-template-columns: repeat(2,minmax(0,1fr)); margin-bottom: .8rem;">
-                        <div class="kpi"><div class="label">Planned Operations Window</div><div class="value">{{ count($scheduling['gantt_rows']) }}</div></div>
-                        <div class="kpi"><div class="label">Working Calendar Slots</div><div class="value">{{ count($scheduling['calendar_rows']) }}</div></div>
-                    </div>
-
-                    @if(count($scheduling['gantt_rows']) === 0)
-                        <div class="empty">No scheduled production orders in the selected window.</div>
-                    @else
-                        <div class="gantt">
-                            <div class="gantt-head">Timeline scale: 30-day window</div>
-                            @foreach($scheduling['gantt_rows'] as $bar)
-                                <div class="gantt-row">
-                                    <div class="gantt-label">
-                                        <strong>{{ $bar['order_number'] }}</strong>
-                                        <span class="tag">{{ $bar['status'] }}</span>
-                                    </div>
-                                    <div class="gantt-track">
-                                        <div class="gantt-bar" style="left: {{ $bar['left_percent'] }}%; width: {{ $bar['width_percent'] }}%;">
-                                            {{ $bar['product_sku'] }}
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-            </section>
-        </main>
+            <main class="content">
+                @if (session('status'))
+                    <div class="status-banner">{{ session('status') }}</div>
+                @endif
+                <h1 class="welcome">{{ __('ui.welcome') }}</h1>
+            </main>
+        </div>
     </div>
+
+    <div id="settingsOverlay" class="settings-overlay" aria-hidden="true"></div>
+    <aside id="settingsPanel" class="settings-panel" aria-hidden="true" aria-label="{{ __('ui.settings_panel_title') }}">
+        <div class="settings-panel-header">
+            <h2>{{ __('ui.settings_panel_title') }}</h2>
+            <button id="settingsClose" class="settings-close" type="button">{{ __('ui.close') }}</button>
+        </div>
+
+        <p>{{ __('ui.settings_panel_description') }}</p>
+
+        @php($currentLocale = auth()->user()?->preferred_locale ?? app()->getLocale())
+        <form method="POST" action="{{ route('preferences.language.update') }}" class="settings-field">
+            @csrf
+            <label for="preferredLocale">{{ __('ui.language') }}</label>
+            <select id="preferredLocale" name="preferred_locale" required>
+                <option value="pt_BR" @selected($currentLocale === 'pt_BR')>{{ __('ui.portuguese') }}</option>
+                <option value="en" @selected($currentLocale === 'en')>{{ __('ui.english') }}</option>
+                <option value="es" @selected($currentLocale === 'es')>{{ __('ui.spanish') }}</option>
+            </select>
+
+            <div class="settings-actions">
+                <button class="settings-save" type="submit">{{ __('ui.save') }}</button>
+            </div>
+        </form>
+    </aside>
+
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const settingsToggle = document.getElementById('settingsToggle');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const settingsClose = document.getElementById('settingsClose');
+
+        menuToggle?.addEventListener('click', function () {
+            sidebar?.classList.toggle('is-open');
+        });
+
+        const setSettingsState = (isOpen) => {
+            settingsPanel?.classList.toggle('is-open', isOpen);
+            settingsOverlay?.classList.toggle('is-open', isOpen);
+            settingsPanel?.setAttribute('aria-hidden', String(!isOpen));
+            settingsOverlay?.setAttribute('aria-hidden', String(!isOpen));
+            settingsToggle?.setAttribute('aria-expanded', String(isOpen));
+        };
+
+        settingsToggle?.addEventListener('click', function () {
+            const isOpen = settingsPanel?.classList.contains('is-open') ?? false;
+            setSettingsState(!isOpen);
+        });
+
+        settingsClose?.addEventListener('click', function () {
+            setSettingsState(false);
+        });
+
+        settingsOverlay?.addEventListener('click', function () {
+            setSettingsState(false);
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                setSettingsState(false);
+            }
+        });
+    </script>
 </body>
 </html>

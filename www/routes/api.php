@@ -51,6 +51,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/onboarding', [SaaSOnboardingApiController::class, 'onboarding']);
         Route::get('/trial/status', [SaaSOnboardingApiController::class, 'trialStatus']);
         Route::get('/tenant-management', [SaaSOnboardingApiController::class, 'tenantManagement']);
+        Route::post('/tenant/users', [SaaSOnboardingApiController::class, 'createTenantUser']);
 
         Route::get('/auth/me', [AuthController::class, 'me']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
