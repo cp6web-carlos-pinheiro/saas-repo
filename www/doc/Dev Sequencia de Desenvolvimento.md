@@ -72,7 +72,7 @@ Criar:
 - Plans
 - Subscription
 - Domains
-- Trial
+- Periodo gratuito inicial (14 dias)
 - Tenant Middleware
 - Tenant Resolver
 - Tenant Settings
@@ -531,7 +531,7 @@ Somente agora implementar tudo relacionado ao modelo comercial.
 
 Planos
 
-Trial
+Periodo gratuito inicial (14 dias)
 
 Assinaturas
 

@@ -180,7 +180,7 @@ Componentes aplicados nas areas:
 - Admin (`admin/management`): secoes com `x-ui.panel` e feedback com `x-ui.alert`.
 - Sidebars globais: dashboard industrial, admin e docs via `x-ui.sidebar`.
 - Menus globais: dashboard industrial, admin e docs via `x-ui.menu` + `x-ui.menu-item`.
-- Breadcrumb global: dashboard industrial, dashboard trial, onboarding wizard, admin e docs via `x-ui.breadcrumb`.
+- Breadcrumb global: dashboard industrial, dashboard de acesso gratuito (14 dias), onboarding wizard, admin e docs via `x-ui.breadcrumb`.
 
 ## Convencao de evolucao
 

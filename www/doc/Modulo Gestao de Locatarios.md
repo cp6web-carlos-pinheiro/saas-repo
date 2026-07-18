@@ -14,7 +14,7 @@ Este modulo trata o contexto multi-tenant da plataforma, incluindo empresas, est
 
 ### Transacionais
 
-- `trials`
+- `trials` (controle do periodo gratuito inicial de 14 dias)
 - `subscriptions`
 - `onboarding_profiles`
 - `social_accounts`

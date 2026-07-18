@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\Auth\RegisterController;
 use App\Http\Controllers\Web\Auth\SessionManagementController;
 use App\Http\Controllers\Web\Auth\SocialAuthController;
 use App\Http\Controllers\Web\Admin\AdminManagementController;
+use App\Http\Controllers\Web\Billing\SubscriptionController;
 use App\Http\Controllers\Web\Onboarding\AccountInvitationController;
 use App\Http\Controllers\Web\Documentation\DocumentationController;
 use App\Http\Controllers\Web\Onboarding\OnboardingController;
@@ -66,6 +67,11 @@ Route::middleware('auth:web')->group(function (): void {
     Route::post('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
 
     Route::middleware(ResolveWebTenant::class)->group(function (): void {
+        Route::get('/billing/subscription', [SubscriptionController::class, 'show'])
+            ->name('billing.subscription.show');
+        Route::post('/billing/subscription', [SubscriptionController::class, 'update'])
+            ->name('billing.subscription.update');
+
         Route::redirect('/trial/dashboard', '/dashboard')
             ->middleware(EnsureTrialIsActive::class)
             ->name('trial.dashboard');

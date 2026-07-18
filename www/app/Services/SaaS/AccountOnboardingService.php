@@ -15,6 +15,7 @@ use App\Models\SaaS\Trial;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -29,10 +30,46 @@ final class AccountOnboardingService
 
     private const MEMBER_ROLE_SLUG = 'organization-member';
 
+    private const CREDIT_CARD_PAYMENT_METHOD = 'Cartao de credito';
+
     private const PLAN_CATALOG = [
-        'starter' => ['label' => 'Starter', 'trial_days' => 14, 'description' => 'Para validar a operacao com uma base enxuta.'],
-        'growth' => ['label' => 'Growth', 'trial_days' => 30, 'description' => 'Para times em expansao e maior volume operacional.'],
-        'enterprise' => ['label' => 'Enterprise', 'trial_days' => 30, 'description' => 'Para operacoes complexas e multiplas unidades.'],
+        'free_trial' => [
+            'label' => 'Gratis 14 dias',
+            'description' => 'Acesso gratuito por 14 dias. Disponivel uma unica vez e sem renovacao.',
+            'payment_method' => 'Sem cobranca',
+            'billing_cycle_label' => 'Uso unico de 14 dias',
+            'trial_days' => 14,
+            'renewable' => false,
+            'allow_once' => true,
+            'status' => 'trialing',
+        ],
+        'monthly' => [
+            'label' => 'Plano mensal',
+            'description' => 'O valor e cobrado mensalmente no cartao de credito.',
+            'payment_method' => self::CREDIT_CARD_PAYMENT_METHOD,
+            'billing_cycle_label' => 'Cobranca mensal',
+            'interval_months' => 1,
+            'renewable' => true,
+            'status' => 'active',
+        ],
+        'semiannual' => [
+            'label' => 'Plano semestral',
+            'description' => 'O valor e cobrado semestralmente no cartao de credito.',
+            'payment_method' => self::CREDIT_CARD_PAYMENT_METHOD,
+            'billing_cycle_label' => 'Cobranca semestral',
+            'interval_months' => 6,
+            'renewable' => true,
+            'status' => 'active',
+        ],
+        'annual' => [
+            'label' => 'Plano anual',
+            'description' => 'O valor e cobrado anualmente no cartao de credito.',
+            'payment_method' => self::CREDIT_CARD_PAYMENT_METHOD,
+            'billing_cycle_label' => 'Cobranca anual',
+            'interval_months' => 12,
+            'renewable' => true,
+            'status' => 'active',
+        ],
     ];
 
     public function __construct(private readonly AuditLogService $audit) {}
@@ -40,6 +77,31 @@ final class AccountOnboardingService
     public function planCatalog(): array
     {
         return self::PLAN_CATALOG;
+    }
+
+    public function planForCode(?string $planCode): ?array
+    {
+        if ($planCode === null || $planCode === '') {
+            return null;
+        }
+
+        return self::PLAN_CATALOG[$planCode] ?? null;
+    }
+
+    public function dueDateForPlan(string $planCode, CarbonInterface $from): ?CarbonInterface
+    {
+        $plan = $this->planForCode($planCode);
+        $dueDate = null;
+
+        if ($plan !== null) {
+            if (isset($plan['trial_days'])) {
+                $dueDate = $from->copy()->addDays((int) $plan['trial_days']);
+            } elseif (isset($plan['interval_months'])) {
+                $dueDate = $from->copy()->addMonthsNoOverflow((int) $plan['interval_months']);
+            }
+        }
+
+        return $dueDate;
     }
 
     /**
@@ -154,6 +216,16 @@ final class AccountOnboardingService
 
     public function createPlanSubscription(User $user, array $data, Request $request): Subscription
     {
+        return $this->upsertPlanSubscription($user, $data, $request);
+    }
+
+    public function changePlanSubscription(User $user, array $data, Request $request): Subscription
+    {
+        return $this->upsertPlanSubscription($user, $data, $request);
+    }
+
+    private function upsertPlanSubscription(User $user, array $data, Request $request): Subscription
+    {
         $companyId = (int) ($user->current_company_id ?? 0);
 
         if ($companyId <= 0) {
@@ -174,7 +246,15 @@ final class AccountOnboardingService
 
         return DB::transaction(function () use ($user, $request, $organization, $planCode): Subscription {
             $plan = self::PLAN_CATALOG[$planCode];
-            $trialEndsAt = now()->addDays((int) $plan['trial_days']);
+
+            if (($plan['allow_once'] ?? false) === true && Trial::query()->where('organization_id', $organization->id)->exists()) {
+                throw ValidationException::withMessages([
+                    'plan_code' => __('messages.free_trial_already_used'),
+                ]);
+            }
+
+            $startsAt = now();
+            $endsAt = $this->dueDateForPlan($planCode, $startsAt);
 
             $subscription = Subscription::query()->updateOrCreate(
                 ['organization_id' => $organization->id],
@@ -182,34 +262,44 @@ final class AccountOnboardingService
                     'trial_id' => null,
                     'provider' => 'manual',
                     'plan_code' => $planCode,
-                    'status' => 'trialing',
-                    'starts_at' => now(),
-                    'ends_at' => $trialEndsAt,
+                    'status' => (string) ($plan['status'] ?? 'active'),
+                    'starts_at' => $startsAt,
+                    'ends_at' => $endsAt,
                     'canceled_at' => null,
                 ]
             );
 
-            $trial = Trial::query()->updateOrCreate(
-                [
-                    'organization_id' => $organization->id,
-                    'user_id' => $user->id,
-                ],
-                [
-                    'trial_start_date' => now(),
-                    'trial_end_date' => $trialEndsAt,
-                    'grace_ends_at' => $trialEndsAt->copy()->addDays(3),
-                    'status' => 'active',
-                    'expired_at' => null,
-                    'is_expired' => false,
-                    'email_domain' => Str::after((string) $user->email, '@'),
-                    'registration_ip' => $request->ip(),
-                ]
-            );
+            $trial = null;
+
+            if (isset($plan['trial_days']) && $endsAt !== null) {
+                $trial = Trial::query()->updateOrCreate(
+                    [
+                        'organization_id' => $organization->id,
+                        'user_id' => $user->id,
+                    ],
+                    [
+                        'trial_start_date' => $startsAt,
+                        'trial_end_date' => $endsAt,
+                        'grace_ends_at' => $endsAt->copy()->addDays(3),
+                        'status' => 'active',
+                        'expired_at' => null,
+                        'is_expired' => false,
+                        'email_domain' => Str::after((string) $user->email, '@'),
+                        'registration_ip' => $request->ip(),
+                    ]
+                );
+
+                $subscription->forceFill([
+                    'trial_id' => $trial->id,
+                ])->save();
+            }
 
             $organization->update([
                 'preferences' => array_merge($organization->preferences ?? [], [
                     'selected_plan' => $planCode,
                     'selected_plan_label' => $plan['label'],
+                    'selected_plan_payment_method' => $plan['payment_method'],
+                    'selected_plan_billing_cycle' => $plan['billing_cycle_label'],
                     'plan_selected_at' => now()->toISOString(),
                 ]),
             ]);
@@ -224,7 +314,7 @@ final class AccountOnboardingService
 
             $this->audit->record(
                 event: 'account.plan.selected',
-                context: ['plan_code' => $planCode, 'subscription_id' => $subscription->id, 'trial_id' => $trial->id],
+                context: ['plan_code' => $planCode, 'subscription_id' => $subscription->id, 'trial_id' => $trial?->id],
                 userId: $user->id,
                 organizationId: $organization->id,
                 ipAddress: $request->ip(),

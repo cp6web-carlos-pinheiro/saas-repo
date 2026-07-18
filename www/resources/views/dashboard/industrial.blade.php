@@ -50,12 +50,6 @@
                 </div>
 
                 <div class="ind-topbar-right">
-                    <a class="ind-icon-button" href="{{ route('docs.index') }}" aria-label="{{ __('ui.open_documentation') }}" title="{{ __('ui.documentation') }}">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M7 4.75h8.4a2.85 2.85 0 0 1 2.85 2.85v11.65H8.6a2.85 2.85 0 0 0-2.85 2.85V7.6A2.85 2.85 0 0 1 8.6 4.75h.15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M8.25 7.75h6.5M8.25 10.75h6.5M8.25 13.75h4.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
-                    </a>
                     <button id="settingsToggle" class="ind-icon-button" type="button" aria-label="{{ __('ui.settings') }}" aria-controls="settingsPanel" aria-expanded="false">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z" stroke="currentColor" stroke-width="2"/>
@@ -76,6 +70,12 @@
 
     <div id="settingsOverlay" class="ind-settings-overlay" aria-hidden="true"></div>
     <aside id="settingsPanel" class="ind-settings-panel" aria-hidden="true" aria-label="{{ __('ui.settings_panel_title') }}">
+        @php
+            $subscriptionPlanName = $subscriptionPlan['label'] ?? data_get($organization?->preferences, 'selected_plan_label') ?? __('ui.no_subscription');
+            $subscriptionPaymentMethod = $subscriptionPlan['payment_method'] ?? data_get($organization?->preferences, 'selected_plan_payment_method') ?? '-';
+            $subscriptionDueDate = $subscription?->ends_at?->format('d/m/Y') ?? __('ui.no_due_date');
+        @endphp
+
         <div class="ind-settings-panel-header">
             <h2>{{ __('ui.settings_panel_title') }}</h2>
             <button id="settingsClose" class="ind-settings-close" type="button">{{ __('ui.close') }}</button>
@@ -97,6 +97,39 @@
                 <button class="ind-settings-save" type="submit">{{ __('ui.save') }}</button>
             </div>
         </form>
+
+        <a href="{{ route('docs.index') }}" class="mt-6 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-100" aria-label="{{ __('ui.open_documentation') }}">
+            <span>{{ __('ui.documentation') }}</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7 4.75h8.4a2.85 2.85 0 0 1 2.85 2.85v11.65H8.6a2.85 2.85 0 0 0-2.85 2.85V7.6A2.85 2.85 0 0 1 8.6 4.75h.15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8.25 7.75h6.5M8.25 10.75h6.5M8.25 13.75h4.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+        </a>
+
+        <section class="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900">{{ __('ui.subscription_section_title') }}</h3>
+                    <p class="mt-1 text-xs text-slate-500">{{ __('ui.subscription_section_description') }}</p>
+                </div>
+                <a href="{{ route('billing.subscription.show') }}" class="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100">{{ __('ui.renew_or_change_plan') }}</a>
+            </div>
+
+            <dl class="mt-4 space-y-3 text-sm">
+                <div>
+                    <dt class="text-slate-500">{{ __('ui.current_plan') }}</dt>
+                    <dd class="font-semibold text-slate-900">{{ $subscriptionPlanName }}</dd>
+                </div>
+                <div>
+                    <dt class="text-slate-500">{{ __('ui.payment_method') }}</dt>
+                    <dd class="font-semibold text-slate-900">{{ $subscriptionPaymentMethod }}</dd>
+                </div>
+                <div>
+                    <dt class="text-slate-500">{{ __('ui.due_date') }}</dt>
+                    <dd class="font-semibold text-slate-900">{{ $subscriptionDueDate }}</dd>
+                </div>
+            </dl>
+        </section>
     </aside>
 
 @endsection

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Models\SaaS\Organization;
+use App\Models\SaaS\Subscription;
 use App\Models\SaaS\Trial;
 use Closure;
 use Illuminate\Http\RedirectResponse;
@@ -26,10 +27,22 @@ final class EnsureTrialIsActive
             if (! $organization) {
                 $redirect = redirect()->route('onboarding.wizard');
             } else {
+                $subscription = Subscription::query()
+                    ->where('organization_id', $organization->id)
+                    ->latest('id')
+                    ->first();
                 $trial = Trial::query()
                     ->where('organization_id', $organization->id)
                     ->latest('id')
                     ->first();
+
+                $hasActivePaidSubscription = $subscription !== null
+                    && $subscription->status === 'active'
+                    && ($subscription->ends_at === null || $subscription->ends_at->isFuture());
+
+                if ($hasActivePaidSubscription) {
+                    return $next($request);
+                }
 
                 if (! $trial) {
                     $redirect = redirect()->route('onboarding.wizard');
@@ -40,7 +53,7 @@ final class EnsureTrialIsActive
                         'expired_at' => now(),
                     ]);
 
-                    $redirect = new RedirectResponse(route('onboarding.wizard'));
+                    $redirect = new RedirectResponse(route('billing.subscription.show'));
                 }
             }
         }

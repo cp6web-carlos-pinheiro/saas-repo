@@ -7,7 +7,7 @@ return [
     'hero_title' => 'Higher margins. Less operational chaos.',
     'login' => 'Login',
     'register_company' => 'Register company',
-    'badge' => 'Free signup with a 14-day trial',
+    'badge' => 'Free signup with 14 days of full system access',
     'headline' => 'Unify production, inventory, and planning in one platform built to scale your operation.',
     'subheadline' => 'Start for free, structure your operation in minutes, and track critical KPIs in real time. You can switch plans at any time.',
     'start_signup' => 'Start signup',
@@ -17,5 +17,5 @@ return [
     'flow_step_2' => '2. Set up company and workspace',
     'flow_step_3' => '3. Choose the plan that fits your stage',
     'flow_step_4' => '4. Invite your team and operate with full visibility',
-    'trial_notice' => '100% free signup: 14-day trial and full freedom to change plans whenever you need.',
+    'trial_notice' => '100% free signup: use the platform for 14 days at no cost, then choose the plan that best fits your operation.',
 ];

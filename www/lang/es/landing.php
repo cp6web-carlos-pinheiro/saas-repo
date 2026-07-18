@@ -7,7 +7,7 @@ return [
     'hero_title' => 'Mas margen, menos caos operativo.',
     'login' => 'Iniciar sesión',
     'register_company' => 'Registrar empresa',
-    'badge' => 'Registro gratuito con trial de 14 días',
+    'badge' => 'Registro gratuito con 14 dias de acceso al sistema',
     'headline' => 'Unifique produccion, inventario y planificacion en una sola plataforma preparada para escalar su industria.',
     'subheadline' => 'Comience gratis, estructure su operacion en minutos y siga indicadores clave en tiempo real. Puede cambiar de plan en cualquier momento.',
     'start_signup' => 'Comenzar registro',
@@ -17,5 +17,5 @@ return [
     'flow_step_2' => '2. Configure empresa y entorno',
     'flow_step_3' => '3. Elija el plan ideal para su etapa',
     'flow_step_4' => '4. Invite al equipo y opere con visibilidad total',
-    'trial_notice' => 'Registro 100% gratuito: trial de 14 días y libertad total para cambiar de plan cuando quiera.',
+    'trial_notice' => 'Registro 100% gratuito: use la plataforma durante 14 días sin costo y contrate el plan ideal al final de ese período.',
 ];

@@ -1139,6 +1139,8 @@ Inventario gerado a partir do schema ativo da aplicacao via `information_schema`
 
 ### `trials`
 
+Observacao: nesta documentacao funcional, a tabela `trials` representa o periodo gratuito inicial de 14 dias concedido a todo novo cadastro.
+
 | Campo | Tipo | Nulo | Padrao | Chave | Extra |
 | --- | --- | --- | --- | --- | --- |
 | `id` | `bigint unsigned` | NO | - | `PRI` | `auto_increment` |

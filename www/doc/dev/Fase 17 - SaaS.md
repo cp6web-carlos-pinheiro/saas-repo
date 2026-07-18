@@ -4,11 +4,11 @@
 Implementar o modelo comercial da plataforma.
 
 ## Status de implementacao
-Parcial. Trial, onboarding, organizacao, assinatura e base de planos existem; cobranca recorrente, provider hooks e gestao comercial completa ainda sao parciais.
+Parcial. Acesso gratuito inicial de 14 dias, onboarding, organizacao, assinatura e base de planos existem; cobranca recorrente, provider hooks e gestao comercial completa ainda sao parciais.
 
 ## Escopo
 - Planos: parcial
-- Trial: implementado
+- Acesso gratuito inicial (14 dias): implementado
 - Assinaturas: parcial
 - Stripe: nao iniciado
 - Mercado Pago: nao iniciado

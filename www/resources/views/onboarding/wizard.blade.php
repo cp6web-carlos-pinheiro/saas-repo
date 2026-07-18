@@ -105,8 +105,11 @@
               </div>
               <p class="mt-3 text-sm text-slate-600">{{ $plan['description'] }}</p>
               <div class="mt-6 rounded-2xl bg-white border border-slate-200 p-4 text-sm text-slate-600">
-                <p class="font-semibold text-slate-900">{{ __('onboarding.trial_days_activation', ['days' => $plan['trial_days']]) }}</p>
-                <p class="mt-1">{{ __('onboarding.plan_register_description') }}</p>
+                <p class="font-semibold text-slate-900">{{ $plan['billing_cycle_label'] }}</p>
+                <p class="mt-1">{{ __('ui.payment_method') }}: {{ $plan['payment_method'] }}</p>
+                @if (isset($plan['trial_days']))
+                  <p class="mt-3 text-xs text-slate-500">{{ __('onboarding.trial_days_activation', ['days' => $plan['trial_days']]) }}</p>
+                @endif
               </div>
               <div class="mt-auto pt-6">
                 <button class="w-full rounded-full bg-coral text-white py-3.5 font-bold text-sm">{{ __('onboarding.select_plan', ['plan' => $plan['label']]) }}</button>

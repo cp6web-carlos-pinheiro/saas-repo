@@ -50,7 +50,7 @@ final class AccountOnboardingFlowTest extends TestCase
         $user = $user->fresh();
 
         $this->actingAs($user)->post(self::ONBOARDING_PATH, [
-            'plan_code' => 'starter',
+            'plan_code' => 'free_trial',
         ])->assertRedirect(route('onboarding.wizard'));
 
         $this->actingAs($user)->post(self::ONBOARDING_PATH, [
@@ -139,9 +139,37 @@ final class AccountOnboardingFlowTest extends TestCase
         $user = $user->fresh();
 
         $this->actingAs($user)->post(self::ONBOARDING_PATH, [
-            'plan_code' => 'starter',
+            'plan_code' => 'free_trial',
         ])->assertRedirect(route('onboarding.wizard'));
 
         return $user->fresh();
+    }
+
+    public function test_it_allows_switching_to_a_paid_plan_after_onboarding(): void
+    {
+        $user = $this->completeWizard('renova@alpha.com', 'Renova Admin', 'Renova Industria');
+
+        $this->actingAs($user)->post(route('billing.subscription.update'), [
+            'plan_code' => 'monthly',
+        ])->assertRedirect(route('billing.subscription.show'));
+
+        $this->assertDatabaseHas('subscriptions', [
+            'plan_code' => 'monthly',
+            'status' => 'active',
+        ]);
+    }
+
+    public function test_it_does_not_allow_reusing_the_free_trial_plan(): void
+    {
+        $user = $this->completeWizard('trial-unico@alpha.com', 'Trial Unico', 'Trial Industria');
+
+        $response = $this->actingAs($user)
+            ->from(route('billing.subscription.show'))
+            ->post(route('billing.subscription.update'), [
+                'plan_code' => 'free_trial',
+            ]);
+
+        $response->assertRedirect(route('billing.subscription.show'));
+        $response->assertSessionHasErrors('plan_code');
     }
 }

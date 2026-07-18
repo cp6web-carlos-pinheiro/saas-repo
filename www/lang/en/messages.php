@@ -17,6 +17,7 @@ return [
     'account_created_and_invitation_accepted' => 'Account created and invitation accepted successfully.',
     'company_data_saved' => 'Company data saved successfully.',
     'plan_selected_successfully' => 'Plan selected successfully.',
+    'free_trial_already_used' => 'The Free 14 Days plan can only be used once and cannot be renewed.',
     'language_updated' => 'Language updated successfully.',
     'password_reset_link_sent' => 'If the email exists, we will send reset instructions.',
     'reset_token_invalid_or_expired' => 'Invalid or expired token.',

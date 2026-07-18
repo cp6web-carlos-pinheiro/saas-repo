@@ -216,7 +216,7 @@
                         @csrf
                         @method('PATCH')
                         <label for="plan_code_{{ $company->id }}" class="sr-only">{{ __('admin.plan') }}</label>
-                        <input id="plan_code_{{ $company->id }}" type="text" name="plan_code" value="{{ $subscription?->plan_code ?? 'starter' }}" class="rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+                        <input id="plan_code_{{ $company->id }}" type="text" name="plan_code" value="{{ $subscription?->plan_code ?? 'free_trial' }}" class="rounded-xl border border-slate-300 px-3 py-2 text-xs" />
                         <label for="plan_status_{{ $company->id }}" class="sr-only">{{ __('admin.plan_status') }}</label>
                         <select id="plan_status_{{ $company->id }}" name="status" class="rounded-xl border border-slate-300 px-3 py-2 text-xs">
                           @foreach (['trialing', 'active', 'past_due', 'canceled', 'suspended'] as $planStatus)
