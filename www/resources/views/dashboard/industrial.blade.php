@@ -71,8 +71,8 @@
     <div id="settingsOverlay" class="ind-settings-overlay" aria-hidden="true"></div>
     <aside id="settingsPanel" class="ind-settings-panel" aria-hidden="true" aria-label="{{ __('ui.settings_panel_title') }}">
         @php
-            $subscriptionPlanName = $subscriptionPlan['label'] ?? data_get($organization?->preferences, 'selected_plan_label') ?? __('ui.no_subscription');
-            $subscriptionPaymentMethod = $subscriptionPlan['payment_method'] ?? data_get($organization?->preferences, 'selected_plan_payment_method') ?? '-';
+            $subscriptionPlanName = $subscriptionPlan['label'] ?? ($subscription?->plan_code ?? __('ui.no_subscription'));
+            $subscriptionPaymentMethod = $subscriptionPlan['payment_method'] ?? '-';
             $subscriptionDueDate = $subscription?->ends_at?->format('d/m/Y') ?? __('ui.no_due_date');
         @endphp
 

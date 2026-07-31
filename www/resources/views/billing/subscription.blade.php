@@ -42,11 +42,11 @@
           <dl class="mt-6 space-y-4 text-sm">
             <div>
               <dt class="text-slate-400">{{ __('ui.payment_method') }}</dt>
-              <dd class="font-semibold text-white">{{ $currentPlan['payment_method'] ?? data_get($organization->preferences, 'selected_plan_payment_method', '-') }}</dd>
+              <dd class="font-semibold text-white">{{ $currentPlan['payment_method'] ?? '-' }}</dd>
             </div>
             <div>
               <dt class="text-slate-400">{{ __('ui.billing_cycle') }}</dt>
-              <dd class="font-semibold text-white">{{ $currentPlan['billing_cycle_label'] ?? data_get($organization->preferences, 'selected_plan_billing_cycle', '-') }}</dd>
+              <dd class="font-semibold text-white">{{ $currentPlan['billing_cycle_label'] ?? '-' }}</dd>
             </div>
             <div>
               <dt class="text-slate-400">{{ __('ui.due_date') }}</dt>

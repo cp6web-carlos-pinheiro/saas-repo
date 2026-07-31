@@ -9,6 +9,7 @@ use App\Models\SaaS\AccountInvitation;
 use App\Models\SaaS\EmailVerification;
 use App\Models\SaaS\OnboardingProfile;
 use App\Models\SaaS\Organization;
+use App\Models\SaaS\Plan;
 use App\Models\SaaS\Subscription;
 use App\Models\SaaS\Tenant;
 use App\Models\SaaS\Trial;
@@ -30,53 +31,16 @@ final class AccountOnboardingService
 
     private const MEMBER_ROLE_SLUG = 'organization-member';
 
-    private const CREDIT_CARD_PAYMENT_METHOD = 'Cartao de credito';
-
-    private const PLAN_CATALOG = [
-        'free_trial' => [
-            'label' => 'Gratis 14 dias',
-            'description' => 'Acesso gratuito por 14 dias. Disponivel uma unica vez e sem renovacao.',
-            'payment_method' => 'Sem cobranca',
-            'billing_cycle_label' => 'Uso unico de 14 dias',
-            'trial_days' => 14,
-            'renewable' => false,
-            'allow_once' => true,
-            'status' => 'trialing',
-        ],
-        'monthly' => [
-            'label' => 'Plano mensal',
-            'description' => 'O valor e cobrado mensalmente no cartao de credito.',
-            'payment_method' => self::CREDIT_CARD_PAYMENT_METHOD,
-            'billing_cycle_label' => 'Cobranca mensal',
-            'interval_months' => 1,
-            'renewable' => true,
-            'status' => 'active',
-        ],
-        'semiannual' => [
-            'label' => 'Plano semestral',
-            'description' => 'O valor e cobrado semestralmente no cartao de credito.',
-            'payment_method' => self::CREDIT_CARD_PAYMENT_METHOD,
-            'billing_cycle_label' => 'Cobranca semestral',
-            'interval_months' => 6,
-            'renewable' => true,
-            'status' => 'active',
-        ],
-        'annual' => [
-            'label' => 'Plano anual',
-            'description' => 'O valor e cobrado anualmente no cartao de credito.',
-            'payment_method' => self::CREDIT_CARD_PAYMENT_METHOD,
-            'billing_cycle_label' => 'Cobranca anual',
-            'interval_months' => 12,
-            'renewable' => true,
-            'status' => 'active',
-        ],
-    ];
-
     public function __construct(private readonly AuditLogService $audit) {}
 
     public function planCatalog(): array
     {
-        return self::PLAN_CATALOG;
+        return Plan::query()
+            ->active()
+            ->ordered()
+            ->get()
+            ->mapWithKeys(fn (Plan $plan): array => [$plan->code => $this->serializePlan($plan)])
+            ->all();
     }
 
     public function planForCode(?string $planCode): ?array
@@ -85,7 +49,9 @@ final class AccountOnboardingService
             return null;
         }
 
-        return self::PLAN_CATALOG[$planCode] ?? null;
+        $plan = Plan::query()->where('code', $planCode)->first();
+
+        return $plan ? $this->serializePlan($plan) : null;
     }
 
     public function dueDateForPlan(string $planCode, CarbonInterface $from): ?CarbonInterface
@@ -248,15 +214,16 @@ final class AccountOnboardingService
         $organization = Organization::query()->where('company_id', $companyId)->firstOrFail();
 
         $planCode = (string) $data['plan_code'];
+        $planModel = Plan::query()->active()->where('code', $planCode)->first();
 
-        if (! array_key_exists($planCode, self::PLAN_CATALOG)) {
+        if ($planModel === null) {
             throw ValidationException::withMessages([
                 'plan_code' => __('messages.invalid_plan'),
             ]);
         }
 
-        return DB::transaction(function () use ($user, $request, $organization, $planCode): Subscription {
-            $plan = self::PLAN_CATALOG[$planCode];
+        return DB::transaction(function () use ($user, $request, $organization, $planCode, $planModel): Subscription {
+            $plan = $this->serializePlan($planModel);
 
             if (($plan['allow_once'] ?? false) === true && Trial::query()->where('organization_id', $organization->id)->exists()) {
                 throw ValidationException::withMessages([
@@ -308,9 +275,6 @@ final class AccountOnboardingService
             $organization->update([
                 'preferences' => array_merge($organization->preferences ?? [], [
                     'selected_plan' => $planCode,
-                    'selected_plan_label' => $plan['label'],
-                    'selected_plan_payment_method' => $plan['payment_method'],
-                    'selected_plan_billing_cycle' => $plan['billing_cycle_label'],
                     'plan_selected_at' => now()->toISOString(),
                 ]),
             ]);
@@ -334,6 +298,33 @@ final class AccountOnboardingService
 
             return $subscription;
         });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function serializePlan(Plan $plan): array
+    {
+        $data = [
+            'id' => $plan->id,
+            'code' => $plan->code,
+            'label' => $plan->label,
+            'description' => $plan->description,
+            'payment_method' => $plan->payment_method,
+            'billing_cycle_label' => $plan->billing_cycle_label,
+            'interval_months' => $plan->interval_months,
+            'renewable' => $plan->renewable,
+            'allow_once' => $plan->allow_once,
+            'status' => $plan->default_status,
+            'is_active' => $plan->is_active,
+            'sort_order' => $plan->sort_order,
+        ];
+
+        if ($plan->trial_days !== null) {
+            $data['trial_days'] = $plan->trial_days;
+        }
+
+        return $data;
     }
 
     /**

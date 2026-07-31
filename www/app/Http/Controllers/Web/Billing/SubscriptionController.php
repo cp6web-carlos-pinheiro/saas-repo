@@ -10,6 +10,7 @@ use App\Models\SaaS\Subscription;
 use App\Services\SaaS\AccountOnboardingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 final class SubscriptionController extends Controller
@@ -45,24 +46,30 @@ final class SubscriptionController extends Controller
         $user = $request->user();
 
         if ($user === null) {
-            return redirect()->route('login');
+            $response = redirect()->route('login');
+        } else {
+            $validated = $request->validate([
+                'plan_code' => ['required', Rule::exists('plans', 'code')->where('is_active', true)],
+            ]);
+
+            $plan = $service->planForCode($validated['plan_code']);
+
+            if ($plan === null || ($plan['is_active'] ?? false) !== true) {
+                $response = redirect()->route('billing.subscription.show')->withErrors([
+                    'plan_code' => __('messages.invalid_plan'),
+                ]);
+            } elseif (! isset($plan['trial_days'])) {
+                $request->session()->put('onboarding.payment_plan', $validated['plan_code']);
+                $request->session()->put('payment.context', 'billing');
+
+                $response = redirect()->route('onboarding.payment.create', ['planCode' => $validated['plan_code']]);
+            } else {
+                $service->changePlanSubscription($user, $validated, $request);
+
+                $response = redirect()->route('billing.subscription.show')->with('status', __('messages.plan_selected_successfully'));
+            }
         }
 
-        $validated = $request->validate([
-            'plan_code' => ['required', 'in:'.implode(',', array_keys($service->planCatalog()))],
-        ]);
-
-        $plan = $service->planForCode($validated['plan_code']);
-
-        if ($plan !== null && ! isset($plan['trial_days'])) {
-            $request->session()->put('onboarding.payment_plan', $validated['plan_code']);
-            $request->session()->put('payment.context', 'billing');
-
-            return redirect()->route('onboarding.payment.create', ['planCode' => $validated['plan_code']]);
-        }
-
-        $service->changePlanSubscription($user, $validated, $request);
-
-        return redirect()->route('billing.subscription.show')->with('status', __('messages.plan_selected_successfully'));
+        return $response;
     }
 }

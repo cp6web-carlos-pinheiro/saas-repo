@@ -3,10 +3,10 @@
 use App\Http\Controllers\IndustrialDashboardController;
 use App\Http\Controllers\Web\Admin\AdminAuthController;
 use App\Http\Controllers\Web\Admin\GlobalAdminHomeController;
-use App\Http\Controllers\Web\Admin\GlobalAdminModuleController;
 use App\Http\Controllers\Web\Admin\GlobalAdministratorController;
 use App\Http\Controllers\Web\Admin\GlobalCompanyController;
 use App\Http\Controllers\Web\Admin\GlobalCustomerController;
+use App\Http\Controllers\Web\Admin\GlobalPlanController;
 use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\LanguagePreferenceController;
 use App\Http\Controllers\Web\Auth\LoginController;
@@ -118,7 +118,14 @@ Route::prefix('global-admin')->name('global-admin.')->middleware('auth:admin')->
     Route::put('/companies/{company}', [GlobalCompanyController::class, 'update'])->name('companies.update');
     Route::delete('/companies/{company}', [GlobalCompanyController::class, 'destroy'])->name('companies.destroy');
 
-    Route::get('/{module}', GlobalAdminModuleController::class)->whereIn('module', ['plans'])->name('modules.show');
+    Route::get('/plans', [GlobalPlanController::class, 'index'])->name('plans.index');
+    Route::get('/plans/create', [GlobalPlanController::class, 'create'])->name('plans.create');
+    Route::post('/plans', [GlobalPlanController::class, 'store'])->name('plans.store');
+    Route::get('/plans/{plan}', [GlobalPlanController::class, 'show'])->name('plans.show');
+    Route::get('/plans/{plan}/edit', [GlobalPlanController::class, 'edit'])->name('plans.edit');
+    Route::put('/plans/{plan}', [GlobalPlanController::class, 'update'])->name('plans.update');
+    Route::delete('/plans/{plan}', [GlobalPlanController::class, 'destroy'])->name('plans.destroy');
+
     Route::get('/administrators', [GlobalAdministratorController::class, 'index'])->name('administrators.index');
     Route::get('/administrators/create', [GlobalAdministratorController::class, 'create'])->name('administrators.create');
     Route::post('/administrators', [GlobalAdministratorController::class, 'store'])->name('administrators.store');

@@ -140,7 +140,7 @@
               </div>
               <div>
                 <dt class="text-slate-500">{{ __('onboarding.plan') }}</dt>
-                <dd class="font-semibold text-slate-900">{{ data_get($organization?->preferences, 'selected_plan_label', $subscription?->plan_code ?? '-') }}</dd>
+                <dd class="font-semibold text-slate-900">{{ data_get($plans, ($subscription?->plan_code ?? '').'.label', $subscription?->plan_code ?? '-') }}</dd>
               </div>
               <div>
                 <dt class="text-slate-500">{{ __('onboarding.sent_invites') }}</dt>

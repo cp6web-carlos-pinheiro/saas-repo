@@ -12,6 +12,7 @@ use App\Models\SaaS\Subscription;
 use App\Services\SaaS\AccountOnboardingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 final class OnboardingController extends Controller
@@ -90,12 +91,18 @@ final class OnboardingController extends Controller
     private function storePlanStep(Request $request, AccountOnboardingService $service, $user): RedirectResponse
     {
         $validated = $request->validate([
-            'plan_code' => ['required', 'in:'.implode(',', array_keys($service->planCatalog()))],
+            'plan_code' => ['required', Rule::exists('plans', 'code')->where('is_active', true)],
         ]);
 
         $plan = $service->planForCode($validated['plan_code']);
 
-        if ($plan !== null && ! isset($plan['trial_days'])) {
+        if ($plan === null || ($plan['is_active'] ?? false) !== true) {
+            return redirect()->route('onboarding.wizard')->withErrors([
+                'plan_code' => __('messages.invalid_plan'),
+            ]);
+        }
+
+        if (! isset($plan['trial_days'])) {
             $request->session()->put('onboarding.payment_plan', $validated['plan_code']);
 
             return redirect()->route('onboarding.payment.create', ['planCode' => $validated['plan_code']]);

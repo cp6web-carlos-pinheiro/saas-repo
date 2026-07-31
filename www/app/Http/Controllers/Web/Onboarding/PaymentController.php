@@ -20,7 +20,7 @@ final class PaymentController extends Controller
     {
         $plan = $onboarding->planForCode($planCode);
 
-        if ($plan === null || isset($plan['trial_days'])) {
+        if ($plan === null || ($plan['is_active'] ?? false) !== true || isset($plan['trial_days'])) {
             return redirect()->route('onboarding.wizard');
         }
 
@@ -44,7 +44,7 @@ final class PaymentController extends Controller
         $planCode = (string) $request->session()->get('onboarding.payment_plan');
         $plan = $onboarding->planForCode($planCode);
 
-        if ($user === null || $plan === null || isset($plan['trial_days'])) {
+        if ($user === null || $plan === null || ($plan['is_active'] ?? false) !== true || isset($plan['trial_days'])) {
             return response()->json(['redirect' => route('onboarding.wizard')], 422);
         }
 
