@@ -34,6 +34,10 @@
                 <dd class="font-medium">{{ $plan->description ?: '—' }}</dd>
             </div>
             <div class="flex justify-between gap-4 py-3">
+                <dt class="text-[#5f6368]">{{ __('global_plan.amount') }}</dt>
+                <dd class="font-medium">R$ {{ number_format($plan->amount_cents / 100, 2, ',', '.') }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-3">
                 <dt class="text-[#5f6368]">{{ __('global_plan.payment_method') }}</dt>
                 <dd class="font-medium">{{ $plan->payment_method ?: '—' }}</dd>
             </div>

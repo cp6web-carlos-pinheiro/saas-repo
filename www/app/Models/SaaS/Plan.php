@@ -21,6 +21,7 @@ final class Plan extends Model
         'description',
         'payment_method',
         'billing_cycle_label',
+        'amount_cents',
         'trial_days',
         'interval_months',
         'renewable',
@@ -33,6 +34,7 @@ final class Plan extends Model
     protected $casts = [
         'trial_days' => 'integer',
         'interval_months' => 'integer',
+        'amount_cents' => 'integer',
         'renewable' => 'boolean',
         'allow_once' => 'boolean',
         'is_active' => 'boolean',

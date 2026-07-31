@@ -28,6 +28,7 @@
           <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
             <th class="px-3 py-3">ID</th>
             <th class="px-3 py-3"><a href="{{ $sortUrl('label') }}">{{ __('global_plan.label') }} ↕</a></th>
+            <th class="px-3 py-3"><a href="{{ $sortUrl('amount_cents') }}">{{ __('global_plan.amount_short') }} ↕</a></th>
             <th class="px-3 py-3">{{ __('global_plan.duration') }}</th>
             <th class="px-3 py-3">{{ __('global_plan.payment_method') }}</th>
             <th class="px-3 py-3"><a href="{{ $sortUrl('sort_order') }}">{{ __('global_plan.sort_order') }} ↕</a></th>
@@ -45,6 +46,7 @@
             >
               <td class="px-3 py-4 text-[#5f6368]">{{ $plan->id }}</td>
               <td class="px-3 py-4">{{ $plan->label }}</td>
+              <td class="px-3 py-4 font-semibold text-slate-900">R$ {{ number_format($plan->amount_cents / 100, 2, ',', '.') }}</td>
               <td class="px-3 py-4 text-[#5f6368]">
                 @if ($plan->trial_days)
                   {{ $plan->trial_days }} {{ $plan->trial_days === 1 ? __('global_plan.day_singular') : __('global_plan.day_plural') }}
@@ -65,7 +67,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="9" class="px-3 py-10 text-center text-[#5f6368]">{{ __('global_plan.empty') }}</td>
+              <td colspan="8" class="px-3 py-10 text-center text-[#5f6368]">{{ __('global_plan.empty') }}</td>
             </tr>
           @endforelse
         </tbody>

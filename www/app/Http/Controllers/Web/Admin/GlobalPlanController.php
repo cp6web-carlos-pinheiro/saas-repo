@@ -21,7 +21,7 @@ final class GlobalPlanController extends Controller
         $sort = (string) $request->query('sort', 'sort_order');
         $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
-        abort_unless(in_array($sort, ['code', 'label', 'is_active', 'sort_order', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['code', 'label', 'amount_cents', 'is_active', 'sort_order', 'created_at'], true), 404);
 
         $plans = Plan::query()
             ->withCount('subscriptions')
@@ -108,6 +108,7 @@ final class GlobalPlanController extends Controller
             'code' => ['required', 'string', 'max:80', Rule::unique('plans', 'code')->ignore($plan)],
             'label' => ['required', 'string', 'max:180'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'amount' => ['required', 'string', 'max:30'],
             'payment_method' => ['nullable', 'string', 'max:120'],
             'billing_cycle_label' => ['nullable', 'string', 'max:180'],
             'trial_days' => ['nullable', 'integer', 'min:1', 'max:3650'],
@@ -133,10 +134,40 @@ final class GlobalPlanController extends Controller
             $data['trial_days'] = null;
         }
 
+        $data['amount_cents'] = $this->normalizeAmountToCents((string) $data['amount']);
+        unset($data['amount']);
+
         $data['renewable'] = (bool) ($data['renewable'] ?? false);
         $data['allow_once'] = (bool) ($data['allow_once'] ?? false);
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
 
         return $data;
+    }
+
+    private function normalizeAmountToCents(string $rawAmount): int
+    {
+        $normalized = trim($rawAmount);
+        $normalized = str_replace(' ', '', $normalized);
+
+        if (str_contains($normalized, ',')) {
+            $normalized = str_replace('.', '', $normalized);
+            $normalized = str_replace(',', '.', $normalized);
+        }
+
+        if (! is_numeric($normalized)) {
+            throw ValidationException::withMessages([
+                'amount' => __('global_plan.invalid_amount'),
+            ]);
+        }
+
+        $cents = (int) round(((float) $normalized) * 100);
+
+        if ($cents < 0) {
+            throw ValidationException::withMessages([
+                'amount' => __('global_plan.invalid_amount'),
+            ]);
+        }
+
+        return $cents;
     }
 }

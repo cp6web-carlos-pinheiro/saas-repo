@@ -52,12 +52,6 @@ return [
         'public_key' => env('PAGARME_PUBLIC_KEY'),
         'base_url' => env('PAGARME_BASE_URL', 'https://api.pagar.me/core/v5'),
         'timeout' => (int) env('PAGARME_TIMEOUT', 30),
-        // Valores em centavos. Defina-os no ambiente antes de habilitar os planos pagos.
-        'plans' => [
-            'monthly' => (int) env('PAGARME_MONTHLY_AMOUNT', 0),
-            'semiannual' => (int) env('PAGARME_SEMIANNUAL_AMOUNT', 0),
-            'annual' => (int) env('PAGARME_ANNUAL_AMOUNT', 0),
-        ],
     ],
 
 ];

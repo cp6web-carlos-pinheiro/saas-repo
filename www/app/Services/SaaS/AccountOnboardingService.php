@@ -312,6 +312,7 @@ final class AccountOnboardingService
             'description' => $plan->description,
             'payment_method' => $plan->payment_method,
             'billing_cycle_label' => $plan->billing_cycle_label,
+            'amount_cents' => $plan->amount_cents,
             'interval_months' => $plan->interval_months,
             'renewable' => $plan->renewable,
             'allow_once' => $plan->allow_once,

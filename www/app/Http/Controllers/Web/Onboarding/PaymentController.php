@@ -31,7 +31,7 @@ final class PaymentController extends Controller
         return view('onboarding.payment', [
             'planCode' => $planCode,
             'plan' => $plan,
-            'amount' => $payments->amountForPlan($planCode),
+            'amount' => (int) ($plan['amount_cents'] ?? 0),
             'pagarMePublicKey' => (string) config('services.pagarme.public_key'),
             'pagarMeTokenUrl' => rtrim((string) config('services.pagarme.base_url'), '/').'/tokens',
             'simulatePayment' => $payments->usesSimulatedGateway(),

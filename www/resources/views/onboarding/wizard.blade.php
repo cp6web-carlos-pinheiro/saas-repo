@@ -105,6 +105,7 @@
               </div>
               <p class="mt-3 text-sm text-slate-600">{{ $plan['description'] }}</p>
               <div class="mt-6 rounded-2xl bg-white border border-slate-200 p-4 text-sm text-slate-600">
+                <p class="text-lg font-bold text-slate-900">R$ {{ number_format(($plan['amount_cents'] ?? 0) / 100, 2, ',', '.') }}</p>
                 <p class="font-semibold text-slate-900">{{ $plan['billing_cycle_label'] }}</p>
                 <p class="mt-1">{{ __('ui.payment_method') }}: {{ $plan['payment_method'] }}</p>
                 @if (isset($plan['trial_days']))

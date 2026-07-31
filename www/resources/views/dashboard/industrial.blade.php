@@ -72,6 +72,7 @@
     <aside id="settingsPanel" class="ind-settings-panel" aria-hidden="true" aria-label="{{ __('ui.settings_panel_title') }}">
         @php
             $subscriptionPlanName = $subscriptionPlan['label'] ?? ($subscription?->plan_code ?? __('ui.no_subscription'));
+            $subscriptionAmount = 'R$ '.number_format((($subscriptionPlan['amount_cents'] ?? 0) / 100), 2, ',', '.');
             $subscriptionPaymentMethod = $subscriptionPlan['payment_method'] ?? '-';
             $subscriptionDueDate = $subscription?->ends_at?->format('d/m/Y') ?? __('ui.no_due_date');
         @endphp
@@ -117,6 +118,10 @@
                 <div class="ind-subscription-detail">
                     <dt>{{ __('ui.current_plan') }}</dt>
                     <dd>{{ $subscriptionPlanName }}</dd>
+                </div>
+                <div class="ind-subscription-detail">
+                    <dt>{{ __('global_plan.amount_short') }}</dt>
+                    <dd>{{ $subscriptionAmount }}</dd>
                 </div>
                 <div class="ind-subscription-detail">
                     <dt>{{ __('ui.payment_method') }}</dt>

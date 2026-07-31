@@ -39,11 +39,17 @@
                 @error('description')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-4 md:grid-cols-3">
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.payment_method') }}
                     <input name="payment_method" value="{{ old('payment_method', $plan?->payment_method) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('payment_method'), 'border-[#dadce0]' => ! $errors->has('payment_method')])>
                     @error('payment_method')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
+
+                <label class="block text-sm font-medium">
+                    {{ __('global_plan.amount') }}
+                    <input name="amount" value="{{ old('amount', number_format(($plan?->amount_cents ?? 0) / 100, 2, ',', '.')) }}" required inputmode="decimal" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('amount'), 'border-[#dadce0]' => ! $errors->has('amount')])>
+                    @error('amount')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">

@@ -41,6 +41,10 @@
           <h2 class="mt-3 text-2xl font-bold">{{ $currentPlan['label'] ?? __('ui.no_subscription') }}</h2>
           <dl class="mt-6 space-y-4 text-sm">
             <div>
+              <dt class="text-slate-400">{{ __('global_plan.amount_short') }}</dt>
+              <dd class="font-semibold text-white">R$ {{ number_format(($currentPlan['amount_cents'] ?? 0) / 100, 2, ',', '.') }}</dd>
+            </div>
+            <div>
               <dt class="text-slate-400">{{ __('ui.payment_method') }}</dt>
               <dd class="font-semibold text-white">{{ $currentPlan['payment_method'] ?? '-' }}</dd>
             </div>
@@ -85,6 +89,10 @@
                 <p class="mt-3 text-sm text-slate-600">{{ $plan['description'] }}</p>
 
                 <dl class="mt-5 space-y-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
+                  <div>
+                    <dt class="text-slate-500">{{ __('global_plan.amount_short') }}</dt>
+                    <dd class="font-semibold text-slate-900">R$ {{ number_format(($plan['amount_cents'] ?? 0) / 100, 2, ',', '.') }}</dd>
+                  </div>
                   <div>
                     <dt class="text-slate-500">{{ __('ui.payment_method') }}</dt>
                     <dd class="font-semibold text-slate-900">{{ $plan['payment_method'] }}</dd>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\SaaS;
 
+use App\Models\SaaS\Plan;
 use App\Models\SaaS\Organization;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\Client\ConnectionException;
@@ -14,7 +15,7 @@ final class PagarMePaymentService
 {
     public function amountForPlan(string $planCode): int
     {
-        return (int) config("services.pagarme.plans.{$planCode}", 0);
+        return (int) (Plan::query()->where('code', $planCode)->value('amount_cents') ?? 0);
     }
 
     /**
