@@ -81,24 +81,23 @@
             <button id="settingsClose" class="ind-settings-close" type="button">{{ __('ui.close') }}</button>
         </div>
 
-        <p>{{ __('ui.settings_panel_description') }}</p>
-
         @php($currentLocale = auth()->user()?->preferred_locale ?? app()->getLocale())
-        <form method="POST" action="{{ route('preferences.language.update') }}" class="ind-settings-field">
+        <form method="POST" action="{{ route('preferences.language.update') }}" class="ind-settings-section ind-settings-field">
             @csrf
             <label for="preferredLocale">{{ __('ui.language') }}</label>
-            <select id="preferredLocale" name="preferred_locale" required>
-                <option value="pt_BR" @selected($currentLocale === 'pt_BR')>{{ __('ui.portuguese') }}</option>
-                <option value="en" @selected($currentLocale === 'en')>{{ __('ui.english') }}</option>
-                <option value="es" @selected($currentLocale === 'es')>{{ __('ui.spanish') }}</option>
-            </select>
-
-            <div class="ind-settings-actions">
-                <button class="ind-settings-save" type="submit">{{ __('ui.save') }}</button>
+            <div class="ind-settings-language-row flex items-start justify-between gap-3">
+                <select id="preferredLocale" name="preferred_locale" required>
+                    <option value="pt_BR" @selected($currentLocale === 'pt_BR')>{{ __('ui.portuguese') }}</option>
+                    <option value="en" @selected($currentLocale === 'en')>{{ __('ui.english') }}</option>
+                    <option value="es" @selected($currentLocale === 'es')>{{ __('ui.spanish') }}</option>
+                </select>
+                <div class="ind-settings-actions">
+                    <button class="ind-settings-save" type="submit">{{ __('ui.save') }}</button>
+                </div>
             </div>
         </form>
 
-        <a href="{{ route('docs.index') }}" class="mt-6 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-100" aria-label="{{ __('ui.open_documentation') }}">
+        <a href="{{ route('docs.index') }}" class="ind-settings-nav-link" aria-label="{{ __('ui.open_documentation') }}">
             <span>{{ __('ui.documentation') }}</span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M7 4.75h8.4a2.85 2.85 0 0 1 2.85 2.85v11.65H8.6a2.85 2.85 0 0 0-2.85 2.85V7.6A2.85 2.85 0 0 1 8.6 4.75h.15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -106,29 +105,30 @@
             </svg>
         </a>
 
-        <section class="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-            <div class="flex items-start justify-between gap-3">
+        <section class="ind-settings-section ind-subscription-card">
+            <div class="ind-subscription-heading">
                 <div>
-                    <h3 class="text-sm font-semibold text-slate-900">{{ __('ui.subscription_section_title') }}</h3>
-                    <p class="mt-1 text-xs text-slate-500">{{ __('ui.subscription_section_description') }}</p>
+                    <h3>{{ __('ui.subscription_section_title') }}</h3>
+                    <p>{{ __('ui.subscription_section_description') }}</p>
                 </div>
-                <a href="{{ route('billing.subscription.show') }}" class="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100">{{ __('ui.renew_or_change_plan') }}</a>
             </div>
 
-            <dl class="mt-4 space-y-3 text-sm">
-                <div>
-                    <dt class="text-slate-500">{{ __('ui.current_plan') }}</dt>
-                    <dd class="font-semibold text-slate-900">{{ $subscriptionPlanName }}</dd>
+            <dl class="ind-subscription-details">
+                <div class="ind-subscription-detail">
+                    <dt>{{ __('ui.current_plan') }}</dt>
+                    <dd>{{ $subscriptionPlanName }}</dd>
                 </div>
-                <div>
-                    <dt class="text-slate-500">{{ __('ui.payment_method') }}</dt>
-                    <dd class="font-semibold text-slate-900">{{ $subscriptionPaymentMethod }}</dd>
+                <div class="ind-subscription-detail">
+                    <dt>{{ __('ui.payment_method') }}</dt>
+                    <dd>{{ $subscriptionPaymentMethod }}</dd>
                 </div>
-                <div>
-                    <dt class="text-slate-500">{{ __('ui.due_date') }}</dt>
-                    <dd class="font-semibold text-slate-900">{{ $subscriptionDueDate }}</dd>
+                <div class="ind-subscription-detail">
+                    <dt>{{ __('ui.due_date') }}</dt>
+                    <dd>{{ $subscriptionDueDate }}</dd>
                 </div>
             </dl>
+
+            <a href="{{ route('billing.subscription.show') }}" class="ind-subscription-action">{{ __('ui.renew_or_change_plan') }}</a>
         </section>
     </aside>
 

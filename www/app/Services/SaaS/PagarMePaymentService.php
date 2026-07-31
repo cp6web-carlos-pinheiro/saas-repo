@@ -8,6 +8,7 @@ use App\Models\SaaS\Organization;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 final class PagarMePaymentService
 {
@@ -22,6 +23,15 @@ final class PagarMePaymentService
      */
     public function charge(User $user, Organization $organization, string $planCode, array $card): array
     {
+        if ($this->usesSimulatedGateway()) {
+            return [
+                'order_id' => 'local_'.Str::uuid(),
+                'charge_id' => null,
+                'customer_id' => null,
+                'last_four' => $card['last_four'],
+            ];
+        }
+
         $secretKey = (string) config('services.pagarme.secret_key');
         $amount = $this->amountForPlan($planCode);
 
@@ -85,5 +95,10 @@ final class PagarMePaymentService
             ?? data_get($payload, 'errors.0.message')
             ?? data_get($payload, 'message')
             ?? __('payment.declined', ['code' => $httpStatus]));
+    }
+
+    public function usesSimulatedGateway(): bool
+    {
+        return in_array((string) config('app.env'), ['local', 'test', 'testing'], true);
     }
 }

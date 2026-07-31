@@ -34,6 +34,7 @@ final class PaymentController extends Controller
             'amount' => $payments->amountForPlan($planCode),
             'pagarMePublicKey' => (string) config('services.pagarme.public_key'),
             'pagarMeTokenUrl' => rtrim((string) config('services.pagarme.base_url'), '/').'/tokens',
+            'simulatePayment' => $payments->usesSimulatedGateway(),
         ]);
     }
 

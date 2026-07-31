@@ -22,11 +22,6 @@ final class ApplyLocalePreference
             $locale = $queryLocale;
         }
 
-        $cookieLocale = $request->cookie('locale');
-        if ($locale === null && is_string($cookieLocale) && in_array($cookieLocale, self::ALLOWED_LOCALES, true)) {
-            $locale = $cookieLocale;
-        }
-
         if ($request->hasSession()) {
             $sessionLocale = $request->session()->get('locale');
             if ($locale === null && is_string($sessionLocale) && in_array($sessionLocale, self::ALLOWED_LOCALES, true)) {
@@ -36,7 +31,12 @@ final class ApplyLocalePreference
 
         $userLocale = $request->user()?->preferred_locale;
         if (is_string($userLocale) && in_array($userLocale, self::ALLOWED_LOCALES, true)) {
-            $locale = $userLocale;
+            $locale ??= $userLocale;
+        }
+
+        $cookieLocale = $request->cookie('locale');
+        if ($locale === null && is_string($cookieLocale) && in_array($cookieLocale, self::ALLOWED_LOCALES, true)) {
+            $locale = $cookieLocale;
         }
 
         if (! is_string($locale) || ! in_array($locale, self::ALLOWED_LOCALES, true)) {
@@ -50,8 +50,26 @@ final class ApplyLocalePreference
         }
 
         $response = $next($request);
-        $response->headers->setCookie(cookie('locale', $locale, 60 * 24 * 365));
+        $resolvedLocale = $this->resolvedLocale($request, $locale);
+        $response->headers->setCookie(cookie('locale', $resolvedLocale, 60 * 24 * 365));
 
         return $response;
+    }
+
+    private function resolvedLocale(Request $request, string $fallback): string
+    {
+        $userLocale = $request->user()?->preferred_locale;
+        if (is_string($userLocale) && in_array($userLocale, self::ALLOWED_LOCALES, true)) {
+            return $userLocale;
+        }
+
+        if ($request->hasSession()) {
+            $sessionLocale = $request->session()->get('locale');
+            if (is_string($sessionLocale) && in_array($sessionLocale, self::ALLOWED_LOCALES, true)) {
+                return $sessionLocale;
+            }
+        }
+
+        return $fallback;
     }
 }

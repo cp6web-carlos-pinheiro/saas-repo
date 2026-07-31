@@ -65,28 +65,35 @@
       document.getElementById('processing-panel').classList.remove('hidden');
 
       try {
-        if (! @json($pagarMePublicKey)) throw new Error('{{ __('payment.configuration_error') }}');
         const cardNumber = form.card_number.value.replace(/\D/g, '');
-        const tokenResponse = await fetch('{{ $pagarMeTokenUrl }}?appId={{ urlencode($pagarMePublicKey) }}', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'card',
-            card: {
-              number: cardNumber,
-              holder_name: form.card_holder_name.value,
-              exp_month: Number(form.card_exp_month.value),
-              exp_year: Number(form.card_exp_year.value),
-              cvv: form.card_cvv.value
-            }
-          })
-        });
-        const tokenData = await tokenResponse.json();
-        if (!tokenResponse.ok || !tokenData.id) throw new Error(tokenData.message || '{{ __('payment.card_tokenization_error') }}');
+        let cardToken;
+
+        if (@json($simulatePayment)) {
+          cardToken = 'local_'.concat(crypto.randomUUID());
+        } else {
+          if (! @json($pagarMePublicKey)) throw new Error('{{ __('payment.configuration_error') }}');
+          const tokenResponse = await fetch('{{ $pagarMeTokenUrl }}?appId={{ urlencode($pagarMePublicKey) }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'card',
+              card: {
+                number: cardNumber,
+                holder_name: form.card_holder_name.value,
+                exp_month: Number(form.card_exp_month.value),
+                exp_year: Number(form.card_exp_year.value),
+                cvv: form.card_cvv.value
+              }
+            })
+          });
+          const tokenData = await tokenResponse.json();
+          if (!tokenResponse.ok || !tokenData.id) throw new Error(tokenData.message || '{{ __('payment.card_tokenization_error') }}');
+          cardToken = tokenData.id;
+        }
 
         const payload = new FormData(form);
         ['card_number', 'card_holder_name', 'card_exp_month', 'card_exp_year', 'card_cvv'].forEach((name) => payload.delete(name));
-        payload.set('card_token', tokenData.id);
+        payload.set('card_token', cardToken);
         payload.set('last_four', cardNumber.slice(-4));
         const response = await fetch('{{ route('onboarding.payment.process') }}', {
           method: 'POST',

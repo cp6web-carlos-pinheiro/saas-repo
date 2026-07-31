@@ -33,7 +33,6 @@ final class LanguagePreferenceController extends Controller
         App::setLocale($locale);
 
         return back()
-            ->with('status', __('messages.language_updated'))
-            ->cookie('locale', $locale, 60 * 24 * 365);
+            ->with('status', __('messages.language_updated'));
     }
 }
