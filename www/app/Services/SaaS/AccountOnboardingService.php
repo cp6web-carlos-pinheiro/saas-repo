@@ -224,6 +224,17 @@ final class AccountOnboardingService
         return $this->upsertPlanSubscription($user, $data, $request);
     }
 
+    public function recordPaymentProvider(Subscription $subscription, array $payment): Subscription
+    {
+        $subscription->forceFill([
+            'provider' => 'pagarme',
+            'provider_customer_id' => $payment['customer_id'] ?? null,
+            'provider_subscription_id' => $payment['order_id'] ?? $payment['charge_id'] ?? null,
+        ])->save();
+
+        return $subscription;
+    }
+
     private function upsertPlanSubscription(User $user, array $data, Request $request): Subscription
     {
         $companyId = (int) ($user->current_company_id ?? 0);

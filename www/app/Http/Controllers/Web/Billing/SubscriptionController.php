@@ -52,6 +52,15 @@ final class SubscriptionController extends Controller
             'plan_code' => ['required', 'in:'.implode(',', array_keys($service->planCatalog()))],
         ]);
 
+        $plan = $service->planForCode($validated['plan_code']);
+
+        if ($plan !== null && ! isset($plan['trial_days'])) {
+            $request->session()->put('onboarding.payment_plan', $validated['plan_code']);
+            $request->session()->put('payment.context', 'billing');
+
+            return redirect()->route('onboarding.payment.create', ['planCode' => $validated['plan_code']]);
+        }
+
         $service->changePlanSubscription($user, $validated, $request);
 
         return redirect()->route('billing.subscription.show')->with('status', __('messages.plan_selected_successfully'));

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\IndustrialDashboardController;
+use App\Http\Controllers\Web\Admin\AdminManagementController;
 use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\LanguagePreferenceController;
 use App\Http\Controllers\Web\Auth\LoginController;
@@ -7,15 +9,14 @@ use App\Http\Controllers\Web\Auth\PasswordRecoveryController;
 use App\Http\Controllers\Web\Auth\RegisterController;
 use App\Http\Controllers\Web\Auth\SessionManagementController;
 use App\Http\Controllers\Web\Auth\SocialAuthController;
-use App\Http\Controllers\Web\Admin\AdminManagementController;
 use App\Http\Controllers\Web\Billing\SubscriptionController;
-use App\Http\Controllers\Web\Onboarding\AccountInvitationController;
 use App\Http\Controllers\Web\Documentation\DocumentationController;
+use App\Http\Controllers\Web\Onboarding\AccountInvitationController;
 use App\Http\Controllers\Web\Onboarding\OnboardingController;
-use App\Http\Middleware\EnsureTrialIsActive;
+use App\Http\Controllers\Web\Onboarding\PaymentController;
 use App\Http\Middleware\EnsurePlatformAdmin;
+use App\Http\Middleware\EnsureTrialIsActive;
 use App\Http\Middleware\ResolveWebTenant;
-use App\Http\Controllers\IndustrialDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -65,6 +66,9 @@ Route::middleware('auth:web')->group(function (): void {
 
     Route::get('/onboarding', [OnboardingController::class, 'show'])->name('onboarding.wizard');
     Route::post('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
+    Route::get('/onboarding/payment/{planCode}', [PaymentController::class, 'create'])->name('onboarding.payment.create');
+    Route::post('/onboarding/payment', [PaymentController::class, 'process'])->name('onboarding.payment.process');
+    Route::get('/onboarding/payment/result', [PaymentController::class, 'result'])->name('onboarding.payment.result');
 
     Route::middleware(ResolveWebTenant::class)->group(function (): void {
         Route::get('/billing/subscription', [SubscriptionController::class, 'show'])

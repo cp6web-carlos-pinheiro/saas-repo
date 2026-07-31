@@ -93,6 +93,14 @@ final class OnboardingController extends Controller
             'plan_code' => ['required', 'in:'.implode(',', array_keys($service->planCatalog()))],
         ]);
 
+        $plan = $service->planForCode($validated['plan_code']);
+
+        if ($plan !== null && ! isset($plan['trial_days'])) {
+            $request->session()->put('onboarding.payment_plan', $validated['plan_code']);
+
+            return redirect()->route('onboarding.payment.create', ['planCode' => $validated['plan_code']]);
+        }
+
         $service->createPlanSubscription($user, $validated, $request);
         $request->session()->put('onboarding.step', 4);
 
