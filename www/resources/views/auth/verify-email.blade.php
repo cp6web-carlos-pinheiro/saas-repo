@@ -28,11 +28,11 @@
 
     <form method="POST" action="{{ route('verification.resend') }}" class="mt-6 space-y-3">
       @csrf
-      <button type="submit" class="auth-btn-primary">
+      <x-ui.button type="submit" variant="brand-primary" :full="true" size="lg" class="rounded-full">
         {{ __('auth.resend_verification_email') }}
         <x-heroicon-o-paper-airplane class="h-4 w-4" />
-      </button>
-      <a href="{{ route('login') }}" class="auth-btn-secondary w-full">{{ __('auth.back_to_login') }}</a>
+      </x-ui.button>
+      <x-ui.button :href="route('login')" variant="secondary" :full="true" size="lg" class="rounded-full">{{ __('auth.back_to_login') }}</x-ui.button>
     </form>
   </section>
   </main>

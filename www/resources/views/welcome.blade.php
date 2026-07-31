@@ -25,8 +25,8 @@
             <a href="{{ url('/?locale=en') }}" class="focus-ring inline-flex h-8 w-8 items-center justify-center rounded-full text-lg hover:bg-white/10 transition" title="{{ __('ui.english') }}" aria-label="{{ __('ui.english') }}">🇺🇸</a>
           </div>
 
-          <a href="{{ route('login') }}" class="focus-ring inline-flex items-center rounded-full border border-white/20 px-4 py-2 text-sm font-semibold hover:bg-white/10 transition">{{ __('landing.login') }}</a>
-          <a href="{{ route('company-signup') }}" class="focus-ring inline-flex items-center rounded-full bg-coral px-4 py-2 text-sm font-bold hover:brightness-110 transition shadow-soft">{{ __('landing.register_company') }}</a>
+          <x-ui.button :href="route('login')" variant="inverse-outline" class="focus-ring rounded-full">{{ __('landing.login') }}</x-ui.button>
+          <x-ui.button :href="route('company-signup')" variant="brand-primary" class="focus-ring rounded-full shadow-soft">{{ __('landing.register_company') }}</x-ui.button>
         </div>
       </div>
     </section>
@@ -38,8 +38,8 @@
           <h2 class="max-w-3xl font-display text-4xl font-bold leading-tight md:text-5xl xl:text-6xl">{{ __('landing.headline') }}</h2>
           <p class="max-w-2xl text-lg text-slate-200/90 leading-relaxed">{{ __('landing.subheadline') }}</p>
           <div class="flex flex-col sm:flex-row gap-4">
-            <a href="{{ route('company-signup') }}" class="focus-ring inline-flex justify-center rounded-full bg-coral px-7 py-4 text-sm font-bold tracking-wide text-white hover:brightness-110 transition shadow-glow">{{ __('landing.start_signup') }}</a>
-            <a href="{{ route('login') }}" class="focus-ring inline-flex justify-center rounded-full border border-white/20 px-7 py-4 text-sm font-semibold text-white hover:bg-white/10 transition">{{ __('landing.login_account') }}</a>
+            <x-ui.button :href="route('company-signup')" variant="brand-primary" size="lg" class="focus-ring justify-center rounded-full tracking-wide shadow-glow">{{ __('landing.start_signup') }}</x-ui.button>
+            <x-ui.button :href="route('login')" variant="inverse-outline" size="lg" class="focus-ring justify-center rounded-full">{{ __('landing.login_account') }}</x-ui.button>
           </div>
 
           <p class="inline-flex items-center gap-2 rounded-xl border border-emerald-300/35 bg-emerald-200/10 px-4 py-3 text-sm text-emerald-100">

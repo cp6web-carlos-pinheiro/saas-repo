@@ -43,7 +43,7 @@
             </div>
           </div>
           <p class="text-xs text-slate-500">{{ __('payment.security_notice') }}</p>
-          <button id="pay-button" type="submit" class="w-full rounded-full bg-coral px-8 py-3.5 text-sm font-bold text-white">{{ __('payment.pay') }}</button>
+          <x-ui.button id="pay-button" type="submit" variant="brand-primary" :full="true" size="lg" class="rounded-full">{{ __('payment.pay') }}</x-ui.button>
         </form>
       </section>
 

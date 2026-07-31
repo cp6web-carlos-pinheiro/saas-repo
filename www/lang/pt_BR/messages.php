@@ -34,8 +34,6 @@ return [
     'admin_company_plan_updated' => 'Plano da empresa atualizado com sucesso.',
     'admin_user_status_updated' => 'Status do usuário atualizado com sucesso.',
     'admin_user_email_verification_updated' => 'Status de verificação de e-mail atualizado com sucesso.',
-    'admin_last_platform_admin_cannot_be_removed' => 'Não é permitido remover o último administrador da plataforma.',
-    'admin_permissions_updated' => 'Permissão administrativa atualizada com sucesso.',
     'user_without_active_company_for_member_registration' => 'Usuário sem empresa ativa para cadastrar membros.',
     'only_master_user_can_register_members' => 'Apenas usuário master pode cadastrar outros usuários.',
     'user_already_belongs_to_account' => 'Este usuário já pertence a esta conta.',

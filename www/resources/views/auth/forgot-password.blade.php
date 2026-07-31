@@ -32,12 +32,12 @@
         </div>
       </div>
 
-      <button type="submit" class="auth-btn-primary">
+      <x-ui.button type="submit" variant="brand-primary" :full="true" size="lg" class="rounded-full">
         {{ __('auth.send_reset_link') }}
         <x-heroicon-o-paper-airplane class="h-4 w-4" />
-      </button>
+      </x-ui.button>
 
-      <a href="{{ route('login') }}" class="auth-btn-secondary w-full">{{ __('auth.back_to_login') }}</a>
+      <x-ui.button :href="route('login')" variant="secondary" :full="true" size="lg" class="rounded-full">{{ __('auth.back_to_login') }}</x-ui.button>
     </form>
   </section>
   </main>

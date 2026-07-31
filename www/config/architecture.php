@@ -23,8 +23,4 @@ return [
         'sql_channel' => env('LOG_SQL_CHANNEL', 'daily'),
     ],
 
-    'platform' => [
-        // Comma-separated emails that should always have admin access to /admin.
-        'admin_emails' => env('PLATFORM_ADMIN_EMAILS', ''),
-    ],
 ];

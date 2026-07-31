@@ -1,7 +1,12 @@
 <?php
 
 use App\Http\Controllers\IndustrialDashboardController;
-use App\Http\Controllers\Web\Admin\AdminManagementController;
+use App\Http\Controllers\Web\Admin\AdminAuthController;
+use App\Http\Controllers\Web\Admin\GlobalAdminHomeController;
+use App\Http\Controllers\Web\Admin\GlobalAdminModuleController;
+use App\Http\Controllers\Web\Admin\GlobalAdministratorController;
+use App\Http\Controllers\Web\Admin\GlobalCompanyController;
+use App\Http\Controllers\Web\Admin\GlobalCustomerController;
 use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\LanguagePreferenceController;
 use App\Http\Controllers\Web\Auth\LoginController;
@@ -14,7 +19,6 @@ use App\Http\Controllers\Web\Documentation\DocumentationController;
 use App\Http\Controllers\Web\Onboarding\AccountInvitationController;
 use App\Http\Controllers\Web\Onboarding\OnboardingController;
 use App\Http\Controllers\Web\Onboarding\PaymentController;
-use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureTrialIsActive;
 use App\Http\Middleware\ResolveWebTenant;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +46,15 @@ Route::middleware('guest')->group(function (): void {
     Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
     Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
 });
+
+Route::prefix('global-admin')->name('global-admin.')->middleware('guest:admin')->group(function (): void {
+    Route::get('/login', [AdminAuthController::class, 'create'])->name('login');
+    Route::post('/login', [AdminAuthController::class, 'store'])->name('login.store');
+});
+
+Route::post('/global-admin/logout', [AdminAuthController::class, 'destroy'])
+    ->middleware('auth:admin')
+    ->name('global-admin.logout');
 
 Route::get('/email/verify/token/{token}', [EmailVerificationController::class, 'verifyToken'])->name('verification.verify-token');
 Route::get('/convite/{token}', [AccountInvitationController::class, 'show'])->name('account-invitations.show');
@@ -85,19 +98,32 @@ Route::middleware('auth:web')->group(function (): void {
             ->name('dashboard.industrial');
     });
 
-    Route::prefix('admin')->name('admin.')->middleware(EnsurePlatformAdmin::class)->group(function (): void {
-        Route::get('/', [AdminManagementController::class, 'index'])->name('management');
+});
 
-        Route::patch('/companies/{company}/status', [AdminManagementController::class, 'updateCompanyStatus'])
-            ->name('companies.status');
-        Route::patch('/companies/{company}/plan', [AdminManagementController::class, 'updateCompanyPlan'])
-            ->name('companies.plan');
+Route::prefix('global-admin')->name('global-admin.')->middleware('auth:admin')->group(function (): void {
+    Route::get('/', GlobalAdminHomeController::class)->name('home');
+    Route::get('/customers', [GlobalCustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/create', [GlobalCustomerController::class, 'create'])->name('customers.create');
+    Route::post('/customers', [GlobalCustomerController::class, 'store'])->name('customers.store');
+    Route::get('/customers/{customer}', [GlobalCustomerController::class, 'show'])->name('customers.show');
+    Route::get('/customers/{customer}/edit', [GlobalCustomerController::class, 'edit'])->name('customers.edit');
+    Route::put('/customers/{customer}', [GlobalCustomerController::class, 'update'])->name('customers.update');
+    Route::delete('/customers/{customer}', [GlobalCustomerController::class, 'destroy'])->name('customers.destroy');
 
-        Route::patch('/users/{user}/status', [AdminManagementController::class, 'updateUserStatus'])
-            ->name('users.status');
-        Route::patch('/users/{user}/email-verification', [AdminManagementController::class, 'updateUserEmailVerification'])
-            ->name('users.email-verification');
-        Route::patch('/users/{user}/platform-admin', [AdminManagementController::class, 'updatePlatformAdmin'])
-            ->name('users.platform-admin');
-    });
+    Route::get('/companies', [GlobalCompanyController::class, 'index'])->name('companies.index');
+    Route::get('/companies/create', [GlobalCompanyController::class, 'create'])->name('companies.create');
+    Route::post('/companies', [GlobalCompanyController::class, 'store'])->name('companies.store');
+    Route::get('/companies/{company}', [GlobalCompanyController::class, 'show'])->name('companies.show');
+    Route::get('/companies/{company}/edit', [GlobalCompanyController::class, 'edit'])->name('companies.edit');
+    Route::put('/companies/{company}', [GlobalCompanyController::class, 'update'])->name('companies.update');
+    Route::delete('/companies/{company}', [GlobalCompanyController::class, 'destroy'])->name('companies.destroy');
+
+    Route::get('/{module}', GlobalAdminModuleController::class)->whereIn('module', ['plans'])->name('modules.show');
+    Route::get('/administrators', [GlobalAdministratorController::class, 'index'])->name('administrators.index');
+    Route::get('/administrators/create', [GlobalAdministratorController::class, 'create'])->name('administrators.create');
+    Route::post('/administrators', [GlobalAdministratorController::class, 'store'])->name('administrators.store');
+    Route::get('/administrators/{administrator}', [GlobalAdministratorController::class, 'show'])->name('administrators.show');
+    Route::get('/administrators/{administrator}/edit', [GlobalAdministratorController::class, 'edit'])->name('administrators.edit');
+    Route::put('/administrators/{administrator}', [GlobalAdministratorController::class, 'update'])->name('administrators.update');
+    Route::delete('/administrators/{administrator}', [GlobalAdministratorController::class, 'destroy'])->name('administrators.destroy');
 });

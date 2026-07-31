@@ -27,7 +27,7 @@
             <form method="POST" action="{{ route('sessions.destroy', ['id' => $session->id]) }}">
               @csrf
               @method('DELETE')
-              <button class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold">{{ __('auth.end_session') }}</button>
+              <x-ui.button type="submit" variant="outline" class="rounded-full">{{ __('auth.end_session') }}</x-ui.button>
             </form>
           @else
             <span class="text-xs px-3 py-2 rounded-full bg-emerald-100 text-emerald-700">{{ __('auth.current_session') }}</span>

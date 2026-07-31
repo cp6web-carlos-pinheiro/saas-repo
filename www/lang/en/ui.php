@@ -30,6 +30,7 @@ return [
     'no_due_date' => 'No due date set',
     'language' => 'Language',
     'save' => 'Save',
+    'back' => 'Back',
     'close' => 'Close',
     'portuguese' => 'Portuguese',
     'english' => 'English',

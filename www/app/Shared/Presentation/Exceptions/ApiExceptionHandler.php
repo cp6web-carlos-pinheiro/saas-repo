@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Shared\Presentation\Exceptions;
 
 use App\Shared\Presentation\Http\Responses\ApiResponse;
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class ApiExceptionHandler
@@ -23,12 +23,18 @@ class ApiExceptionHandler
             return redirect()->guest(route('login'));
         }
 
-        if (! $request->expectsJson()) {
-            throw $exception;
+        if ($exception instanceof ValidationException) {
+            if (! $request->expectsJson()) {
+                return redirect()->back()
+                    ->withInput($request->except(['password', 'password_confirmation', 'current_password']))
+                    ->withErrors($exception->errors());
+            }
+
+            return ApiResponse::error('Validation error', 422, $exception->errors(), 'VALIDATION_ERROR');
         }
 
-        if ($exception instanceof ValidationException) {
-            return ApiResponse::error('Validation error', 422, $exception->errors(), 'VALIDATION_ERROR');
+        if (! $request->expectsJson()) {
+            throw $exception;
         }
 
         if ($exception instanceof AuthenticationException) {

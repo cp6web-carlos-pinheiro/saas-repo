@@ -98,10 +98,10 @@
             <span>{{ __('ui.accept_terms') }}</span>
           </label>
 
-          <button type="submit" class="auth-btn-primary">
+          <x-ui.button type="submit" variant="brand-primary" :full="true" size="lg" class="rounded-full">
             {{ __('ui.continue_to_company') }}
             <x-heroicon-o-arrow-right class="h-4 w-4" />
-          </button>
+          </x-ui.button>
 
           <div class="relative py-1">
             <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
@@ -109,14 +109,14 @@
           </div>
 
           <div class="grid sm:grid-cols-2 gap-3">
-            <a href="{{ route('social.redirect', ['provider' => 'google']) }}" class="auth-btn-secondary">
+            <x-ui.button :href="route('social.redirect', ['provider' => 'google'])" variant="secondary" size="lg" class="rounded-full">
               <x-heroicon-o-globe-alt class="h-4 w-4" />
               {{ __('ui.google') }}
-            </a>
-            <a href="{{ route('social.redirect', ['provider' => 'microsoft']) }}" class="auth-btn-secondary">
+            </x-ui.button>
+            <x-ui.button :href="route('social.redirect', ['provider' => 'microsoft'])" variant="secondary" size="lg" class="rounded-full">
               <x-heroicon-o-window class="h-4 w-4" />
               {{ __('ui.microsoft') }}
-            </a>
+            </x-ui.button>
           </div>
         </form>
       </div>

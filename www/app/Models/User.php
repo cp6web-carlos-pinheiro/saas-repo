@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -22,6 +24,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'current_company_id',
+        'is_active',
         'preferred_locale',
     ];
 
@@ -46,6 +50,19 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'preferred_locale' => 'string',
+            'is_active' => 'bool',
         ];
+    }
+
+    public function currentCompany(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'current_company_id');
+    }
+
+    public function companies(): BelongsToMany
+    {
+        return $this->belongsToMany(Company::class, 'company_user')
+            ->withPivot(['is_default'])
+            ->withTimestamps();
     }
 }

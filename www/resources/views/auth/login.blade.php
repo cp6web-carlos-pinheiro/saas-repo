@@ -46,10 +46,10 @@
         <input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
         {{ __('ui.remember_me') }}
       </label>
-      <button type="submit" class="auth-btn-primary">
+      <x-ui.button type="submit" variant="brand-primary" :full="true" size="lg" class="rounded-full">
         {{ __('ui.enter') }}
         <x-heroicon-o-arrow-right class="h-4 w-4" />
-      </button>
+      </x-ui.button>
     </form>
 
     <div class="mt-5 flex items-center justify-between text-sm">

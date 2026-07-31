@@ -83,7 +83,7 @@
             </div>
 
             <div class="pt-2">
-              <button class="rounded-full bg-coral text-white px-8 py-3.5 font-bold text-sm">{{ __('onboarding.save_company_continue') }}</button>
+              <x-ui.button type="submit" variant="brand-primary" size="lg" class="rounded-full">{{ __('onboarding.save_company_continue') }}</x-ui.button>
             </div>
           </form>
 
@@ -112,7 +112,7 @@
                 @endif
               </div>
               <div class="mt-auto pt-6">
-                <button class="w-full rounded-full bg-coral text-white py-3.5 font-bold text-sm">{{ __('onboarding.select_plan', ['plan' => $plan['label']]) }}</button>
+                <x-ui.button type="submit" variant="brand-primary" size="lg" :full="true" class="rounded-full">{{ __('onboarding.select_plan', ['plan' => $plan['label']]) }}</x-ui.button>
               </div>
             </form>
           @endforeach
@@ -127,7 +127,7 @@
             </div>
             <p class="text-sm text-slate-500">{{ __('onboarding.emails_invites_help') }}</p>
             <div class="pt-2">
-              <button class="rounded-full bg-coral text-white px-8 py-3.5 font-bold text-sm">{{ __('onboarding.send_invites_finish') }}</button>
+              <x-ui.button type="submit" variant="brand-primary" size="lg" class="rounded-full">{{ __('onboarding.send_invites_finish') }}</x-ui.button>
             </div>
           </form>
 
@@ -168,7 +168,7 @@
           <h2 class="text-2xl font-bold">{{ __('onboarding.account_ready') }}</h2>
           <p class="mt-3 text-sm text-slate-600">{{ __('onboarding.account_ready_description') }}</p>
           <div class="mt-6">
-            <a href="{{ route('dashboard.industrial') }}" class="rounded-full bg-coral text-white px-8 py-3.5 font-bold text-sm inline-flex">{{ __('onboarding.go_to_dashboard') }}</a>
+            <x-ui.button :href="route('dashboard.industrial')" variant="brand-primary" size="lg" class="rounded-full">{{ __('onboarding.go_to_dashboard') }}</x-ui.button>
           </div>
         </div>
       @endif

@@ -18,7 +18,7 @@
           <h1 class="font-display text-3xl font-bold">{{ __('ui.billing_page_title') }}</h1>
           <p class="mt-2 text-sm text-slate-600">{{ __('ui.billing_page_subtitle') }}</p>
         </div>
-        <a href="{{ route('dashboard.industrial') }}" class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900">{{ __('ui.back_to_dashboard') }}</a>
+        <x-ui.button :href="route('dashboard.industrial')" variant="outline" class="rounded-full">{{ __('ui.back_to_dashboard') }}</x-ui.button>
       </div>
 
       @if (session('status'))
@@ -102,9 +102,15 @@
                 </dl>
 
                 <div class="mt-auto pt-6">
-                  <button type="submit" @disabled($disableFreeTrial) class="w-full rounded-full px-4 py-3 text-sm font-bold text-white transition {{ $disableFreeTrial ? 'cursor-not-allowed bg-slate-300' : 'bg-coral hover:brightness-110' }}">
+                  <x-ui.button
+                    type="submit"
+                    @disabled($disableFreeTrial)
+                    :variant="$disableFreeTrial ? 'surface-muted' : 'brand-primary'"
+                    :full="true"
+                    class="rounded-full"
+                  >
                     {{ $isCurrentPlan ? __('ui.renew_or_change_plan') : __('ui.select_plan_action') }}
-                  </button>
+                  </x-ui.button>
                 </div>
 
                 @if ($disableFreeTrial)

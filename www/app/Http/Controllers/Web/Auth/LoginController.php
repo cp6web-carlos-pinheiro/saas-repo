@@ -10,7 +10,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 final class LoginController extends Controller
@@ -31,7 +30,7 @@ final class LoginController extends Controller
         $throttleKey = 'web-login:'.mb_strtolower((string) $credentials['email']).'|'.$request->ip();
 
         if (RateLimiter::tooManyAttempts($throttleKey, 8)) {
-            throw ValidationException::withMessages([
+            return back()->withInput($request->only('email', 'remember'))->withErrors([
                 'email' => __('messages.login_too_many_attempts'),
             ]);
         }
@@ -53,7 +52,7 @@ final class LoginController extends Controller
                 userAgent: $request->userAgent(),
             );
 
-            throw ValidationException::withMessages([
+            return back()->withInput($request->only('email', 'remember'))->withErrors([
                 'email' => __('messages.invalid_credentials'),
             ]);
         }

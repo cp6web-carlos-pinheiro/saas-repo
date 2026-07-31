@@ -28,7 +28,6 @@ final class User extends Authenticatable implements JWTSubject
         'preferred_locale',
         'current_company_id',
         'is_active',
-        'is_platform_admin',
     ];
 
     protected $hidden = [
@@ -41,7 +40,6 @@ final class User extends Authenticatable implements JWTSubject
         'password' => 'hashed',
         'preferred_locale' => 'string',
         'is_active' => 'bool',
-        'is_platform_admin' => 'bool',
     ];
 
     public function currentCompany(): BelongsTo

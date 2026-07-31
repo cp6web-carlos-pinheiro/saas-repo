@@ -41,7 +41,7 @@
         <div class="ind-main-area">
             <header class="ind-topbar">
                 <div class="ind-topbar-left">
-                    <button id="menuToggle" class="ind-icon-button" type="button" aria-label="{{ __('ui.open_menu') }}">
+                    <button id="menuToggle" class="ind-icon-button" type="button" aria-label="{{ __('ui.open_menu') }}" aria-controls="sidebar" aria-expanded="false" aria-pressed="false">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M4 7H20M4 12H20M4 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="ind-topbar-right">
-                    <button id="settingsToggle" class="ind-icon-button" type="button" aria-label="{{ __('ui.settings') }}" aria-controls="settingsPanel" aria-expanded="false">
+                    <button id="settingsToggle" class="ind-icon-button" type="button" aria-label="{{ __('ui.settings') }}" aria-controls="settingsPanel" aria-expanded="false" aria-pressed="false">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z" stroke="currentColor" stroke-width="2"/>
                             <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.2 1.2 0 0 1 0 1.7l-1 1a1.2 1.2 0 0 1-1.7 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a1.2 1.2 0 0 1-1.2 1.2h-1.4A1.2 1.2 0 0 1 11.4 20v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.2 1.2 0 0 1-1.7 0l-1-1a1.2 1.2 0 0 1 0-1.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H6A1.2 1.2 0 0 1 4.8 13v-1.4A1.2 1.2 0 0 1 6 10.4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1.2 1.2 0 0 1 0-1.7l1-1a1.2 1.2 0 0 1 1.7 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4A1.2 1.2 0 0 1 12.6 2.8H14A1.2 1.2 0 0 1 15.2 4v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.2 1.2 0 0 1 1.7 0l1 1a1.2 1.2 0 0 1 0 1.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2A1.2 1.2 0 0 1 21.2 11.6V13a1.2 1.2 0 0 1-1.2 1.2h-.2a1 1 0 0 0-.9.8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
@@ -143,8 +143,15 @@
         const settingsOverlay = document.getElementById('settingsOverlay');
         const settingsClose = document.getElementById('settingsClose');
 
+        const setMenuState = (isOpen) => {
+            sidebar?.classList.toggle('is-open', isOpen);
+            menuToggle?.setAttribute('aria-expanded', String(isOpen));
+            menuToggle?.setAttribute('aria-pressed', String(isOpen));
+        };
+
         menuToggle?.addEventListener('click', function () {
-            sidebar?.classList.toggle('is-open');
+            const isOpen = sidebar?.classList.contains('is-open') ?? false;
+            setMenuState(!isOpen);
         });
 
         const setSettingsState = (isOpen) => {
@@ -153,6 +160,7 @@
             settingsPanel?.setAttribute('aria-hidden', String(!isOpen));
             settingsOverlay?.setAttribute('aria-hidden', String(!isOpen));
             settingsToggle?.setAttribute('aria-expanded', String(isOpen));
+            settingsToggle?.setAttribute('aria-pressed', String(isOpen));
         };
 
         settingsToggle?.addEventListener('click', function () {

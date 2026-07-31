@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Models\Admin;
 
 return [
 
@@ -43,6 +44,11 @@ return [
             'provider' => 'users',
         ],
 
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
+
         'sanctum' => [
             'driver' => 'sanctum',
             'provider' => 'users',
@@ -75,6 +81,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => Admin::class,
         ],
 
         // 'users' => [

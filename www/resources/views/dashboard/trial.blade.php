@@ -19,8 +19,8 @@
       <h1 class="mt-2 font-display text-4xl font-bold">{{ __('onboarding.trial_active') }}</h1>
       <p class="mt-3 text-mist/90">{{ __('onboarding.days_remaining', ['days' => $daysRemaining]) }}</p>
       <div class="mt-6 flex gap-3">
-        <a href="#" class="rounded-full bg-coral px-6 py-3 font-bold text-sm">{{ __('onboarding.upgrade') }}</a>
-        <a href="{{ route('onboarding.wizard') }}" class="rounded-full border border-white/30 px-6 py-3 font-semibold text-sm">{{ __('onboarding.edit_onboarding') }}</a>
+        <x-ui.button href="#" variant="brand-primary" size="lg" class="rounded-full">{{ __('onboarding.upgrade') }}</x-ui.button>
+        <x-ui.button :href="route('onboarding.wizard')" variant="inverse-outline" size="lg" class="rounded-full">{{ __('onboarding.edit_onboarding') }}</x-ui.button>
       </div>
     </header>
 
@@ -61,7 +61,7 @@
 
     <form method="POST" action="{{ route('logout') }}">
       @csrf
-      <button class="rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold">{{ __('onboarding.end_session') }}</button>
+      <x-ui.button type="submit" variant="outline" size="lg" class="rounded-full">{{ __('onboarding.end_session') }}</x-ui.button>
     </form>
   </main>
 @endsection

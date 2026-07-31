@@ -1169,7 +1169,6 @@ Observacao: nesta documentacao funcional, a tabela `trials` representa o periodo
 | `password` | `varchar(255)` | NO | - | - | - |
 | `current_company_id` | `bigint unsigned` | YES | - | `MUL` | - |
 | `is_active` | `tinyint(1)` | NO | `1` | - | - |
-| `is_platform_admin` | `tinyint(1)` | NO | `0` | `MUL` | - |
 | `remember_token` | `varchar(100)` | YES | - | - | - |
 | `created_at` | `timestamp` | YES | - | - | - |
 | `updated_at` | `timestamp` | YES | - | - | - |

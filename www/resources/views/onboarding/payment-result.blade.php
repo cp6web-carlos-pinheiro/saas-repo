@@ -13,7 +13,7 @@
           <p class="text-sm font-semibold text-emerald-700">{{ __('payment.approved_label') }}</p>
           <h1 class="mt-2 font-display text-3xl font-bold">{{ __('payment.approved_title') }}</h1>
           <p class="mt-3 text-sm text-slate-600">{{ __('payment.approved_description', ['plan' => $result['plan_label'], 'last_four' => $result['last_four']]) }}</p>
-          <a href="{{ $result['continue_url'] }}" class="mt-8 inline-flex rounded-full bg-coral px-8 py-3.5 text-sm font-bold text-white">{{ __('payment.continue') }}</a>
+          <x-ui.button :href="$result['continue_url']" variant="brand-primary" size="lg" class="mt-8 rounded-full">{{ __('payment.continue') }}</x-ui.button>
         </div>
       @else
         <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-3xl text-red-700">!</div>
@@ -23,7 +23,7 @@
           <p class="mt-3 text-sm text-slate-600">{{ __('payment.declined_description') }}</p>
           <p class="mt-4 rounded-2xl bg-red-50 p-4 text-sm text-red-800">{{ $result['reason'] }}</p>
           <p class="mt-4 text-xs text-slate-500">{{ __('payment.redirecting_to_review') }}</p>
-          <a href="{{ route('onboarding.payment.create', ['planCode' => $result['plan_code']]) }}" class="mt-8 inline-flex rounded-full bg-coral px-8 py-3.5 text-sm font-bold text-white">{{ __('payment.review_card') }}</a>
+          <x-ui.button :href="route('onboarding.payment.create', ['planCode' => $result['plan_code']])" variant="brand-primary" size="lg" class="mt-8 rounded-full">{{ __('payment.review_card') }}</x-ui.button>
           <script>window.setTimeout(() => window.location.assign(@json(route('onboarding.payment.create', ['planCode' => $result['plan_code']]))), 8000);</script>
         </div>
       @endif

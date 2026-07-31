@@ -46,10 +46,10 @@
           <input id="password_confirmation" name="password_confirmation" type="password" required class="auth-input" placeholder="{{ __('auth.repeat_new_password') }}" />
         </div>
       </div>
-      <button type="submit" class="auth-btn-primary">
+      <x-ui.button type="submit" variant="brand-primary" :full="true" size="lg" class="rounded-full">
         {{ __('auth.update_password') }}
         <x-heroicon-o-arrow-right class="h-4 w-4" />
-      </button>
+      </x-ui.button>
     </form>
   </section>
   </main>

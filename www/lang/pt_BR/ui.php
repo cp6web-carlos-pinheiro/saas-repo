@@ -30,6 +30,7 @@ return [
     'no_due_date' => 'Sem vencimento definido',
     'language' => 'Idioma',
     'save' => 'Salvar',
+    'back' => 'Voltar',
     'close' => 'Fechar',
     'portuguese' => 'Português',
     'english' => 'Inglês',

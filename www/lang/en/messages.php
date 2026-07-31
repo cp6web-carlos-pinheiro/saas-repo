@@ -34,8 +34,6 @@ return [
     'admin_company_plan_updated' => 'Company plan updated successfully.',
     'admin_user_status_updated' => 'User status updated successfully.',
     'admin_user_email_verification_updated' => 'Email verification status updated successfully.',
-    'admin_last_platform_admin_cannot_be_removed' => 'It is not allowed to remove the last platform administrator.',
-    'admin_permissions_updated' => 'Administrative permission updated successfully.',
     'user_without_active_company_for_member_registration' => 'User without an active company to register members.',
     'only_master_user_can_register_members' => 'Only a master user can register other users.',
     'user_already_belongs_to_account' => 'This user already belongs to this account.',
