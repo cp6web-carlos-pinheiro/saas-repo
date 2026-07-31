@@ -1,6 +1,34 @@
 import './bootstrap';
+import jQuery from 'jquery';
+import 'select2/dist/css/select2.min.css';
+import 'select2/dist/js/select2.full.min.js';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+
+window.$ = window.jQuery = jQuery;
+
+const uiSelects = document.querySelectorAll('select[data-ui-select2="true"]');
+
+for (const element of uiSelects) {
+	const select = window.jQuery(element);
+
+	if (select.hasClass('select2-hidden-accessible')) {
+		continue;
+	}
+
+	const minForSearch = element.dataset.search === 'off' ? Number.POSITIVE_INFINITY : 8;
+	const dropdownParentSelector = element.dataset.dropdownParent;
+	const dropdownParent = dropdownParentSelector ? document.querySelector(dropdownParentSelector) : null;
+	const placeholder = element.dataset.placeholder;
+
+	select.select2({
+		width: '100%',
+		minimumResultsForSearch: minForSearch,
+		placeholder,
+		allowClear: element.dataset.allowClear === 'true',
+		dropdownParent: dropdownParent ? window.jQuery(dropdownParent) : undefined,
+	});
+}
 
 const sidebarShell = document.querySelector('[data-admin-sidebar-shell]');
 const sidebar = document.querySelector('[data-admin-sidebar]');

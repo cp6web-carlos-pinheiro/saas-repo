@@ -68,12 +68,12 @@
               </div>
               <div>
                 <label class="block text-sm font-medium mb-2" for="operation_size">{{ __('onboarding.operation_size') }}</label>
-                <select id="operation_size" name="operation_size" class="w-full rounded-xl border border-slate-300 px-4 py-3">
+                <x-ui.select id="operation_size" name="operation_size" class="w-full rounded-xl border border-slate-300 px-4 py-3">
                   <option value="">{{ __('onboarding.select') }}</option>
                   <option value="small" @selected(old('operation_size', $profile?->operation_size) === 'small')>{{ __('onboarding.small') }}</option>
                   <option value="mid" @selected(old('operation_size', $profile?->operation_size) === 'mid')>{{ __('onboarding.mid') }}</option>
                   <option value="large" @selected(old('operation_size', $profile?->operation_size) === 'large')>{{ __('onboarding.large') }}</option>
-                </select>
+                </x-ui.select>
               </div>
             </div>
 

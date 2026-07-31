@@ -60,12 +60,12 @@
             <label class="auth-label" for="preferred_locale">{{ __('ui.language') }}</label>
             <div class="auth-input-wrap">
               <x-heroicon-o-language class="auth-input-icon" />
-              <select id="preferred_locale" name="preferred_locale" class="auth-input" required>
+              <x-ui.select id="preferred_locale" name="preferred_locale" class="auth-input" required>
                 @php($selectedLocale = old('preferred_locale', 'pt_BR'))
                 <option value="pt_BR" @selected($selectedLocale === 'pt_BR')>{{ __('ui.portuguese') }}</option>
                 <option value="en" @selected($selectedLocale === 'en')>{{ __('ui.english') }}</option>
                 <option value="es" @selected($selectedLocale === 'es')>{{ __('ui.spanish') }}</option>
-              </select>
+              </x-ui.select>
             </div>
           </div>
 

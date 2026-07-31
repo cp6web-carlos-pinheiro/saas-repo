@@ -86,11 +86,11 @@
             @csrf
             <label for="preferredLocale">{{ __('ui.language') }}</label>
             <div class="ind-settings-language-row flex items-start justify-between gap-3">
-                <select id="preferredLocale" name="preferred_locale" required>
+                <x-ui.select id="preferredLocale" name="preferred_locale" required>
                     <option value="pt_BR" @selected($currentLocale === 'pt_BR')>{{ __('ui.portuguese') }}</option>
                     <option value="en" @selected($currentLocale === 'en')>{{ __('ui.english') }}</option>
                     <option value="es" @selected($currentLocale === 'es')>{{ __('ui.spanish') }}</option>
-                </select>
+                </x-ui.select>
                 <div class="ind-settings-actions">
                     <button class="ind-settings-save" type="submit">{{ __('ui.save') }}</button>
                 </div>
