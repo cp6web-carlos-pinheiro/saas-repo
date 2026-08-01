@@ -6,7 +6,11 @@ namespace Tests\Feature;
 
 use App\Mail\AccountInvitationMail;
 use App\Mail\TrialVerificationMail;
+use App\Modules\Identity\Infrastructure\Persistence\Models\Permission;
+use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Services\SaaS\CompanyUserAccessService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -112,6 +116,45 @@ final class AccountOnboardingFlowTest extends TestCase
             'email' => $user->email,
             'password' => self::TEST_SECRET,
         ])->assertRedirect(route('onboarding.wizard'));
+    }
+
+    public function test_dashboard_modules_only_include_the_user_accessible_modules(): void
+    {
+        $user = User::query()->create([
+            'name' => 'Module Access User',
+            'email' => 'modules@example.com',
+            'password' => bcrypt(self::TEST_SECRET),
+            'current_company_id' => null,
+            'is_active' => true,
+        ]);
+        $company = Company::query()->create([
+            'name' => 'Module Company',
+            'code' => 'module-company',
+            'is_active' => true,
+        ]);
+
+        $user->companies()->syncWithoutDetaching([
+            $company->id => ['is_default' => true],
+        ]);
+        $user->forceFill(['current_company_id' => $company->id])->save();
+
+        $bom = Permission::query()->create(['name' => 'BOM', 'slug' => 'bom.read', 'module' => 'bom']);
+        $inventory = Permission::query()->create(['name' => 'Inventory', 'slug' => 'inventory.read', 'module' => 'inventory']);
+        $identity = Permission::query()->create(['name' => 'Identity', 'slug' => 'identity.read', 'module' => 'identity']);
+
+        $role = Role::query()->create([
+            'company_id' => $company->id,
+            'name' => 'Custom access',
+            'slug' => 'user-access-'.$user->id.'-custom',
+        ]);
+        $role->permissions()->sync([$bom->id, $inventory->id]);
+        $user->roles()->attach($role->id, ['company_id' => $company->id]);
+
+        $service = app(CompanyUserAccessService::class);
+
+        $this->assertSame(['bom', 'inventory'], $service->accessibleModules($user, $company));
+        $this->assertTrue($service->hasModuleAccess($user, $company, 'inventory'));
+        $this->assertFalse($service->hasModuleAccess($user, $company, 'identity'));
     }
 
     private function completeWizard(string $email, string $name, string $company): User

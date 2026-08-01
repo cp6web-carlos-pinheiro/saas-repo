@@ -1,6 +1,9 @@
 @extends('layouts.global-admin')
 @php($editing = $customer !== null)
-@php($hasCompanyContext = ! $editing && $contextCompany !== null)
+@php($hasCompanyContext = $contextCompany !== null)
+@php($selectedCompanyId = old('company_id', $contextCompany?->id ?? $customer?->current_company_id))
+@php($selectedProfile = old('access_profile', $accessProfile))
+@php($selectedModuleNames = old('modules', $selectedModules))
 @section('title', ($editing ? __('global_customer.edit') : __('global_customer.create')).' | '.__('global_customer.title'))
 @section('admin-content-container-class', 'w-full')
 @section('admin-content')
@@ -25,6 +28,18 @@
                     {{ __('global_customer.company_context_label') }}: {{ $contextCompany->name }} | CNPJ: {{ $contextCompany->code ?? __('global_customer.company_cnpj_uninformed') }}
                 </x-ui.alert>
                 <input type="hidden" name="company_id" value="{{ $contextCompany->id }}">
+                <input type="hidden" name="return_to_company_id" value="{{ $contextCompany->id }}">
+            @else
+                <label class="block text-sm font-medium">
+                    {{ __('global_customer.company') }}
+                    <select name="company_id" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('company_id'), 'border-[#dadce0]' => ! $errors->has('company_id')])>
+                        <option value="">{{ __('global_customer.select_company') }}</option>
+                        @foreach ($companies as $company)
+                            <option value="{{ $company->id }}" @selected((int) $selectedCompanyId === $company->id)>{{ $company->name }} ({{ $company->code }})</option>
+                        @endforeach
+                    </select>
+                    @error('company_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
             @endif
 
             <label class="block text-sm font-medium">
@@ -50,6 +65,46 @@
                 <input name="password_confirmation" type="password" @required(! $editing) class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
             </label>
 
+            <fieldset class="rounded-2xl border border-[#dadce0] p-5">
+                <legend class="px-2 font-semibold">{{ __('global_customer.access_section') }}</legend>
+
+                @if ($mustBeAdministrator)
+                    <x-ui.alert class="mt-2" variant="info">{{ __('global_customer.first_user_administrator') }}</x-ui.alert>
+                    <input type="hidden" name="access_profile" value="administrator">
+                @else
+                    <label class="mt-2 block text-sm font-medium">
+                        {{ __('global_customer.access_profile') }}
+                        <select name="access_profile" required class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                            <option value="administrator" @selected($selectedProfile === 'administrator')>{{ __('global_customer.profile_administrator') }}</option>
+                            <option value="custom" @selected($selectedProfile === 'custom')>{{ __('global_customer.profile_custom') }}</option>
+                        </select>
+                    </label>
+                    <p class="mt-2 text-sm text-[#5f6368]">{{ __('global_customer.access_profile_help') }}</p>
+                @endif
+
+                <div class="mt-5">
+                    <p class="text-sm font-medium">{{ __('global_customer.modules') }}</p>
+                    <p class="mt-1 text-sm text-[#5f6368]">{{ __('global_customer.modules_help') }}</p>
+
+                    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                        @foreach ($modules as $module => $permissions)
+                            @php($moduleIsSelected = $mustBeAdministrator || $selectedProfile === 'administrator' || in_array($module, (array) $selectedModuleNames, true))
+                            <label class="flex items-start gap-3 rounded-xl border border-[#dadce0] p-4">
+                                <input name="modules[]" type="checkbox" value="{{ $module }}" @checked($moduleIsSelected) class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35">
+                                <span>
+                                    <span class="block font-medium">{{ \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleLabel((string) $module) }}</span>
+                                    @php($moduleDescription = \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleDescription((string) $module))
+                                    @if ($moduleDescription !== '')
+                                        <span class="mt-1 block text-xs text-[#5f6368]">{{ $moduleDescription }}</span>
+                                    @endif
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('modules')<span class="mt-2 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </div>
+            </fieldset>
+
             @if ($editing)
                 <label class="flex items-center gap-2 text-sm">
                     <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $customer->is_active))>
@@ -58,7 +113,7 @@
             @endif
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('global-admin.customers.show', $customer) : ($hasCompanyContext ? route('global-admin.companies.show', $contextCompany) : route('global-admin.customers.index'))" variant="surface-muted" class="rounded-full" :full="true">
+                <x-ui.button :href="$hasCompanyContext ? route('global-admin.companies.show', $contextCompany) : ($editing ? route('global-admin.customers.show', $customer) : route('global-admin.customers.index'))" variant="surface-muted" class="rounded-full" :full="true">
                     {{ __('ui.back') }}
                 </x-ui.button>
 

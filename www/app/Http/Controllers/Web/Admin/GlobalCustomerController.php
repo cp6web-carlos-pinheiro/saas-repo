@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
+use App\Services\SaaS\CompanyUserAccessService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -36,88 +38,115 @@ final class GlobalCustomerController extends Controller
         return view('admin.customer.search', compact('customers', 'search', 'sort', 'direction'));
     }
 
-    public function create(Request $request): View
+    public function create(Request $request, CompanyUserAccessService $access): View
     {
-        $companyId = $request->query('company_id');
-        $contextCompany = null;
+        $contextCompany = $this->resolveContextCompany($request);
 
-        if ($companyId !== null && ctype_digit((string) $companyId)) {
-            $contextCompany = Company::query()->find((int) $companyId);
-        }
+        return view('admin.customer.form', $this->formData(null, $contextCompany, $access));
 
-        return view('admin.customer.form', [
-            'customer' => null,
-            'contextCompany' => $contextCompany,
-        ]);
     }
 
-    public function show(User $customer): View
+    public function show(User $customer, CompanyUserAccessService $access): View
     {
-        $customer->loadMissing('currentCompany:id,name,code,is_active,created_at,updated_at');
+        $customer->loadMissing(
+            'currentCompany:id,name,code,is_active,created_at,updated_at',
+            'companies:id,name,code,is_active,created_at,updated_at',
+            'roles.permissions'
+        );
 
-        return view('admin.customer.show', compact('customer'));
+        $companyAccesses = $customer->companies
+            ->sortBy('name')
+            ->values()
+            ->map(fn (Company $company): array => [
+                'company' => $company,
+                'access' => $access->accessFor($customer, $company),
+                'is_current' => (int) $customer->current_company_id === (int) $company->id,
+                'is_default' => (bool) ($company->pivot?->is_default ?? false),
+            ]);
+
+        return view('admin.customer.show', compact('customer', 'companyAccesses'));
     }
 
-    public function store(Request $request, AuditLogService $audit): RedirectResponse
+    public function store(Request $request, AuditLogService $audit, CompanyUserAccessService $access): RedirectResponse
     {
         $data = $this->validateCustomer($request);
+        $company = Company::query()->findOrFail($data['company_id']);
+        $isFirstCompanyUser = $company->users()->doesntExist();
 
-        $customer = User::query()->create([
-            'name' => $data['name'],
-            'email' => mb_strtolower($data['email']),
-            'password' => Hash::make($data['password']),
-            'is_active' => true,
-            'current_company_id' => $data['company_id'] ?? null,
-        ]);
-
-        if (! empty($data['company_id'])) {
-            $customer->companies()->syncWithoutDetaching([
-                (int) $data['company_id'] => ['is_default' => true],
+        $customer = DB::transaction(function () use ($access, $company, $data, $isFirstCompanyUser): User {
+            $customer = User::query()->create([
+                'name' => $data['name'],
+                'email' => mb_strtolower($data['email']),
+                'password' => Hash::make($data['password']),
+                'is_active' => true,
+                'current_company_id' => $company->id,
             ]);
-        }
+
+            $access->sync(
+                $customer,
+                $company,
+                $data['access_profile'],
+                $data['modules'] ?? [],
+                $isFirstCompanyUser,
+            );
+
+            return $customer;
+        });
 
         $audit->record(
             'platform_customer.created',
-            context: ['customer_id' => $customer->id, 'admin_id' => $request->user('admin')->id],
+            context: ['customer_id' => $customer->id, 'company_id' => $company->id, 'admin_id' => $request->user('admin')->id],
             ipAddress: $request->ip(),
             userAgent: $request->userAgent(),
         );
 
-        return redirect()->route('global-admin.customers.index')->with('status', __('global_customer.created'));
+        return $this->redirectAfterSave($request, __('global_customer.created'));
     }
 
-    public function edit(User $customer): View
+    public function edit(Request $request, User $customer, CompanyUserAccessService $access): View
     {
-        return view('admin.customer.form', [
-            'customer' => $customer,
-            'contextCompany' => null,
-        ]);
+        $customer->loadMissing('currentCompany', 'companies');
+        $contextCompany = $this->resolveContextCompany($request, $customer);
+
+        return view('admin.customer.form', $this->formData($customer, $contextCompany, $access));
     }
 
-    public function update(Request $request, User $customer, AuditLogService $audit): RedirectResponse
+    public function update(Request $request, User $customer, AuditLogService $audit, CompanyUserAccessService $access): RedirectResponse
     {
         $data = $this->validateCustomer($request, $customer);
+        $company = Company::query()->findOrFail($data['company_id']);
+        $isFirstCompanyUser = $company->users()->doesntExist() || $access->isFirstCompanyUser($customer, $company);
 
-        $customer->fill([
-            'name' => $data['name'],
-            'email' => mb_strtolower($data['email']),
-            'is_active' => (bool) ($data['is_active'] ?? false),
-        ]);
+        DB::transaction(function () use ($access, $company, $customer, $data, $isFirstCompanyUser): void {
+            $customer->fill([
+                'name' => $data['name'],
+                'email' => mb_strtolower($data['email']),
+                'is_active' => (bool) ($data['is_active'] ?? false),
+            ]);
 
-        if (! empty($data['password'])) {
-            $customer->password = Hash::make($data['password']);
-        }
+            if (! empty($data['password'])) {
+                $customer->password = Hash::make($data['password']);
+            }
 
-        $customer->save();
+            $customer->save();
+
+            $access->sync(
+                $customer,
+                $company,
+                $data['access_profile'],
+                $data['modules'] ?? [],
+                $isFirstCompanyUser,
+            );
+        });
 
         $audit->record(
             'platform_customer.updated',
-            context: ['customer_id' => $customer->id, 'admin_id' => $request->user('admin')->id],
+            context: ['customer_id' => $customer->id, 'company_id' => $company->id, 'admin_id' => $request->user('admin')->id],
             ipAddress: $request->ip(),
             userAgent: $request->userAgent(),
         );
 
-        return redirect()->route('global-admin.customers.index')->with('status', __('global_customer.updated'));
+        return $this->redirectAfterSave($request, __('global_customer.updated'));
     }
 
     public function destroy(Request $request, User $customer, AuditLogService $audit): RedirectResponse
@@ -142,8 +171,67 @@ final class GlobalCustomerController extends Controller
             'email' => ['required', 'email', 'max:190', Rule::unique('users', 'email')->ignore($customer)],
             'password' => [$customer ? 'nullable' : 'required', 'confirmed', 'min:10'],
             'is_active' => ['nullable', 'boolean'],
-            'company_id' => ['nullable', 'integer', Rule::exists('companies', 'id')],
+            'company_id' => ['required', 'integer', Rule::exists('companies', 'id')],
+            'access_profile' => ['required', Rule::in([CompanyUserAccessService::ADMINISTRATOR_PROFILE, CompanyUserAccessService::CUSTOM_PROFILE])],
+            'modules' => ['nullable', 'array', 'required_if:access_profile,'.CompanyUserAccessService::CUSTOM_PROFILE, 'min:1'],
+            'modules.*' => ['required', 'string', 'distinct', Rule::exists('permissions', 'module')],
+            'return_to_company_id' => ['nullable', 'integer', Rule::exists('companies', 'id')],
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function formData(?User $customer, ?Company $contextCompany, CompanyUserAccessService $access): array
+    {
+        $selectedCompany = $contextCompany ?? $customer?->currentCompany;
+        $companyAccess = $customer !== null && $selectedCompany !== null
+            ? $access->accessFor($customer, $selectedCompany)
+            : ['profile' => CompanyUserAccessService::CUSTOM_PROFILE, 'modules' => []];
+
+        return [
+            'customer' => $customer,
+            'contextCompany' => $contextCompany,
+            'companies' => Company::query()->orderBy('name')->get(['id', 'name', 'code']),
+            'modules' => $access->modules(),
+            'accessProfile' => $companyAccess['profile'],
+            'selectedModules' => $companyAccess['modules'],
+            'mustBeAdministrator' => $selectedCompany !== null && ($customer === null
+                ? $selectedCompany->users()->doesntExist()
+                : $access->isFirstCompanyUser($customer, $selectedCompany)),
+        ];
+    }
+
+    private function resolveContextCompany(Request $request, ?User $customer = null): ?Company
+    {
+        $companyId = $request->query('company_id');
+
+        if (! ctype_digit((string) $companyId)) {
+            return null;
+        }
+
+        $company = Company::query()->find((int) $companyId);
+
+        if ($company === null || $customer === null) {
+            return $company;
+        }
+
+        $isLinked = $customer->companies->contains(static fn (Company $item): bool => (int) $item->id === (int) $company->id)
+            || (int) $customer->current_company_id === (int) $company->id;
+
+        return $isLinked ? $company : null;
+    }
+
+    private function redirectAfterSave(Request $request, string $status): RedirectResponse
+    {
+        $returnCompanyId = $request->input('return_to_company_id');
+
+        if (ctype_digit((string) $returnCompanyId) && Company::query()->whereKey((int) $returnCompanyId)->exists()) {
+            return redirect()->route('global-admin.companies.show', ['company' => (int) $returnCompanyId])
+                ->with('status', $status);
+        }
+
+        return redirect()->route('global-admin.customers.index')->with('status', $status);
     }
 
     private function applySearchFilters(Builder $query, array $searchTerms): void

@@ -13,6 +13,7 @@ return [
     'back_to_dashboard' => 'Back to dashboard',
     'settings' => 'Settings',
     'settings_panel_title' => 'Preferences',
+    'manage_accesses' => 'Manage Accesses',
     'subscription_section_title' => 'Plan and billing',
     'current_plan' => 'Subscribed plan',
     'payment_method' => 'Payment method',

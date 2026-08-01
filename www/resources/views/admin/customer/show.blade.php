@@ -70,6 +70,65 @@
             @endif
         </div>
 
+        <div class="mt-8 rounded-2xl border border-[#dadce0] bg-[#f8fafd] p-5">
+            <h2 class="font-display text-xl font-semibold">{{ __('global_customer.access_section') }}</h2>
+
+            @if ($companyAccesses->isNotEmpty())
+                <div class="mt-4 overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                                <th class="px-3 py-3">{{ __('global_customer.company') }}</th>
+                                <th class="px-3 py-3">{{ __('global_customer.access_profile') }}</th>
+                                <th class="px-3 py-3">{{ __('global_customer.modules') }}</th>
+                                <th class="px-3 py-3">{{ __('global_customer.current_company') }}</th>
+                                <th class="px-3 py-3">{{ __('global_customer.default_company') }}</th>
+                                <th class="px-3 py-3">{{ __('global_customer.actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($companyAccesses as $entry)
+                                @php($company = $entry['company'])
+                                @php($access = $entry['access'])
+                                <tr class="border-b border-[#e8eaed]">
+                                    <td class="px-3 py-3">
+                                        <a href="{{ route('global-admin.companies.show', $company) }}" class="font-medium text-[#174ea6] no-underline hover:underline">{{ $company->name }}</a>
+                                        <p class="text-xs text-[#5f6368]">{{ $company->code }}</p>
+                                    </td>
+                                    <td class="px-3 py-3 text-[#5f6368]">{{ $access['profile'] === 'administrator' ? __('global_customer.profile_administrator') : __('global_customer.profile_custom') }}</td>
+                                    <td class="px-3 py-3 text-[#5f6368]">
+                                        <div class="space-y-2">
+                                            @foreach ($access['modules'] as $module)
+                                                <div>
+                                                    <div class="font-medium text-[#202124]">{{ \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleLabel($module) }}</div>
+                                                    @php($moduleDescription = \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleDescription($module))
+                                                    @if ($moduleDescription !== '')
+                                                        <div class="text-xs text-[#5f6368]">{{ $moduleDescription }}</div>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                            @if (empty($access['modules']))
+                                                <div>—</div>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="px-3 py-3 text-[#5f6368]">{{ $entry['is_current'] ? __('global_customer.yes') : __('global_customer.no') }}</td>
+                                    <td class="px-3 py-3 text-[#5f6368]">{{ $entry['is_default'] ? __('global_customer.yes') : __('global_customer.no') }}</td>
+                                    <td class="px-3 py-3">
+                                        <x-ui.button :href="route('global-admin.customers.edit', ['customer' => $customer->id, 'company_id' => $company->id])" variant="surface-muted" size="sm" class="rounded-full">
+                                            {{ __('global_customer.edit_company_access') }}
+                                        </x-ui.button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p class="mt-4 text-sm text-[#5f6368]">{{ __('global_customer.company_unlinked_details') }}</p>
+            @endif
+        </div>
+
         <div class="mt-8 flex flex-wrap gap-3">
             <x-ui.button :href="route('global-admin.customers.index')" variant="surface-muted" class="rounded-full">
                 {{ __('ui.back') }}

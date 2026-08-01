@@ -13,6 +13,7 @@ return [
     'back_to_dashboard' => 'Voltar ao dashboard',
     'settings' => 'Configurações',
     'settings_panel_title' => 'Preferências',
+    'manage_accesses' => 'Gerenciar Acessos',
     'subscription_section_title' => 'Plano e cobrança',
     'current_plan' => 'Plano contratado',
     'payment_method' => 'Forma de pagamento',

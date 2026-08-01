@@ -353,7 +353,6 @@ final class TrialOnboardingService
             ],
             [
                 'name' => 'Account Master',
-                'description' => 'Conta principal com permissao para gerenciar usuarios',
             ]
         );
     }
@@ -367,7 +366,6 @@ final class TrialOnboardingService
             ],
             [
                 'name' => 'Organization Member',
-                'description' => 'Usuario padrao da organizacao',
             ]
         );
     }

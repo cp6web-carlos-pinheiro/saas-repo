@@ -118,7 +118,7 @@
                                 <td class="px-3 py-3 text-[#5f6368]">{{ $user->email_verified_at ? $user->email_verified_at->format('d/m/Y H:i') : __('global_company.user_not_verified') }}</td>
                                 <td class="px-3 py-3 text-[#5f6368]">{{ $user->pivot?->created_at?->format('d/m/Y H:i') ?? '—' }}</td>
                                 <td class="px-3 py-3">
-                                    <x-ui.button :href="route('global-admin.customers.edit', $user->id)" variant="surface-muted" size="sm" class="rounded-full">
+                                    <x-ui.button :href="route('global-admin.customers.edit', ['customer' => $user->id, 'company_id' => $company->id])" variant="surface-muted" size="sm" class="rounded-full">
                                         {{ __('global_company.user_edit') }}
                                     </x-ui.button>
                                 </td>

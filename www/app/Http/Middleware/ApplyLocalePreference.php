@@ -13,8 +13,18 @@ final class ApplyLocalePreference
 {
     private const ALLOWED_LOCALES = ['pt_BR', 'en', 'es'];
 
+    private const GLOBAL_ADMIN_LOCALE = 'pt_BR';
+
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->is('global-admin') || $request->is('global-admin/*')) {
+            return $this->handleGlobalAdminRequest($request, $next);
+        }
+
+        if ($this->isApiRequest($request)) {
+            return $this->handleApiRequest($request, $next);
+        }
+
         $locale = null;
 
         $queryLocale = $request->query('locale');
@@ -54,6 +64,43 @@ final class ApplyLocalePreference
         $response->headers->setCookie(cookie('locale', $resolvedLocale, 60 * 24 * 365));
 
         return $response;
+    }
+
+    private function handleGlobalAdminRequest(Request $request, Closure $next): Response
+    {
+        $locale = self::GLOBAL_ADMIN_LOCALE;
+
+        App::setLocale($locale);
+
+        if ($request->hasSession()) {
+            $request->session()->put('locale', $locale);
+        }
+
+        $response = $next($request);
+        $response->headers->setCookie(cookie('locale', $locale, 60 * 24 * 365));
+
+        return $response;
+    }
+
+    private function handleApiRequest(Request $request, Closure $next): Response
+    {
+        $locale = 'en';
+
+        App::setLocale($locale);
+
+        if ($request->hasSession()) {
+            $request->session()->put('locale', $locale);
+        }
+
+        $response = $next($request);
+        $response->headers->setCookie(cookie('locale', $locale, 60 * 24 * 365));
+
+        return $response;
+    }
+
+    private function isApiRequest(Request $request): bool
+    {
+        return $request->is('api') || $request->is('api/*') || $request->expectsJson();
     }
 
     private function resolvedLocale(Request $request, string $fallback): string

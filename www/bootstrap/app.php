@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->appendToGroup('web', ApplyLocalePreference::class);
+        $middleware->appendToGroup('api', ApplyLocalePreference::class);
         $middleware->append(SecurityHeaders::class);
         $middleware->redirectUsersTo(function ($request): string {
             $user = $request->user();

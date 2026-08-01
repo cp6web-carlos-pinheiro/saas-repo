@@ -13,6 +13,7 @@ return [
     'back_to_dashboard' => 'Volver al panel',
     'settings' => 'Configuración',
     'settings_panel_title' => 'Preferencias',
+    'manage_accesses' => 'Gestionar Accesos',
     'subscription_section_title' => 'Plan y facturación',
     'current_plan' => 'Plan contratado',
     'payment_method' => 'Forma de pago',

@@ -16,7 +16,6 @@ final class TenantRolesSeeder extends Seeder
         $roleMatrix = [
             'planner' => [
                 'name' => 'Planner',
-                'description' => 'Production planning role',
                 'permissions' => [
                     'work-centers.read',
                     'production-calendar.read',
@@ -48,7 +47,6 @@ final class TenantRolesSeeder extends Seeder
             ],
             'supervisor' => [
                 'name' => 'Supervisor',
-                'description' => 'Shop floor supervision role',
                 'permissions' => [
                     'work-centers.read',
                     'work-centers.create',
@@ -101,7 +99,6 @@ final class TenantRolesSeeder extends Seeder
             ],
             'admin' => [
                 'name' => 'Admin',
-                'description' => 'Tenant administration role',
                 'permissions' => [
                     'work-centers.read',
                     'work-centers.create',
@@ -174,7 +171,6 @@ final class TenantRolesSeeder extends Seeder
                     ],
                     [
                         'name' => $definition['name'],
-                        'description' => $definition['description'],
                     ]
                 );
 

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             RoutingPermissionsSeeder::class,
             InventoryPermissionsSeeder::class,
             ProductionPermissionsSeeder::class,
+            CompanyAccessPermissionsSeeder::class,
             TenantFoundationSeeder::class,
             TenantRolesSeeder::class,
         ]);

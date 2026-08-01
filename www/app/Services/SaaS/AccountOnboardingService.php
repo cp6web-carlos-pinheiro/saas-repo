@@ -14,6 +14,7 @@ use App\Models\SaaS\Subscription;
 use App\Models\SaaS\Tenant;
 use App\Models\SaaS\Trial;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
+use App\Modules\Identity\Infrastructure\Persistence\Models\Permission;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use Carbon\CarbonInterface;
@@ -503,16 +504,19 @@ final class AccountOnboardingService
 
     private function ensureMasterRole(int $companyId): Role
     {
-        return Role::query()->withoutGlobalScope('tenant')->firstOrCreate(
+        $role = Role::query()->withoutGlobalScope('tenant')->firstOrCreate(
             [
                 'company_id' => $companyId,
                 'slug' => self::MASTER_ROLE_SLUG,
             ],
             [
                 'name' => 'Account Master',
-                'description' => 'Conta principal com permissao para gerenciar usuarios',
             ]
         );
+
+        $role->permissions()->sync(Permission::query()->pluck('id')->all());
+
+        return $role;
     }
 
     private function ensureMemberRole(int $companyId): Role
@@ -524,7 +528,6 @@ final class AccountOnboardingService
             ],
             [
                 'name' => 'Organization Member',
-                'description' => 'Usuario padrao da organizacao',
             ]
         );
     }

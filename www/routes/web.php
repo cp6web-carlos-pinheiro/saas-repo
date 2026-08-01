@@ -19,6 +19,7 @@ use App\Http\Controllers\Web\Documentation\DocumentationController;
 use App\Http\Controllers\Web\Onboarding\AccountInvitationController;
 use App\Http\Controllers\Web\Onboarding\OnboardingController;
 use App\Http\Controllers\Web\Onboarding\PaymentController;
+use App\Http\Controllers\Web\Tenant\CompanyAccessUserController;
 use App\Http\Middleware\EnsureTrialIsActive;
 use App\Http\Middleware\ResolveWebTenant;
 use Illuminate\Support\Facades\Route;
@@ -96,6 +97,16 @@ Route::middleware('auth:web')->group(function (): void {
         Route::get('/dashboard', IndustrialDashboardController::class)
             ->middleware(EnsureTrialIsActive::class)
             ->name('dashboard.industrial');
+
+        Route::prefix('company-access/users')->name('company-access.users.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [CompanyAccessUserController::class, 'index'])->name('index');
+            Route::get('/create', [CompanyAccessUserController::class, 'create'])->name('create');
+            Route::post('/', [CompanyAccessUserController::class, 'store'])->name('store');
+            Route::get('/{customer}', [CompanyAccessUserController::class, 'show'])->name('show');
+            Route::get('/{customer}/edit', [CompanyAccessUserController::class, 'edit'])->name('edit');
+            Route::put('/{customer}', [CompanyAccessUserController::class, 'update'])->name('update');
+            Route::delete('/{customer}', [CompanyAccessUserController::class, 'destroy'])->name('destroy');
+        });
     });
 
 });

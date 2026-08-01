@@ -13,21 +13,31 @@
             </x-slot:header>
 
             <x-ui.menu variant="industrial" :aria-label="__('ui.modules')">
-                <x-ui.menu-item variant="industrial" href="#" active>{{ __('ui.module_bom') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_eco') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_engineering_change') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_genealogy') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_identity') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_inventory') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_mes') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_mrp') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_observability') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_product') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_production') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_purchasing') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_routing') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_scheduling') }}</x-ui.menu-item>
-                <x-ui.menu-item variant="industrial" href="#">{{ __('ui.module_tenant') }}</x-ui.menu-item>
+                @php($moduleLabels = [
+                    'bom' => __('ui.module_bom'),
+                    'eco' => __('ui.module_eco'),
+                    'engineering-change' => __('ui.module_engineering_change'),
+                    'genealogy' => __('ui.module_genealogy'),
+                    'identity' => __('ui.module_identity'),
+                    'inventory' => __('ui.module_inventory'),
+                    'mes' => __('ui.module_mes'),
+                    'mrp' => __('ui.module_mrp'),
+                    'observability' => __('ui.module_observability'),
+                    'product' => __('ui.module_product'),
+                    'production' => __('ui.module_production'),
+                    'purchasing' => __('ui.module_purchasing'),
+                    'routing' => __('ui.module_routing'),
+                    'scheduling' => __('ui.module_scheduling'),
+                    'tenant' => __('ui.module_tenant'),
+                ])
+
+                @forelse ($availableModules as $module)
+                    @if (isset($moduleLabels[$module]))
+                        <x-ui.menu-item variant="industrial" href="#" @class(['is-active' => $loop->first])>{{ $moduleLabels[$module] }}</x-ui.menu-item>
+                    @endif
+                @empty
+                    <x-ui.menu-item variant="industrial" href="#" class="text-muted">{{ __('ui.modules') }}</x-ui.menu-item>
+                @endforelse
             </x-ui.menu>
 
             <x-slot:footer>
@@ -105,6 +115,15 @@
                 <path d="M8.25 7.75h6.5M8.25 10.75h6.5M8.25 13.75h4.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
         </a>
+
+        @if ($canManageAccesses)
+            <a href="{{ route('company-access.users.index') }}" class="ind-settings-nav-link" aria-label="{{ __('ui.manage_accesses') }}">
+                <span>{{ __('ui.manage_accesses') }}</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M7 7.5A3.5 3.5 0 1 1 10.5 11 3.5 3.5 0 0 1 7 7.5Zm8 1A2.5 2.5 0 1 1 17.5 11 2.5 2.5 0 0 1 15 8.5ZM4.75 18a4.25 4.25 0 0 1 8.5 0v.25H4.75V18Zm9.5.25v-.25a4.86 4.86 0 0 0-1.09-3.08A3.75 3.75 0 0 1 19.25 18v.25h-5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        @endif
 
         <section class="ind-settings-section ind-subscription-card">
             <div class="ind-subscription-heading">
