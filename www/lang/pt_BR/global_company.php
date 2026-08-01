@@ -3,7 +3,7 @@
 return [
     'title' => 'Empresas',
     'eyebrow' => 'Gerenciamento de empresas',
-    'search' => 'Buscar por empresa, codigo ou ID',
+    'search' => 'Buscar por empresa, código ou ID',
     'filter' => 'Buscar',
     'empty' => 'Nenhuma empresa encontrada.',
     'create' => 'Criar empresa',

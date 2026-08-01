@@ -7,6 +7,34 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 window.$ = window.jQuery = jQuery;
 
+const currencyMaskedInputs = document.querySelectorAll('input[data-currency-mask="brl"]');
+
+const formatCurrencyDigitsToBrl = (digits) => {
+	const normalized = (digits || '0').replace(/^0+(?=\d)/, '');
+	const cents = normalized === '' ? 0 : Number.parseInt(normalized, 10);
+	const value = cents / 100;
+
+	return value.toLocaleString('pt-BR', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	});
+};
+
+for (const input of currencyMaskedInputs) {
+	const initialDigits = (input.value || '').replace(/\D/g, '');
+	input.value = formatCurrencyDigitsToBrl(initialDigits);
+
+	input.addEventListener('input', () => {
+		const digits = input.value.replace(/\D/g, '');
+		input.value = formatCurrencyDigitsToBrl(digits);
+	});
+
+	input.addEventListener('blur', () => {
+		const digits = input.value.replace(/\D/g, '');
+		input.value = formatCurrencyDigitsToBrl(digits);
+	});
+}
+
 const uiSelects = document.querySelectorAll('select[data-ui-select2="true"]');
 
 for (const element of uiSelects) {

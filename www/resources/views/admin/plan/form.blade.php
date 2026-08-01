@@ -48,7 +48,7 @@
 
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.amount') }}
-                    <input name="amount" value="{{ old('amount', number_format(($plan?->amount_cents ?? 0) / 100, 2, ',', '.')) }}" required inputmode="decimal" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('amount'), 'border-[#dadce0]' => ! $errors->has('amount')])>
+                    <input name="amount" value="{{ old('amount', number_format(($plan?->amount_cents ?? 0) / 100, 2, ',', '.')) }}" required inputmode="decimal" data-currency-mask="brl" autocomplete="off" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('amount'), 'border-[#dadce0]' => ! $errors->has('amount')])>
                     @error('amount')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 
@@ -62,7 +62,7 @@
             <div class="grid gap-4 md:grid-cols-3">
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.trial_days') }}
-                    <input type="number" min="1" name="trial_days" value="{{ old('trial_days', $plan?->trial_days) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('trial_days'), 'border-[#dadce0]' => ! $errors->has('trial_days')])>
+                    <input type="number" min="0" name="trial_days" value="{{ old('trial_days', $plan?->trial_days) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('trial_days'), 'border-[#dadce0]' => ! $errors->has('trial_days')])>
                     @error('trial_days')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 

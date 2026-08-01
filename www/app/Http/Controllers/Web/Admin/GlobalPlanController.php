@@ -111,7 +111,7 @@ final class GlobalPlanController extends Controller
             'amount' => ['required', 'string', 'max:30'],
             'payment_method' => ['nullable', 'string', 'max:120'],
             'billing_cycle_label' => ['nullable', 'string', 'max:180'],
-            'trial_days' => ['nullable', 'integer', 'min:1', 'max:3650'],
+            'trial_days' => ['nullable', 'integer', 'min:0', 'max:3650'],
             'interval_months' => ['nullable', 'integer', 'min:1', 'max:120'],
             'renewable' => ['nullable', 'boolean'],
             'allow_once' => ['nullable', 'boolean'],

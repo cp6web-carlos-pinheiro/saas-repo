@@ -30,7 +30,6 @@
             <th class="px-3 py-3"><a href="{{ $sortUrl('label') }}">{{ __('global_plan.label') }} ↕</a></th>
             <th class="px-3 py-3"><a href="{{ $sortUrl('amount_cents') }}">{{ __('global_plan.amount_short') }} ↕</a></th>
             <th class="px-3 py-3">{{ __('global_plan.duration') }}</th>
-            <th class="px-3 py-3">{{ __('global_plan.payment_method') }}</th>
             <th class="px-3 py-3"><a href="{{ $sortUrl('sort_order') }}">{{ __('global_plan.sort_order') }} ↕</a></th>
             <th class="px-3 py-3">{{ __('global_plan.subscriptions_count') }}</th>
             <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('global_plan.status') }} ↕</a></th>
@@ -56,7 +55,6 @@
                   —
                 @endif
               </td>
-              <td class="px-3 py-4 text-[#5f6368]">{{ $plan->payment_method ?: '—' }}</td>
               <td class="px-3 py-4 text-[#5f6368]">{{ $plan->sort_order }}</td>
               <td class="px-3 py-4 text-[#5f6368]">{{ $plan->subscriptions_count }}</td>
               <td class="px-3 py-4">
