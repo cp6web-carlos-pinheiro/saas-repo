@@ -50,6 +50,15 @@
                     ];
 
                     $moduleSubitems = [
+                        'bom' => [
+                            ['label' => __('ui.bom_material_list'), 'href' => null, 'active' => false],
+                            ['label' => __('ui.bom_structures'), 'href' => null, 'active' => false],
+                            ['label' => __('ui.bom_revisions'), 'href' => null, 'active' => false],
+                        ],
+                        'product' => [
+                            ['label' => __('ui.product_register'), 'href' => null, 'active' => false],
+                            ['label' => __('ui.product_versions'), 'href' => null, 'active' => false],
+                        ],
                         'purchasing' => [
                             [
                                 'label' => __('ui.purchasing_suppliers'),
@@ -61,6 +70,15 @@
                             ['label' => __('ui.purchasing_order'), 'href' => null, 'active' => false],
                             ['label' => __('ui.purchasing_receipt'), 'href' => null, 'active' => false],
                             ['label' => __('ui.purchasing_fiscal_entry'), 'href' => null, 'active' => false],
+                        ],
+                        'production' => [
+                            ['label' => __('ui.production_orders'), 'href' => null, 'active' => false],
+                            ['label' => __('ui.production_postings'), 'href' => null, 'active' => false],
+                        ],
+                        'inventory' => [
+                            ['label' => __('ui.inventory_items'), 'href' => null, 'active' => false],
+                            ['label' => __('ui.inventory_movements'), 'href' => null, 'active' => false],
+                            ['label' => __('ui.inventory_count'), 'href' => null, 'active' => false],
                         ],
                     ];
                 @endphp

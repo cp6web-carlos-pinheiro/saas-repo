@@ -23,6 +23,13 @@ final class CompanyUserAccessService
     private const ROLE_SLUG_PREFIX = 'user-access-';
 
     /**
+     * @var array<string, string>
+     */
+    private const MODULE_ALIASES = [
+        'product' => 'bom',
+    ];
+
+    /**
      * @var array<int, string>
      */
     private const COMPANY_ADMIN_ROLE_SLUGS = ['admin', 'account-master'];
@@ -114,6 +121,8 @@ final class CompanyUserAccessService
 
     public function hasModuleAccess(User $user, Company $company, string $module): bool
     {
+        $module = $this->resolveModuleAlias($module);
+
         return $user->roles()
             ->withoutGlobalScope('tenant')
             ->wherePivot('company_id', $company->id)
@@ -126,23 +135,23 @@ final class CompanyUserAccessService
      */
     public function accessibleModules(User $user, Company $company): array
     {
-        if ($this->isCompanyAdministrator($user, $company)) {
-            return $this->modules()->keys()->all();
-        }
-
-        return $user->roles()
-            ->withoutGlobalScope('tenant')
-            ->wherePivot('company_id', $company->id)
-            ->with('permissions')
-            ->get()
-            ->flatMap(static fn (Role $role): array => $role->permissions
-                ->pluck('module')
-                ->filter(static fn (string $module): bool => $module !== '')
-                ->unique()
+        $accessibleModules = $this->isCompanyAdministrator($user, $company)
+            ? $this->modules()->keys()->all()
+            : $user->roles()
+                ->withoutGlobalScope('tenant')
+                ->wherePivot('company_id', $company->id)
+                ->with('permissions')
+                ->get()
+                ->flatMap(static fn (Role $role): array => $role->permissions
+                    ->pluck('module')
+                    ->filter(static fn (string $module): bool => $module !== '')
+                    ->unique()
+                    ->values()
+                    ->all())
                 ->values()
-                ->all())
-            ->values()
-            ->all();
+                ->all();
+
+        return $this->appendModuleAliases($accessibleModules);
     }
 
     public function isCompanyAdministrator(User $user, Company $company): bool
@@ -175,5 +184,25 @@ final class CompanyUserAccessService
     private function roleSlugPrefix(User $user): string
     {
         return self::ROLE_SLUG_PREFIX.$user->id.'-';
+    }
+
+    private function resolveModuleAlias(string $module): string
+    {
+        return self::MODULE_ALIASES[$module] ?? $module;
+    }
+
+    /**
+     * @param  array<int, string>  $modules
+     * @return array<int, string>
+     */
+    private function appendModuleAliases(array $modules): array
+    {
+        foreach (self::MODULE_ALIASES as $alias => $sourceModule) {
+            if (in_array($sourceModule, $modules, true) && ! in_array($alias, $modules, true)) {
+                $modules[] = $alias;
+            }
+        }
+
+        return $modules;
     }
 }
