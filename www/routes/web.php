@@ -20,6 +20,7 @@ use App\Http\Controllers\Web\Onboarding\AccountInvitationController;
 use App\Http\Controllers\Web\Onboarding\OnboardingController;
 use App\Http\Controllers\Web\Onboarding\PaymentController;
 use App\Http\Controllers\Web\Tenant\CompanyAccessUserController;
+use App\Http\Controllers\Web\Tenant\SupplierController;
 use App\Http\Middleware\EnsureTrialIsActive;
 use App\Http\Middleware\ResolveWebTenant;
 use Illuminate\Support\Facades\Route;
@@ -106,6 +107,16 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/{customer}/edit', [CompanyAccessUserController::class, 'edit'])->name('edit');
             Route::put('/{customer}', [CompanyAccessUserController::class, 'update'])->name('update');
             Route::delete('/{customer}', [CompanyAccessUserController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('purchasing/suppliers')->name('purchasing.suppliers.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [SupplierController::class, 'index'])->name('index');
+            Route::get('/create', [SupplierController::class, 'create'])->name('create');
+            Route::post('/', [SupplierController::class, 'store'])->name('store');
+            Route::get('/{supplier}', [SupplierController::class, 'show'])->name('show');
+            Route::get('/{supplier}/edit', [SupplierController::class, 'edit'])->name('edit');
+            Route::put('/{supplier}', [SupplierController::class, 'update'])->name('update');
+            Route::delete('/{supplier}', [SupplierController::class, 'destroy'])->name('destroy');
         });
     });
 

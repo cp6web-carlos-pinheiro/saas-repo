@@ -1,10 +1,73 @@
 @extends('layouts.google')
 
-@section('title', __('ui.dashboard').' | '.__('ui.app_name'))
-
 @section('bodyClass', 'ind-page')
 
 @section('content')
+    @php
+        $moduleLabels = [
+            'bom' => __('ui.module_bom'),
+            'eco' => __('ui.module_eco'),
+            'engineering-change' => __('ui.module_engineering_change'),
+            'genealogy' => __('ui.module_genealogy'),
+            'identity' => __('ui.module_identity'),
+            'inventory' => __('ui.module_inventory'),
+            'mes' => __('ui.module_mes'),
+            'mrp' => __('ui.module_mrp'),
+            'observability' => __('ui.module_observability'),
+            'product' => __('ui.module_product'),
+            'production' => __('ui.module_production'),
+            'purchasing' => __('ui.module_purchasing'),
+            'routing' => __('ui.module_routing'),
+            'scheduling' => __('ui.module_scheduling'),
+            'tenant' => __('ui.module_tenant'),
+        ];
+
+        $moduleLinks = [
+            'purchasing' => route('purchasing.suppliers.index'),
+        ];
+
+        $moduleSubitems = [
+            'purchasing' => [
+                [
+                    'label' => __('ui.purchasing_suppliers'),
+                    'href' => route('purchasing.suppliers.index'),
+                    'active' => request()->routeIs('purchasing.suppliers.*'),
+                ],
+                ['label' => __('ui.purchasing_requisition'), 'href' => null, 'active' => false],
+                ['label' => __('ui.purchasing_quotation'), 'href' => null, 'active' => false],
+                ['label' => __('ui.purchasing_order'), 'href' => null, 'active' => false],
+                ['label' => __('ui.purchasing_receipt'), 'href' => null, 'active' => false],
+                ['label' => __('ui.purchasing_fiscal_entry'), 'href' => null, 'active' => false],
+            ],
+        ];
+
+        $user = auth()->user();
+        $company = null;
+        $availableModules = [];
+        $canManageAccesses = false;
+        $organization = null;
+        $subscription = null;
+        $subscriptionPlan = null;
+
+        if ($user instanceof \App\Modules\Identity\Infrastructure\Persistence\Models\User && (int) ($user->current_company_id ?? 0) > 0) {
+            $company = \App\Modules\Tenant\Infrastructure\Persistence\Models\Company::query()->find((int) $user->current_company_id);
+
+            if ($company !== null) {
+                $organization = \App\Models\SaaS\Organization::query()->where('company_id', $company->id)->first();
+                $subscription = $organization
+                    ? \App\Models\SaaS\Subscription::query()->where('organization_id', $organization->id)->latest('id')->first()
+                    : null;
+                $subscriptionPlan = $subscription
+                    ? app(\App\Services\SaaS\AccountOnboardingService::class)->planForCode($subscription->plan_code)
+                    : null;
+                $availableModules = app(\App\Services\SaaS\CompanyUserAccessService::class)->accessibleModules($user, $company);
+                $canManageAccesses = app(\App\Services\SaaS\CompanyUserAccessService::class)->canManageCompanyAccess($user, $company);
+            }
+        }
+
+        $activeCompanyName = $company?->name ?? __('ui.app_name');
+    @endphp
+
     <div class="ind-layout" data-client-sidebar-shell>
         <x-ui.sidebar id="sidebar" variant="industrial" aria-label="{{ __('ui.modules') }}" data-client-sidebar>
             <x-slot:header>
@@ -26,45 +89,6 @@
             </x-slot:header>
 
             <x-ui.menu variant="industrial" :aria-label="__('ui.modules')" data-client-sidebar-content>
-                @php
-                    $moduleLabels = [
-                        'bom' => __('ui.module_bom'),
-                        'eco' => __('ui.module_eco'),
-                        'engineering-change' => __('ui.module_engineering_change'),
-                        'genealogy' => __('ui.module_genealogy'),
-                        'identity' => __('ui.module_identity'),
-                        'inventory' => __('ui.module_inventory'),
-                        'mes' => __('ui.module_mes'),
-                        'mrp' => __('ui.module_mrp'),
-                        'observability' => __('ui.module_observability'),
-                        'product' => __('ui.module_product'),
-                        'production' => __('ui.module_production'),
-                        'purchasing' => __('ui.module_purchasing'),
-                        'routing' => __('ui.module_routing'),
-                        'scheduling' => __('ui.module_scheduling'),
-                        'tenant' => __('ui.module_tenant'),
-                    ];
-
-                    $moduleLinks = [
-                        'purchasing' => route('purchasing.suppliers.index'),
-                    ];
-
-                    $moduleSubitems = [
-                        'purchasing' => [
-                            [
-                                'label' => __('ui.purchasing_suppliers'),
-                                'href' => route('purchasing.suppliers.index'),
-                                'active' => request()->routeIs('purchasing.suppliers.*'),
-                            ],
-                            ['label' => __('ui.purchasing_requisition'), 'href' => null, 'active' => false],
-                            ['label' => __('ui.purchasing_quotation'), 'href' => null, 'active' => false],
-                            ['label' => __('ui.purchasing_order'), 'href' => null, 'active' => false],
-                            ['label' => __('ui.purchasing_receipt'), 'href' => null, 'active' => false],
-                            ['label' => __('ui.purchasing_fiscal_entry'), 'href' => null, 'active' => false],
-                        ],
-                    ];
-                @endphp
-
                 @forelse ($availableModules as $module)
                     @if (isset($moduleLabels[$module]))
                         @php
@@ -125,12 +149,7 @@
         <div class="ind-main-area">
             <header class="ind-topbar">
                 <div class="ind-topbar-left">
-                    <button id="menuToggle" class="ind-icon-button" type="button" aria-label="{{ __('ui.open_menu') }}" aria-controls="sidebar" aria-expanded="false" aria-pressed="false">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M4 7H20M4 12H20M4 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </button>
-                    <span class="ind-topbar-title">{{ __('ui.dashboard') }}</span>
+                    <span class="ind-topbar-title">{{ $activeCompanyName }}</span>
                 </div>
 
                 <div class="ind-topbar-right">
@@ -143,11 +162,8 @@
                 </div>
             </header>
 
-            <main class="ind-content">
-                @if (session('status'))
-                    <div class="ind-status-banner">{{ session('status') }}</div>
-                @endif
-                <h1 class="ind-welcome">{{ __('ui.welcome') }}</h1>
+            <main>
+                @yield('client-content')
             </main>
         </div>
     </div>
@@ -229,12 +245,10 @@
             <a href="{{ route('billing.subscription.show') }}" class="ind-subscription-action">{{ __('ui.renew_or_change_plan') }}</a>
         </section>
     </aside>
-
 @endsection
 
 @section('scripts')
     <script>
-        const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
         const sidebarShell = document.querySelector('[data-client-sidebar-shell]');
         const sidebarCollapseToggle = document.querySelector('[data-client-sidebar-toggle]');
@@ -242,17 +256,6 @@
         const settingsPanel = document.getElementById('settingsPanel');
         const settingsOverlay = document.getElementById('settingsOverlay');
         const settingsClose = document.getElementById('settingsClose');
-
-        const setMenuState = (isOpen) => {
-            sidebar?.classList.toggle('is-open', isOpen);
-            menuToggle?.setAttribute('aria-expanded', String(isOpen));
-            menuToggle?.setAttribute('aria-pressed', String(isOpen));
-        };
-
-        menuToggle?.addEventListener('click', function () {
-            const isOpen = sidebar?.classList.contains('is-open') ?? false;
-            setMenuState(!isOpen);
-        });
 
         if (sidebarShell && sidebar && sidebarCollapseToggle) {
             const storageKey = 'client.sidebar-collapsed';

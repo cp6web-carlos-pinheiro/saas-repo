@@ -1,13 +1,12 @@
-@extends('layouts.google')
+@extends('layouts.client-area')
 
 @section('title', $customer->name.' | '.__('company_access.title'))
-@section('bodyClass', 'min-h-screen bg-[#f8fafd] text-[#202124]')
+@section('client-page-title', __('company_access.details'))
 
-@section('content')
-<div class="mx-auto w-full max-w-4xl p-5 md:p-8">
+@section('client-content')
+<div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-            <p class="text-sm text-[#5f6368]">{{ __('company_access.company_context') }}: {{ $company->name }}</p>
             <h1 class="font-display text-3xl font-bold">{{ $customer->name }}</h1>
         </div>
         <span class="rounded-full px-3 py-1 text-xs {{ $customer->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">

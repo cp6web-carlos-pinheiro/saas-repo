@@ -1,17 +1,16 @@
-@extends('layouts.google')
+@extends('layouts.client-area')
 
 @php($editing = $customer !== null)
 @php($selectedProfile = old('access_profile', $accessProfile))
 @php($selectedModuleNames = old('modules', $selectedModules))
 
 @section('title', ($editing ? __('company_access.edit') : __('company_access.create')).' | '.__('ui.app_name'))
-@section('bodyClass', 'min-h-screen bg-[#f8fafd] text-[#202124]')
+@section('client-page-title', $editing ? __('company_access.edit') : __('company_access.create'))
 
-@section('content')
-<div class="mx-auto w-full max-w-4xl p-5 md:p-8">
+@section('client-content')
+<div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-            <p class="text-sm text-[#5f6368]">{{ __('company_access.company_context') }}: {{ $company->name }}</p>
             <h1 class="font-display text-3xl font-bold">{{ $editing ? __('company_access.edit') : __('company_access.create') }}</h1>
         </div>
         <x-ui.button :href="$editing ? route('company-access.users.show', $customer) : route('company-access.users.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>

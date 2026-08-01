@@ -1,0 +1,82 @@
+@extends('layouts.client-area')
+
+@php($editing = $supplier !== null)
+
+@section('title', ($editing ? __('supplier.edit') : __('supplier.create')).' | '.__('ui.app_name'))
+@section('client-page-title', $editing ? __('supplier.edit') : __('supplier.create'))
+
+@section('client-content')
+<div class="w-full p-5 md:p-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="font-display text-3xl font-bold">{{ $editing ? __('supplier.edit') : __('supplier.create') }}</h1>
+        </div>
+        <x-ui.button :href="$editing ? route('purchasing.suppliers.show', $supplier) : route('purchasing.suppliers.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+    </div>
+
+    @if ($errors->any())
+        <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
+    @endif
+
+    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+        <form method="POST" action="{{ $editing ? route('purchasing.suppliers.update', $supplier) : route('purchasing.suppliers.store') }}" class="space-y-5">
+            @csrf
+            @if ($editing)
+                @method('PUT')
+            @endif
+
+            <label class="block text-sm font-medium">
+                {{ __('supplier.code') }}
+                <input name="code" value="{{ old('code', $supplier?->code) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('code'), 'border-[#dadce0]' => ! $errors->has('code')])>
+                @error('code')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+            </label>
+
+            <label class="block text-sm font-medium">
+                {{ __('supplier.name') }}
+                <input name="name" value="{{ old('name', $supplier?->name) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')])>
+                @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+            </label>
+
+            <label class="block text-sm font-medium">
+                {{ __('supplier.email') }}
+                <input name="email" type="email" value="{{ old('email', $supplier?->email) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('email'), 'border-[#dadce0]' => ! $errors->has('email')])>
+                @error('email')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+            </label>
+
+            <label class="block text-sm font-medium">
+                {{ __('supplier.phone') }}
+                <input name="phone" value="{{ old('phone', $supplier?->phone) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('phone'), 'border-[#dadce0]' => ! $errors->has('phone')])>
+                @error('phone')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+            </label>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+                <label class="block text-sm font-medium">
+                    {{ __('supplier.status') }}
+                    <select name="status" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                        <option value="ACTIVE" @selected(old('status', $supplier?->status ?? 'ACTIVE') === 'ACTIVE')>{{ __('supplier.active') }}</option>
+                        <option value="INACTIVE" @selected(old('status', $supplier?->status ?? 'ACTIVE') === 'INACTIVE')>{{ __('supplier.inactive') }}</option>
+                    </select>
+                    @error('status')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
+
+                <label class="block text-sm font-medium">
+                    {{ __('supplier.default_lead_time_days') }}
+                    <input name="default_lead_time_days" type="number" min="0" value="{{ old('default_lead_time_days', $supplier?->default_lead_time_days ?? 0) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('default_lead_time_days'), 'border-[#dadce0]' => ! $errors->has('default_lead_time_days')])>
+                    @error('default_lead_time_days')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
+            </div>
+
+            <label class="block text-sm font-medium">
+                {{ __('supplier.payment_terms') }}
+                <input name="payment_terms" value="{{ old('payment_terms', $supplier?->payment_terms) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('payment_terms'), 'border-[#dadce0]' => ! $errors->has('payment_terms')])>
+                @error('payment_terms')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+            </label>
+
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+                <x-ui.button :href="$editing ? route('purchasing.suppliers.show', $supplier) : route('purchasing.suppliers.index')" variant="surface-muted" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('supplier.save') : __('supplier.create') }}</x-ui.button>
+            </div>
+        </form>
+    </x-ui.panel>
+</div>
+@endsection
