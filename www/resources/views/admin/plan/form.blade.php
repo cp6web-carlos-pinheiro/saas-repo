@@ -81,7 +81,7 @@
 
             <label class="block text-sm font-medium">
                 {{ __('global_plan.default_status') }}
-                <x-ui.select name="default_status" class="mt-2" data-search="off">
+                <x-ui.select name="default_status" class="mt-2" data-search="on">
                     @php($defaultStatus = old('default_status', $plan?->default_status ?? 'active'))
                     <option value="active" @selected($defaultStatus === 'active')>{{ __('global_plan.default_status_active') }}</option>
                     <option value="trialing" @selected($defaultStatus === 'trialing')>{{ __('global_plan.default_status_trialing') }}</option>

@@ -1,7 +1,6 @@
 import './bootstrap';
 import jQuery from 'jquery';
 import 'select2/dist/css/select2.min.css';
-import 'select2/dist/js/select2.full.min.js';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
@@ -35,27 +34,47 @@ for (const input of currencyMaskedInputs) {
 	});
 }
 
-const uiSelects = document.querySelectorAll('select[data-ui-select2="true"]');
-
-for (const element of uiSelects) {
-	const select = window.jQuery(element);
-
-	if (select.hasClass('select2-hidden-accessible')) {
-		continue;
+const initializeUiSelects = () => {
+	if (typeof window.jQuery?.fn?.select2 !== 'function') {
+		return;
 	}
 
-	const minForSearch = element.dataset.search === 'off' ? Number.POSITIVE_INFINITY : 8;
-	const dropdownParentSelector = element.dataset.dropdownParent;
-	const dropdownParent = dropdownParentSelector ? document.querySelector(dropdownParentSelector) : null;
-	const placeholder = element.dataset.placeholder;
+	const uiSelects = document.querySelectorAll('select[data-ui-select2="true"]');
 
-	select.select2({
-		width: '100%',
-		minimumResultsForSearch: minForSearch,
-		placeholder,
-		allowClear: element.dataset.allowClear === 'true',
-		dropdownParent: dropdownParent ? window.jQuery(dropdownParent) : undefined,
-	});
+	for (const element of uiSelects) {
+		const select = window.jQuery(element);
+
+		if (select.hasClass('select2-hidden-accessible')) {
+			continue;
+		}
+
+		const searchMode = element.dataset.search;
+		let minForSearch = 8;
+
+		if (searchMode === 'off') {
+			minForSearch = Number.POSITIVE_INFINITY;
+		} else if (searchMode === 'on') {
+			minForSearch = 0;
+		}
+		const dropdownParentSelector = element.dataset.dropdownParent;
+		const dropdownParent = dropdownParentSelector ? document.querySelector(dropdownParentSelector) : null;
+		const placeholder = element.dataset.placeholder;
+
+		select.select2({
+			width: '100%',
+			minimumResultsForSearch: minForSearch,
+			placeholder,
+			allowClear: element.dataset.allowClear === 'true',
+			dropdownParent: dropdownParent ? window.jQuery(dropdownParent) : undefined,
+		});
+	}
+};
+
+try {
+	await import('select2/dist/js/select2.full.min.js');
+	initializeUiSelects();
+} catch {
+	// Ignore plugin load failures to avoid breaking other UI scripts.
 }
 
 const sidebarShell = document.querySelector('[data-admin-sidebar-shell]');
