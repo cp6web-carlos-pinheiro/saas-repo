@@ -13,7 +13,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.27",
         "laravel/tinker": "^2.10.1",
-        "predis/predis": "^2.3",
+        "predis/predis": "^3.5",
         "socialiteproviders/microsoft": "^4.9",
         "tymon/jwt-auth": "^2.3"
     },

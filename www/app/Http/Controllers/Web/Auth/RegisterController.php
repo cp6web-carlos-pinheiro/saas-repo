@@ -26,14 +26,6 @@ final class RegisterController extends Controller
 
     public function store(Request $request, AccountOnboardingService $service): RedirectResponse
     {
-        $limiterKey = 'trial-register:'.$request->ip();
-
-        if (RateLimiter::tooManyAttempts($limiterKey, 12)) {
-            return back()->withInput()->withErrors([
-                'email' => __('messages.too_many_attempts'),
-            ]);
-        }
-
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email:rfc,dns', 'max:190'],
@@ -43,6 +35,14 @@ final class RegisterController extends Controller
         ], [
             'terms.accepted' => __('messages.terms_required'),
         ]);
+
+        $limiterKey = 'trial-register:'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($limiterKey, 12)) {
+            return back()->withInput()->withErrors([
+                'email' => __('messages.too_many_attempts'),
+            ]);
+        }
 
         RateLimiter::hit($limiterKey, 60);
 

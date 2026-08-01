@@ -43,8 +43,8 @@ return new class extends Migration {
             Schema::create('engineering_change_order_lines', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-                $table->foreignId('engineering_change_order_id', 'fk_eco_lines_eco_id')
-                    ->constrained('engineering_change_orders', 'id')
+                $table->foreignId('engineering_change_order_id')
+                    ->constrained('engineering_change_orders', 'id', 'fk_eco_lines_eco_id')
                     ->cascadeOnDelete();
                 $table->string('target_domain', 20); // PRODUCT | BOM | ROUTING
                 $table->unsignedBigInteger('target_entity_id');
