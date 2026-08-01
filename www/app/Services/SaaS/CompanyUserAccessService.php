@@ -126,6 +126,10 @@ final class CompanyUserAccessService
      */
     public function accessibleModules(User $user, Company $company): array
     {
+        if ($this->isCompanyAdministrator($user, $company)) {
+            return $this->modules()->keys()->all();
+        }
+
         return $user->roles()
             ->withoutGlobalScope('tenant')
             ->wherePivot('company_id', $company->id)

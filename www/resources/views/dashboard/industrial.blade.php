@@ -9,31 +9,32 @@
         <x-ui.sidebar id="sidebar" variant="industrial" aria-label="{{ __('ui.modules') }}">
             <x-slot:header>
                 <strong>{{ __('ui.app_name') }}</strong>
-                <span>{{ __('ui.modules') }}</span>
             </x-slot:header>
 
             <x-ui.menu variant="industrial" :aria-label="__('ui.modules')">
-                @php($moduleLabels = [
-                    'bom' => __('ui.module_bom'),
-                    'eco' => __('ui.module_eco'),
-                    'engineering-change' => __('ui.module_engineering_change'),
-                    'genealogy' => __('ui.module_genealogy'),
-                    'identity' => __('ui.module_identity'),
-                    'inventory' => __('ui.module_inventory'),
-                    'mes' => __('ui.module_mes'),
-                    'mrp' => __('ui.module_mrp'),
-                    'observability' => __('ui.module_observability'),
-                    'product' => __('ui.module_product'),
-                    'production' => __('ui.module_production'),
-                    'purchasing' => __('ui.module_purchasing'),
-                    'routing' => __('ui.module_routing'),
-                    'scheduling' => __('ui.module_scheduling'),
-                    'tenant' => __('ui.module_tenant'),
-                ])
+                @php
+                    $moduleLabels = [
+                        'bom' => __('ui.module_bom'),
+                        'eco' => __('ui.module_eco'),
+                        'engineering-change' => __('ui.module_engineering_change'),
+                        'genealogy' => __('ui.module_genealogy'),
+                        'identity' => __('ui.module_identity'),
+                        'inventory' => __('ui.module_inventory'),
+                        'mes' => __('ui.module_mes'),
+                        'mrp' => __('ui.module_mrp'),
+                        'observability' => __('ui.module_observability'),
+                        'product' => __('ui.module_product'),
+                        'production' => __('ui.module_production'),
+                        'purchasing' => __('ui.module_purchasing'),
+                        'routing' => __('ui.module_routing'),
+                        'scheduling' => __('ui.module_scheduling'),
+                        'tenant' => __('ui.module_tenant'),
+                    ];
+                @endphp
 
                 @forelse ($availableModules as $module)
                     @if (isset($moduleLabels[$module]))
-                        <x-ui.menu-item variant="industrial" href="#" @class(['is-active' => $loop->first])>{{ $moduleLabels[$module] }}</x-ui.menu-item>
+                        <x-ui.menu-item variant="industrial" href="#" :active="$loop->first">{{ $moduleLabels[$module] }}</x-ui.menu-item>
                     @endif
                 @empty
                     <x-ui.menu-item variant="industrial" href="#" class="text-muted">{{ __('ui.modules') }}</x-ui.menu-item>

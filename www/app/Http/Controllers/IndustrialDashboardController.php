@@ -22,6 +22,7 @@ final class IndustrialDashboardController extends Controller
         $subscription = null;
         $subscriptionPlan = null;
         $canManageAccesses = false;
+        $company = null;
 
         if ($user !== null && (int) ($user->current_company_id ?? 0) > 0) {
             $companyId = (int) $user->current_company_id;
