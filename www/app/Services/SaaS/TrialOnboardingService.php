@@ -23,7 +23,11 @@ final class TrialOnboardingService
 {
     public function __construct(private readonly AuditLogService $audit) {}
 
-    private const MASTER_ROLE_SLUG = 'account-master';
+    private const MASTER_ROLE_SLUG = 'master';
+
+    private const LEGACY_ADMIN_ROLE_SLUG = 'admin';
+
+    private const LEGACY_ACCOUNT_MASTER_ROLE_SLUG = 'account-master';
 
     private const LEGACY_MASTER_ROLE_SLUG = 'organization-admin';
 
@@ -200,7 +204,7 @@ final class TrialOnboardingService
 
         return $user->roles()
             ->wherePivot('company_id', $companyId)
-            ->whereIn('slug', [self::MASTER_ROLE_SLUG, self::LEGACY_MASTER_ROLE_SLUG])
+            ->whereIn('slug', [self::MASTER_ROLE_SLUG, self::LEGACY_ADMIN_ROLE_SLUG, self::LEGACY_ACCOUNT_MASTER_ROLE_SLUG, self::LEGACY_MASTER_ROLE_SLUG])
             ->exists();
     }
 
@@ -352,7 +356,7 @@ final class TrialOnboardingService
                 'slug' => self::MASTER_ROLE_SLUG,
             ],
             [
-                'name' => 'Account Master',
+                'name' => 'Master',
             ]
         );
     }

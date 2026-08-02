@@ -19,6 +19,7 @@ final class Role extends TenantModel
         'company_id',
         'name',
         'slug',
+        'description',
     ];
 
     public function company(): BelongsTo

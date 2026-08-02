@@ -12,14 +12,14 @@ final class EcoPermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            ['name' => 'Read ECO', 'slug' => 'eco.read', 'module' => 'eco'],
-            ['name' => 'Create ECO', 'slug' => 'eco.create', 'module' => 'eco'],
-            ['name' => 'Update ECO', 'slug' => 'eco.update', 'module' => 'eco'],
-            ['name' => 'Submit ECO', 'slug' => 'eco.submit', 'module' => 'eco'],
-            ['name' => 'Approve ECO', 'slug' => 'eco.approve', 'module' => 'eco'],
-            ['name' => 'Reject ECO', 'slug' => 'eco.reject', 'module' => 'eco'],
-            ['name' => 'Implement ECO', 'slug' => 'eco.implement', 'module' => 'eco'],
-            ['name' => 'Read ECO Impact', 'slug' => 'eco.impact.read', 'module' => 'eco'],
+            ['name' => 'Read ECO', 'slug' => 'eco.read', 'module' => 'audit'],
+            ['name' => 'Create ECO', 'slug' => 'eco.create', 'module' => 'audit'],
+            ['name' => 'Update ECO', 'slug' => 'eco.update', 'module' => 'audit'],
+            ['name' => 'Submit ECO', 'slug' => 'eco.submit', 'module' => 'audit'],
+            ['name' => 'Approve ECO', 'slug' => 'eco.approve', 'module' => 'audit'],
+            ['name' => 'Reject ECO', 'slug' => 'eco.reject', 'module' => 'audit'],
+            ['name' => 'Implement ECO', 'slug' => 'eco.implement', 'module' => 'audit'],
+            ['name' => 'Read ECO Impact', 'slug' => 'eco.impact.read', 'module' => 'audit'],
         ];
 
         foreach ($permissions as $permission) {

@@ -12,13 +12,13 @@ final class ProductionPermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            ['name' => 'Read Production Orders', 'slug' => 'production-orders.read', 'module' => 'production'],
-            ['name' => 'Create Production Orders', 'slug' => 'production-orders.create', 'module' => 'production'],
-            ['name' => 'Release Production Orders', 'slug' => 'production-orders.release', 'module' => 'production'],
-            ['name' => 'Record Partial Production Orders', 'slug' => 'production-orders.partial', 'module' => 'production'],
-            ['name' => 'Complete Production Orders', 'slug' => 'production-orders.complete', 'module' => 'production'],
-            ['name' => 'Record Material Consumption', 'slug' => 'production-orders.consumption.create', 'module' => 'production'],
-            ['name' => 'Read Material Consumption', 'slug' => 'production-orders.consumption.read', 'module' => 'production'],
+            ['name' => 'Read Production Orders', 'slug' => 'production-orders.read', 'module' => 'production_mrp'],
+            ['name' => 'Create Production Orders', 'slug' => 'production-orders.create', 'module' => 'production_mrp'],
+            ['name' => 'Release Production Orders', 'slug' => 'production-orders.release', 'module' => 'production_mrp'],
+            ['name' => 'Record Partial Production Orders', 'slug' => 'production-orders.partial', 'module' => 'production_mrp'],
+            ['name' => 'Complete Production Orders', 'slug' => 'production-orders.complete', 'module' => 'production_mrp'],
+            ['name' => 'Record Material Consumption', 'slug' => 'production-orders.consumption.create', 'module' => 'production_mrp'],
+            ['name' => 'Read Material Consumption', 'slug' => 'production-orders.consumption.read', 'module' => 'production_mrp'],
         ];
 
         foreach ($permissions as $permission) {

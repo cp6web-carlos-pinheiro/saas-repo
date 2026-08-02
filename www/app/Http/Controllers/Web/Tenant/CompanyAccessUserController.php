@@ -134,6 +134,22 @@ final class CompanyAccessUserController extends Controller
         $customer = $this->companyCustomerOrFail($company, $customer->id);
         $data = $this->validateCustomer($request, $customer);
         $isFirstCompanyUser = $company->users()->doesntExist() || $access->isFirstCompanyUser($customer, $company);
+        $currentIsAdmin = $access->isCompanyAdministrator($customer, $company);
+        $requestedProfile = (string) $data['access_profile'];
+        $willBeAdmin = $isFirstCompanyUser || $requestedProfile === CompanyUserAccessService::ADMINISTRATOR_PROFILE;
+        $willBeActive = (bool) ($data['is_active'] ?? false);
+
+        if ($currentIsAdmin && ! $willBeAdmin) {
+            return back()
+                ->withInput()
+                ->withErrors(['customer' => __('company_access.administrator_profile_locked')]);
+        }
+
+        if ($currentIsAdmin && ! $willBeActive && $access->countActiveCompanyAdministrators($company, $customer->id) === 0) {
+            return back()
+                ->withInput()
+                ->withErrors(['customer' => __('company_access.last_administrator_required')]);
+        }
 
         DB::transaction(function () use ($access, $company, $customer, $data, $isFirstCompanyUser): void {
             $customer->fill([
@@ -185,6 +201,11 @@ final class CompanyAccessUserController extends Controller
 
         if ((int) ($request->user()?->id ?? 0) === (int) $customer->id) {
             return back()->withErrors(['customer' => __('company_access.cannot_remove_self')]);
+        }
+
+        if (app(CompanyUserAccessService::class)->isCompanyAdministrator($customer, $company)
+            && app(CompanyUserAccessService::class)->countActiveCompanyAdministrators($company, $customer->id) === 0) {
+            return back()->withErrors(['customer' => __('company_access.last_administrator_required')]);
         }
 
         $customerId = $customer->id;
@@ -282,12 +303,16 @@ final class CompanyAccessUserController extends Controller
             ? $access->accessFor($customer, $company)
             : ['profile' => CompanyUserAccessService::CUSTOM_PROFILE, 'modules' => []];
 
+        $isAdministratorProfileLocked = $customer !== null
+            && $companyAccess['profile'] === CompanyUserAccessService::ADMINISTRATOR_PROFILE;
+
         return [
             'customer' => $customer,
             'company' => $company,
             'modules' => $access->modules(),
             'accessProfile' => $companyAccess['profile'],
             'selectedModules' => $companyAccess['modules'],
+            'isAdministratorProfileLocked' => $isAdministratorProfileLocked,
             'mustBeAdministrator' => $customer === null
                 ? $company->users()->doesntExist()
                 : $access->isFirstCompanyUser($customer, $company),

@@ -2,6 +2,14 @@
 
 Este modulo controla o processo funcional de mudancas de engenharia, incluindo solicitacao, analise de impacto, aprovacao e implementacao.
 
+## Ultima atualizacao
+- 2026-08-02
+
+## Status objetivo
+- Status atual: Planejado.
+- Cobertura atual: modelo de dados mapeado e documentado.
+- Pendencia principal: implementar fluxo funcional de ECR/ECO com estados, aprovacoes e trilha de auditoria.
+
 ## Tabelas relacionadas
 
 ### Mestres

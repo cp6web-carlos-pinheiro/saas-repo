@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 final class CompanyUserAccessService
 {
-    public const COMPANY_ACCESS_MODULE = 'company_access';
+    public const COMPANY_ACCESS_MODULE = 'users';
 
     public const ADMINISTRATOR_PROFILE = 'administrator';
 
@@ -22,17 +22,22 @@ final class CompanyUserAccessService
 
     private const ROLE_SLUG_PREFIX = 'user-access-';
 
+    private const PRIMARY_COMPANY_ADMIN_ROLE_SLUG = 'master';
+
     /**
      * @var array<string, string>
      */
-    private const MODULE_ALIASES = [
-        'product' => 'bom',
-    ];
+    private const MODULE_ALIASES = [];
 
     /**
      * @var array<int, string>
      */
-    private const COMPANY_ADMIN_ROLE_SLUGS = ['admin', 'account-master'];
+    private const COMPANY_ADMIN_ROLE_SLUGS = ['master'];
+
+    /**
+     * @var array<int, string>
+     */
+    private const LEGACY_ADMIN_ROLE_SLUGS = ['admin', 'account-master'];
 
     /**
      * @return Collection<string, Collection<int, Permission>>
@@ -51,8 +56,9 @@ final class CompanyUserAccessService
      */
     public function sync(User $user, Company $company, string $profile, array $modules, bool $isCompanyAdministrator): void
     {
+        $isAdministratorProfile = $isCompanyAdministrator || $profile === self::ADMINISTRATOR_PROFILE;
         $availableModules = $this->modules()->keys()->all();
-        $selectedModules = $isCompanyAdministrator || $profile === self::ADMINISTRATOR_PROFILE
+        $selectedModules = $isAdministratorProfile
             ? $availableModules
             : array_values(array_intersect($availableModules, array_unique($modules)));
 
@@ -62,7 +68,9 @@ final class CompanyUserAccessService
                 'slug' => $this->roleSlug($user, $profile, $isCompanyAdministrator),
             ],
             [
-                'name' => Str::limit($isCompanyAdministrator || $profile === self::ADMINISTRATOR_PROFILE ? 'Administrator: '.$user->name : 'Custom access: '.$user->name, 120, ''),
+                'name' => $isAdministratorProfile
+                    ? 'Master'
+                    : Str::limit('Custom access: '.$user->name, 120, ''),
             ]
         );
 
@@ -92,10 +100,17 @@ final class CompanyUserAccessService
      */
     public function accessFor(User $user, Company $company): array
     {
+        if ($this->isCompanyAdministrator($user, $company)) {
+            return [
+                'profile' => self::ADMINISTRATOR_PROFILE,
+                'modules' => $this->appendModuleAliases($this->modules()->keys()->all()),
+            ];
+        }
+
         $role = $user->roles()
             ->withoutGlobalScope('tenant')
             ->wherePivot('company_id', $company->id)
-            ->where('roles.slug', 'like', $this->roleSlugPrefix($user).'%')
+            ->where('roles.slug', $this->roleSlugPrefix($user).self::CUSTOM_PROFILE)
             ->first();
 
         if ($role === null) {
@@ -104,10 +119,8 @@ final class CompanyUserAccessService
 
         $roleModules = $role->permissions()->orderBy('module')->pluck('module')->unique()->values()->all();
 
-        $isAdministrator = str_ends_with((string) $role->slug, '-'.self::ADMINISTRATOR_PROFILE);
-
         return [
-            'profile' => $isAdministrator ? self::ADMINISTRATOR_PROFILE : self::CUSTOM_PROFILE,
+            'profile' => self::CUSTOM_PROFILE,
             'modules' => $roleModules,
         ];
     }
@@ -159,11 +172,34 @@ final class CompanyUserAccessService
         return $user->roles()
             ->withoutGlobalScope('tenant')
             ->wherePivot('company_id', $company->id)
-            ->where(function ($query) {
-                $query->whereIn('roles.slug', self::COMPANY_ADMIN_ROLE_SLUGS)
+            ->where(function ($query): void {
+                $query->whereIn('roles.slug', array_merge(self::COMPANY_ADMIN_ROLE_SLUGS, self::LEGACY_ADMIN_ROLE_SLUGS))
                     ->orWhere('roles.slug', 'like', self::ROLE_SLUG_PREFIX.'%-'.self::ADMINISTRATOR_PROFILE);
             })
             ->exists();
+    }
+
+    public function isAdministratorRoleSlug(string $roleSlug): bool
+    {
+        return in_array($roleSlug, array_merge(self::COMPANY_ADMIN_ROLE_SLUGS, self::LEGACY_ADMIN_ROLE_SLUGS), true)
+            || (bool) preg_match('/^'.preg_quote(self::ROLE_SLUG_PREFIX, '/').'\d+-'.self::ADMINISTRATOR_PROFILE.'$/', $roleSlug);
+    }
+
+    public function countActiveCompanyAdministrators(Company $company, ?int $excludeUserId = null): int
+    {
+        return User::query()
+            ->where('is_active', true)
+            ->whereHas('companies', static fn ($query) => $query->where('companies.id', $company->id))
+            ->whereHas('roles', function ($query) use ($company): void {
+                $query->withoutGlobalScope('tenant')
+                    ->where('role_user.company_id', $company->id)
+                    ->where(function ($inner): void {
+                        $inner->whereIn('roles.slug', array_merge(self::COMPANY_ADMIN_ROLE_SLUGS, self::LEGACY_ADMIN_ROLE_SLUGS))
+                            ->orWhere('roles.slug', 'like', self::ROLE_SLUG_PREFIX.'%-'.self::ADMINISTRATOR_PROFILE);
+                    });
+            })
+                ->when($excludeUserId !== null, static fn ($query) => $query->where('users.id', '!=', $excludeUserId))
+            ->count();
     }
 
     public function canManageCompanyAccess(User $user, Company $company): bool
@@ -178,7 +214,11 @@ final class CompanyUserAccessService
             ? self::ADMINISTRATOR_PROFILE
             : self::CUSTOM_PROFILE;
 
-        return $this->roleSlugPrefix($user).$effectiveProfile;
+        if ($effectiveProfile === self::ADMINISTRATOR_PROFILE) {
+            return self::PRIMARY_COMPANY_ADMIN_ROLE_SLUG;
+        }
+
+        return $this->roleSlugPrefix($user).self::CUSTOM_PROFILE;
     }
 
     private function roleSlugPrefix(User $user): string

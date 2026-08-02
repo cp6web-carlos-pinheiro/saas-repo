@@ -33,7 +33,7 @@ return [
     'company_status_col' => 'Status Empresa',
     'actions' => 'Ações',
     'code' => 'Codigo',
-    'slug' => 'Slug',
+    'slug' => 'Identificador',
     'organization_missing' => 'Sem organização vinculada',
     'without_plan' => 'sem-plano',
     'not_configured' => 'não configurado',

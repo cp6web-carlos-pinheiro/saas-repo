@@ -2,6 +2,14 @@
 
 Este modulo gerencia ordens de producao, saidas e registros operacionais para controle da execucao produtiva.
 
+## Ultima atualizacao
+- 2026-08-02
+
+## Status objetivo
+- Status atual: Planejado.
+- Cobertura atual: dominio e tabelas de ordens/consumos/saidas definidos.
+- Pendencia principal: implementar ciclo funcional de ordem de producao (abertura, apontamento, consumo, fechamento).
+
 ## Tabelas relacionadas
 
 ### Mestres

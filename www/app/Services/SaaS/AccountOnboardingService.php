@@ -28,7 +28,7 @@ use Illuminate\Validation\ValidationException;
 
 final class AccountOnboardingService
 {
-    private const MASTER_ROLE_SLUG = 'account-master';
+    private const MASTER_ROLE_SLUG = 'master';
 
     private const MEMBER_ROLE_SLUG = 'organization-member';
 
@@ -510,7 +510,7 @@ final class AccountOnboardingService
                 'slug' => self::MASTER_ROLE_SLUG,
             ],
             [
-                'name' => 'Account Master',
+                'name' => 'Master',
             ]
         );
 

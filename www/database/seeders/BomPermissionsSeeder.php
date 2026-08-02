@@ -15,7 +15,7 @@ final class BomPermissionsSeeder extends Seeder
             ['slug' => 'bom.explode'],
             [
                 'name' => 'Explode BOM',
-                'module' => 'bom',
+                'module' => 'products',
             ]
         );
     }

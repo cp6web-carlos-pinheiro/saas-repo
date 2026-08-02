@@ -2,6 +2,14 @@
 
 Este modulo acompanha a execucao operacional da manufatura no chao de fabrica, com foco em andamento de ordens e consumos.
 
+## Ultima atualizacao
+- 2026-08-02
+
+## Status objetivo
+- Status atual: Planejado.
+- Cobertura atual: estrutura de tabelas da execucao produtiva documentada.
+- Pendencia principal: disponibilizar telas e servicos para apontamentos, consumo, producao e snapshots de ordem.
+
 ## Tabelas relacionadas
 
 ### Mestres

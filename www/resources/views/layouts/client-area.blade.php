@@ -5,58 +5,80 @@
 @section('content')
     @php
         $moduleLabels = [
-            'bom' => __('ui.module_bom'),
-            'eco' => __('ui.module_eco'),
-            'engineering-change' => __('ui.module_engineering_change'),
-            'genealogy' => __('ui.module_genealogy'),
-            'identity' => __('ui.module_identity'),
+            'products' => __('ui.module_products'),
             'inventory' => __('ui.module_inventory'),
-            'mes' => __('ui.module_mes'),
-            'mrp' => __('ui.module_mrp'),
-            'observability' => __('ui.module_observability'),
-            'product' => __('ui.module_product'),
-            'production' => __('ui.module_production'),
             'purchasing' => __('ui.module_purchasing'),
-            'routing' => __('ui.module_routing'),
-            'scheduling' => __('ui.module_scheduling'),
-            'tenant' => __('ui.module_tenant'),
+            'sales' => __('ui.module_sales'),
+            'production_mrp' => __('ui.module_production_mrp'),
+            'financial' => __('ui.module_financial'),
+            'reports' => __('ui.module_reports'),
+            'audit' => __('ui.module_audit'),
+            'users' => __('ui.module_users'),
+            'suppliers' => __('ui.module_suppliers'),
+            'customers' => __('ui.module_customers'),
+        ];
+
+        $moduleIcons = [
+            'production_mrp' => 'production_mrp',
+            'inventory' => 'inventory',
+            'purchasing' => 'purchasing',
+            'sales' => 'sales',
+            'products' => 'products',
+            'suppliers' => 'suppliers',
+            'customers' => 'customers',
+            'financial' => 'financial',
+            'reports' => 'reports',
+            'audit' => 'audit',
+            'users' => 'users',
         ];
 
         $moduleLinks = [
-            'purchasing' => route('purchasing.suppliers.index'),
+            'suppliers' => route('purchasing.suppliers.index'),
         ];
 
         $moduleSubitems = [
-            'bom' => [
-                ['label' => __('ui.bom_material_list'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
+            'products' => [
+                ['label' => __('ui.product_register'), 'href' => route('products.index'), 'active' => request()->routeIs('products.index') || request()->routeIs('products.create') || request()->routeIs('products.show') || request()->routeIs('products.edit')],
+                ['label' => __('ui.product_versions'), 'href' => route('products.versions'), 'active' => request()->routeIs('products.versions') || request()->routeIs('products.versions.*')],
+            ],
+            'production_mrp' => [
                 ['label' => __('ui.bom_structures'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
                 ['label' => __('ui.bom_revisions'), 'href' => route('bom.material-lists.index'), 'active' => request()->routeIs('bom.material-lists.*')],
             ],
-            'product' => [
-                            ['label' => __('ui.product_register'), 'href' => route('products.index'), 'active' => request()->routeIs('products.index') || request()->routeIs('products.create') || request()->routeIs('products.show') || request()->routeIs('products.edit')],
-                            ['label' => __('ui.product_versions'), 'href' => route('products.versions'), 'active' => request()->routeIs('products.versions') || request()->routeIs('products.versions.*')],
-            ],
             'purchasing' => [
-                [
-                    'label' => __('ui.purchasing_suppliers'),
-                    'href' => route('purchasing.suppliers.index'),
-                    'active' => request()->routeIs('purchasing.suppliers.*'),
-                ],
                 ['label' => __('ui.purchasing_requisition'), 'href' => null, 'active' => false],
                 ['label' => __('ui.purchasing_quotation'), 'href' => null, 'active' => false],
                 ['label' => __('ui.purchasing_order'), 'href' => null, 'active' => false],
                 ['label' => __('ui.purchasing_receipt'), 'href' => null, 'active' => false],
                 ['label' => __('ui.purchasing_fiscal_entry'), 'href' => null, 'active' => false],
             ],
-            'production' => [
-                ['label' => __('ui.production_orders'), 'href' => null, 'active' => false],
-                ['label' => __('ui.production_postings'), 'href' => null, 'active' => false],
-            ],
             'inventory' => [
                 ['label' => __('ui.inventory_items'), 'href' => null, 'active' => false],
                 ['label' => __('ui.inventory_movements'), 'href' => null, 'active' => false],
                 ['label' => __('ui.inventory_count'), 'href' => null, 'active' => false],
             ],
+            'users' => [
+                ['label' => __('ui.manage_accesses'), 'href' => route('company-access.users.index'), 'active' => request()->routeIs('company-access.users.*')],
+                ['label' => __('ui.rbac_console'), 'href' => route('company-access.rbac.index'), 'active' => request()->routeIs('company-access.rbac.index')],
+                ['label' => __('ui.rbac_roles'), 'href' => route('company-access.rbac.roles.index'), 'active' => request()->routeIs('company-access.rbac.roles.*')],
+                ['label' => __('ui.rbac_templates'), 'href' => route('company-access.rbac.templates.index'), 'active' => request()->routeIs('company-access.rbac.templates.*')],
+                ['label' => __('ui.rbac_approvals'), 'href' => route('company-access.rbac.approvals.index'), 'active' => request()->routeIs('company-access.rbac.approvals.*')],
+                ['label' => __('ui.rbac_history'), 'href' => route('company-access.rbac.history.index'), 'active' => request()->routeIs('company-access.rbac.history.*')],
+            ],
+        ];
+
+        $modulePriority = [
+            'production_mrp',
+            'inventory',
+            'purchasing',
+            'sales',
+            'products',
+            'suppliers',
+            'customers',
+            'financial',
+            'reports',
+            'audit',
+            'users',
         ];
 
         $user = auth()->user();
@@ -81,11 +103,22 @@
                 $availableModules = app(\App\Services\SaaS\CompanyUserAccessService::class)->accessibleModules($user, $company);
                 $canManageAccesses = app(\App\Services\SaaS\CompanyUserAccessService::class)->canManageCompanyAccess($user, $company);
 
-                if (in_array('bom', $availableModules, true) && ! in_array('product', $availableModules, true)) {
-                    $availableModules[] = 'product';
-                }
             }
         }
+
+        usort($availableModules, static function (string $left, string $right) use ($modulePriority): int {
+            $leftOrder = array_search($left, $modulePriority, true);
+            $rightOrder = array_search($right, $modulePriority, true);
+
+            $leftRank = $leftOrder === false ? PHP_INT_MAX : $leftOrder;
+            $rightRank = $rightOrder === false ? PHP_INT_MAX : $rightOrder;
+
+            if ($leftRank === $rightRank) {
+                return strcmp($left, $right);
+            }
+
+            return $leftRank <=> $rightRank;
+        });
 
         $activeCompanyName = $company?->name ?? __('ui.app_name');
     @endphp
@@ -127,7 +160,48 @@
                                     data-module-toggle
                                     aria-expanded="{{ $hasActiveSubitem ? 'true' : 'false' }}"
                                 >
-                                    <span>{{ $moduleLabels[$module] }}</span>
+                                    <span class="inline-flex items-center gap-2">
+                                        <span class="inline-flex h-4 w-4 items-center justify-center text-[#5f6368]" aria-hidden="true">
+                                            @switch($moduleIcons[$module] ?? null)
+                                                @case('production_mrp')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 19h18M5 19V9l4-3 4 3v10M13 19V5h6v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @case('inventory')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 7.5 12 3l9 4.5-9 4.5-9-4.5Zm0 4.5L12 16.5 21 12M3 16.5 12 21l9-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @case('purchasing')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 5h2l2 10h10l2-7H7M9 19a1 1 0 1 0 0 .01M17 19a1 1 0 1 0 0 .01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @case('sales')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 18V6m5 12V10m5 8V8m5 10V4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 20h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                                    @break
+                                                @case('products')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                                    @break
+                                                @case('suppliers')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 20V8l8-4 8 4v12" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 20v-4h6v4M9 10h1M14 10h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                                    @break
+                                                @case('customers')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M16 19a4 4 0 0 0-8 0M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm9 6a4 4 0 0 0-3-3.87M18 4.13A3 3 0 0 1 18 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @case('financial')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M8 14h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                                    @break
+                                                @case('reports')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 20h12M8 20V8m4 12V4m4 16v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                                    @break
+                                                @case('audit')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3 5 6v6c0 4.4 3 8.4 7 9 4-0.6 7-4.6 7-9V6l-7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @case('users')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M16 19a4 4 0 0 0-8 0M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @default
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/></svg>
+                                            @endswitch
+                                        </span>
+                                        <span>{{ $moduleLabels[$module] }}</span>
+                                    </span>
                                     <span class="ind-module-caret" aria-hidden="true">▾</span>
                                 </button>
 
@@ -150,7 +224,48 @@
                                     :active="$moduleActive"
                                     class="ind-module-parent"
                                 >
-                                    {{ $moduleLabels[$module] }}
+                                    <span class="inline-flex items-center gap-2">
+                                        <span class="inline-flex h-4 w-4 items-center justify-center text-[#5f6368]" aria-hidden="true">
+                                            @switch($moduleIcons[$module] ?? null)
+                                                @case('production_mrp')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 19h18M5 19V9l4-3 4 3v10M13 19V5h6v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @case('inventory')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 7.5 12 3l9 4.5-9 4.5-9-4.5Zm0 4.5L12 16.5 21 12M3 16.5 12 21l9-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @case('purchasing')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 5h2l2 10h10l2-7H7M9 19a1 1 0 1 0 0 .01M17 19a1 1 0 1 0 0 .01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @case('sales')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 18V6m5 12V10m5 8V8m5 10V4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 20h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                                    @break
+                                                @case('products')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                                    @break
+                                                @case('suppliers')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 20V8l8-4 8 4v12" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 20v-4h6v4M9 10h1M14 10h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                                    @break
+                                                @case('customers')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M16 19a4 4 0 0 0-8 0M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm9 6a4 4 0 0 0-3-3.87M18 4.13A3 3 0 0 1 18 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @case('financial')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M8 14h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                                    @break
+                                                @case('reports')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 20h12M8 20V8m4 12V4m4 16v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                                                    @break
+                                                @case('audit')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3 5 6v6c0 4.4 3 8.4 7 9 4-0.6 7-4.6 7-9V6l-7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @case('users')
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M16 19a4 4 0 0 0-8 0M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                    @break
+                                                @default
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/></svg>
+                                            @endswitch
+                                        </span>
+                                        <span>{{ $moduleLabels[$module] }}</span>
+                                    </span>
                                 </x-ui.menu-item>
                             @endif
                         </div>

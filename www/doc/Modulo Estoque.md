@@ -2,6 +2,14 @@
 
 Este modulo administra saldos, movimentacoes, lotes, seriais e alocacoes de estoque para suportar operacao e planejamento.
 
+## Ultima atualizacao
+- 2026-08-02
+
+## Status objetivo
+- Status atual: Parcial inicial.
+- Cobertura atual: estrutura de dados de saldos e movimentos definida no dominio.
+- Pendencia principal: implementar entradas/saidas, transferencias, inventario, reservas e consultas operacionais de saldo.
+
 ## Tabelas relacionadas
 
 ### Mestres

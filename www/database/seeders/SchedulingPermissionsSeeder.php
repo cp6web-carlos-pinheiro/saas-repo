@@ -12,15 +12,15 @@ final class SchedulingPermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            ['name' => 'Read Work Centers', 'slug' => 'work-centers.read', 'module' => 'scheduling'],
-            ['name' => 'Create Work Centers', 'slug' => 'work-centers.create', 'module' => 'scheduling'],
-            ['name' => 'Update Work Centers', 'slug' => 'work-centers.update', 'module' => 'scheduling'],
-            ['name' => 'Delete Work Centers', 'slug' => 'work-centers.delete', 'module' => 'scheduling'],
-            ['name' => 'Create Work Center Shifts', 'slug' => 'work-centers.shifts.create', 'module' => 'scheduling'],
-            ['name' => 'Read Production Calendar', 'slug' => 'production-calendar.read', 'module' => 'scheduling'],
-            ['name' => 'Update Production Calendar', 'slug' => 'production-calendar.update', 'module' => 'scheduling'],
-            ['name' => 'Generate Production Calendar', 'slug' => 'production-calendar.generate', 'module' => 'scheduling'],
-            ['name' => 'Run Production Scheduling', 'slug' => 'production-scheduling.run', 'module' => 'scheduling'],
+            ['name' => 'Read Work Centers', 'slug' => 'work-centers.read', 'module' => 'production_mrp'],
+            ['name' => 'Create Work Centers', 'slug' => 'work-centers.create', 'module' => 'production_mrp'],
+            ['name' => 'Update Work Centers', 'slug' => 'work-centers.update', 'module' => 'production_mrp'],
+            ['name' => 'Delete Work Centers', 'slug' => 'work-centers.delete', 'module' => 'production_mrp'],
+            ['name' => 'Create Work Center Shifts', 'slug' => 'work-centers.shifts.create', 'module' => 'production_mrp'],
+            ['name' => 'Read Production Calendar', 'slug' => 'production-calendar.read', 'module' => 'production_mrp'],
+            ['name' => 'Update Production Calendar', 'slug' => 'production-calendar.update', 'module' => 'production_mrp'],
+            ['name' => 'Generate Production Calendar', 'slug' => 'production-calendar.generate', 'module' => 'production_mrp'],
+            ['name' => 'Run Production Scheduling', 'slug' => 'production-scheduling.run', 'module' => 'production_mrp'],
         ];
 
         foreach ($permissions as $permission) {

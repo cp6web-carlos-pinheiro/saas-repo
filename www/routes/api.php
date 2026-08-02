@@ -228,7 +228,7 @@ Route::prefix('v1')->group(function (): void {
             Route::get('/purchasing/suppliers/{supplierId}/rules', [SupplierController::class, 'rules'])
                 ->middleware(CheckPermission::class.':purchasing.suppliers.read');
             Route::put('/purchasing/suppliers/{supplierId}/products/{productId}/rule', [SupplierController::class, 'upsertRule'])
-                ->middleware(CheckPermission::class.':purchasing.suppliers.rules.manage');
+                ->middleware(CheckPermission::class.':purchasing.supplier-rules.manage');
 
             Route::get('/purchasing/requisitions', [PurchaseRequisitionController::class, 'index'])
                 ->middleware(CheckPermission::class.':purchasing.requisitions.read');

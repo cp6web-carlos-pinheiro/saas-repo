@@ -12,8 +12,8 @@ final class GenealogyPermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            ['name' => 'Trace Genealogy', 'slug' => 'genealogy.trace', 'module' => 'genealogy'],
-            ['name' => 'Create Genealogy Relations', 'slug' => 'genealogy.relations.create', 'module' => 'genealogy'],
+            ['name' => 'Trace Genealogy', 'slug' => 'genealogy.trace', 'module' => 'audit'],
+            ['name' => 'Create Genealogy Relations', 'slug' => 'genealogy.relations.create', 'module' => 'audit'],
         ];
 
         foreach ($permissions as $permission) {

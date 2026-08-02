@@ -15,7 +15,7 @@ final class MrpPermissionsSeeder extends Seeder
             ['slug' => 'mrp.plan'],
             [
                 'name' => 'Run MRP Planning',
-                'module' => 'mrp',
+                'module' => 'production_mrp',
             ]
         );
     }

@@ -3,6 +3,9 @@
 ## Objetivo
 Definir a fundacao tecnica e visual que sera reutilizada por todo o sistema.
 
+## Ultima atualizacao
+- 2026-08-02
+
 ## Nivel de implementacao atual
 
 | Item | Status | Situacao no projeto |
@@ -11,9 +14,9 @@ Definir a fundacao tecnica e visual que sera reutilizada por todo o sistema.
 | Componentes Blade | Implementado | Foi criada e aplicada uma biblioteca compartilhada em `resources/views/components/ui` (alert, panel, page-heading, button), com uso real em autenticacao, onboarding e admin, e documentacao dedicada no arquivo `doc/dev/Biblioteca de Componentes Blade.md`. |
 | Tema | Implementado | O tema foi centralizado em `resources/css/app.css` com tokens globais (cores, tipografia e estados) e aplicado via `layouts/google.blade.php`, removendo duplicacoes de estilos inline e unificando dashboard, docs, auth, onboarding, admin e landing. |
 | Sidebar | Implementado | Foi criado o componente global `x-ui.sidebar` em `resources/views/components/ui/sidebar.blade.php` e aplicado nas areas de dashboard industrial, administracao e visualizador de documentacao, mantendo variacoes de layout por contexto. |
-| Menu | Implementado | Foi criada uma composicao global de menu com `x-ui.menu` e `x-ui.menu-item`, incluindo estado ativo (`active`/`is-active`) e aplicacao consolidada em dashboard industrial, administracao e visualizador de documentacao. |
+| Menu | Implementado | Foi criada uma composicao global de menu com `x-ui.menu` e `x-ui.menu-item`, incluindo estado ativo (`active`/`is-active`), submenus colapsaveis, ordenacao por prioridade operacional, mapeamento por modulos e icones coerentes por contexto na area do cliente/dashboard. |
 | Breadcrumb | Implementado | Foi criado o componente global `x-ui.breadcrumb` em `resources/views/components/ui/breadcrumb.blade.php` e aplicado nas paginas internas de dashboard industrial, dashboard de acesso gratuito (14 dias), onboarding, administracao e documentacao. |
-| Dashboard | Implementado | O projeto ja possui dashboard industrial e dashboard de acesso gratuito (14 dias) ligados as rotas web. |
+| Dashboard | Implementado | O projeto possui dashboard industrial e dashboard de acesso gratuito (14 dias) ligados as rotas web, com shell padronizado (cabecalho, sidebar, breadcrumbs e conteudo full width para CRUDs internos). |
 
 ## Arquitetura Base
 - Laravel
@@ -43,12 +46,12 @@ Definir a fundacao tecnica e visual que sera reutilizada por todo o sistema.
 ## Subfases da Fundacao
 | Subfase | Status | Situacao no projeto |
 | --- | --- | --- |
-| Multitenancy | Parcial | Existem companies, organizations, tenants, periodo gratuito inicial de 14 dias, subscriptions, middleware de resolucao de tenant e escopo por company; o fluxo ainda depende de refinamentos de integracao e padronizacao entre web e API. |
+| Multitenancy | Parcial avancado | Existem companies, organizations, tenants, periodo gratuito inicial de 14 dias, subscriptions, middleware de resolucao de tenant e escopo por company. A navegacao web tenant foi ampliada e padronizada, mas ainda ha refinamentos pendentes para consolidar contratos entre web e API. |
 | Autenticacao e seguranca | Parcial | Login, logout, recuperacao de senha, verificacao de email e gerenciamento de sessoes ja existem; two factor ainda nao foi identificado no projeto. |
-| Permissoes RBAC | Parcial | Roles, permissions, role_user, permission_role, hasPermission e middleware de checagem ja existem; ainda falta consolidar a camada de administracao e cobertura por modulo. |
+| Permissoes RBAC | Parcial avancado | Roles, permissions, role_user, permission_role, hasPermission e middleware de checagem ja existem e estao ativos no fluxo tenant. Foi consolidado o catalogo de modulos/permissoes (Produtos, Estoque, Compras, Vendas, Producao MRP, Financeiro, Relatorios, Auditoria, Usuarios, Fornecedores e Clientes), mas a camada de administracao visual unificada ainda precisa evoluir. |
 
 ### Observacoes por subfase
 
-- Multitenancy: companies, planos, assinaturas, dominios e periodo gratuito inicial de 14 dias ja estao presentes em boa parte da base.
+- Multitenancy: companies, planos, assinaturas, dominios e periodo gratuito inicial de 14 dias ja estao presentes em boa parte da base, com resolucao tenant aplicada no fluxo web.
 - Autenticacao e seguranca: login, logout, recuperacao de senha, verificacao de email e sessoes estao implementados; two factor ainda nao aparece no codigo.
-- Permissoes RBAC: roles, permissions, role permission, user role e permissoes por modulo ja tem base de dados e regras de checagem, mas ainda sem camada completa de gestao visual unificada.
+- Permissoes RBAC: roles, permissions, role permission, user role e permissoes por modulo ja tem base de dados e regras de checagem, com reorganizacao recente dos modulos para o menu operacional e seeders sincronizados.

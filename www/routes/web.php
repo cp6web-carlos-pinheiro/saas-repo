@@ -20,6 +20,7 @@ use App\Http\Controllers\Web\Onboarding\AccountInvitationController;
 use App\Http\Controllers\Web\Onboarding\OnboardingController;
 use App\Http\Controllers\Web\Onboarding\PaymentController;
 use App\Http\Controllers\Web\Tenant\CompanyAccessUserController;
+use App\Http\Controllers\Web\Tenant\RbacConsoleController;
 use App\Http\Controllers\Web\Tenant\BomMaterialListController;
 use App\Http\Controllers\Web\Tenant\BomStructureController;
 use App\Http\Controllers\Web\Tenant\ProductController;
@@ -92,8 +93,10 @@ Route::middleware('auth:web')->group(function (): void {
 
     Route::middleware(ResolveWebTenant::class)->group(function (): void {
         Route::get('/billing/subscription', [SubscriptionController::class, 'show'])
+            ->middleware(CheckPermission::class.':company-access.billing.read')
             ->name('billing.subscription.show');
         Route::post('/billing/subscription', [SubscriptionController::class, 'update'])
+            ->middleware(CheckPermission::class.':company-access.billing.update')
             ->name('billing.subscription.update');
 
         Route::redirect('/trial/dashboard', '/dashboard')
@@ -101,7 +104,7 @@ Route::middleware('auth:web')->group(function (): void {
             ->name('trial.dashboard');
 
         Route::get('/dashboard', IndustrialDashboardController::class)
-            ->middleware(EnsureTrialIsActive::class)
+            ->middleware([EnsureTrialIsActive::class, CheckPermission::class.':company-access.dashboard.read'])
             ->name('dashboard.industrial');
 
         Route::prefix('company-access/users')->name('company-access.users.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
@@ -112,6 +115,30 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/{customer}/edit', [CompanyAccessUserController::class, 'edit'])->name('edit');
             Route::put('/{customer}', [CompanyAccessUserController::class, 'update'])->name('update');
             Route::delete('/{customer}', [CompanyAccessUserController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('company-access/rbac')->name('company-access.rbac.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [RbacConsoleController::class, 'index'])->name('index');
+            Route::get('/roles', [RbacConsoleController::class, 'roles'])->name('roles.index');
+            Route::get('/templates', [RbacConsoleController::class, 'templates'])->name('templates.index');
+            Route::get('/approvals', [RbacConsoleController::class, 'approvals'])->name('approvals.index');
+            Route::get('/history', [RbacConsoleController::class, 'history'])->name('history.index');
+
+            Route::get('/roles/create', [RbacConsoleController::class, 'createRole'])->name('roles.create');
+            Route::post('/roles', [RbacConsoleController::class, 'storeRole'])->name('roles.store');
+            Route::get('/roles/{role}', [RbacConsoleController::class, 'showRole'])->name('roles.show');
+            Route::get('/roles/{role}/edit', [RbacConsoleController::class, 'editRole'])->name('roles.edit');
+            Route::put('/roles/{role}', [RbacConsoleController::class, 'updateRole'])->name('roles.update');
+            Route::delete('/roles/{role}', [RbacConsoleController::class, 'destroyRole'])->name('roles.destroy');
+
+            Route::get('/users/{user}/overrides', [RbacConsoleController::class, 'editUserOverrides'])->name('users.overrides.edit');
+            Route::put('/users/{user}/overrides', [RbacConsoleController::class, 'updateUserOverrides'])->name('users.overrides.update');
+
+            Route::post('/templates/{template}/versions', [RbacConsoleController::class, 'publishTemplateVersion'])->name('templates.versions.store');
+            Route::post('/templates/{template}/apply', [RbacConsoleController::class, 'applyTemplateVersion'])->name('templates.apply');
+
+            Route::post('/change-requests/{changeRequest}/approve', [RbacConsoleController::class, 'approveChangeRequest'])->name('change-requests.approve');
+            Route::post('/change-requests/{changeRequest}/reject', [RbacConsoleController::class, 'rejectChangeRequest'])->name('change-requests.reject');
         });
 
         Route::prefix('purchasing/suppliers')->name('purchasing.suppliers.')->middleware(EnsureTrialIsActive::class)->group(function (): void {

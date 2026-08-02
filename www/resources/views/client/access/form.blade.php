@@ -53,8 +53,8 @@
             <fieldset class="rounded-2xl border border-[#dadce0] p-5">
                 <legend class="px-2 font-semibold">{{ __('company_access.access_section') }}</legend>
 
-                @if ($mustBeAdministrator)
-                    <x-ui.alert class="mt-2" variant="info">{{ __('company_access.first_user_administrator') }}</x-ui.alert>
+                @if ($mustBeAdministrator || $isAdministratorProfileLocked)
+                    <x-ui.alert class="mt-2" variant="info">{{ $mustBeAdministrator ? __('company_access.first_user_administrator') : __('company_access.administrator_profile_locked') }}</x-ui.alert>
                     <input type="hidden" name="access_profile" value="administrator">
                 @else
                     <label class="mt-2 block text-sm font-medium">
@@ -73,9 +73,9 @@
 
                     <div class="mt-3 grid gap-3 sm:grid-cols-2">
                         @foreach ($modules as $module => $permissions)
-                            @php($moduleIsSelected = $mustBeAdministrator || $selectedProfile === 'administrator' || in_array($module, (array) $selectedModuleNames, true))
+                            @php($moduleIsSelected = $mustBeAdministrator || $isAdministratorProfileLocked || $selectedProfile === 'administrator' || in_array($module, (array) $selectedModuleNames, true))
                             <label class="flex items-start gap-3 rounded-xl border border-[#dadce0] p-4">
-                                <input name="modules[]" type="checkbox" value="{{ $module }}" @checked($moduleIsSelected) class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35">
+                                <input name="modules[]" type="checkbox" value="{{ $module }}" @checked($moduleIsSelected) @disabled($mustBeAdministrator || $isAdministratorProfileLocked || $selectedProfile === 'administrator') class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35">
                                 <span>
                                     <span class="block font-medium">{{ \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleLabel((string) $module) }}</span>
                                     @php($moduleDescription = \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleDescription((string) $module))
