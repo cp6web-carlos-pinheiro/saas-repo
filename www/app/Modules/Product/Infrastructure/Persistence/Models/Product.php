@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Product\Infrastructure\Persistence\Models;
 
+use App\Modules\Bom\Infrastructure\Persistence\Models\BomHeader;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -38,5 +39,10 @@ final class Product extends TenantModel
     public function versions(): HasMany
     {
         return $this->hasMany(ProductVersion::class);
+    }
+
+    public function bomHeaders(): HasMany
+    {
+        return $this->hasMany(BomHeader::class);
     }
 }

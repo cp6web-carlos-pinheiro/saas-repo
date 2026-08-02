@@ -159,6 +159,24 @@ final class ProductVersionService extends BaseService
         return $obsolete->toArray();
     }
 
+    public function delete(int $productId, int $versionId): void
+    {
+        $entity = $this->versions->findByProductOrFail($productId, $versionId);
+
+        if ($entity->status === 'APPROVED') {
+            throw new DomainException('Approved versions must be obsoleted before deletion', 422);
+        }
+
+        $this->inTransaction(function () use ($productId, $versionId): void {
+            $this->versions->delete($productId, $versionId);
+        });
+
+        $this->logger->info('product_version.deleted', [
+            'product_id' => $productId,
+            'version_id' => $versionId,
+        ]);
+    }
+
     public function history(int $productId): Collection
     {
         $this->products->findOrFail($productId);

@@ -9,9 +9,9 @@ use App\Shared\Application\DTO\BaseDTO;
 final class ApproveProductVersionDTO extends BaseDTO
 {
     public function __construct(
-        public readonly ?string $effective_from,
-        public readonly ?string $effective_to,
-        public readonly ?string $change_summary,
+        public readonly ?string $effective_from = null,
+        public readonly ?string $effective_to = null,
+        public readonly ?string $change_summary = null,
     ) {
     }
 }

@@ -50,6 +50,13 @@ final class EloquentProductVersionRepository implements ProductVersionRepository
         return $entity;
     }
 
+    public function delete(int $productId, int $versionId): bool
+    {
+        $entity = $this->findByProductOrFail($productId, $versionId);
+
+        return (bool) $entity->delete();
+    }
+
     public function history(int $productId): Collection
     {
         return $this->model->newQuery()

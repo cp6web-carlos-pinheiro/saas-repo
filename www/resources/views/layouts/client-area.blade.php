@@ -28,13 +28,13 @@
 
         $moduleSubitems = [
             'bom' => [
-                ['label' => __('ui.bom_material_list'), 'href' => null, 'active' => false],
-                ['label' => __('ui.bom_structures'), 'href' => null, 'active' => false],
-                ['label' => __('ui.bom_revisions'), 'href' => null, 'active' => false],
+                ['label' => __('ui.bom_material_list'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
+                ['label' => __('ui.bom_structures'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
+                ['label' => __('ui.bom_revisions'), 'href' => route('bom.material-lists.index'), 'active' => request()->routeIs('bom.material-lists.*')],
             ],
             'product' => [
-                ['label' => __('ui.product_register'), 'href' => null, 'active' => false],
-                ['label' => __('ui.product_versions'), 'href' => null, 'active' => false],
+                            ['label' => __('ui.product_register'), 'href' => route('products.index'), 'active' => request()->routeIs('products.index') || request()->routeIs('products.create') || request()->routeIs('products.show') || request()->routeIs('products.edit')],
+                            ['label' => __('ui.product_versions'), 'href' => route('products.versions'), 'active' => request()->routeIs('products.versions') || request()->routeIs('products.versions.*')],
             ],
             'purchasing' => [
                 [
@@ -80,6 +80,10 @@
                     : null;
                 $availableModules = app(\App\Services\SaaS\CompanyUserAccessService::class)->accessibleModules($user, $company);
                 $canManageAccesses = app(\App\Services\SaaS\CompanyUserAccessService::class)->canManageCompanyAccess($user, $company);
+
+                if (in_array('bom', $availableModules, true) && ! in_array('product', $availableModules, true)) {
+                    $availableModules[] = 'product';
+                }
             }
         }
 

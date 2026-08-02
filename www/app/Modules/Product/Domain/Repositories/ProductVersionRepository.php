@@ -17,6 +17,8 @@ interface ProductVersionRepository
 
     public function update(int $productId, int $versionId, array $attributes): ProductVersion;
 
+    public function delete(int $productId, int $versionId): bool;
+
     public function history(int $productId): Collection;
 
     public function latestApproved(int $productId): ?ProductVersion;

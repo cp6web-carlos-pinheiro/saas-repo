@@ -20,8 +20,13 @@ use App\Http\Controllers\Web\Onboarding\AccountInvitationController;
 use App\Http\Controllers\Web\Onboarding\OnboardingController;
 use App\Http\Controllers\Web\Onboarding\PaymentController;
 use App\Http\Controllers\Web\Tenant\CompanyAccessUserController;
+use App\Http\Controllers\Web\Tenant\BomMaterialListController;
+use App\Http\Controllers\Web\Tenant\BomStructureController;
+use App\Http\Controllers\Web\Tenant\ProductController;
+use App\Http\Controllers\Web\Tenant\ProductVersionController;
 use App\Http\Controllers\Web\Tenant\SupplierController;
 use App\Http\Middleware\EnsureTrialIsActive;
+use App\Modules\Identity\Presentation\Http\Middleware\CheckPermission;
 use App\Http\Middleware\ResolveWebTenant;
 use Illuminate\Support\Facades\Route;
 
@@ -117,6 +122,43 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/{supplier}/edit', [SupplierController::class, 'edit'])->name('edit');
             Route::put('/{supplier}', [SupplierController::class, 'update'])->name('update');
             Route::delete('/{supplier}', [SupplierController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::middleware([EnsureTrialIsActive::class, CheckPermission::class.':bom.explode'])->group(function (): void {
+            Route::prefix('bom/structures')->name('bom.structures.')->group(function (): void {
+                Route::get('/', [BomStructureController::class, 'index'])->name('index');
+                Route::get('/{product}', [BomStructureController::class, 'show'])->whereNumber('product')->name('show');
+            });
+
+            Route::prefix('bom/material-lists')->name('bom.material-lists.')->group(function (): void {
+                Route::get('/', [BomMaterialListController::class, 'index'])->name('index');
+                Route::get('/create', [BomMaterialListController::class, 'create'])->name('create');
+                Route::post('/', [BomMaterialListController::class, 'store'])->name('store');
+                Route::get('/{bom}', [BomMaterialListController::class, 'show'])->whereNumber('bom')->name('show');
+                Route::get('/{bom}/edit', [BomMaterialListController::class, 'edit'])->whereNumber('bom')->name('edit');
+                Route::put('/{bom}', [BomMaterialListController::class, 'update'])->whereNumber('bom')->name('update');
+                Route::delete('/{bom}', [BomMaterialListController::class, 'destroy'])->whereNumber('bom')->name('destroy');
+            });
+
+            Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+            Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+            Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+            Route::get('/products/versions', [ProductVersionController::class, 'index'])->name('products.versions');
+            Route::get('/products/{product}', [ProductController::class, 'show'])->whereNumber('product')->name('products.show');
+            Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->whereNumber('product')->name('products.edit');
+            Route::put('/products/{product}', [ProductController::class, 'update'])->whereNumber('product')->name('products.update');
+            Route::delete('/products/{product}', [ProductController::class, 'destroy'])->whereNumber('product')->name('products.destroy');
+
+            Route::prefix('/products/{product}/versions')->name('products.versions.')->group(function (): void {
+                Route::get('/create', [ProductVersionController::class, 'create'])->whereNumber('product')->name('create');
+                Route::post('/', [ProductVersionController::class, 'store'])->whereNumber('product')->name('store');
+                Route::get('/{version}', [ProductVersionController::class, 'show'])->whereNumber('product')->whereNumber('version')->name('show');
+                Route::get('/{version}/edit', [ProductVersionController::class, 'edit'])->whereNumber('product')->whereNumber('version')->name('edit');
+                Route::put('/{version}', [ProductVersionController::class, 'update'])->whereNumber('product')->whereNumber('version')->name('update');
+                Route::delete('/{version}', [ProductVersionController::class, 'destroy'])->whereNumber('product')->whereNumber('version')->name('destroy');
+                Route::post('/{version}/approve', [ProductVersionController::class, 'approve'])->whereNumber('product')->whereNumber('version')->name('approve');
+                Route::post('/{version}/obsolete', [ProductVersionController::class, 'obsolete'])->whereNumber('product')->whereNumber('version')->name('obsolete');
+            });
         });
     });
 

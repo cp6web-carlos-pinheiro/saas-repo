@@ -6,21 +6,27 @@
 @source '../**/*.js';
 
 @theme {
+    /* Fontes mantidas */
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
     --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'Manrope', sans-serif;
 
-    --color-night: #0A1224;
-    --color-graphite: #111827;
-    --color-skycore: #00B3FF;
-    --color-emeraldcore: #19D89D;
-    --color-snow: #F8FAFC;
-    --color-mist: #DDE8F5;
-    --color-coral: #FF7A59;
+    /* --- ATUALIZAÇÕES DE CORES BASEADAS NO FAVICON --- */
 
-    --shadow-glow: 0 20px 60px rgba(0, 179, 255, 0.25);
-    --shadow-soft: 0 12px 34px rgba(2, 6, 23, 0.16);
+    /* Tons de base neutros inspirados no fundo do favicon */
+    --color-night: #37474F;         /* Mais suave do que #0A1224, neutro */
+    --color-graphite: #455A64;      /* Ajustado para acompanhar */
+    --color-snow: #F8FAFC;          /* Mantido limpo */
+    --color-mist: #CFD8DC;          /* Mantido suave, mais cinza-azulado */
+
+    /* Cores principais do favicon */
+    --color-mrp-blue: #0066CC;       /* O azul da engrenagem/seta */
+    --color-mrp-orange-action: #FF8800; /* O laranja vibrante das setas laterais */
+    --color-mrp-orange-check: #E07000;  /* O laranja mais quente do checkmark central */
+
+    /* Sombras e Animações (mantidas, mas ajustadas para usar as novas cores base) */
+    --shadow-soft: 0 12px 34px rgba(69, 90, 100, 0.16);
 
     --animate-float: float 6s ease-in-out infinite;
     --animate-pulseSoft: pulseSoft 3s ease-in-out infinite;
@@ -28,18 +34,32 @@
 }
 
 :root {
-    --g-bg: #f8fafd;
+    /* --- ATUALIZAÇÕES DOS TOKENS DE RAIZ (Usando as cores do favicon) --- */
+
+    /* Fundo suave cinza-azulado */
+    --g-bg: #F0F2F3;                /* Superfície muito clara inspirada no fundo do ícone */
     --g-surface: #ffffff;
-    --g-surface-muted: #f1f3f4;
-    --g-text: #202124;
-    --g-text-muted: #5f6368;
-    --g-line: #dadce0;
-    --g-primary: #1a73e8;
-    --g-primary-soft: #e8f0fe;
+    --g-surface-muted: #E1E5E7;     /* Mais cinza, menos azulado antigo */
+
+    /* Texto: Preto suave, mas neutro */
+    --g-text: #263238;
+    --g-text-muted: #607D8B;
+
+    --g-line: #CFD8DC;
+
+    /* PRINCIPAL: O azul do MRP */
+    --g-primary: #0066CC;
+    --g-primary-soft: #E0F0FF;      /* Um tom azul-bebê suave para destaques ativos */
+
+    /* Perigo: Mantido (D93025) */
     --g-danger: #d93025;
-    --g-success: #196a3f;
-    --g-success-soft: #eaf8ef;
-    --g-success-line: #c7e8d3;
+
+    /* Sucesso: O laranja de verificação pode ser um 'destaque de status',
+       mas se você precisa de verde para sucesso, o antigo era OK.
+       Vou redefinir para o Laranja de Checkmark Central para testar um esquema coerente. */
+    --g-success: #E07000;          /* O laranja mais quente para "verificado/processado" */
+    --g-success-soft: #FFEFCF;
+    --g-success-line: #FFDDAA;
 }
 
 * {
@@ -91,16 +111,18 @@ body {
 }
 
 @layer components {
+    /* Componentes mantidos, mas reajustados para usar novas variáveis de base */
+
     .auth-shell {
         min-height: 100vh;
         background:
-            radial-gradient(circle at 0% 0%, rgba(26, 115, 232, 0.11), transparent 36%),
-            radial-gradient(circle at 100% 100%, rgba(66, 133, 244, 0.09), transparent 34%),
+            radial-gradient(circle at 0% 0%, rgba(0, 102, 204, 0.11), transparent 36%), /* Azul do favicon */
+            radial-gradient(circle at 100% 100%, rgba(0, 102, 204, 0.09), transparent 34%), /* Azul do favicon */
             #f8fafc;
     }
 
     .auth-card {
-        @apply w-full rounded-3xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)];
+        @apply w-full rounded-3xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(38,50,56,0.08)];
     }
 
     .auth-label {
@@ -172,8 +194,8 @@ body {
     }
 
     .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
-        background-color: #e8f0fe;
-        color: #174ea6;
+        background-color: #e0f0ff; /* Novo primary soft */
+        color: #004C99;         /* Azul primário, ligeiramente mais escuro para contraste */
     }
 
     .auth-input-wrap .select2-container--default .select2-selection--single {
@@ -190,7 +212,7 @@ body {
     }
 
     .auth-btn-primary:hover {
-        background: #1558b0;
+        background: #0052A3; /* Azul primário escurecido para hover */
     }
 
     .auth-btn-primary:focus {
@@ -262,9 +284,9 @@ body {
 
     .admin-nav-link.is-active {
         background: #e2e8f0;
-        border-color: #38bdf8;
+        border-color: #FF8800; /* Laranja do favicon para 'ativo' */
         color: #0f172a;
-        box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.3);
+        box-shadow: inset 0 0 0 1px rgba(255, 136, 0, 0.3);
     }
 
     .docs-layout {
@@ -408,16 +430,16 @@ body {
     }
 
     .docs-article code {
-        background: #eef2f7;
-        border: 1px solid #d7dee8;
+        background: #e1e5e7; /* Novo surface muted */
+        border: 1px solid #CFD8DC; /* Novo line */
         border-radius: 6px;
         padding: 0.08rem 0.3rem;
         font-size: 0.88em;
     }
 
     .docs-article pre {
-        background: #0f172a;
-        color: #e2e8f0;
+        background: #263238; /* Novo g-text */
+        color: #CFD8DC;     /* Novo line */
         border-radius: 10px;
         padding: 0.9rem;
         overflow: auto;
@@ -448,8 +470,8 @@ body {
 
     .ind-page {
         background:
-            radial-gradient(circle at 100% 0%, #e8f0fe 0%, rgba(232, 240, 254, 0) 34%),
-            radial-gradient(circle at 0% 100%, #fce8e6 0%, rgba(252, 232, 230, 0) 30%),
+            radial-gradient(circle at 100% 0%, #FFEFCF 0%, rgba(255, 239, 207, 0) 34%), /* Sucesso (Laranja) */
+            radial-gradient(circle at 0% 100%, #ffebee 0%, rgba(255, 235, 238, 0) 30%), /* Perigo (Vermelho) */
             var(--g-bg);
     }
 
@@ -720,7 +742,7 @@ body {
     .ind-logout-button {
         width: 100%;
         border: 1px solid #f6aea9;
-        background: #fce8e6;
+        background: #ffebee; /* Perigo soft */
         color: var(--g-danger);
         border-radius: 999px;
         font-size: 0.9rem;
@@ -763,7 +785,7 @@ body {
     .ind-settings-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(15, 23, 42, 0.24);
+        background: rgba(38, 50, 56, 0.24); /* g-text */
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.22s ease;
@@ -781,8 +803,8 @@ body {
         right: 12px;
         width: min(400px, calc(100% - 24px));
         height: calc(100vh - 24px);
-        background: #f8fafd;
-        border: 1px solid #e1e7f0;
+        background: #F0F2F3; /* g-bg */
+        border: 1px solid #CFD8DC; /* line */
         border-radius: 28px;
         box-shadow: 0 12px 28px rgba(60, 64, 67, 0.22), 0 2px 6px rgba(60, 64, 67, 0.16);
         transform: translateX(calc(100% + 64px));
@@ -885,7 +907,7 @@ body {
     }
 
     .ind-settings-save:hover {
-        background: #1558b0;
+        background: #0052A3; /* Hover primário escurecido */
         box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
     }
 
@@ -928,8 +950,8 @@ body {
         gap: 1rem;
         border-radius: 16px;
         padding: 0.9rem 1rem;
-        background: #e8f0fe;
-        color: #174ea6;
+        background: #E0F0FF; /* Primary soft */
+        color: #004C99;         /* Azul primário, ligeiramente mais escuro para contraste */
         font-size: 0.875rem;
         font-weight: 600;
         text-decoration: none;
@@ -937,7 +959,7 @@ body {
     }
 
     .ind-settings-nav-link:hover {
-        background: #d2e3fc;
+        background: #C4E3FF;
     }
 
     .ind-settings-nav-link svg {
@@ -947,7 +969,7 @@ body {
     .ind-subscription-card {
         display: grid;
         gap: 1rem;
-        background: #f1f3f4;
+        background: var(--g-surface-muted);
         border-color: transparent;
     }
 
@@ -998,7 +1020,7 @@ body {
         border: 1px solid #747775;
         border-radius: 999px;
         padding: 0.55rem 1rem;
-        color: #0b57d0;
+        color: #0066CC; /* g-primary */
         font-size: 0.875rem;
         font-weight: 600;
         text-decoration: none;
@@ -1006,7 +1028,7 @@ body {
     }
 
     .ind-subscription-action:hover {
-        background: #e8f0fe;
+        background: #E0F0FF; /* Primary soft */
         box-shadow: 0 1px 2px rgba(60, 64, 67, 0.2);
     }
 
@@ -1110,7 +1132,7 @@ body {
     }
 
     .g-swal-confirm {
-        background: #d93025;
+        background: #d93025; /* Perigo */
         color: #fff;
     }
 
@@ -1130,11 +1152,11 @@ body {
     }
 
     .g-swal-cancel:hover {
-        background: #e8eaed;
+        background: #CFD8DC; /* Novo line */
     }
 
     .g-swal-cancel:focus-visible {
         outline: none;
-        box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2); /* Novo primary */
     }
 }

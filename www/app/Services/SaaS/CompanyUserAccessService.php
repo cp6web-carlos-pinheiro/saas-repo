@@ -199,7 +199,15 @@ final class CompanyUserAccessService
     {
         foreach (self::MODULE_ALIASES as $alias => $sourceModule) {
             if (in_array($sourceModule, $modules, true) && ! in_array($alias, $modules, true)) {
-                $modules[] = $alias;
+                $insertAfter = array_search($sourceModule, $modules, true);
+
+                if ($insertAfter === false) {
+                    $modules[] = $alias;
+
+                    continue;
+                }
+
+                array_splice($modules, $insertAfter + 1, 0, [$alias]);
             }
         }
 

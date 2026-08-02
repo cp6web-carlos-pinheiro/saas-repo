@@ -41,6 +41,6 @@ final class BomHeader extends TenantModel
 
     public function items(): HasMany
     {
-        return $this->hasMany(BomItem::class, 'bom_header_id');
+        return $this->hasMany(BomItem::class, 'bom_header_id')->orderBy('line_no');
     }
 }
