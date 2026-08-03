@@ -23,5 +23,5 @@ return [
     'trial_expired' => 'Seu período gratuito de 14 dias terminou. Contrate um plano para retomar a operação.',
     'trial_started' => 'Seu acesso gratuito de 14 dias foi ativado. Comece agora e valide os ganhos operacionais.',
     'reset_password' => 'Recebemos sua solicitação de redefinição de senha. Use o link seguro enviado para criar uma nova senha.',
-    'welcome' => 'Bem-vindo(a), :name. Seus 14 dias gratuitos foram iniciados e seu workspace já esta disponivel.',
+    'welcome' => 'Bem-vindo(a), :name. Seus 14 dias gratuitos foram iniciados e seu workspace já esta disponível.',
 ];

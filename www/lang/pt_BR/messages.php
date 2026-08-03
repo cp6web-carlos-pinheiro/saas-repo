@@ -17,7 +17,7 @@ return [
     'account_created_and_invitation_accepted' => 'Conta criada e convite aceito com sucesso.',
     'company_data_saved' => 'Dados da empresa salvos com sucesso.',
     'plan_selected_successfully' => 'Plano selecionado com sucesso.',
-    'free_trial_already_used' => 'O plano Gratis 14 dias pode ser usado apenas uma vez e nao pode ser renovado.',
+    'free_trial_already_used' => 'O plano GrÃ¡tis 14 dias pode ser usado apenas uma vez e não pode ser renovado.',
     'language_updated' => 'Idioma atualizado com sucesso.',
     'password_reset_link_sent' => 'Se o e-mail existir, enviaremos as instruções de redefinição.',
     'reset_token_invalid_or_expired' => 'Token inválido ou expirado.',

@@ -3,7 +3,7 @@
 return [
     'title' => 'Clientes',
     'eyebrow' => 'Gestión de clientes',
-    'search' => 'Buscar por cliente, empresa, codigo, estado, correo o ID',
+    'search' => 'Buscar por cliente, empresa, cÃ³digo, estado, correo o ID',
     'filter' => 'Buscar',
     'empty' => 'No se encontraron clientes.',
     'create' => 'Crear cliente',
@@ -20,7 +20,7 @@ return [
     'company_unlinked_details' => 'Este cliente aun no tiene una empresa vinculada.',
     'company_id' => 'ID de la empresa',
     'company_name' => 'Nombre de la empresa',
-    'company_code' => 'Codigo de la empresa',
+    'company_code' => 'Código de la empresa',
     'company_status' => 'Estado de la empresa',
     'company_created_at' => 'Empresa registrada en',
     'company_updated_at' => 'Empresa actualizada en',

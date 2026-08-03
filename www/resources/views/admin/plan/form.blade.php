@@ -48,7 +48,7 @@
 
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.amount') }}
-                    <x-ui.input name="amount" :value="old('amount', number_format(($plan?->amount_cents ?? 0) / 100, 2, ',', '.'))" required inputmode="decimal" data-currency-mask="brl" autocomplete="off" @class(['mt-2', 'border-red-500' => $errors->has('amount'), 'border-[#dadce0]' => ! $errors->has('amount')]) />
+                    <x-ui.input name="amount" :value="old('amount', number_format(($plan?->amount_cents ?? 0) / 100, 2, ',', '.'))" required inputmode="decimal" data-currency-mask="brl" @class(['mt-2', 'border-red-500' => $errors->has('amount'), 'border-[#dadce0]' => ! $errors->has('amount')]) />
                     @error('amount')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 

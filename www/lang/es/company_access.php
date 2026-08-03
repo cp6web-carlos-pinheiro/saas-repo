@@ -30,7 +30,7 @@ return [
     'last_administrator_required' => 'La empresa debe mantener al menos un usuario administrador activo.',
     'confirm_delete_title' => 'Eliminar usuario?',
     'confirm_delete_text' => 'Está a punto de eliminar a :name. Esta acción no se puede deshacer.',
-    'confirm_delete_confirm' => 'Si, eliminar',
+    'confirm_delete_confirm' => 'Sí, eliminar',
     'confirm_delete_cancel' => 'Cancelar',
     'created' => 'Usuario creado con éxito.',
     'updated' => 'Usuario actualizado con éxito.',

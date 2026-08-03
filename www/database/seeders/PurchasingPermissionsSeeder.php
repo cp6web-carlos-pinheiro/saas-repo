@@ -22,7 +22,9 @@ final class PurchasingPermissionsSeeder extends Seeder
             ['name' => 'Convert Requisitions to PO', 'slug' => 'purchasing.requisitions.convert', 'module' => 'purchasing'],
             ['name' => 'Read Purchase Orders', 'slug' => 'purchasing.orders.read', 'module' => 'purchasing'],
             ['name' => 'Approve Purchase Orders', 'slug' => 'purchasing.orders.approve', 'module' => 'purchasing'],
-            ['name' => 'Read Customers', 'slug' => 'customers.read', 'module' => 'customers'],
+            ['name' => 'Read Customers', 'slug' => 'sales.customers.read', 'module' => 'customers'],
+            ['name' => 'Create Customers', 'slug' => 'sales.customers.create', 'module' => 'customers'],
+            ['name' => 'Update Customers', 'slug' => 'sales.customers.update', 'module' => 'customers'],
             ['name' => 'Read Sales', 'slug' => 'sales.read', 'module' => 'sales'],
         ];
 

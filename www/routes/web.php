@@ -23,6 +23,7 @@ use App\Http\Controllers\Web\Tenant\CompanyAccessUserController;
 use App\Http\Controllers\Web\Tenant\RbacConsoleController;
 use App\Http\Controllers\Web\Tenant\BomMaterialListController;
 use App\Http\Controllers\Web\Tenant\BomStructureController;
+use App\Http\Controllers\Web\Tenant\CustomerController;
 use App\Http\Controllers\Web\Tenant\ProductController;
 use App\Http\Controllers\Web\Tenant\ProductVersionController;
 use App\Http\Controllers\Web\Tenant\SupplierController;
@@ -129,7 +130,7 @@ Route::middleware('auth:web')->group(function (): void {
             Route::delete('/roles/{role}', [RbacConsoleController::class, 'destroyRole'])->name('roles.destroy');
         });
 
-        Route::prefix('purchasing/suppliers')->name('purchasing.suppliers.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+        Route::prefix('suppliers')->name('purchasing.suppliers.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
             Route::get('/', [SupplierController::class, 'index'])->name('index');
             Route::get('/create', [SupplierController::class, 'create'])->name('create');
             Route::post('/', [SupplierController::class, 'store'])->name('store');
@@ -137,6 +138,16 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/{supplier}/edit', [SupplierController::class, 'edit'])->name('edit');
             Route::put('/{supplier}', [SupplierController::class, 'update'])->name('update');
             Route::delete('/{supplier}', [SupplierController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('customers')->name('customers.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [CustomerController::class, 'index'])->name('index');
+            Route::get('/create', [CustomerController::class, 'create'])->name('create');
+            Route::post('/', [CustomerController::class, 'store'])->name('store');
+            Route::get('/{customer}', [CustomerController::class, 'show'])->name('show');
+            Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
+            Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
+            Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
         });
 
         Route::middleware([EnsureTrialIsActive::class, CheckPermission::class.':bom.explode'])->group(function (): void {

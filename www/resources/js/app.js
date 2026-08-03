@@ -34,6 +34,53 @@ for (const input of currencyMaskedInputs) {
 	});
 }
 
+const taxIdMaskedInputs = document.querySelectorAll('input[data-tax-id-mask="true"]');
+
+const maskCpf = (digits) => {
+	const value = digits.slice(0, 11);
+
+	return value
+		.replace(/(\d{3})(\d)/, '$1.$2')
+		.replace(/(\d{3})(\d)/, '$1.$2')
+		.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+};
+
+const maskCnpj = (digits) => {
+	const value = digits.slice(0, 14);
+
+	return value
+		.replace(/^(\d{2})(\d)/, '$1.$2')
+		.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+		.replace(/\.(\d{3})(\d)/, '.$1/$2')
+		.replace(/(\d{4})(\d)/, '$1-$2');
+};
+
+const applyTaxIdMask = (input) => {
+	const digits = input.value.replace(/\D/g, '');
+	const personTypeSourceId = input.dataset.personTypeSource;
+	const personTypeElement = personTypeSourceId ? document.getElementById(personTypeSourceId) : null;
+	const personType = personTypeElement instanceof HTMLSelectElement ? personTypeElement.value : 'PJ';
+
+	input.value = personType === 'PF' ? maskCpf(digits) : maskCnpj(digits);
+};
+
+for (const input of taxIdMaskedInputs) {
+	applyTaxIdMask(input);
+
+	input.addEventListener('input', () => {
+		applyTaxIdMask(input);
+	});
+
+	const personTypeSourceId = input.dataset.personTypeSource;
+	const personTypeElement = personTypeSourceId ? document.getElementById(personTypeSourceId) : null;
+
+	if (personTypeElement instanceof HTMLSelectElement) {
+		personTypeElement.addEventListener('change', () => {
+			applyTaxIdMask(input);
+		});
+	}
+}
+
 const initializeUiSelects = () => {
 	if (typeof window.jQuery?.fn?.select2 !== 'function') {
 		return;

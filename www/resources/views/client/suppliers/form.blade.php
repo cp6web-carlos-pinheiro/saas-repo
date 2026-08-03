@@ -26,16 +26,27 @@
             @endif
 
             <label class="block text-sm font-medium">
-                {{ __('supplier.code') }}
-                <x-ui.input name="code" :value="old('code', $supplier?->code)" required @class(['mt-2', 'border-red-500' => $errors->has('code'), 'border-[#dadce0]' => ! $errors->has('code')]) />
-                @error('code')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-            </label>
-
-            <label class="block text-sm font-medium">
                 {{ __('supplier.name') }}
                 <x-ui.input name="name" :value="old('name', $supplier?->name)" required @class(['mt-2', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')]) />
                 @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+                <label class="block text-sm font-medium">
+                    {{ __('supplier.person_type') }}
+                    <x-ui.select id="supplier-person-type" name="person_type" class="mt-2" required data-search="off">
+                        <option value="PJ" @selected(old('person_type', $supplier?->person_type ?? 'PJ') === 'PJ')>{{ __('supplier.person_type_pj') }}</option>
+                        <option value="PF" @selected(old('person_type', $supplier?->person_type ?? 'PJ') === 'PF')>{{ __('supplier.person_type_pf') }}</option>
+                    </x-ui.select>
+                    @error('person_type')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
+
+                <label class="block text-sm font-medium">
+                    {{ __('supplier.tax_id') }}
+                    <x-ui.input name="tax_id" :value="old('tax_id', $supplier?->tax_id)" inputmode="numeric" data-tax-id-mask="true" data-person-type-source="supplier-person-type" @class(['mt-2', 'border-red-500' => $errors->has('tax_id'), 'border-[#dadce0]' => ! $errors->has('tax_id')]) />
+                    @error('tax_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
+            </div>
 
             <label class="block text-sm font-medium">
                 {{ __('supplier.email') }}

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Customer\Infrastructure\Persistence\Models\Customer;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
-use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
@@ -16,13 +16,13 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-final class SupplierController extends Controller
+final class CustomerController extends Controller
 {
-    private const READ_PERMISSION = 'purchasing.suppliers.read';
+    private const READ_PERMISSION = 'sales.customers.read';
 
-    private const CREATE_PERMISSION = 'purchasing.suppliers.create';
+    private const CREATE_PERMISSION = 'sales.customers.create';
 
-    private const UPDATE_PERMISSION = 'purchasing.suppliers.update';
+    private const UPDATE_PERMISSION = 'sales.customers.update';
 
     public function index(Request $request): View
     {
@@ -44,9 +44,9 @@ final class SupplierController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['name', 'status', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['name', 'person_type', 'status', 'created_at'], true), 404);
 
-        $suppliers = Supplier::query()
+        $customers = Customer::query()
             ->when($personType !== '', static fn (Builder $query) => $query->where('person_type', $personType))
             ->when($status !== '', static fn (Builder $query) => $query->where('status', $status))
             ->when($search !== '', fn (Builder $query) => $this->applySearchFilters($query, $searchTerms))
@@ -54,7 +54,7 @@ final class SupplierController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('client.suppliers.search', compact('suppliers', 'search', 'sort', 'direction', 'personType', 'status', 'company'));
+        return view('client.customers.search', compact('customers', 'search', 'sort', 'direction', 'personType', 'status', 'company'));
     }
 
     public function create(Request $request): View
@@ -62,18 +62,18 @@ final class SupplierController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
-        return view('client.suppliers.form', [
-            'supplier' => null,
+        return view('client.customers.form', [
+            'customer' => null,
             'company' => $company,
         ]);
     }
 
-    public function show(Request $request, Supplier $supplier): View
+    public function show(Request $request, Customer $customer): View
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
-        return view('client.suppliers.show', compact('supplier', 'company'));
+        return view('client.customers.show', compact('customer', 'company'));
     }
 
     public function store(Request $request, AuditLogService $audit): RedirectResponse
@@ -81,8 +81,8 @@ final class SupplierController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
-        $data = $this->validateSupplier($request, $company);
-        $supplier = Supplier::query()->create([
+        $data = $this->validateCustomer($request, $company);
+        $customer = Customer::query()->create([
             'company_id' => $company->id,
             'code' => $this->generateCode($company),
             'name' => $data['name'],
@@ -91,14 +91,12 @@ final class SupplierController extends Controller
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
             'status' => $data['status'],
-            'default_lead_time_days' => (int) ($data['default_lead_time_days'] ?? 0),
-            'payment_terms' => $data['payment_terms'] ?? null,
         ]);
 
         $audit->record(
-            'tenant_supplier.created',
+            'tenant_customer.created',
             context: [
-                'supplier_id' => $supplier->id,
+                'customer_id' => $customer->id,
                 'company_id' => $company->id,
                 'actor_user_id' => $request->user()?->id,
             ],
@@ -107,40 +105,38 @@ final class SupplierController extends Controller
             userAgent: $request->userAgent(),
         );
 
-        return redirect()->route('purchasing.suppliers.index')->with('status', __('supplier.created'));
+        return redirect()->route('customers.index')->with('status', __('customer.created'));
     }
 
-    public function edit(Request $request, Supplier $supplier): View
+    public function edit(Request $request, Customer $customer): View
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
-        return view('client.suppliers.form', compact('supplier', 'company'));
+        return view('client.customers.form', compact('customer', 'company'));
     }
 
-    public function update(Request $request, Supplier $supplier, AuditLogService $audit): RedirectResponse
+    public function update(Request $request, Customer $customer, AuditLogService $audit): RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
-        $data = $this->validateSupplier($request, $company, $supplier);
+        $data = $this->validateCustomer($request, $company, $customer);
 
-        $supplier->fill([
+        $customer->fill([
             'name' => $data['name'],
             'person_type' => $data['person_type'],
             'tax_id' => $data['tax_id'] ?? null,
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
             'status' => $data['status'],
-            'default_lead_time_days' => (int) ($data['default_lead_time_days'] ?? 0),
-            'payment_terms' => $data['payment_terms'] ?? null,
         ]);
-        $supplier->save();
+        $customer->save();
 
         $audit->record(
-            'tenant_supplier.updated',
+            'tenant_customer.updated',
             context: [
-                'supplier_id' => $supplier->id,
+                'customer_id' => $customer->id,
                 'company_id' => $company->id,
                 'actor_user_id' => $request->user()?->id,
             ],
@@ -149,23 +145,23 @@ final class SupplierController extends Controller
             userAgent: $request->userAgent(),
         );
 
-        return redirect()->route('purchasing.suppliers.index')->with('status', __('supplier.updated'));
+        return redirect()->route('customers.index')->with('status', __('customer.updated'));
     }
 
-    public function destroy(Request $request, Supplier $supplier, AuditLogService $audit): RedirectResponse
+    public function destroy(Request $request, Customer $customer, AuditLogService $audit): RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
-        $supplierId = $supplier->id;
-        $supplierName = $supplier->name;
-        $supplier->delete();
+        $customerId = $customer->id;
+        $customerName = $customer->name;
+        $customer->delete();
 
         $audit->record(
-            'tenant_supplier.removed',
+            'tenant_customer.removed',
             context: [
-                'supplier_id' => $supplierId,
-                'supplier_name' => $supplierName,
+                'customer_id' => $customerId,
+                'customer_name' => $customerName,
                 'company_id' => $company->id,
                 'actor_user_id' => $request->user()?->id,
             ],
@@ -174,7 +170,7 @@ final class SupplierController extends Controller
             userAgent: $request->userAgent(),
         );
 
-        return redirect()->route('purchasing.suppliers.index')->with('status', __('supplier.removed'));
+        return redirect()->route('customers.index')->with('status', __('customer.removed'));
     }
 
     private function activeCompanyFrom(Request $request): Company
@@ -203,7 +199,7 @@ final class SupplierController extends Controller
         abort_unless($user->hasPermission($permission, $companyId), 403);
     }
 
-    private function validateSupplier(Request $request, Company $company, ?Supplier $supplier = null): array
+    private function validateCustomer(Request $request, Company $company, ?Customer $customer = null): array
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:180'],
@@ -227,16 +223,14 @@ final class SupplierController extends Controller
             'email' => ['nullable', 'email', 'max:180'],
             'phone' => ['nullable', 'string', 'max:50'],
             'status' => ['required', Rule::in(['ACTIVE', 'INACTIVE'])],
-            'default_lead_time_days' => ['nullable', 'integer', 'min:0'],
-            'payment_terms' => ['nullable', 'string', 'max:80'],
         ]);
     }
 
     private function generateCode(Company $company): string
     {
         do {
-            $code = 'SUP-'.strtoupper(bin2hex(random_bytes(3)));
-        } while (Supplier::query()->where('company_id', $company->id)->where('code', $code)->exists());
+            $code = 'CUS-'.strtoupper(bin2hex(random_bytes(3)));
+        } while (Customer::query()->where('company_id', $company->id)->where('code', $code)->exists());
 
         return $code;
     }

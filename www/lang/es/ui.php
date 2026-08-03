@@ -31,7 +31,7 @@ return [
     'billing_page_subtitle' => 'Elija un nuevo ciclo para renovar o contratar otro plan de la cuenta.',
     'current_subscription' => 'Suscripción actual',
     'choose_next_plan' => 'Planes disponibles',
-    'free_trial_used' => 'El plan Gratis 14 dias ya fue utilizado en esta cuenta y no puede renovarse.',
+    'free_trial_used' => 'El plan Gratis 14 días ya fue utilizado en esta cuenta y no puede renovarse.',
     'plan_without_amount_cannot_be_renewed' => 'Este plan no tiene importe y no puede renovarse.',
     'no_subscription' => 'Ningún plan activo',
     'no_due_date' => 'Sin vencimiento definido',

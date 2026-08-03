@@ -34,6 +34,7 @@
 
         $moduleLinks = [
             'suppliers' => route('purchasing.suppliers.index'),
+            'customers' => route('customers.index'),
         ];
 
         $moduleSubitems = [
