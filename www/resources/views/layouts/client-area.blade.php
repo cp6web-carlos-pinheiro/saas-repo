@@ -489,5 +489,11 @@
                 setSettingsState(false);
             }
         });
+
+        window.addEventListener('load', function () {
+            if (typeof window.initializeUiSelects === 'function') {
+                window.initializeUiSelects();
+            }
+        });
     </script>
 @endsection

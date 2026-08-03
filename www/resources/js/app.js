@@ -83,10 +83,11 @@ for (const input of taxIdMaskedInputs) {
 
 const initializeUiSelects = () => {
 	if (typeof window.jQuery?.fn?.select2 !== 'function') {
-		return;
+		return 0;
 	}
 
 	const uiSelects = document.querySelectorAll('select[data-ui-select2="true"]');
+	let initializedCount = 0;
 
 	for (const element of uiSelects) {
 		const select = window.jQuery(element);
@@ -106,15 +107,43 @@ const initializeUiSelects = () => {
 		const dropdownParentSelector = element.dataset.dropdownParent;
 		const dropdownParent = dropdownParentSelector ? document.querySelector(dropdownParentSelector) : null;
 		const placeholder = element.dataset.placeholder;
-
-		select.select2({
+		const ajaxUrl = element.dataset.ajaxUrl;
+		const minimumInputLength = Number.parseInt(element.dataset.minimumInputLength ?? '', 10);
+		const select2Options = {
 			width: '100%',
 			minimumResultsForSearch: minForSearch,
 			placeholder,
 			allowClear: element.dataset.allowClear === 'true',
 			dropdownParent: dropdownParent ? window.jQuery(dropdownParent) : undefined,
-		});
+		};
+
+		if (ajaxUrl) {
+			select2Options.minimumInputLength = Number.isNaN(minimumInputLength) ? 1 : minimumInputLength;
+			select2Options.ajax = {
+				url: ajaxUrl,
+				dataType: 'json',
+				delay: 250,
+				data: (params) => ({
+					q: params.term ?? '',
+					page: params.page ?? 1,
+				}),
+				processResults: (data) => {
+					return {
+						results: Array.isArray(data?.results) ? data.results : [],
+						pagination: {
+							more: Boolean(data?.pagination?.more),
+						},
+					};
+				},
+				cache: true,
+			};
+		}
+
+		select.select2(select2Options);
+		initializedCount += 1;
 	}
+
+	return initializedCount;
 };
 
 window.initializeUiSelects = initializeUiSelects;
@@ -144,12 +173,75 @@ const observeDynamicUiSelects = () => {
 	observer.observe(root, { childList: true, subtree: true });
 };
 
+const patchSelect2AjaxNormalizeForStrictMode = () => {
+	const select2Amd = window.jQuery?.fn?.select2?.amd;
+
+	if (!select2Amd || typeof select2Amd.require !== 'function') {
+		return;
+	}
+
+	const SelectDataAdapter = select2Amd.require('select2/data/select');
+
+	if (!SelectDataAdapter || SelectDataAdapter.__beyondNormalizePatched === true) {
+		return;
+	}
+
+	SelectDataAdapter.prototype._normalizeItem = function (item) {
+		let normalizedItem = item;
+
+		if (normalizedItem !== Object(normalizedItem)) {
+			normalizedItem = { id: normalizedItem, text: normalizedItem };
+		}
+
+		normalizedItem = window.jQuery.extend({}, { text: '' }, normalizedItem);
+
+		if (normalizedItem.id != null) {
+			normalizedItem.id = normalizedItem.id.toString();
+		}
+
+		if (normalizedItem.text != null) {
+			normalizedItem.text = normalizedItem.text.toString();
+		}
+
+		const hasContext = this !== undefined && this !== null;
+		const container = hasContext ? this.container : null;
+
+		if (normalizedItem._resultId == null && normalizedItem.id && container != null && typeof this.generateResultId === 'function') {
+			normalizedItem._resultId = this.generateResultId(container, normalizedItem);
+		}
+
+		if (Array.isArray(normalizedItem.children)) {
+			normalizedItem.children = normalizedItem.children.map((child) => SelectDataAdapter.prototype._normalizeItem.call(this, child));
+		}
+
+		return window.jQuery.extend({}, { selected: false, disabled: false }, normalizedItem);
+	};
+
+	SelectDataAdapter.__beyondNormalizePatched = true;
+};
+
 try {
-	await import('select2/dist/js/select2.full.min.js');
-	initializeUiSelects();
+	const select2Module = await import('select2/dist/js/select2.full.min.js');
+
+	if (typeof window.jQuery?.fn?.select2 !== 'function') {
+		const select2Factory = select2Module?.default;
+
+		if (typeof select2Factory === 'function') {
+			select2Factory(window, window.jQuery);
+		}
+	}
+
+	if (typeof window.jQuery?.fn?.select2 !== 'function') {
+		throw new Error('Select2 plugin did not attach to jQuery.');
+	}
+
+	patchSelect2AjaxNormalizeForStrictMode();
+
+	const initializedSelects = initializeUiSelects();
+	console.info(`[UI] Select2 loaded successfully. Initialized ${initializedSelects} select(s).`);
 	observeDynamicUiSelects();
-} catch {
-	// Ignore plugin load failures to avoid breaking other UI scripts.
+} catch (error) {
+	console.warn('[UI] Select2 failed to load. Native selects will be used.', error);
 }
 
 const sidebarShell = document.querySelector('[data-admin-sidebar-shell]');

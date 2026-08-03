@@ -170,6 +170,7 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
             Route::post('/products', [ProductController::class, 'store'])->name('products.store');
             Route::get('/products/versions', [ProductVersionController::class, 'index'])->name('products.versions');
+            Route::get('/products/search', [ProductVersionController::class, 'searchProducts'])->name('products.search');
             Route::get('/products/{product}', [ProductController::class, 'show'])->whereNumber('product')->name('products.show');
             Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->whereNumber('product')->name('products.edit');
             Route::put('/products/{product}', [ProductController::class, 'update'])->whereNumber('product')->name('products.update');

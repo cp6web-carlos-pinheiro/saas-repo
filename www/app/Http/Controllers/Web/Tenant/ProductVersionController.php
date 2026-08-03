@@ -15,6 +15,7 @@ use App\Modules\Product\Infrastructure\Persistence\Models\ProductVersion;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -31,10 +32,6 @@ final class ProductVersionController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
-        $products = Product::query()
-            ->orderBy('sku')
-            ->get(['id', 'sku', 'description']);
-
         $productId = (int) $request->query('product_id', 0);
         $selectedProduct = $productId > 0
             ? Product::query()->find($productId)
@@ -44,7 +41,46 @@ final class ProductVersionController extends Controller
             ? $service->history($selectedProduct->id)
             : collect();
 
-        return view('client.products.versions', compact('products', 'selectedProduct', 'versions', 'company'));
+        return view('client.products.versions', compact('selectedProduct', 'versions', 'company'));
+    }
+
+    public function searchProducts(Request $request): JsonResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
+
+        $term = trim((string) $request->query('q', ''));
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 20;
+
+        $query = Product::query()
+            ->select(['id', 'sku', 'description'])
+            ->orderBy('sku');
+
+        if ($term !== '') {
+            $query->where(function ($inner) use ($term): void {
+                $inner
+                    ->where('sku', 'like', "%{$term}%")
+                    ->orWhere('description', 'like', "%{$term}%");
+            });
+        }
+
+        $paginator = $query->paginate($perPage, ['id', 'sku', 'description'], 'page', $page);
+
+        $results = $paginator
+            ->getCollection()
+            ->map(fn (Product $product): array => [
+                'id' => $product->id,
+                'text' => sprintf('%s - %s', $product->sku, $product->description ?? __('product.no_description')),
+            ])
+            ->values();
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => [
+                'more' => $paginator->hasMorePages(),
+            ],
+        ]);
     }
 
     public function create(Request $request, Product $product): View

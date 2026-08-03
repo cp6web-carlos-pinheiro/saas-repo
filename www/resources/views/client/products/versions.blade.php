@@ -24,13 +24,20 @@
         <form class="grid gap-4 md:grid-cols-[1fr_auto] md:items-end" method="GET">
             <div>
                 <label for="product_id" class="mb-2 block text-sm font-medium text-[#5f6368]">{{ __('product.choose_product') }}</label>
-                <x-ui.select id="product_id" name="product_id" data-search="on">
+                <x-ui.select
+                    id="product_id"
+                    name="product_id"
+                    data-search="on"
+                    data-placeholder="{{ __('product.choose_product') }}"
+                    data-ajax-url="{{ route('products.search') }}"
+                    data-minimum-input-length="1"
+                >
                     <option value="">{{ __('product.choose_product') }}</option>
-                    @foreach ($products as $product)
-                        <option value="{{ $product->id }}" @selected($selectedProduct?->id === $product->id)>
-                            {{ $product->sku }} - {{ $product->description ?? __('product.no_description') }}
+                    @if ($selectedProduct !== null)
+                        <option value="{{ $selectedProduct->id }}" selected>
+                            {{ $selectedProduct->sku }} - {{ $selectedProduct->description ?? __('product.no_description') }}
                         </option>
-                    @endforeach
+                    @endif
                 </x-ui.select>
             </div>
             <x-ui.button type="submit" variant="brand-primary" class="rounded-full">{{ __('product.filter') }}</x-ui.button>
