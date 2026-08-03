@@ -4,14 +4,14 @@
 Definir a fundacao tecnica e visual que sera reutilizada por todo o sistema.
 
 ## Ultima atualizacao
-- 2026-08-02
+- 2026-08-03
 
 ## Nivel de implementacao atual
 
 | Item | Status | Situacao no projeto |
 | --- | --- | --- |
 | Layout | Implementado | Foi criado um layout base reutilizavel no padrao visual Google e aplicado nas telas de dashboard, admin, onboarding e docs, padronizando estrutura e cabecalho HTML com seções Blade compartilhadas. |
-| Componentes Blade | Implementado | Foi criada e aplicada uma biblioteca compartilhada em `resources/views/components/ui` (alert, panel, page-heading, button), com uso real em autenticacao, onboarding e admin, e documentacao dedicada no arquivo `doc/dev/Biblioteca de Componentes Blade.md`. |
+| Componentes Blade | Implementado | Biblioteca compartilhada consolidada em `resources/views/components/ui`, incluindo `alert`, `panel`, `page-heading`, `button`, `sidebar`, `menu`, `menu-item`, `breadcrumb` e componentes de formulario (`input`, `textarea`, `select`). Os formularios e buscas foram padronizados para uso desses componentes, com `x-ui.select` integrado ao Select2 (incluindo suporte a elementos dinamicos). |
 | Tema | Implementado | O tema foi centralizado em `resources/css/app.css` com tokens globais (cores, tipografia e estados) e aplicado via `layouts/google.blade.php`, removendo duplicacoes de estilos inline e unificando dashboard, docs, auth, onboarding, admin e landing. |
 | Sidebar | Implementado | Foi criado o componente global `x-ui.sidebar` em `resources/views/components/ui/sidebar.blade.php` e aplicado nas areas de dashboard industrial, administracao e visualizador de documentacao, mantendo variacoes de layout por contexto. |
 | Menu | Implementado | Foi criada uma composicao global de menu com `x-ui.menu` e `x-ui.menu-item`, incluindo estado ativo (`active`/`is-active`), submenus colapsaveis, ordenacao por prioridade operacional, mapeamento por modulos e icones coerentes por contexto na area do cliente/dashboard. |
