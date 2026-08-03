@@ -70,9 +70,37 @@ const initializeUiSelects = () => {
 	}
 };
 
+window.initializeUiSelects = initializeUiSelects;
+
+const observeDynamicUiSelects = () => {
+	const root = document.body;
+
+	if (!root || typeof window.MutationObserver !== 'function') {
+		return;
+	}
+
+	const observer = new MutationObserver((mutations) => {
+		for (const mutation of mutations) {
+			for (const node of mutation.addedNodes) {
+				if (!(node instanceof HTMLElement)) {
+					continue;
+				}
+
+				if (node.matches('select[data-ui-select2="true"]') || node.querySelector('select[data-ui-select2="true"]')) {
+					initializeUiSelects();
+					return;
+				}
+			}
+		}
+	});
+
+	observer.observe(root, { childList: true, subtree: true });
+};
+
 try {
 	await import('select2/dist/js/select2.full.min.js');
 	initializeUiSelects();
+	observeDynamicUiSelects();
 } catch {
 	// Ignore plugin load failures to avoid breaking other UI scripts.
 }

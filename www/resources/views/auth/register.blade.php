@@ -44,7 +44,7 @@
             <label class="auth-label" for="name">{{ __('ui.full_name') }}</label>
             <div class="auth-input-wrap">
               <x-heroicon-o-user class="auth-input-icon" />
-              <input id="name" name="name" type="text" value="{{ old('name') }}" required class="auth-input" placeholder="{{ __('ui.your_name') }}" />
+              <x-ui.input id="name" name="name" type="text" :value="old('name')" required class="auth-input" unstyled placeholder="{{ __('ui.your_name') }}" />
             </div>
           </div>
 
@@ -52,7 +52,7 @@
             <label class="auth-label" for="email">{{ __('ui.corporate_email') }}</label>
             <div class="auth-input-wrap">
               <x-heroicon-o-envelope class="auth-input-icon" />
-              <input id="email" name="email" type="email" value="{{ old('email') }}" required class="auth-input" placeholder="{{ __('ui.email_placeholder') }}" />
+              <x-ui.input id="email" name="email" type="email" :value="old('email')" required class="auth-input" unstyled placeholder="{{ __('ui.email_placeholder') }}" />
             </div>
           </div>
 
@@ -74,14 +74,14 @@
               <label class="auth-label" for="password">{{ __('ui.password') }}</label>
               <div class="auth-input-wrap">
                 <x-heroicon-o-lock-closed class="auth-input-icon" />
-                <input id="password" name="password" type="password" required class="auth-input" placeholder="{{ __('ui.password_placeholder') }}" />
+                <x-ui.input id="password" name="password" type="password" required class="auth-input" unstyled placeholder="{{ __('ui.password_placeholder') }}" />
               </div>
             </div>
             <div>
               <label class="auth-label" for="password_confirmation">{{ __('ui.password_confirmation') }}</label>
               <div class="auth-input-wrap">
                 <x-heroicon-o-check-circle class="auth-input-icon" />
-                <input id="password_confirmation" name="password_confirmation" type="password" required class="auth-input" placeholder="{{ __('ui.password_confirmation_placeholder') }}" />
+                <x-ui.input id="password_confirmation" name="password_confirmation" type="password" required class="auth-input" unstyled placeholder="{{ __('ui.password_confirmation_placeholder') }}" />
               </div>
             </div>
           </div>
@@ -94,7 +94,7 @@
           </div>
 
           <label class="flex items-start gap-3 text-sm text-slate-600">
-            <input type="checkbox" name="terms" value="1" class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" required />
+            <x-ui.input type="checkbox" name="terms" value="1" class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" required unstyled />
             <span>{{ __('ui.accept_terms') }}</span>
           </label>
 

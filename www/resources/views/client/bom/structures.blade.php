@@ -14,7 +14,7 @@
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
         <form class="flex gap-3" method="GET">
             <label for="structure-search" class="sr-only">{{ __('bom.search') }}</label>
-            <input id="structure-search" name="search" value="{{ $search }}" class="min-w-0 flex-1 rounded-xl border border-[#dadce0] px-4 py-3" placeholder="{{ __('bom.search') }}">
+            <x-ui.input id="structure-search" name="search" :value="$search" class="min-w-0 flex-1" placeholder="{{ __('bom.search') }}" />
             <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('bom.filter') }}</x-ui.button>
         </form>
 

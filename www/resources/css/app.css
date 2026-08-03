@@ -152,7 +152,23 @@ body {
         border-color: #cbd5e1;
     }
 
+    .ui-input {
+        @apply w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 transition focus:outline-none focus:ring-2;
+        border-color: #cbd5e1;
+    }
+
+    .ui-textarea {
+        @apply w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 transition focus:outline-none focus:ring-2;
+        border-color: #cbd5e1;
+    }
+
     .ui-select:focus {
+        border-color: var(--g-primary);
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--g-primary) 25%, transparent);
+    }
+
+    .ui-input:focus,
+    .ui-textarea:focus {
         border-color: var(--g-primary);
         box-shadow: 0 0 0 3px color-mix(in oklab, var(--g-primary) 25%, transparent);
     }

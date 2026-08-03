@@ -32,18 +32,18 @@
         <label class="auth-label" for="email">{{ __('ui.email') }}</label>
         <div class="auth-input-wrap">
           <x-heroicon-o-envelope class="auth-input-icon" />
-          <input id="email" name="email" type="email" required class="auth-input" placeholder="{{ __('ui.email_placeholder') }}" />
+          <x-ui.input id="email" name="email" type="email" required class="auth-input" unstyled placeholder="{{ __('ui.email_placeholder') }}" />
         </div>
       </div>
       <div>
         <label class="auth-label" for="password">{{ __('ui.password') }}</label>
         <div class="auth-input-wrap">
           <x-heroicon-o-lock-closed class="auth-input-icon" />
-          <input id="password" name="password" type="password" required class="auth-input" placeholder="{{ __('ui.password_type') }}" />
+          <x-ui.input id="password" name="password" type="password" required class="auth-input" unstyled placeholder="{{ __('ui.password_type') }}" />
         </div>
       </div>
       <label class="flex items-center gap-2 text-sm text-slate-600">
-        <input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
+        <x-ui.input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" unstyled />
         {{ __('ui.remember_me') }}
       </label>
       <x-ui.button type="submit" variant="brand-primary" :full="true" size="lg" class="rounded-full">

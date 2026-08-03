@@ -21,7 +21,7 @@
   <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
     <form class="flex gap-3" method="GET">
       <label for="company-search" class="sr-only">{{ __('global_company.search') }}</label>
-      <input id="company-search" name="search" value="{{ $search }}" class="min-w-0 flex-1 rounded-xl border border-[#dadce0] px-4 py-3" placeholder="{{ __('global_company.search') }}">
+      <x-ui.input id="company-search" name="search" :value="$search" class="min-w-0 flex-1" placeholder="{{ __('global_company.search') }}" />
       <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('global_company.filter') }}</x-ui.button>
     </form>
 

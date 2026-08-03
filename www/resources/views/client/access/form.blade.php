@@ -28,25 +28,25 @@
 
             <label class="block text-sm font-medium">
                 {{ __('company_access.name') }}
-                <input name="name" value="{{ old('name', $customer?->name) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')])>
+                <x-ui.input name="name" :value="old('name', $customer?->name)" required @class(['mt-2', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')]) />
                 @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('company_access.email') }}
-                <input name="email" type="email" value="{{ old('email', $customer?->email) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('email'), 'border-[#dadce0]' => ! $errors->has('email')])>
+                <x-ui.input name="email" type="email" :value="old('email', $customer?->email)" required @class(['mt-2', 'border-red-500' => $errors->has('email'), 'border-[#dadce0]' => ! $errors->has('email')]) />
                 @error('email')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ $editing ? __('company_access.new_password') : __('company_access.password') }}
-                <input name="password" type="password" @required(! $editing) @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('password'), 'border-[#dadce0]' => ! $errors->has('password')])>
+                <x-ui.input name="password" type="password" @required(! $editing) @class(['mt-2', 'border-red-500' => $errors->has('password'), 'border-[#dadce0]' => ! $errors->has('password')]) />
                 @error('password')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('company_access.password_confirmation') }}
-                <input name="password_confirmation" type="password" @required(! $editing) class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                <x-ui.input name="password_confirmation" type="password" @required(! $editing) class="mt-2" />
             </label>
 
             <fieldset class="rounded-2xl border border-[#dadce0] p-5">
@@ -54,15 +54,15 @@
 
                 @if ($mustBeAdministrator)
                     <x-ui.alert class="mt-2" variant="info">{{ __('company_access.first_user_administrator') }}</x-ui.alert>
-                    <input type="hidden" name="role_id" value="{{ $administratorRoleId }}">
+                    <x-ui.input type="hidden" name="role_id" :value="$administratorRoleId" unstyled />
                 @else
                     <label class="mt-2 block text-sm font-medium">
                         {{ __('company_access.access_role') }}
-                        <select name="role_id" required class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                        <x-ui.select name="role_id" required class="mt-2" data-search="on">
                             @foreach ($assignableRoles as $role)
                                 <option value="{{ $role->id }}" @selected($selectedRole === (int) $role->id)>{{ $role->name }} ({{ $role->slug }})</option>
                             @endforeach
-                        </select>
+                        </x-ui.select>
                     </label>
                     <p class="mt-2 text-sm text-[#5f6368]">{{ __('company_access.access_role_help') }}</p>
                     @error('role_id')<span class="mt-2 block text-sm text-red-700">{{ $message }}</span>@enderror
@@ -71,7 +71,7 @@
 
             @if ($editing)
                 <label class="flex items-center gap-2 text-sm">
-                    <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $customer->is_active))>
+                    <x-ui.input name="is_active" type="checkbox" value="1" @checked(old('is_active', $customer->is_active)) unstyled />
                     {{ __('company_access.active') }}
                 </label>
             @endif

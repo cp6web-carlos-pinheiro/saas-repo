@@ -28,18 +28,18 @@
             <div class="grid gap-5 md:grid-cols-2">
                 <label class="block text-sm font-medium">
                     {{ __('rbac.role_name') }}
-                    <input name="name" value="{{ old('name', $role?->name) }}" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                    <x-ui.input name="name" :value="old('name', $role?->name)" class="mt-2" required />
                 </label>
 
                 <label class="block text-sm font-medium">
                     {{ __('rbac.role_slug') }}
-                    <input name="slug" value="{{ old('slug', $role?->slug) }}" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                    <x-ui.input name="slug" :value="old('slug', $role?->slug)" class="mt-2" required />
                 </label>
             </div>
 
             <label class="block text-sm font-medium">
                 {{ __('rbac.role_description') }}
-                <input name="description" value="{{ old('description', $role?->description) }}" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                <x-ui.input name="description" :value="old('description', $role?->description)" class="mt-2" />
             </label>
 
             <div>
@@ -55,7 +55,7 @@
                             <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 @foreach ($permissions as $permission)
                                     <label class="flex items-start gap-2 rounded-lg border border-[#f1f3f4] p-2 text-sm">
-                                        <input type="checkbox" name="permission_ids[]" value="{{ $permission->id }}" @checked(in_array((string) $permission->id, array_map('strval', old('permission_ids', $selectedPermissionIds)), true))>
+                                        <x-ui.input type="checkbox" name="permission_ids[]" value="{{ $permission->id }}" @checked(in_array((string) $permission->id, array_map('strval', old('permission_ids', $selectedPermissionIds)), true)) unstyled />
                                         <span>
                                             <span class="block font-medium">{{ $permission->label() }}</span>
                                             <span class="block text-xs text-[#5f6368]">{{ $permission->slug }}</span>

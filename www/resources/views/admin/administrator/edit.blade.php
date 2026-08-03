@@ -17,11 +17,11 @@
 			@csrf
 			@method('PUT')
 
-			<label class="block text-sm font-medium">{{ __('global_admin.name') }}<input name="name" value="{{ old('name', $administrator->name) }}" required class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3"></label>
-			<label class="block text-sm font-medium">{{ __('global_admin.email') }}<input name="email" type="email" value="{{ old('email', $administrator->email) }}" required class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3"></label>
-			<label class="block text-sm font-medium">{{ __('global_admin.new_password') }}<input name="password" type="password" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3"></label>
-			<label class="block text-sm font-medium">{{ __('global_admin.password_confirmation') }}<input name="password_confirmation" type="password" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3"></label>
-			<label class="flex items-center gap-2 text-sm"><input name="is_active" type="checkbox" value="1" @checked(old('is_active', $administrator->is_active))>{{ __('global_admin.active') }}</label>
+			<label class="block text-sm font-medium">{{ __('global_admin.name') }}<x-ui.input name="name" :value="old('name', $administrator->name)" required class="mt-2" /></label>
+			<label class="block text-sm font-medium">{{ __('global_admin.email') }}<x-ui.input name="email" type="email" :value="old('email', $administrator->email)" required class="mt-2" /></label>
+			<label class="block text-sm font-medium">{{ __('global_admin.new_password') }}<x-ui.input name="password" type="password" class="mt-2" /></label>
+			<label class="block text-sm font-medium">{{ __('global_admin.password_confirmation') }}<x-ui.input name="password_confirmation" type="password" class="mt-2" /></label>
+			<label class="flex items-center gap-2 text-sm"><x-ui.input name="is_active" type="checkbox" value="1" @checked(old('is_active', $administrator->is_active)) unstyled />{{ __('global_admin.active') }}</label>
 
 			<x-ui.button type="submit" variant="brand-primary" :full="true" class="rounded-full">{{ __('global_admin.save') }}</x-ui.button>
 		</form>

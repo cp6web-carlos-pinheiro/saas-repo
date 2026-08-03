@@ -27,48 +27,48 @@
 
             <label class="block text-sm font-medium">
                 {{ __('supplier.code') }}
-                <input name="code" value="{{ old('code', $supplier?->code) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('code'), 'border-[#dadce0]' => ! $errors->has('code')])>
+                <x-ui.input name="code" :value="old('code', $supplier?->code)" required @class(['mt-2', 'border-red-500' => $errors->has('code'), 'border-[#dadce0]' => ! $errors->has('code')]) />
                 @error('code')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('supplier.name') }}
-                <input name="name" value="{{ old('name', $supplier?->name) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')])>
+                <x-ui.input name="name" :value="old('name', $supplier?->name)" required @class(['mt-2', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')]) />
                 @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('supplier.email') }}
-                <input name="email" type="email" value="{{ old('email', $supplier?->email) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('email'), 'border-[#dadce0]' => ! $errors->has('email')])>
+                <x-ui.input name="email" type="email" :value="old('email', $supplier?->email)" @class(['mt-2', 'border-red-500' => $errors->has('email'), 'border-[#dadce0]' => ! $errors->has('email')]) />
                 @error('email')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('supplier.phone') }}
-                <input name="phone" value="{{ old('phone', $supplier?->phone) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('phone'), 'border-[#dadce0]' => ! $errors->has('phone')])>
+                <x-ui.input name="phone" :value="old('phone', $supplier?->phone)" @class(['mt-2', 'border-red-500' => $errors->has('phone'), 'border-[#dadce0]' => ! $errors->has('phone')]) />
                 @error('phone')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <label class="block text-sm font-medium">
                     {{ __('supplier.status') }}
-                    <select name="status" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                    <x-ui.select name="status" class="mt-2" required data-search="off">
                         <option value="ACTIVE" @selected(old('status', $supplier?->status ?? 'ACTIVE') === 'ACTIVE')>{{ __('supplier.active') }}</option>
                         <option value="INACTIVE" @selected(old('status', $supplier?->status ?? 'ACTIVE') === 'INACTIVE')>{{ __('supplier.inactive') }}</option>
-                    </select>
+                    </x-ui.select>
                     @error('status')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
                     {{ __('supplier.default_lead_time_days') }}
-                    <input name="default_lead_time_days" type="number" min="0" value="{{ old('default_lead_time_days', $supplier?->default_lead_time_days ?? 0) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('default_lead_time_days'), 'border-[#dadce0]' => ! $errors->has('default_lead_time_days')])>
+                    <x-ui.input name="default_lead_time_days" type="number" min="0" :value="old('default_lead_time_days', $supplier?->default_lead_time_days ?? 0)" @class(['mt-2', 'border-red-500' => $errors->has('default_lead_time_days'), 'border-[#dadce0]' => ! $errors->has('default_lead_time_days')]) />
                     @error('default_lead_time_days')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
             </div>
 
             <label class="block text-sm font-medium">
                 {{ __('supplier.payment_terms') }}
-                <input name="payment_terms" value="{{ old('payment_terms', $supplier?->payment_terms) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('payment_terms'), 'border-[#dadce0]' => ! $errors->has('payment_terms')])>
+                <x-ui.input name="payment_terms" :value="old('payment_terms', $supplier?->payment_terms)" @class(['mt-2', 'border-red-500' => $errors->has('payment_terms'), 'border-[#dadce0]' => ! $errors->has('payment_terms')]) />
                 @error('payment_terms')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 

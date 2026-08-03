@@ -22,39 +22,39 @@
             <div class="grid gap-4 md:grid-cols-2">
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.code') }}
-                    <input name="code" value="{{ old('code', $plan?->code) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('code'), 'border-[#dadce0]' => ! $errors->has('code')])>
+                    <x-ui.input name="code" :value="old('code', $plan?->code)" required @class(['mt-2', 'border-red-500' => $errors->has('code'), 'border-[#dadce0]' => ! $errors->has('code')]) />
                     @error('code')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.label') }}
-                    <input name="label" value="{{ old('label', $plan?->label) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('label'), 'border-[#dadce0]' => ! $errors->has('label')])>
+                    <x-ui.input name="label" :value="old('label', $plan?->label)" required @class(['mt-2', 'border-red-500' => $errors->has('label'), 'border-[#dadce0]' => ! $errors->has('label')]) />
                     @error('label')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
             </div>
 
             <label class="block text-sm font-medium">
                 {{ __('global_plan.description') }}
-                <textarea name="description" rows="4" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('description'), 'border-[#dadce0]' => ! $errors->has('description')])>{{ old('description', $plan?->description) }}</textarea>
+                <x-ui.textarea name="description" rows="4" @class(['mt-2', 'border-red-500' => $errors->has('description'), 'border-[#dadce0]' => ! $errors->has('description')])>{{ old('description', $plan?->description) }}</x-ui.textarea>
                 @error('description')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <div class="grid gap-4 md:grid-cols-3">
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.payment_method') }}
-                    <input name="payment_method" value="{{ old('payment_method', $plan?->payment_method) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('payment_method'), 'border-[#dadce0]' => ! $errors->has('payment_method')])>
+                    <x-ui.input name="payment_method" :value="old('payment_method', $plan?->payment_method)" @class(['mt-2', 'border-red-500' => $errors->has('payment_method'), 'border-[#dadce0]' => ! $errors->has('payment_method')]) />
                     @error('payment_method')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.amount') }}
-                    <input name="amount" value="{{ old('amount', number_format(($plan?->amount_cents ?? 0) / 100, 2, ',', '.')) }}" required inputmode="decimal" data-currency-mask="brl" autocomplete="off" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('amount'), 'border-[#dadce0]' => ! $errors->has('amount')])>
+                    <x-ui.input name="amount" :value="old('amount', number_format(($plan?->amount_cents ?? 0) / 100, 2, ',', '.'))" required inputmode="decimal" data-currency-mask="brl" autocomplete="off" @class(['mt-2', 'border-red-500' => $errors->has('amount'), 'border-[#dadce0]' => ! $errors->has('amount')]) />
                     @error('amount')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.billing_cycle_label') }}
-                    <input name="billing_cycle_label" value="{{ old('billing_cycle_label', $plan?->billing_cycle_label) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('billing_cycle_label'), 'border-[#dadce0]' => ! $errors->has('billing_cycle_label')])>
+                    <x-ui.input name="billing_cycle_label" :value="old('billing_cycle_label', $plan?->billing_cycle_label)" @class(['mt-2', 'border-red-500' => $errors->has('billing_cycle_label'), 'border-[#dadce0]' => ! $errors->has('billing_cycle_label')]) />
                     @error('billing_cycle_label')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
             </div>
@@ -62,19 +62,19 @@
             <div class="grid gap-4 md:grid-cols-3">
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.trial_days') }}
-                    <input type="number" min="0" name="trial_days" value="{{ old('trial_days', $plan?->trial_days) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('trial_days'), 'border-[#dadce0]' => ! $errors->has('trial_days')])>
+                    <x-ui.input type="number" min="0" name="trial_days" :value="old('trial_days', $plan?->trial_days)" @class(['mt-2', 'border-red-500' => $errors->has('trial_days'), 'border-[#dadce0]' => ! $errors->has('trial_days')]) />
                     @error('trial_days')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.interval_months') }}
-                    <input type="number" min="1" name="interval_months" value="{{ old('interval_months', $plan?->interval_months) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('interval_months'), 'border-[#dadce0]' => ! $errors->has('interval_months')])>
+                    <x-ui.input type="number" min="1" name="interval_months" :value="old('interval_months', $plan?->interval_months)" @class(['mt-2', 'border-red-500' => $errors->has('interval_months'), 'border-[#dadce0]' => ! $errors->has('interval_months')]) />
                     @error('interval_months')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
                     {{ __('global_plan.sort_order') }}
-                    <input type="number" min="0" name="sort_order" value="{{ old('sort_order', $plan?->sort_order ?? 0) }}" @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('sort_order'), 'border-[#dadce0]' => ! $errors->has('sort_order')])>
+                    <x-ui.input type="number" min="0" name="sort_order" :value="old('sort_order', $plan?->sort_order ?? 0)" @class(['mt-2', 'border-red-500' => $errors->has('sort_order'), 'border-[#dadce0]' => ! $errors->has('sort_order')]) />
                     @error('sort_order')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
             </div>
@@ -92,17 +92,17 @@
 
             <div class="grid gap-3 md:grid-cols-2">
                 <label class="flex items-center gap-2 text-sm">
-                    <input name="renewable" type="checkbox" value="1" @checked(old('renewable', $plan?->renewable ?? true))>
+                    <x-ui.input name="renewable" type="checkbox" value="1" @checked(old('renewable', $plan?->renewable ?? true)) unstyled />
                     {{ __('global_plan.renewable') }}
                 </label>
 
                 <label class="flex items-center gap-2 text-sm">
-                    <input name="allow_once" type="checkbox" value="1" @checked(old('allow_once', $plan?->allow_once ?? false))>
+                    <x-ui.input name="allow_once" type="checkbox" value="1" @checked(old('allow_once', $plan?->allow_once ?? false)) unstyled />
                     {{ __('global_plan.allow_once') }}
                 </label>
 
                 <label class="flex items-center gap-2 text-sm md:col-span-2">
-                    <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $plan?->is_active ?? true))>
+                    <x-ui.input name="is_active" type="checkbox" value="1" @checked(old('is_active', $plan?->is_active ?? true)) unstyled />
                     {{ __('global_plan.active') }}
                 </label>
             </div>

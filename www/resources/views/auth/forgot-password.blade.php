@@ -28,7 +28,7 @@
         <label class="auth-label" for="email">{{ __('ui.email') }}</label>
         <div class="auth-input-wrap">
           <x-heroicon-o-envelope class="auth-input-icon" />
-          <input id="email" name="email" type="email" required class="auth-input" placeholder="{{ __('ui.email_placeholder') }}" />
+          <x-ui.input id="email" name="email" type="email" required class="auth-input" unstyled placeholder="{{ __('ui.email_placeholder') }}" />
         </div>
       </div>
 

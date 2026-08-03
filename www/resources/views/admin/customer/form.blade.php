@@ -27,42 +27,42 @@
                 <x-ui.alert variant="info">
                     {{ __('global_customer.company_context_label') }}: {{ $contextCompany->name }} | CNPJ: {{ $contextCompany->code ?? __('global_customer.company_cnpj_uninformed') }}
                 </x-ui.alert>
-                <input type="hidden" name="company_id" value="{{ $contextCompany->id }}">
-                <input type="hidden" name="return_to_company_id" value="{{ $contextCompany->id }}">
+                <x-ui.input type="hidden" name="company_id" :value="$contextCompany->id" unstyled />
+                <x-ui.input type="hidden" name="return_to_company_id" :value="$contextCompany->id" unstyled />
             @else
                 <label class="block text-sm font-medium">
                     {{ __('global_customer.company') }}
-                    <select name="company_id" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('company_id'), 'border-[#dadce0]' => ! $errors->has('company_id')])>
+                    <x-ui.select name="company_id" required data-search="on" @class(['mt-2', 'border-red-500' => $errors->has('company_id'), 'border-[#dadce0]' => ! $errors->has('company_id')])>
                         <option value="">{{ __('global_customer.select_company') }}</option>
                         @foreach ($companies as $company)
                             <option value="{{ $company->id }}" @selected((int) $selectedCompanyId === $company->id)>{{ $company->name }} ({{ $company->code }})</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     @error('company_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
             @endif
 
             <label class="block text-sm font-medium">
                 {{ __('global_customer.name') }}
-                <input name="name" value="{{ old('name', $customer?->name) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')])>
+                <x-ui.input name="name" :value="old('name', $customer?->name)" required @class(['mt-2', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')]) />
                 @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('global_customer.email') }}
-                <input name="email" type="email" value="{{ old('email', $customer?->email) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('email'), 'border-[#dadce0]' => ! $errors->has('email')])>
+                <x-ui.input name="email" type="email" :value="old('email', $customer?->email)" required @class(['mt-2', 'border-red-500' => $errors->has('email'), 'border-[#dadce0]' => ! $errors->has('email')]) />
                 @error('email')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ $editing ? __('global_customer.new_password') : __('global_customer.password') }}
-                <input name="password" type="password" @required(! $editing) @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('password'), 'border-[#dadce0]' => ! $errors->has('password')])>
+                <x-ui.input name="password" type="password" @required(! $editing) @class(['mt-2', 'border-red-500' => $errors->has('password'), 'border-[#dadce0]' => ! $errors->has('password')]) />
                 @error('password')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('global_customer.password_confirmation') }}
-                <input name="password_confirmation" type="password" @required(! $editing) class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                <x-ui.input name="password_confirmation" type="password" @required(! $editing) class="mt-2" />
             </label>
 
             <fieldset class="rounded-2xl border border-[#dadce0] p-5">
@@ -70,14 +70,14 @@
 
                 @if ($mustBeAdministrator)
                     <x-ui.alert class="mt-2" variant="info">{{ __('global_customer.first_user_administrator') }}</x-ui.alert>
-                    <input type="hidden" name="access_profile" value="administrator">
+                    <x-ui.input type="hidden" name="access_profile" value="administrator" unstyled />
                 @else
                     <label class="mt-2 block text-sm font-medium">
                         {{ __('global_customer.access_profile') }}
-                        <select name="access_profile" required class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                        <x-ui.select name="access_profile" required class="mt-2" data-search="off">
                             <option value="administrator" @selected($selectedProfile === 'administrator')>{{ __('global_customer.profile_administrator') }}</option>
                             <option value="custom" @selected($selectedProfile === 'custom')>{{ __('global_customer.profile_custom') }}</option>
-                        </select>
+                        </x-ui.select>
                     </label>
                     <p class="mt-2 text-sm text-[#5f6368]">{{ __('global_customer.access_profile_help') }}</p>
                 @endif
@@ -90,7 +90,7 @@
                         @foreach ($modules as $module => $permissions)
                             @php($moduleIsSelected = $mustBeAdministrator || $selectedProfile === 'administrator' || in_array($module, (array) $selectedModuleNames, true))
                             <label class="flex items-start gap-3 rounded-xl border border-[#dadce0] p-4">
-                                <input name="modules[]" type="checkbox" value="{{ $module }}" @checked($moduleIsSelected) class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35">
+                                <x-ui.input name="modules[]" type="checkbox" value="{{ $module }}" @checked($moduleIsSelected) class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" unstyled />
                                 <span>
                                     <span class="block font-medium">{{ \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleLabel((string) $module) }}</span>
                                     @php($moduleDescription = \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleDescription((string) $module))
@@ -107,7 +107,7 @@
 
             @if ($editing)
                 <label class="flex items-center gap-2 text-sm">
-                    <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $customer->is_active))>
+                    <x-ui.input name="is_active" type="checkbox" value="1" @checked(old('is_active', $customer->is_active)) unstyled />
                     {{ __('global_customer.active') }}
                 </label>
             @endif

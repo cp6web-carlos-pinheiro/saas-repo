@@ -53,18 +53,18 @@
             <div class="grid md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium mb-2" for="company_name">{{ __('onboarding.company_name') }}</label>
-                <input id="company_name" name="company_name" type="text" value="{{ old('company_name', $organization?->name) }}" required class="w-full rounded-xl border border-slate-300 px-4 py-3" />
+                <x-ui.input id="company_name" name="company_name" type="text" :value="old('company_name', $organization?->name)" required />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-2" for="company_domain">{{ __('onboarding.company_domain') }}</label>
-                <input id="company_domain" name="company_domain" type="text" value="{{ old('company_domain', $organization?->domain) }}" placeholder="{{ __('onboarding.company_domain_placeholder') }}" class="w-full rounded-xl border border-slate-300 px-4 py-3" />
+                <x-ui.input id="company_domain" name="company_domain" type="text" :value="old('company_domain', $organization?->domain)" placeholder="{{ __('onboarding.company_domain_placeholder') }}" />
               </div>
             </div>
 
             <div class="grid md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium mb-2" for="segment">{{ __('onboarding.segment') }}</label>
-                <input id="segment" name="segment" type="text" value="{{ old('segment', $profile?->segment) }}" class="w-full rounded-xl border border-slate-300 px-4 py-3" />
+                <x-ui.input id="segment" name="segment" type="text" :value="old('segment', $profile?->segment)" />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-2" for="operation_size">{{ __('onboarding.operation_size') }}</label>
@@ -79,7 +79,7 @@
 
             <div>
               <label class="block text-sm font-medium mb-2" for="timezone">{{ __('onboarding.timezone') }}</label>
-              <input id="timezone" name="timezone" type="text" value="{{ old('timezone', $profile?->timezone ?? 'America/Sao_Paulo') }}" class="w-full rounded-xl border border-slate-300 px-4 py-3" />
+              <x-ui.input id="timezone" name="timezone" type="text" :value="old('timezone', $profile?->timezone ?? 'America/Sao_Paulo')" />
             </div>
 
             <div class="pt-2">
@@ -98,7 +98,7 @@
           @foreach ($plans as $planCode => $plan)
             <form method="POST" action="{{ route('onboarding.store') }}" class="rounded-3xl border border-slate-200 p-6 bg-slate-50 flex flex-col">
               @csrf
-              <input type="hidden" name="plan_code" value="{{ $planCode }}" />
+              <x-ui.input type="hidden" name="plan_code" :value="$planCode" unstyled />
               <div class="flex items-center justify-between gap-3">
                 <h2 class="text-2xl font-bold">{{ $plan['label'] }}</h2>
                 <span class="rounded-full bg-slate-900 text-white px-3 py-1 text-xs font-semibold uppercase">{{ $planCode }}</span>
@@ -124,7 +124,7 @@
             @csrf
             <div>
               <label class="block text-sm font-medium mb-2" for="emails">{{ __('onboarding.emails_invites') }}</label>
-              <textarea id="emails" name="emails" rows="8" class="w-full rounded-2xl border border-slate-300 px-4 py-3" placeholder="{{ __('onboarding.emails_invites_placeholder') }}">{{ old('emails') }}</textarea>
+              <x-ui.textarea id="emails" name="emails" rows="8" class="rounded-2xl" placeholder="{{ __('onboarding.emails_invites_placeholder') }}">{{ old('emails') }}</x-ui.textarea>
             </div>
             <p class="text-sm text-slate-500">{{ __('onboarding.emails_invites_help') }}</p>
             <div class="pt-2">

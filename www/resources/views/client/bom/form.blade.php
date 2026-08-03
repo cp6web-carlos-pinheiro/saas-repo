@@ -29,7 +29,7 @@
             @endif
 
             @if ($editing)
-                <input type="hidden" name="product_id" value="{{ old('product_id', $bom->product_id) }}">
+                <x-ui.input type="hidden" name="product_id" :value="old('product_id', $bom->product_id)" unstyled />
 
                 <div class="rounded-2xl border border-[#dadce0] bg-white p-4">
                     <div class="flex flex-wrap items-start justify-between gap-3">
@@ -46,14 +46,14 @@
                 <div class="grid gap-5 md:grid-cols-2">
                     <div class="md:col-span-2">
                         <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="product_id">{{ __('bom.select_product') }}</label>
-                        <select id="product_id" name="product_id" class="w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                        <x-ui.select id="product_id" name="product_id" required data-search="on">
                             <option value="">{{ __('bom.select_product') }}</option>
                             @foreach ($products as $product)
                                 <option value="{{ $product->id }}" @selected((string) old('product_id') === (string) $product->id)>
                                     {{ $product->sku }} - {{ $product->description ?? __('bom.product_hint') }}
                                 </option>
                             @endforeach
-                        </select>
+                        </x-ui.select>
                         <p class="mt-2 text-sm text-[#5f6368]">{{ __('bom.product_hint') }}</p>
                         @error('product_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
@@ -63,29 +63,29 @@
             <div class="grid gap-5 md:grid-cols-2">
                 <div>
                     <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="status">{{ __('bom.status') }}</label>
-                    <select id="status" name="status" class="w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                    <x-ui.select id="status" name="status" required data-search="off">
                         <option value="DRAFT" @selected($selectedStatus === 'DRAFT')>{{ __('bom.status_DRAFT') }}</option>
                         <option value="APPROVED" @selected($selectedStatus === 'APPROVED')>{{ __('bom.status_APPROVED') }}</option>
                         <option value="OBSOLETE" @selected($selectedStatus === 'OBSOLETE')>{{ __('bom.status_OBSOLETE') }}</option>
-                    </select>
+                    </x-ui.select>
                     @error('status')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="effective_from">{{ __('bom.effective_from') }}</label>
-                    <input id="effective_from" type="date" name="effective_from" value="{{ old('effective_from', $bom?->effective_from?->format('Y-m-d')) }}" class="w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                    <x-ui.input id="effective_from" type="date" name="effective_from" :value="old('effective_from', $bom?->effective_from?->format('Y-m-d'))" />
                     @error('effective_from')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="effective_to">{{ __('bom.effective_to') }}</label>
-                    <input id="effective_to" type="date" name="effective_to" value="{{ old('effective_to', $bom?->effective_to?->format('Y-m-d')) }}" class="w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                    <x-ui.input id="effective_to" type="date" name="effective_to" :value="old('effective_to', $bom?->effective_to?->format('Y-m-d'))" />
                     @error('effective_to')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div class="md:col-span-2">
                     <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="description">{{ __('bom.description') }}</label>
-                    <input id="description" name="description" value="{{ old('description', $bom?->description ?? '') }}" class="w-full rounded-xl border border-[#dadce0] px-4 py-3" maxlength="255">
+                    <x-ui.input id="description" name="description" :value="old('description', $bom?->description ?? '')" maxlength="255" />
                     @error('description')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
             </div>
@@ -110,35 +110,35 @@
                             <div class="mt-4 grid gap-4 md:grid-cols-5">
                                 <label class="block text-sm font-medium text-[#5f6368]">
                                     {{ __('bom.line_no') }}
-                                    <input type="number" min="1" name="items[{{ $index }}][line_no]" value="{{ old('items.'.$index.'.line_no', $item['line_no'] ?? $index + 1) }}" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                                    <x-ui.input type="number" min="1" name="items[{{ $index }}][line_no]" :value="old('items.'.$index.'.line_no', $item['line_no'] ?? $index + 1)" class="mt-2" required />
                                 </label>
 
                                 <label class="block text-sm font-medium text-[#5f6368] md:col-span-2">
                                     {{ __('bom.component_product') }}
-                                    <select name="items[{{ $index }}][component_product_id]" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                                    <x-ui.select name="items[{{ $index }}][component_product_id]" class="mt-2" required data-search="on">
                                         <option value="">{{ __('bom.component_product') }}</option>
                                         @foreach ($products as $product)
                                             <option value="{{ $product->id }}" @selected((string) old('items.'.$index.'.component_product_id', $item['component_product_id'] ?? '') === (string) $product->id)>
                                                 {{ $product->sku }} - {{ $product->description ?? '—' }}
                                             </option>
                                         @endforeach
-                                    </select>
+                                    </x-ui.select>
                                     @error('items.'.$index.'.component_product_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                                 </label>
 
                                 <label class="block text-sm font-medium text-[#5f6368]">
                                     {{ __('bom.quantity_per') }}
-                                    <input type="number" step="0.000001" min="0.000001" name="items[{{ $index }}][quantity_per]" value="{{ old('items.'.$index.'.quantity_per', $item['quantity_per'] ?? 1) }}" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                                    <x-ui.input type="number" step="0.000001" min="0.000001" name="items[{{ $index }}][quantity_per]" :value="old('items.'.$index.'.quantity_per', $item['quantity_per'] ?? 1)" class="mt-2" required />
                                 </label>
 
                                 <label class="block text-sm font-medium text-[#5f6368]">
                                     {{ __('bom.scrap_factor') }}
-                                    <input type="number" step="0.0001" min="0" name="items[{{ $index }}][scrap_factor]" value="{{ old('items.'.$index.'.scrap_factor', $item['scrap_factor'] ?? 0) }}" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                                    <x-ui.input type="number" step="0.0001" min="0" name="items[{{ $index }}][scrap_factor]" :value="old('items.'.$index.'.scrap_factor', $item['scrap_factor'] ?? 0)" class="mt-2" />
                                 </label>
 
                                 <label class="block text-sm font-medium text-[#5f6368]">
                                     {{ __('bom.uom') }}
-                                    <input type="text" name="items[{{ $index }}][uom]" value="{{ old('items.'.$index.'.uom', $item['uom'] ?? '') }}" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" maxlength="20">
+                                    <x-ui.input type="text" name="items[{{ $index }}][uom]" :value="old('items.'.$index.'.uom', $item['uom'] ?? '')" class="mt-2" maxlength="20" />
                                 </label>
                             </div>
                         </article>
@@ -166,32 +166,32 @@
         <div class="mt-4 grid gap-4 md:grid-cols-5">
             <label class="block text-sm font-medium text-[#5f6368]">
                 {{ __('bom.line_no') }}
-                <input type="number" min="1" name="items[__INDEX__][line_no]" value="1" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                <x-ui.input type="number" min="1" name="items[__INDEX__][line_no]" value="1" class="mt-2" required />
             </label>
 
             <label class="block text-sm font-medium text-[#5f6368] md:col-span-2">
                 {{ __('bom.component_product') }}
-                <select name="items[__INDEX__][component_product_id]" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                <x-ui.select name="items[__INDEX__][component_product_id]" class="mt-2" required data-search="on">
                     <option value="">{{ __('bom.component_product') }}</option>
                     @foreach ($products as $product)
                         <option value="{{ $product->id }}">{{ $product->sku }} - {{ $product->description ?? '—' }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </label>
 
             <label class="block text-sm font-medium text-[#5f6368]">
                 {{ __('bom.quantity_per') }}
-                <input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity_per]" value="1" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity_per]" value="1" class="mt-2" required />
             </label>
 
             <label class="block text-sm font-medium text-[#5f6368]">
                 {{ __('bom.scrap_factor') }}
-                <input type="number" step="0.0001" min="0" name="items[__INDEX__][scrap_factor]" value="0" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                <x-ui.input type="number" step="0.0001" min="0" name="items[__INDEX__][scrap_factor]" value="0" class="mt-2" />
             </label>
 
             <label class="block text-sm font-medium text-[#5f6368]">
                 {{ __('bom.uom') }}
-                <input type="text" name="items[__INDEX__][uom]" value="" class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3" maxlength="20">
+                <x-ui.input type="text" name="items[__INDEX__][uom]" value="" class="mt-2" maxlength="20" />
             </label>
         </div>
     </article>

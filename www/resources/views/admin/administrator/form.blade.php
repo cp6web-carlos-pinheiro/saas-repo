@@ -21,30 +21,30 @@
 
             <label class="block text-sm font-medium">
                 {{ __('global_admin.name') }}
-                <input name="name" value="{{ old('name', $administrator?->name) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')])>
+                <x-ui.input name="name" :value="old('name', $administrator?->name)" required @class(['mt-2', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')]) />
                 @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('global_admin.email') }}
-                <input name="email" type="email" value="{{ old('email', $administrator?->email) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('email'), 'border-[#dadce0]' => ! $errors->has('email')])>
+                <x-ui.input name="email" type="email" :value="old('email', $administrator?->email)" required @class(['mt-2', 'border-red-500' => $errors->has('email'), 'border-[#dadce0]' => ! $errors->has('email')]) />
                 @error('email')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ $editing ? __('global_admin.new_password') : __('global_admin.password') }}
-                <input name="password" type="password" @required(! $editing) @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('password'), 'border-[#dadce0]' => ! $errors->has('password')])>
+                <x-ui.input name="password" type="password" @required(! $editing) @class(['mt-2', 'border-red-500' => $errors->has('password'), 'border-[#dadce0]' => ! $errors->has('password')]) />
                 @error('password')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('global_admin.password_confirmation') }}
-                <input name="password_confirmation" type="password" @required(! $editing) class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                <x-ui.input name="password_confirmation" type="password" @required(! $editing) class="mt-2" />
             </label>
 
             @if ($editing)
                 <label class="flex items-center gap-2 text-sm">
-                    <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $administrator->is_active))>
+                    <x-ui.input name="is_active" type="checkbox" value="1" @checked(old('is_active', $administrator->is_active)) unstyled />
                     {{ __('global_admin.active') }}
                 </label>
             @endif

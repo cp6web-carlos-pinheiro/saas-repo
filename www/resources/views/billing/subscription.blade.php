@@ -48,7 +48,7 @@
 
             <form method="POST" action="{{ route('billing.subscription.update') }}" class="flex h-full flex-col rounded-3xl border border-slate-200 bg-slate-50 p-6 {{ $isCurrentPlan ? 'ring-2 ring-slate-900' : '' }}">
               @csrf
-              <input type="hidden" name="plan_code" value="{{ $planCode }}" />
+              <x-ui.input type="hidden" name="plan_code" :value="$planCode" unstyled />
 
                 <div class="flex items-center justify-between gap-3">
                   <h3 class="text-xl font-bold text-slate-900">{{ $plan['label'] }}</h3>

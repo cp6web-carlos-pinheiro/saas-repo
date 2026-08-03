@@ -35,21 +35,21 @@
         <label class="auth-label" for="name">{{ __('ui.full_name') }}</label>
         <div class="auth-input-wrap">
           <x-heroicon-o-user class="auth-input-icon" />
-          <input id="name" name="name" type="text" value="{{ old('name') }}" class="auth-input" placeholder="{{ __('ui.your_name') }}" />
+          <x-ui.input id="name" name="name" type="text" :value="old('name')" class="auth-input" unstyled placeholder="{{ __('ui.your_name') }}" />
         </div>
       </div>
       <div>
         <label class="auth-label" for="password">{{ __('ui.password') }}</label>
         <div class="auth-input-wrap">
           <x-heroicon-o-lock-closed class="auth-input-icon" />
-          <input id="password" name="password" type="password" class="auth-input" placeholder="{{ __('ui.password_type') }}" />
+          <x-ui.input id="password" name="password" type="password" class="auth-input" unstyled placeholder="{{ __('ui.password_type') }}" />
         </div>
       </div>
       <div>
         <label class="auth-label" for="password_confirmation">{{ __('ui.password_confirmation') }}</label>
         <div class="auth-input-wrap">
           <x-heroicon-o-check-circle class="auth-input-icon" />
-          <input id="password_confirmation" name="password_confirmation" type="password" class="auth-input" placeholder="{{ __('ui.password_confirmation_placeholder') }}" />
+          <x-ui.input id="password_confirmation" name="password_confirmation" type="password" class="auth-input" unstyled placeholder="{{ __('ui.password_confirmation_placeholder') }}" />
         </div>
       </div>
       <button class="auth-btn-primary" type="submit">

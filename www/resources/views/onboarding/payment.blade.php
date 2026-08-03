@@ -22,24 +22,24 @@
           @csrf
           <div>
             <label class="mb-2 block text-sm font-medium" for="card_holder_name">{{ __('payment.card_holder') }}</label>
-            <input id="card_holder_name" name="card_holder_name" type="text" autocomplete="cc-name" required class="w-full rounded-xl border border-slate-300 px-4 py-3" />
+            <x-ui.input id="card_holder_name" name="card_holder_name" type="text" autocomplete="cc-name" required />
           </div>
           <div>
             <label class="mb-2 block text-sm font-medium" for="card_number">{{ __('payment.card_number') }}</label>
-            <input id="card_number" name="card_number" inputmode="numeric" autocomplete="cc-number" maxlength="23" required class="w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="0000 0000 0000 0000" />
+            <x-ui.input id="card_number" name="card_number" inputmode="numeric" autocomplete="cc-number" maxlength="23" required placeholder="0000 0000 0000 0000" />
           </div>
           <div class="grid grid-cols-3 gap-4">
             <div>
               <label class="mb-2 block text-sm font-medium" for="card_exp_month">{{ __('payment.exp_month') }}</label>
-              <input id="card_exp_month" name="card_exp_month" type="text" inputmode="numeric" autocomplete="cc-exp-month" maxlength="2" required class="w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="MM" />
+              <x-ui.input id="card_exp_month" name="card_exp_month" type="text" inputmode="numeric" autocomplete="cc-exp-month" maxlength="2" required placeholder="MM" />
             </div>
             <div>
               <label class="mb-2 block text-sm font-medium" for="card_exp_year">{{ __('payment.exp_year') }}</label>
-              <input id="card_exp_year" name="card_exp_year" type="text" inputmode="numeric" autocomplete="cc-exp-year" maxlength="4" required class="w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="AAAA" />
+              <x-ui.input id="card_exp_year" name="card_exp_year" type="text" inputmode="numeric" autocomplete="cc-exp-year" maxlength="4" required placeholder="AAAA" />
             </div>
             <div>
               <label class="mb-2 block text-sm font-medium" for="card_cvv">{{ __('payment.cvv') }}</label>
-              <input id="card_cvv" name="card_cvv" type="password" inputmode="numeric" autocomplete="cc-csc" maxlength="4" required class="w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="•••" />
+              <x-ui.input id="card_cvv" name="card_cvv" type="password" inputmode="numeric" autocomplete="cc-csc" maxlength="4" required placeholder="***" />
             </div>
           </div>
           <p class="text-xs text-slate-500">{{ __('payment.security_notice') }}</p>

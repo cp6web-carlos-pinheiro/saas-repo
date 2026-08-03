@@ -21,19 +21,19 @@
 
             <label class="block text-sm font-medium">
                 {{ __('global_company.name') }}
-                <input name="name" value="{{ old('name', $company?->name) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')])>
+                <x-ui.input name="name" :value="old('name', $company?->name)" required @class(['mt-2', 'border-red-500' => $errors->has('name'), 'border-[#dadce0]' => ! $errors->has('name')]) />
                 @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('global_company.code') }}
-                <input name="code" value="{{ old('code', $company?->code) }}" required @class(['mt-2 w-full rounded-xl border px-4 py-3', 'border-red-500' => $errors->has('code'), 'border-[#dadce0]' => ! $errors->has('code')])>
+                <x-ui.input name="code" :value="old('code', $company?->code)" required @class(['mt-2', 'border-red-500' => $errors->has('code'), 'border-[#dadce0]' => ! $errors->has('code')]) />
                 @error('code')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             @if ($editing)
                 <label class="flex items-center gap-2 text-sm">
-                    <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $company->is_active))>
+                    <x-ui.input name="is_active" type="checkbox" value="1" @checked(old('is_active', $company->is_active)) unstyled />
                     {{ __('global_company.active') }}
                 </label>
             @endif

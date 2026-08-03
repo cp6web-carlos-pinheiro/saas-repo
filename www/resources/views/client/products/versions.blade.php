@@ -24,14 +24,14 @@
         <form class="grid gap-4 md:grid-cols-[1fr_auto] md:items-end" method="GET">
             <div>
                 <label for="product_id" class="mb-2 block text-sm font-medium text-[#5f6368]">{{ __('product.choose_product') }}</label>
-                <select id="product_id" name="product_id" class="w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                <x-ui.select id="product_id" name="product_id" data-search="on">
                     <option value="">{{ __('product.choose_product') }}</option>
                     @foreach ($products as $product)
                         <option value="{{ $product->id }}" @selected($selectedProduct?->id === $product->id)>
                             {{ $product->sku }} - {{ $product->description ?? __('product.no_description') }}
                         </option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
             <x-ui.button type="submit" variant="brand-primary" class="rounded-full">{{ __('product.filter') }}</x-ui.button>
         </form>

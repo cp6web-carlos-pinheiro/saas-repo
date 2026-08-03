@@ -24,26 +24,26 @@
 
     <form method="POST" action="{{ route('password.update') }}" class="mt-6 space-y-4">
       @csrf
-      <input type="hidden" name="token" value="{{ $token }}" />
+      <x-ui.input type="hidden" name="token" :value="$token" unstyled />
       <div>
         <label class="auth-label" for="email">{{ __('ui.email') }}</label>
         <div class="auth-input-wrap">
           <x-heroicon-o-envelope class="auth-input-icon" />
-          <input id="email" name="email" type="email" value="{{ $email }}" required class="auth-input" />
+          <x-ui.input id="email" name="email" type="email" :value="$email" required class="auth-input" unstyled />
         </div>
       </div>
       <div>
         <label class="auth-label" for="password">{{ __('auth.new_password') }}</label>
         <div class="auth-input-wrap">
           <x-heroicon-o-lock-closed class="auth-input-icon" />
-          <input id="password" name="password" type="password" required class="auth-input" placeholder="{{ __('auth.type_new_password') }}" />
+          <x-ui.input id="password" name="password" type="password" required class="auth-input" unstyled placeholder="{{ __('auth.type_new_password') }}" />
         </div>
       </div>
       <div>
         <label class="auth-label" for="password_confirmation">{{ __('ui.password_confirmation') }}</label>
         <div class="auth-input-wrap">
           <x-heroicon-o-check-circle class="auth-input-icon" />
-          <input id="password_confirmation" name="password_confirmation" type="password" required class="auth-input" placeholder="{{ __('auth.repeat_new_password') }}" />
+          <x-ui.input id="password_confirmation" name="password_confirmation" type="password" required class="auth-input" unstyled placeholder="{{ __('auth.repeat_new_password') }}" />
         </div>
       </div>
       <x-ui.button type="submit" variant="brand-primary" :full="true" size="lg" class="rounded-full">

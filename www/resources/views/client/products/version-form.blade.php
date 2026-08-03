@@ -33,35 +33,35 @@
 
             <div>
                 <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="effective_from">{{ __('product.effective_from') }}</label>
-                <input id="effective_from" type="date" name="effective_from" value="{{ old('effective_from', $version?->effective_from?->format('Y-m-d')) }}" class="w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                <x-ui.input id="effective_from" type="date" name="effective_from" :value="old('effective_from', $version?->effective_from?->format('Y-m-d'))" />
                 @error('effective_from')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="effective_to">{{ __('product.effective_to') }}</label>
-                <input id="effective_to" type="date" name="effective_to" value="{{ old('effective_to', $version?->effective_to?->format('Y-m-d')) }}" class="w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                <x-ui.input id="effective_to" type="date" name="effective_to" :value="old('effective_to', $version?->effective_to?->format('Y-m-d'))" />
                 @error('effective_to')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="compatibility_rule">{{ __('product.compatibility_rule') }}</label>
-                <select id="compatibility_rule" name="compatibility_rule" class="w-full rounded-xl border border-[#dadce0] px-4 py-3" required>
+                <x-ui.select id="compatibility_rule" name="compatibility_rule" required data-search="off">
                     @foreach (__('product.compatibility_rules') as $ruleValue => $ruleLabel)
                         <option value="{{ $ruleValue }}" @selected(old('compatibility_rule', $version?->compatibility_rule ?? 'FULL') === $ruleValue)>{{ $ruleLabel }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
                 @error('compatibility_rule')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div class="md:col-span-2">
                 <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="change_summary">{{ __('product.change_summary') }}</label>
-                <textarea id="change_summary" name="change_summary" rows="4" class="w-full rounded-xl border border-[#dadce0] px-4 py-3">{{ old('change_summary', $version?->change_summary ?? '') }}</textarea>
+                <x-ui.textarea id="change_summary" name="change_summary" rows="4">{{ old('change_summary', $version?->change_summary ?? '') }}</x-ui.textarea>
                 @error('change_summary')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div class="md:col-span-2">
                 <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="payload_json">{{ __('product.payload') }}</label>
-                <textarea id="payload_json" name="payload_json" rows="12" class="w-full rounded-xl border border-[#dadce0] px-4 py-3 font-mono text-sm">{{ old('payload_json', $payloadJson) }}</textarea>
+                <x-ui.textarea id="payload_json" name="payload_json" rows="12" class="font-mono text-sm">{{ old('payload_json', $payloadJson) }}</x-ui.textarea>
                 <p class="mt-2 text-sm text-[#5f6368]">{{ __('product.payload_hint') }}</p>
                 @error('payload_json')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
