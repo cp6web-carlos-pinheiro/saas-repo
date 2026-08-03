@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
@@ -78,7 +79,7 @@ final class CompanyAccessUserController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
-        $data = $this->validateCustomer($request);
+        $data = $this->validateCustomer($request, $company);
         $isFirstCompanyUser = $company->users()->doesntExist();
 
         $customer = DB::transaction(function () use ($access, $company, $data, $isFirstCompanyUser): User {
@@ -90,13 +91,8 @@ final class CompanyAccessUserController extends Controller
                 'current_company_id' => $company->id,
             ]);
 
-            $access->sync(
-                $customer,
-                $company,
-                $data['access_profile'],
-                $data['modules'] ?? [],
-                $isFirstCompanyUser,
-            );
+            $role = $this->resolveSelectedRole($access, $company, (int) $data['role_id'], $isFirstCompanyUser);
+            $access->assignExistingRole($customer, $company, $role);
 
             return $customer;
         });
@@ -132,11 +128,11 @@ final class CompanyAccessUserController extends Controller
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
         $customer = $this->companyCustomerOrFail($company, $customer->id);
-        $data = $this->validateCustomer($request, $customer);
+        $data = $this->validateCustomer($request, $company, $customer);
         $isFirstCompanyUser = $company->users()->doesntExist() || $access->isFirstCompanyUser($customer, $company);
         $currentIsAdmin = $access->isCompanyAdministrator($customer, $company);
-        $requestedProfile = (string) $data['access_profile'];
-        $willBeAdmin = $isFirstCompanyUser || $requestedProfile === CompanyUserAccessService::ADMINISTRATOR_PROFILE;
+        $selectedRole = $this->resolveSelectedRole($access, $company, (int) $data['role_id'], $isFirstCompanyUser);
+        $willBeAdmin = $isFirstCompanyUser || $access->isAdministratorRoleSlug((string) $selectedRole->slug);
         $willBeActive = (bool) ($data['is_active'] ?? false);
 
         if ($currentIsAdmin && ! $willBeAdmin) {
@@ -151,7 +147,7 @@ final class CompanyAccessUserController extends Controller
                 ->withErrors(['customer' => __('company_access.last_administrator_required')]);
         }
 
-        DB::transaction(function () use ($access, $company, $customer, $data, $isFirstCompanyUser): void {
+        DB::transaction(function () use ($access, $company, $customer, $data, $selectedRole): void {
             $customer->fill([
                 'name' => $data['name'],
                 'email' => mb_strtolower($data['email']),
@@ -168,13 +164,7 @@ final class CompanyAccessUserController extends Controller
 
             $customer->save();
 
-            $access->sync(
-                $customer,
-                $company,
-                $data['access_profile'],
-                $data['modules'] ?? [],
-                $isFirstCompanyUser,
-            );
+            $access->assignExistingRole($customer, $company, $selectedRole);
         });
 
         $audit->record(
@@ -281,16 +271,14 @@ final class CompanyAccessUserController extends Controller
             ->firstOrFail();
     }
 
-    private function validateCustomer(Request $request, ?User $customer = null): array
+    private function validateCustomer(Request $request, Company $company, ?User $customer = null): array
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email', 'max:190', Rule::unique('users', 'email')->ignore($customer)],
             'password' => [$customer ? 'nullable' : 'required', 'confirmed', 'min:10'],
             'is_active' => ['nullable', 'boolean'],
-            'access_profile' => ['required', Rule::in([CompanyUserAccessService::ADMINISTRATOR_PROFILE, CompanyUserAccessService::CUSTOM_PROFILE])],
-            'modules' => ['nullable', 'array', 'required_if:access_profile,'.CompanyUserAccessService::CUSTOM_PROFILE, 'min:1'],
-            'modules.*' => ['required', 'string', 'distinct', Rule::exists('permissions', 'module')],
+            'role_id' => ['required', 'integer', Rule::exists('roles', 'id')->where('company_id', $company->id)],
         ]);
     }
 
@@ -303,20 +291,50 @@ final class CompanyAccessUserController extends Controller
             ? $access->accessFor($customer, $company)
             : ['profile' => CompanyUserAccessService::CUSTOM_PROFILE, 'modules' => []];
 
+        $assignableRoles = $access->assignableRolesFor($company);
+        $administratorRole = $access->administratorRoleFor($company);
+
+        if ($administratorRole === null) {
+            abort(500, __('company_access.administrator_role_not_found'));
+        }
+
+        $selectedRoleId = $customer !== null
+            ? (int) ($companyAccess['role_id'] ?? $administratorRole->id)
+            : (int) $administratorRole->id;
+
         $isAdministratorProfileLocked = $customer !== null
             && $companyAccess['profile'] === CompanyUserAccessService::ADMINISTRATOR_PROFILE;
 
         return [
             'customer' => $customer,
             'company' => $company,
-            'modules' => $access->modules(),
-            'accessProfile' => $companyAccess['profile'],
-            'selectedModules' => $companyAccess['modules'],
+            'assignableRoles' => $assignableRoles,
+            'selectedRoleId' => $selectedRoleId,
+            'administratorRoleId' => (int) $administratorRole->id,
             'isAdministratorProfileLocked' => $isAdministratorProfileLocked,
             'mustBeAdministrator' => $customer === null
                 ? $company->users()->doesntExist()
                 : $access->isFirstCompanyUser($customer, $company),
         ];
+    }
+
+    private function resolveSelectedRole(CompanyUserAccessService $access, Company $company, int $roleId, bool $mustBeAdministrator): Role
+    {
+        if ($mustBeAdministrator) {
+            $adminRole = $access->administratorRoleFor($company);
+
+            if ($adminRole === null) {
+                abort(500, __('company_access.administrator_role_not_found'));
+            }
+
+            return $adminRole;
+        }
+
+        return Role::query()
+            ->withoutGlobalScope('tenant')
+            ->where('company_id', $company->id)
+            ->whereKey($roleId)
+            ->firstOrFail();
     }
 
     private function applySearchFilters(Builder $query, array $searchTerms): void

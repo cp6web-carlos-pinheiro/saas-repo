@@ -8,6 +8,7 @@ use App\Modules\Identity\Infrastructure\Persistence\Models\Permission;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -96,32 +97,75 @@ final class CompanyUserAccessService
     }
 
     /**
+     * @return EloquentCollection<int, Role>
+     */
+    public function assignableRolesFor(Company $company): EloquentCollection
+    {
+        return Role::query()
+            ->withoutGlobalScope('tenant')
+            ->where('company_id', $company->id)
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function administratorRoleFor(Company $company): ?Role
+    {
+        return Role::query()
+            ->withoutGlobalScope('tenant')
+            ->where('company_id', $company->id)
+            ->whereIn('slug', array_merge(self::COMPANY_ADMIN_ROLE_SLUGS, self::LEGACY_ADMIN_ROLE_SLUGS))
+            ->orderBy('id')
+            ->first();
+    }
+
+    public function assignExistingRole(User $user, Company $company, Role $role): void
+    {
+        $user->companies()->syncWithoutDetaching([
+            $company->id => ['is_default' => $user->current_company_id === null || $user->current_company_id === $company->id],
+        ]);
+
+        $user->forceFill(['current_company_id' => $company->id])->save();
+
+        DB::table('role_user')
+            ->where('user_id', $user->id)
+            ->where('company_id', $company->id)
+            ->delete();
+
+        $user->roles()->attach($role->id, ['company_id' => $company->id]);
+    }
+
+    /**
      * @return array{profile: string, modules: array<int, string>}
      */
     public function accessFor(User $user, Company $company): array
     {
+        $assignedRole = $user->roles()
+            ->withoutGlobalScope('tenant')
+            ->wherePivot('company_id', $company->id)
+            ->first();
+
         if ($this->isCompanyAdministrator($user, $company)) {
             return [
                 'profile' => self::ADMINISTRATOR_PROFILE,
                 'modules' => $this->appendModuleAliases($this->modules()->keys()->all()),
+                'role_id' => $assignedRole?->id,
+                'role_name' => $assignedRole?->name,
+                'role_slug' => $assignedRole?->slug,
             ];
         }
 
-        $role = $user->roles()
-            ->withoutGlobalScope('tenant')
-            ->wherePivot('company_id', $company->id)
-            ->where('roles.slug', $this->roleSlugPrefix($user).self::CUSTOM_PROFILE)
-            ->first();
-
-        if ($role === null) {
+        if ($assignedRole === null) {
             return ['profile' => self::CUSTOM_PROFILE, 'modules' => []];
         }
 
-        $roleModules = $role->permissions()->orderBy('module')->pluck('module')->unique()->values()->all();
+        $roleModules = $assignedRole->permissions()->orderBy('module')->pluck('module')->unique()->values()->all();
 
         return [
             'profile' => self::CUSTOM_PROFILE,
             'modules' => $roleModules,
+            'role_id' => $assignedRole->id,
+            'role_name' => $assignedRole->name,
+            'role_slug' => $assignedRole->slug,
         ];
     }
 

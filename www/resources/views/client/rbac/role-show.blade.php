@@ -12,7 +12,7 @@
             <p class="mt-1 text-sm text-[#5f6368]">{{ $role->slug }}</p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <x-ui.button :href="route('company-access.rbac.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+            <x-ui.button :href="route('company-access.rbac.roles.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             @unless($isAdministratorRole)
                 <x-ui.button :href="route('company-access.rbac.roles.edit', $role)" variant="brand-primary" class="rounded-full">{{ __('rbac.update') }}</x-ui.button>
             @endunless
@@ -51,12 +51,7 @@
                 <form method="POST" action="{{ route('company-access.rbac.roles.destroy', $role) }}" class="mt-6 rounded-xl border border-amber-300 bg-amber-50 p-4">
                     @csrf
                     @method('DELETE')
-                    <label class="flex items-start gap-2 text-sm font-medium">
-                        <input type="checkbox" name="requires_approval" value="1">
-                        <span>{{ __('rbac.approval_mode') }}</span>
-                    </label>
-                    <input name="approval_reason" class="mt-3 w-full rounded-xl border border-amber-300 px-3 py-2" placeholder="{{ __('rbac.approval_reason') }}">
-                    <x-ui.button type="submit" variant="danger-outline" class="mt-3 rounded-full">{{ __('rbac.delete') }}</x-ui.button>
+                    <x-ui.button type="submit" variant="danger-outline" class="rounded-full">{{ __('rbac.delete') }}</x-ui.button>
                 </form>
             @endunless
         </x-ui.panel>

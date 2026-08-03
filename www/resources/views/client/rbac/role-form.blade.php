@@ -11,7 +11,7 @@
         <div>
             <h1 class="font-display text-3xl font-bold">{{ $editing ? __('rbac.update') : __('rbac.create') }}</h1>
         </div>
-        <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.roles.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
@@ -68,31 +68,8 @@
                 </div>
             </div>
 
-            <div>
-                <h2 class="text-base font-semibold">{{ __('rbac.role_users') }}</h2>
-                <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($users as $user)
-                        <label class="flex items-start gap-2 rounded-lg border border-[#f1f3f4] p-3 text-sm">
-                            <input type="checkbox" name="user_ids[]" value="{{ $user->id }}" @checked(in_array((string) $user->id, array_map('strval', old('user_ids', $selectedUserIds)), true))>
-                            <span>
-                                <span class="block font-medium">{{ $user->name }}</span>
-                                <span class="block text-xs text-[#5f6368]">{{ $user->email }}</span>
-                            </span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="rounded-xl border border-amber-300 bg-amber-50 p-4">
-                <label class="flex items-start gap-2 text-sm font-medium">
-                    <input type="checkbox" name="requires_approval" value="1" @checked(old('requires_approval') == '1')>
-                    <span>{{ __('rbac.approval_mode') }}</span>
-                </label>
-                <input name="approval_reason" value="{{ old('approval_reason') }}" class="mt-3 w-full rounded-xl border border-amber-300 px-3 py-2" placeholder="{{ __('rbac.approval_reason') }}">
-            </div>
-
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.index')" variant="surface-muted" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.roles.index')" variant="surface-muted" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
                 <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('rbac.update') : __('rbac.create') }}</x-ui.button>
             </div>
         </form>

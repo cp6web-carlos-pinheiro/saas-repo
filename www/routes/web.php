@@ -118,11 +118,8 @@ Route::middleware('auth:web')->group(function (): void {
         });
 
         Route::prefix('company-access/rbac')->name('company-access.rbac.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
-            Route::get('/', [RbacConsoleController::class, 'index'])->name('index');
+            Route::get('/', static fn () => redirect()->route('company-access.rbac.roles.index'))->name('index');
             Route::get('/roles', [RbacConsoleController::class, 'roles'])->name('roles.index');
-            Route::get('/templates', [RbacConsoleController::class, 'templates'])->name('templates.index');
-            Route::get('/approvals', [RbacConsoleController::class, 'approvals'])->name('approvals.index');
-            Route::get('/history', [RbacConsoleController::class, 'history'])->name('history.index');
 
             Route::get('/roles/create', [RbacConsoleController::class, 'createRole'])->name('roles.create');
             Route::post('/roles', [RbacConsoleController::class, 'storeRole'])->name('roles.store');
@@ -133,12 +130,6 @@ Route::middleware('auth:web')->group(function (): void {
 
             Route::get('/users/{user}/overrides', [RbacConsoleController::class, 'editUserOverrides'])->name('users.overrides.edit');
             Route::put('/users/{user}/overrides', [RbacConsoleController::class, 'updateUserOverrides'])->name('users.overrides.update');
-
-            Route::post('/templates/{template}/versions', [RbacConsoleController::class, 'publishTemplateVersion'])->name('templates.versions.store');
-            Route::post('/templates/{template}/apply', [RbacConsoleController::class, 'applyTemplateVersion'])->name('templates.apply');
-
-            Route::post('/change-requests/{changeRequest}/approve', [RbacConsoleController::class, 'approveChangeRequest'])->name('change-requests.approve');
-            Route::post('/change-requests/{changeRequest}/reject', [RbacConsoleController::class, 'rejectChangeRequest'])->name('change-requests.reject');
         });
 
         Route::prefix('purchasing/suppliers')->name('purchasing.suppliers.')->middleware(EnsureTrialIsActive::class)->group(function (): void {

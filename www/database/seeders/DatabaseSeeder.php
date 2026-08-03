@@ -23,7 +23,6 @@ class DatabaseSeeder extends Seeder
             InventoryPermissionsSeeder::class,
             ProductionPermissionsSeeder::class,
             CompanyAccessPermissionsSeeder::class,
-            RbacRoleTemplateSeeder::class,
             TenantFoundationSeeder::class,
             TenantRolesSeeder::class,
         ]);

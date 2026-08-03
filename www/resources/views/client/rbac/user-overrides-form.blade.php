@@ -10,7 +10,7 @@
             <h1 class="font-display text-3xl font-bold">{{ __('rbac.edit_overrides') }}</h1>
             <p class="mt-1 text-sm text-[#5f6368]">{{ $customer->name }} · {{ $customer->email }}</p>
         </div>
-        <x-ui.button :href="request('role_id') ? route('company-access.rbac.roles.show', request('role_id')) : route('company-access.rbac.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="request('role_id') ? route('company-access.rbac.roles.show', request('role_id')) : route('company-access.rbac.roles.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())

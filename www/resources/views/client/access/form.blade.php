@@ -1,8 +1,7 @@
 @extends('layouts.client-area')
 
 @php($editing = $customer !== null)
-@php($selectedProfile = old('access_profile', $accessProfile))
-@php($selectedModuleNames = old('modules', $selectedModules))
+@php($selectedRole = (int) old('role_id', $selectedRoleId))
 
 @section('title', ($editing ? __('company_access.edit') : __('company_access.create')).' | '.__('ui.app_name'))
 @section('client-page-title', $editing ? __('company_access.edit') : __('company_access.create'))
@@ -55,39 +54,19 @@
 
                 @if ($mustBeAdministrator || $isAdministratorProfileLocked)
                     <x-ui.alert class="mt-2" variant="info">{{ $mustBeAdministrator ? __('company_access.first_user_administrator') : __('company_access.administrator_profile_locked') }}</x-ui.alert>
-                    <input type="hidden" name="access_profile" value="administrator">
+                    <input type="hidden" name="role_id" value="{{ $administratorRoleId }}">
                 @else
                     <label class="mt-2 block text-sm font-medium">
-                        {{ __('company_access.access_profile') }}
-                        <select name="access_profile" required class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
-                            <option value="administrator" @selected($selectedProfile === 'administrator')>{{ __('company_access.profile_administrator') }}</option>
-                            <option value="custom" @selected($selectedProfile === 'custom')>{{ __('company_access.profile_custom') }}</option>
+                        {{ __('company_access.access_role') }}
+                        <select name="role_id" required class="mt-2 w-full rounded-xl border border-[#dadce0] px-4 py-3">
+                            @foreach ($assignableRoles as $role)
+                                <option value="{{ $role->id }}" @selected($selectedRole === (int) $role->id)>{{ $role->name }} ({{ $role->slug }})</option>
+                            @endforeach
                         </select>
                     </label>
-                    <p class="mt-2 text-sm text-[#5f6368]">{{ __('company_access.access_profile_help') }}</p>
+                    <p class="mt-2 text-sm text-[#5f6368]">{{ __('company_access.access_role_help') }}</p>
+                    @error('role_id')<span class="mt-2 block text-sm text-red-700">{{ $message }}</span>@enderror
                 @endif
-
-                <div class="mt-5">
-                    <p class="text-sm font-medium">{{ __('company_access.modules') }}</p>
-                    <p class="mt-1 text-sm text-[#5f6368]">{{ __('company_access.modules_help') }}</p>
-
-                    <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                        @foreach ($modules as $module => $permissions)
-                            @php($moduleIsSelected = $mustBeAdministrator || $isAdministratorProfileLocked || $selectedProfile === 'administrator' || in_array($module, (array) $selectedModuleNames, true))
-                            <label class="flex items-start gap-3 rounded-xl border border-[#dadce0] p-4">
-                                <input name="modules[]" type="checkbox" value="{{ $module }}" @checked($moduleIsSelected) @disabled($mustBeAdministrator || $isAdministratorProfileLocked || $selectedProfile === 'administrator') class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35">
-                                <span>
-                                    <span class="block font-medium">{{ \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleLabel((string) $module) }}</span>
-                                    @php($moduleDescription = \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleDescription((string) $module))
-                                    @if ($moduleDescription !== '')
-                                        <span class="mt-1 block text-xs text-[#5f6368]">{{ $moduleDescription }}</span>
-                                    @endif
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
-                    @error('modules')<span class="mt-2 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </div>
             </fieldset>
 
             @if ($editing)

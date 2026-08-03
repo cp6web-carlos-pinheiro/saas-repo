@@ -25,31 +25,18 @@
                 <dd class="font-medium">{{ $customer->email }}</dd>
             </div>
             <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('company_access.access_profile') }}</dt>
-                <dd class="font-medium">{{ $companyAccess['profile'] === 'administrator' ? __('company_access.profile_administrator') : __('company_access.profile_custom') }}</dd>
+                <dt class="text-[#5f6368]">{{ __('company_access.access_role') }}</dt>
+                <dd class="font-medium">{{ $companyAccess['role_name'] ?? '—' }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-4">
+                <dt class="text-[#5f6368]">{{ __('rbac.role_slug') }}</dt>
+                <dd class="font-medium">{{ $companyAccess['role_slug'] ?? '—' }}</dd>
             </div>
             <div class="flex justify-between gap-4 py-4">
                 <dt class="text-[#5f6368]">{{ __('company_access.created_at') }}</dt>
                 <dd class="font-medium">{{ $customer->created_at->format('d/m/Y H:i') }}</dd>
             </div>
         </dl>
-
-        <div class="mt-8 rounded-2xl border border-[#dadce0] bg-[#f8fafd] p-5">
-            <h2 class="font-display text-xl font-semibold">{{ __('company_access.modules') }}</h2>
-            <div class="mt-4 space-y-3">
-                @forelse ($companyAccess['modules'] as $module)
-                    <div>
-                        <div class="font-medium text-[#202124]">{{ \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleLabel($module) }}</div>
-                        @php($moduleDescription = \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleDescription($module))
-                        @if ($moduleDescription !== '')
-                            <div class="text-xs text-[#5f6368]">{{ $moduleDescription }}</div>
-                        @endif
-                    </div>
-                @empty
-                    <p class="text-sm text-[#5f6368]">—</p>
-                @endforelse
-            </div>
-        </div>
 
         <div class="mt-8 flex flex-wrap gap-3">
             <x-ui.button :href="route('company-access.users.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>

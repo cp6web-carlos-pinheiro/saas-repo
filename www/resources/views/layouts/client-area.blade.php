@@ -59,11 +59,7 @@
             ],
             'users' => [
                 ['label' => __('ui.manage_accesses'), 'href' => route('company-access.users.index'), 'active' => request()->routeIs('company-access.users.*')],
-                ['label' => __('ui.rbac_console'), 'href' => route('company-access.rbac.index'), 'active' => request()->routeIs('company-access.rbac.index')],
                 ['label' => __('ui.rbac_roles'), 'href' => route('company-access.rbac.roles.index'), 'active' => request()->routeIs('company-access.rbac.roles.*')],
-                ['label' => __('ui.rbac_templates'), 'href' => route('company-access.rbac.templates.index'), 'active' => request()->routeIs('company-access.rbac.templates.*')],
-                ['label' => __('ui.rbac_approvals'), 'href' => route('company-access.rbac.approvals.index'), 'active' => request()->routeIs('company-access.rbac.approvals.*')],
-                ['label' => __('ui.rbac_history'), 'href' => route('company-access.rbac.history.index'), 'active' => request()->routeIs('company-access.rbac.history.*')],
             ],
         ];
 
