@@ -60,7 +60,7 @@
                 </div>
             @endif
 
-            <div class="grid gap-5 md:grid-cols-2">
+            <div class="grid gap-5 md:grid-cols-3">
                 <div>
                     <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="status">{{ __('bom.status') }}</label>
                     <x-ui.select id="status" name="status" required data-search="off">
@@ -83,7 +83,7 @@
                     @error('effective_to')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="md:col-span-3">
                     <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="description">{{ __('bom.description') }}</label>
                     <x-ui.input id="description" name="description" :value="old('description', $bom?->description ?? '')" maxlength="255" />
                     @error('description')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -99,50 +99,59 @@
                     <button type="button" class="rounded-full border border-[#dadce0] px-4 py-2 text-sm font-medium" data-bom-add-item>{{ __('bom.add_item') }}</button>
                 </div>
 
-                <div class="space-y-4" data-bom-items-container>
-                    @foreach ($itemRows as $index => $item)
-                        <article class="rounded-2xl border border-[#dadce0] bg-white p-4" data-bom-item-row>
-                            <div class="flex flex-wrap items-center justify-between gap-3">
-                                <h3 class="font-semibold" data-bom-item-title>{{ __('bom.items') }} {{ $index + 1 }}</h3>
-                                <button type="button" class="text-sm font-medium text-red-600" data-bom-remove-item>{{ __('bom.remove_item') }}</button>
-                            </div>
+                <div class="overflow-x-auto">
+                    <div class="min-w-[920px]">
+                        <div class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 border-b border-[#dadce0] pb-2 text-xs font-semibold uppercase tracking-wide text-[#5f6368]">
+                            <span>{{ __('bom.component_product') }}</span>
+                            <span>{{ __('bom.quantity_per') }}</span>
+                            <span>{{ __('bom.scrap_factor') }}</span>
+                            <span>{{ __('bom.uom') }}</span>
+                            <span class="sr-only">{{ __('bom.remove_item') }}</span>
+                        </div>
 
-                            <div class="mt-4 grid gap-4 md:grid-cols-5">
-                                <label class="block text-sm font-medium text-[#5f6368]">
-                                    {{ __('bom.line_no') }}
-                                    <x-ui.input type="number" min="1" name="items[{{ $index }}][line_no]" :value="old('items.'.$index.'.line_no', $item['line_no'] ?? $index + 1)" class="mt-2" required />
-                                </label>
+                        <div class="mt-3 space-y-3" data-bom-items-container>
+                            @foreach ($itemRows as $index => $item)
+                                <div class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-start gap-4" data-bom-item-row>
+                                    <div>
+                                        <x-ui.select name="items[{{ $index }}][component_product_id]" required data-search="on">
+                                            <option value="">{{ __('bom.component_product') }}</option>
+                                            @foreach ($products as $product)
+                                                <option value="{{ $product->id }}" @selected((string) old('items.'.$index.'.component_product_id', $item['component_product_id'] ?? '') === (string) $product->id)>
+                                                    {{ $product->sku }} - {{ $product->description ?? '—' }}
+                                                </option>
+                                            @endforeach
+                                        </x-ui.select>
+                                        @error('items.'.$index.'.component_product_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                                    </div>
 
-                                <label class="block text-sm font-medium text-[#5f6368] md:col-span-2">
-                                    {{ __('bom.component_product') }}
-                                    <x-ui.select name="items[{{ $index }}][component_product_id]" class="mt-2" required data-search="on">
-                                        <option value="">{{ __('bom.component_product') }}</option>
-                                        @foreach ($products as $product)
-                                            <option value="{{ $product->id }}" @selected((string) old('items.'.$index.'.component_product_id', $item['component_product_id'] ?? '') === (string) $product->id)>
-                                                {{ $product->sku }} - {{ $product->description ?? '—' }}
-                                            </option>
-                                        @endforeach
-                                    </x-ui.select>
-                                    @error('items.'.$index.'.component_product_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
-                                </label>
+                                    <div>
+                                        <x-ui.input type="number" step="0.000001" min="0.000001" name="items[{{ $index }}][quantity_per]" :value="old('items.'.$index.'.quantity_per', $item['quantity_per'] ?? 1)" required />
+                                    </div>
 
-                                <label class="block text-sm font-medium text-[#5f6368]">
-                                    {{ __('bom.quantity_per') }}
-                                    <x-ui.input type="number" step="0.000001" min="0.000001" name="items[{{ $index }}][quantity_per]" :value="old('items.'.$index.'.quantity_per', $item['quantity_per'] ?? 1)" class="mt-2" required />
-                                </label>
+                                    <div>
+                                        <x-ui.input type="number" step="0.0001" min="0" name="items[{{ $index }}][scrap_factor]" :value="old('items.'.$index.'.scrap_factor', $item['scrap_factor'] ?? 0)" />
+                                    </div>
 
-                                <label class="block text-sm font-medium text-[#5f6368]">
-                                    {{ __('bom.scrap_factor') }}
-                                    <x-ui.input type="number" step="0.0001" min="0" name="items[{{ $index }}][scrap_factor]" :value="old('items.'.$index.'.scrap_factor', $item['scrap_factor'] ?? 0)" class="mt-2" />
-                                </label>
+                                    <div>
+                                        <x-ui.input type="text" name="items[{{ $index }}][uom]" :value="old('items.'.$index.'.uom', $item['uom'] ?? '')" maxlength="20" />
+                                    </div>
 
-                                <label class="block text-sm font-medium text-[#5f6368]">
-                                    {{ __('bom.uom') }}
-                                    <x-ui.input type="text" name="items[{{ $index }}][uom]" :value="old('items.'.$index.'.uom', $item['uom'] ?? '')" class="mt-2" maxlength="20" />
-                                </label>
-                            </div>
-                        </article>
-                    @endforeach
+                                    <div class="flex justify-end">
+                                        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-bom-remove-item aria-label="Remover" title="Remover">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M3 6h18" />
+                                                <path d="M8 6V4h8v2" />
+                                                <path d="M19 6l-1 14H6L5 6" />
+                                                <path d="M10 11v6" />
+                                                <path d="M14 11v6" />
+                                            </svg>
+                                            <span class="sr-only">Remover</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
 
                 @error('items')<p class="text-sm text-red-600">{{ $message }}</p>@enderror
@@ -157,44 +166,41 @@
 </div>
 
 <template id="bom-item-template">
-    <article class="rounded-2xl border border-[#dadce0] bg-white p-4" data-bom-item-row>
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <h3 class="font-semibold" data-bom-item-title>{{ __('bom.items') }}</h3>
-            <button type="button" class="text-sm font-medium text-red-600" data-bom-remove-item>{{ __('bom.remove_item') }}</button>
+    <div class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-start gap-4" data-bom-item-row>
+        <div>
+            <x-ui.select name="items[__INDEX__][component_product_id]" required data-search="on">
+                <option value="">{{ __('bom.component_product') }}</option>
+                @foreach ($products as $product)
+                    <option value="{{ $product->id }}">{{ $product->sku }} - {{ $product->description ?? '—' }}</option>
+                @endforeach
+            </x-ui.select>
         </div>
 
-        <div class="mt-4 grid gap-4 md:grid-cols-5">
-            <label class="block text-sm font-medium text-[#5f6368]">
-                {{ __('bom.line_no') }}
-                <x-ui.input type="number" min="1" name="items[__INDEX__][line_no]" value="1" class="mt-2" required />
-            </label>
-
-            <label class="block text-sm font-medium text-[#5f6368] md:col-span-2">
-                {{ __('bom.component_product') }}
-                <x-ui.select name="items[__INDEX__][component_product_id]" class="mt-2" required data-search="on">
-                    <option value="">{{ __('bom.component_product') }}</option>
-                    @foreach ($products as $product)
-                        <option value="{{ $product->id }}">{{ $product->sku }} - {{ $product->description ?? '—' }}</option>
-                    @endforeach
-                </x-ui.select>
-            </label>
-
-            <label class="block text-sm font-medium text-[#5f6368]">
-                {{ __('bom.quantity_per') }}
-                <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity_per]" value="1" class="mt-2" required />
-            </label>
-
-            <label class="block text-sm font-medium text-[#5f6368]">
-                {{ __('bom.scrap_factor') }}
-                <x-ui.input type="number" step="0.0001" min="0" name="items[__INDEX__][scrap_factor]" value="0" class="mt-2" />
-            </label>
-
-            <label class="block text-sm font-medium text-[#5f6368]">
-                {{ __('bom.uom') }}
-                <x-ui.input type="text" name="items[__INDEX__][uom]" value="" class="mt-2" maxlength="20" />
-            </label>
+        <div>
+            <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity_per]" value="1" required />
         </div>
-    </article>
+
+        <div>
+            <x-ui.input type="number" step="0.0001" min="0" name="items[__INDEX__][scrap_factor]" value="0" />
+        </div>
+
+        <div>
+            <x-ui.input type="text" name="items[__INDEX__][uom]" value="" maxlength="20" />
+        </div>
+
+        <div class="flex justify-end">
+            <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-bom-remove-item aria-label="Remover" title="Remover">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 6h18" />
+                    <path d="M8 6V4h8v2" />
+                    <path d="M19 6l-1 14H6L5 6" />
+                    <path d="M10 11v6" />
+                    <path d="M14 11v6" />
+                </svg>
+                <span class="sr-only">Remover</span>
+            </button>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -211,18 +217,12 @@ document.addEventListener('DOMContentLoaded', () => {
         row.querySelectorAll('[name]').forEach((field) => {
             field.name = field.name.replace(/items\[(?:__INDEX__|\d+)\]/, `items[${index}]`);
         });
-
-        const title = row.querySelector('[data-bom-item-title]');
-
-        if (title) {
-            title.textContent = `{{ __('bom.items') }} ${index + 1}`;
-        }
     };
 
     const resetRow = (row) => {
         row.querySelectorAll('input').forEach((input) => {
             if (input.type === 'number') {
-                input.value = input.name.includes('line_no') ? '1' : (input.name.includes('quantity_per') ? '1' : '0');
+                input.value = input.name.includes('quantity_per') ? '1' : '0';
             } else {
                 input.value = '';
             }

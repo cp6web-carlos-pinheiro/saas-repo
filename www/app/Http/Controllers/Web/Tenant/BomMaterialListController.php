@@ -269,7 +269,6 @@ final class BomMaterialListController extends Controller
             'effective_to' => ['nullable', 'date', 'after_or_equal:effective_from'],
             'description' => ['nullable', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.line_no' => ['required', 'integer', 'min:1', 'distinct'],
             'items.*.component_product_id' => [
                 'required',
                 'integer',
@@ -301,7 +300,7 @@ final class BomMaterialListController extends Controller
                 'company_id' => $companyId,
                 'bom_header_id' => $bom->id,
                 'component_product_id' => $componentProduct->id,
-                'line_no' => (int) $item['line_no'],
+                'line_no' => $index + 1,
                 'quantity_per' => (float) $item['quantity_per'],
                 'scrap_factor' => (float) ($item['scrap_factor'] ?? 0),
                 'uom' => trim((string) ($item['uom'] ?? '')) !== '' ? trim((string) $item['uom']) : $componentProduct->uom,
