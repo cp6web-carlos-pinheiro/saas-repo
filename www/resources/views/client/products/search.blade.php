@@ -10,6 +10,7 @@
             <h1 class="font-display text-3xl font-bold">{{ __('product.title') }}</h1>
         </div>
         <div class="flex flex-wrap items-center gap-3">
+            <x-ui.button :href="route('products.export', ['search' => $search, 'sort' => $sort, 'direction' => $direction])" variant="surface-muted" class="rounded-full">{{ __('product.export_xlsx') }}</x-ui.button>
             <x-ui.button :href="route('products.create')" variant="brand-primary" class="rounded-full">{{ __('product.create') }}</x-ui.button>
         </div>
     </div>
@@ -20,6 +21,28 @@
             <x-ui.input id="product-search" name="search" :value="$search" class="min-w-0 flex-1" placeholder="{{ __('product.search') }}" />
             <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('product.filter') }}</x-ui.button>
         </form>
+
+        <div class="mt-5 rounded-2xl border border-[#dadce0] bg-white p-4">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                    <p class="text-sm font-medium text-[#5f6368]">{{ __('product.import_xlsx') }}</p>
+                    <p class="mt-1 text-sm text-[#5f6368]">{{ __('product.import_help') }}</p>
+                </div>
+            </div>
+
+            <form class="mt-4 flex flex-wrap items-end gap-3" method="POST" action="{{ route('products.import') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="min-w-0 flex-1">
+                    <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="products-xlsx">{{ __('product.import_file') }}</label>
+                    <x-ui.input id="products-xlsx" type="file" name="file" accept=".xlsx" required class="w-full" />
+                </div>
+                <x-ui.button type="submit" variant="brand-primary" class="rounded-xl">{{ __('product.import_xlsx') }}</x-ui.button>
+            </form>
+
+            @error('file')
+                <p class="mt-3 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
 
         @php($sortUrl = fn ($column) => route('products.index', ['search' => $search, 'sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
 

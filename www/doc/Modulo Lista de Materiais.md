@@ -1,4 +1,4 @@
-# Modulo Lista de Materiais
+# Modulo Revisões
 
 Este modulo gerencia a estrutura de produtos, componentes e quantidades que formam cada item fabricado.
 

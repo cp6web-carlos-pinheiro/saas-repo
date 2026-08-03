@@ -45,6 +45,12 @@
             'production_mrp' => [
                 ['label' => __('ui.bom_structures'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
                 ['label' => __('ui.bom_revisions'), 'href' => route('bom.material-lists.index'), 'active' => request()->routeIs('bom.material-lists.*')],
+                ['label' => __('ui.production_orders').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
+                ['label' => __('ui.production_postings').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
+                ['label' => __('ui.module_routing').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
+                ['label' => __('ui.work_centers').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
+                ['label' => __('ui.production_calendar').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
+                ['label' => __('ui.module_scheduling').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
             ],
             'purchasing' => [
                 ['label' => __('ui.purchasing_requisition'), 'href' => null, 'active' => false],

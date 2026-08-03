@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Product\Application\Services\ProductService;
+use App\Modules\Product\Application\Services\ProductSpreadsheetService;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
+use App\Modules\Product\Presentation\Http\Requests\ImportProductsRequest;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
@@ -15,7 +17,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 final class ProductController extends Controller
 {
@@ -24,6 +28,8 @@ final class ProductController extends Controller
     private const CREATE_PERMISSION = 'bom.explode';
 
     private const UPDATE_PERMISSION = 'bom.explode';
+
+    private const XLSX_CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
     public function index(Request $request, ProductService $service): View
     {
@@ -163,6 +169,82 @@ final class ProductController extends Controller
         );
 
         return redirect()->route('products.index')->with('status', __('product.removed'));
+    }
+
+    public function export(Request $request, ProductSpreadsheetService $spreadsheetService): BinaryFileResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
+
+        $search = trim((string) $request->query('search'));
+        $sort = (string) $request->query('sort', 'sku');
+        $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
+
+        abort_unless(in_array($sort, ['sku', 'product_type', 'lead_time_days', 'is_active', 'created_at'], true), 404);
+
+        $products = Product::query()
+            ->where('company_id', $company->id)
+            ->when($search !== '', static function (Builder $query) use ($search): void {
+                $query->where(static function (Builder $nested) use ($search): void {
+                    $nested->where('sku', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy($sort, $direction)
+            ->get();
+
+        $path = $spreadsheetService->export($products, $company->name);
+        $filename = 'products-'.now()->format('Ymd-His').'.xlsx';
+
+        $audit = app(AuditLogService::class);
+        $audit->record(
+            'tenant_product.exported',
+            context: [
+                'company_id' => $company->id,
+                'actor_user_id' => $request->user()?->id,
+                'products_count' => $products->count(),
+            ],
+            userId: $request->user()?->id,
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent(),
+        );
+
+        return response()
+            ->download($path, $filename, ['Content-Type' => self::XLSX_CONTENT_TYPE])
+            ->deleteFileAfterSend(true);
+    }
+
+    public function import(ImportProductsRequest $request, ProductSpreadsheetService $spreadsheetService, AuditLogService $audit): RedirectResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
+
+        try {
+            $result = $spreadsheetService->import($company, $request->file('file'));
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (\App\Shared\Presentation\Exceptions\DomainException $exception) {
+            throw ValidationException::withMessages([
+                'file' => $exception->getMessage(),
+            ]);
+        }
+
+        $audit->record(
+            'tenant_product.imported',
+            context: [
+                'company_id' => $company->id,
+                'actor_user_id' => $request->user()?->id,
+                'created_count' => $result['created'],
+                'updated_count' => $result['updated'],
+            ],
+            userId: $request->user()?->id,
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent(),
+        );
+
+        return redirect()
+            ->route('products.index')
+            ->with('status', __('product.import_success', ['created' => $result['created'], 'updated' => $result['updated']]));
     }
 
     private function activeCompanyFrom(Request $request): Company

@@ -1,13 +1,13 @@
 @extends('layouts.client-area')
 
 @section('title', __('ui.module_production_mrp').' | '.__('ui.bom_revisions'))
-@section('client-page-title', __('bom.title'))
+@section('client-page-title', __('ui.bom_revisions'))
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-            <h1 class="font-display text-3xl font-bold">{{ __('bom.title') }}</h1>
+            <h1 class="font-display text-3xl font-bold">{{ __('ui.bom_revisions') }}</h1>
         </div>
         <div class="flex flex-wrap items-center gap-3">
             <x-ui.button :href="route('bom.material-lists.create')" variant="brand-primary" class="rounded-full">{{ __('bom.create') }}</x-ui.button>

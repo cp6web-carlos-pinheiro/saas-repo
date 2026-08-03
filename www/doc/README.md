@@ -7,7 +7,7 @@ Este diretório concentra documentos funcionais dos módulos do sistema Beyond M
 1. [Módulo Identidade e Acesso](Modulo%20Identidade%20e%20Acesso.md)
 2. [Módulo Gestão de Locatários](Modulo%20Gestao%20de%20Locatarios.md)
 3. [Módulo Produto](Modulo%20Produto.md)
-4. [Módulo Lista de Materiais](Modulo%20Lista%20de%20Materiais.md)
+4. [Módulo Revisões](Modulo%20Lista%20de%20Materiais.md)
 5. [Módulo Roteiro de Produção](Modulo%20Roteiro%20de%20Producao.md)
 6. [Módulo Engenharia de Mudanças](Modulo%20Engenharia%20de%20Mudancas.md)
 7. [Módulo Ordem de Mudança de Engenharia](Modulo%20Ordem%20de%20Mudanca%20de%20Engenharia.md)

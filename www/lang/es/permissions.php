@@ -30,7 +30,7 @@ return [
     ],
 
     'slugs' => [
-        'bom.explode' => 'Explotar lista de materiales',
+        'bom.explode' => 'Explotar revisiones',
         'company-access.users.create' => 'Crear usuarios de la empresa',
         'company-access.users.delete' => 'Eliminar usuarios de la empresa',
         'company-access.users.read' => 'Leer usuarios de la empresa',
