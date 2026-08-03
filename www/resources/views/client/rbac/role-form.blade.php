@@ -45,6 +45,7 @@
             <div>
                 <h2 class="text-base font-semibold">{{ __('rbac.permission_matrix') }}</h2>
                 <div class="mt-4 space-y-4">
+                    @php($checkedPermissionIds = array_map('strval', old('permission_ids', $selectedPermissionIds)))
                     @foreach ($permissionsByModule as $module => $permissions)
                         <fieldset class="rounded-xl border border-[#dadce0] p-4" data-module-permissions>
                             <div class="mb-3 flex items-center justify-between gap-2">
@@ -53,12 +54,14 @@
                             </div>
 
                             <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                                @foreach ($permissions as $permission)
-                                    <label class="flex items-start gap-2 rounded-lg border border-[#f1f3f4] p-2 text-sm">
-                                        <x-ui.input type="checkbox" name="permission_ids[]" value="{{ $permission->id }}" @checked(in_array((string) $permission->id, array_map('strval', old('permission_ids', $selectedPermissionIds)), true)) unstyled />
-                                        <span>
-                                            <span class="block font-medium">{{ $permission->label() }}</span>
-                                            <span class="block text-xs text-[#5f6368]">{{ $permission->slug }}</span>
+                                @foreach ($permissions->unique('slug')->values() as $permission)
+                                    @php($permissionLabel = $permission->label())
+                                    @php($permissionDescription = $permission->description())
+                                    <label for="permission_{{ $permission->id }}" class="flex items-start gap-2 rounded-lg border border-[#f1f3f4] p-2 text-sm">
+                                        <input id="permission_{{ $permission->id }}" type="checkbox" name="permission_ids[]" value="{{ $permission->id }}" @checked(in_array((string) $permission->id, $checkedPermissionIds, true)) class="mt-1 h-4 w-4 cursor-pointer appearance-auto rounded border-slate-300 accent-[#1a73e8]" />
+                                        <span title="{{ $permission->slug }}">
+                                            <span class="block font-medium">{{ $permissionLabel }}</span>
+                                            <span class="block text-xs text-[#5f6368]">{{ $permissionDescription !== $permissionLabel ? $permissionDescription : $permission->slug }}</span>
                                         </span>
                                     </label>
                                 @endforeach

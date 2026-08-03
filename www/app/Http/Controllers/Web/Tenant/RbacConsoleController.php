@@ -292,6 +292,8 @@ final class RbacConsoleController extends Controller
             ->orderBy('module')
             ->orderBy('name')
             ->get()
+            ->unique('slug')
+            ->values()
             ->groupBy('module');
 
         $selectedPermissionIds = $role?->permissions()->pluck('permissions.id')->map(static fn ($id): int => (int) $id)->all() ?? [];

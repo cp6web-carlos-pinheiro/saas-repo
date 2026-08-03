@@ -7,6 +7,7 @@ namespace App\Modules\Identity\Infrastructure\Persistence\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 
 final class Permission extends Model
@@ -29,10 +30,13 @@ final class Permission extends Model
 
     public function label(): string
     {
-        $key = 'permissions.slugs.'.$this->slug;
-        $translated = __($key);
+        $translations = Lang::get('permissions.slugs');
 
-        return $translated !== $key ? $translated : $this->name;
+        if (is_array($translations) && array_key_exists($this->slug, $translations)) {
+            return (string) $translations[$this->slug];
+        }
+
+        return $this->name;
     }
 
     public static function moduleLabel(string $module): string
@@ -45,10 +49,13 @@ final class Permission extends Model
 
     public function description(): string
     {
-        $key = 'permissions.descriptions.'.$this->slug;
-        $translated = __($key);
+        $translations = Lang::get('permissions.descriptions');
 
-        return $translated !== $key ? $translated : $this->name;
+        if (is_array($translations) && array_key_exists($this->slug, $translations)) {
+            return (string) $translations[$this->slug];
+        }
+
+        return $this->name;
     }
 
     public static function moduleDescription(string $module): string
