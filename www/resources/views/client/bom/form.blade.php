@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', ($editing ? __('bom.edit') : __('bom.create')).' | '.__('ui.app_name'))
+@section('title', __('ui.module_production_mrp').' | '.__('ui.bom_revisions'))
 @section('client-page-title', __('bom.title'))
 
 @section('client-content')
@@ -14,7 +14,7 @@
         <div>
             <h1 class="font-display text-3xl font-bold">{{ $editing ? __('bom.edit') : __('bom.create') }}</h1>
         </div>
-        <x-ui.button :href="$editing ? route('bom.material-lists.show', $bom) : route('bom.material-lists.index')" variant="surface-muted" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('bom.material-lists.show', $bom) : route('bom.material-lists.index')" variant="material-back" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
@@ -150,7 +150,7 @@
 
             <div class="flex flex-wrap gap-3">
                 <x-ui.button type="submit" variant="brand-primary" class="rounded-full">{{ __('bom.save') }}</x-ui.button>
-                <x-ui.button :href="$editing ? route('bom.material-lists.show', $bom) : route('bom.material-lists.index')" variant="surface-muted" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('bom.material-lists.show', $bom) : route('bom.material-lists.index')" variant="material-back" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>

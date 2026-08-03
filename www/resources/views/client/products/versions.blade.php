@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', __('product.versions_title').' | '.__('ui.app_name'))
+@section('title', __('ui.module_products').' | '.__('ui.product_versions'))
 @section('client-page-title', __('product.versions_title'))
 
 @section('client-content')

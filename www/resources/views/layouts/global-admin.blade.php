@@ -1,4 +1,4 @@
-@extends('layouts.google')
+@extends('layouts.public')
 
 @section('bodyClass', 'min-h-screen bg-[#f8fafd] text-[#202124]')
 

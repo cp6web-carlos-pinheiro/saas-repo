@@ -1,4 +1,4 @@
-@extends('layouts.google')
+@extends('layouts.public')
 
 @section('title', __('auth.accept_invitation_title').' | '.__('ui.app_name'))
 

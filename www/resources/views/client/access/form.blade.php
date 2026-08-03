@@ -3,7 +3,7 @@
 @php($editing = $customer !== null)
 @php($selectedRole = (int) old('role_id', $selectedRoleId))
 
-@section('title', ($editing ? __('company_access.edit') : __('company_access.create')).' | '.__('ui.app_name'))
+@section('title', __('ui.module_users').' | '.__('ui.manage_accesses'))
 @section('client-page-title', $editing ? __('company_access.edit') : __('company_access.create'))
 
 @section('client-content')
@@ -12,7 +12,7 @@
         <div>
             <h1 class="font-display text-3xl font-bold">{{ $editing ? __('company_access.edit') : __('company_access.create') }}</h1>
         </div>
-        <x-ui.button :href="$editing ? route('company-access.users.show', $customer) : route('company-access.users.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('company-access.users.show', $customer) : route('company-access.users.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
@@ -77,7 +77,7 @@
             @endif
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('company-access.users.show', $customer) : route('company-access.users.index')" variant="surface-muted" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('company-access.users.show', $customer) : route('company-access.users.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
                 <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('company_access.save') : __('company_access.create') }}</x-ui.button>
             </div>
         </form>

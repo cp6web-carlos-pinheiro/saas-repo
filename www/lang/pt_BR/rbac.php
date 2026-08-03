@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Console RBAC',
+    'title' => 'Perfis de acesso',
     'subtitle' => 'Gestão central de perfis de acesso e permissões por empresa.',
     'roles' => 'Perfis de acesso',
     'new_role' => 'Novo perfil de acesso',

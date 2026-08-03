@@ -2,7 +2,7 @@
 
 @php($editing = $supplier !== null)
 
-@section('title', ($editing ? __('supplier.edit') : __('supplier.create')).' | '.__('ui.app_name'))
+@section('title', __('ui.module_purchasing').' | '.__('ui.purchasing_suppliers'))
 @section('client-page-title', $editing ? __('supplier.edit') : __('supplier.create'))
 
 @section('client-content')
@@ -11,7 +11,7 @@
         <div>
             <h1 class="font-display text-3xl font-bold">{{ $editing ? __('supplier.edit') : __('supplier.create') }}</h1>
         </div>
-        <x-ui.button :href="$editing ? route('purchasing.suppliers.show', $supplier) : route('purchasing.suppliers.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('purchasing.suppliers.show', $supplier) : route('purchasing.suppliers.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
@@ -73,7 +73,7 @@
             </label>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('purchasing.suppliers.show', $supplier) : route('purchasing.suppliers.index')" variant="surface-muted" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('purchasing.suppliers.show', $supplier) : route('purchasing.suppliers.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
                 <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('supplier.save') : __('supplier.create') }}</x-ui.button>
             </div>
         </form>

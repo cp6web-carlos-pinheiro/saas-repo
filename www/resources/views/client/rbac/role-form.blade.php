@@ -2,7 +2,7 @@
 
 @php($editing = $role !== null)
 
-@section('title', ($editing ? __('rbac.update') : __('rbac.create')).' | '.__('rbac.title'))
+@section('title', __('ui.module_users').' | '.__('ui.rbac_roles'))
 @section('client-page-title', __('rbac.title'))
 
 @section('client-content')
@@ -11,7 +11,7 @@
         <div>
             <h1 class="font-display text-3xl font-bold">{{ $editing ? __('rbac.update') : __('rbac.create') }}</h1>
         </div>
-        <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.roles.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.roles.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
@@ -69,7 +69,7 @@
             </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.roles.index')" variant="surface-muted" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.roles.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
                 <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('rbac.update') : __('rbac.create') }}</x-ui.button>
             </div>
         </form>

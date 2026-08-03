@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', $product->sku.' | '.__('bom.structures_title'))
+@section('title', __('ui.module_production_mrp').' | '.__('ui.bom_structures'))
 @section('client-page-title', __('bom.structures_title'))
 
 @section('client-content')
@@ -10,7 +10,11 @@
             <h1 class="font-display text-3xl font-bold">{{ $product->sku }}</h1>
             <p class="mt-1 text-sm text-[#5f6368]">{{ $product->description ?? '—' }}</p>
         </div>
-        <x-ui.button :href="route('bom.material-lists.create', ['product_id' => $product->id])" variant="brand-primary" class="rounded-full">{{ __('bom.create_revision') }}</x-ui.button>
+        <div class="flex flex-wrap gap-3">
+            <x-ui.button :href="route('bom.structures.index')" variant="material-back" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
+            <x-ui.button :href="route('bom.material-lists.index', ['search' => $product->sku])" variant="material-versions" class="rounded-full">{{ __('ui.bom_revisions') }}</x-ui.button>
+            <x-ui.button :href="route('bom.material-lists.create', ['product_id' => $product->id])" variant="brand-primary" class="rounded-full">{{ __('bom.create_revision') }}</x-ui.button>
+        </div>
     </div>
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
@@ -49,10 +53,6 @@
             </table>
         </div>
 
-        <div class="mt-8 flex flex-wrap gap-3">
-            <x-ui.button :href="route('bom.structures.index')" variant="surface-muted" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
-            <x-ui.button :href="route('bom.material-lists.index', ['search' => $product->sku])" variant="surface-muted" class="rounded-full">{{ __('ui.bom_revisions') }}</x-ui.button>
-        </div>
     </x-ui.panel>
 </div>
 @endsection

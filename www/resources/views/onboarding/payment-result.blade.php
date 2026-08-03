@@ -1,4 +1,4 @@
-@extends('layouts.google')
+@extends('layouts.public')
 
 @section('title', __('payment.result_title').' | '.__('ui.app_name'))
 

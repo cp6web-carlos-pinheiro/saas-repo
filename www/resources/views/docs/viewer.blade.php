@@ -1,4 +1,4 @@
-@extends('layouts.google')
+@extends('layouts.public')
 
 @section('title', $currentTitle.' | '.__('ui.documentation').' | '.__('ui.app_name'))
 

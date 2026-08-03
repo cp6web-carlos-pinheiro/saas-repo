@@ -1,4 +1,4 @@
-@extends('layouts.google')
+@extends('layouts.public')
 
 @section('title', __('auth.active_sessions_title'))
 

@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', ($editing ? __('product.version_edit') : __('product.version_create')).' | '.__('ui.app_name'))
+@section('title', __('ui.module_products').' | '.__('ui.product_versions'))
 @section('client-page-title', __('product.versions_title'))
 
 @section('client-content')
@@ -9,7 +9,7 @@
         <div>
             <h1 class="font-display text-3xl font-bold">{{ $editing ? __('product.version_edit') : __('product.version_create') }}</h1>
         </div>
-        <x-ui.button :href="route('products.versions', ['product_id' => $product->id])" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="route('products.versions', ['product_id' => $product->id])" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">

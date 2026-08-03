@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', __('ui.rbac_roles').' | '.__('rbac.title'))
+@section('title', __('ui.module_users').' | '.__('ui.rbac_roles'))
 @section('client-page-title', __('rbac.title'))
 
 @section('client-content')
@@ -43,7 +43,7 @@
                                     @if ($isAdministratorRole)
                                         <span class="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">{{ __('rbac.master_role_locked') }}</span>
                                     @else
-                                        <x-ui.button :href="route('company-access.rbac.roles.edit', $role)" variant="surface-muted" class="rounded-full text-xs">{{ __('rbac.update') }}</x-ui.button>
+                                        <x-ui.button :href="route('company-access.rbac.roles.edit', $role)" variant="material-edit" class="rounded-full text-xs">{{ __('rbac.update') }}</x-ui.button>
                                     @endif
                                 </div>
                             </td>

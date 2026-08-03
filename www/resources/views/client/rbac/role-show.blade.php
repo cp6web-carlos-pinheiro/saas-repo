@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', $role->name.' | '.__('rbac.title'))
+@section('title', __('ui.module_users').' | '.__('ui.rbac_roles'))
 @section('client-page-title', __('rbac.title'))
 
 @section('client-content')
@@ -12,9 +12,14 @@
             <p class="mt-1 text-sm text-[#5f6368]">{{ $role->slug }}</p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <x-ui.button :href="route('company-access.rbac.roles.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+            <x-ui.button :href="route('company-access.rbac.roles.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             @unless($isAdministratorRole)
-                <x-ui.button :href="route('company-access.rbac.roles.edit', $role)" variant="brand-primary" class="rounded-full">{{ __('rbac.update') }}</x-ui.button>
+                <x-ui.button :href="route('company-access.rbac.roles.edit', $role)" variant="material-edit" class="rounded-full">{{ __('rbac.update') }}</x-ui.button>
+                <form method="POST" action="{{ route('company-access.rbac.roles.destroy', $role) }}">
+                    @csrf
+                    @method('DELETE')
+                    <x-ui.button type="submit" variant="material-remove" class="rounded-full">{{ __('rbac.delete') }}</x-ui.button>
+                </form>
             @endunless
         </div>
     </div>
@@ -46,14 +51,6 @@
                     </div>
                 @endforeach
             </div>
-
-            @unless($isAdministratorRole)
-                <form method="POST" action="{{ route('company-access.rbac.roles.destroy', $role) }}" class="mt-6 rounded-xl border border-amber-300 bg-amber-50 p-4">
-                    @csrf
-                    @method('DELETE')
-                    <x-ui.button type="submit" variant="danger-outline" class="rounded-full">{{ __('rbac.delete') }}</x-ui.button>
-                </form>
-            @endunless
         </x-ui.panel>
 
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-6 md:p-8">
@@ -66,7 +63,7 @@
                                 <p class="font-semibold">{{ $customer->name }}</p>
                                 <p class="mt-1 text-xs text-[#5f6368]">{{ $customer->email }}</p>
                             </div>
-                            <x-ui.button :href="route('company-access.users.edit', $customer)" variant="surface-muted" class="rounded-full text-xs">{{ __('company_access.edit') }}</x-ui.button>
+                            <x-ui.button :href="route('company-access.users.edit', $customer)" variant="material-edit" class="rounded-full text-xs">{{ __('company_access.edit') }}</x-ui.button>
                         </div>
                     </div>
                 @empty

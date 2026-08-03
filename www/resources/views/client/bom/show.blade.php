@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', ($bom->product?->sku ?? __('bom.title')).' | '.__('ui.app_name'))
+@section('title', __('ui.module_production_mrp').' | '.__('ui.bom_revisions'))
 @section('client-page-title', __('bom.title'))
 
 @section('client-content')
@@ -10,9 +10,16 @@
             <h1 class="font-display text-3xl font-bold">{{ $bom->product?->sku ?? __('bom.title') }}</h1>
             <p class="mt-1 text-sm text-[#5f6368]">{{ $bom->product?->description ?? '—' }}</p>
         </div>
-        <span class="rounded-full px-3 py-1 text-xs {{ $bom->status === 'DRAFT' ? 'bg-slate-100 text-slate-600' : ($bom->status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700') }}">
-            {{ __('bom.status_'.$bom->status) }}
-        </span>
+        <div class="flex flex-wrap gap-3">
+            <x-ui.button :href="route('bom.material-lists.index')" variant="material-back" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
+            <x-ui.button :href="route('bom.material-lists.edit', $bom)" variant="material-edit" class="rounded-full">{{ __('bom.edit') }}</x-ui.button>
+
+            <form method="POST" action="{{ route('bom.material-lists.destroy', $bom) }}" data-admin-delete-confirm data-admin-name="{{ $bom->product?->sku ?? __('bom.title') }} v{{ $bom->version_number }}" data-confirm-title="{{ __('bom.confirm_delete_title') }}" data-confirm-text="{{ __('bom.confirm_delete_text') }}" data-confirm-confirm="{{ __('bom.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('bom.confirm_delete_cancel') }}">
+                @csrf
+                @method('DELETE')
+                <x-ui.button type="submit" variant="material-remove" class="rounded-full">{{ __('bom.remove') }}</x-ui.button>
+            </form>
+        </div>
     </div>
 
     @if (session('status'))
@@ -79,16 +86,6 @@
             </table>
         </div>
 
-        <div class="mt-8 flex flex-wrap gap-3">
-            <x-ui.button :href="route('bom.material-lists.index')" variant="surface-muted" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
-            <x-ui.button :href="route('bom.material-lists.edit', $bom)" variant="brand-primary" class="rounded-full">{{ __('bom.edit') }}</x-ui.button>
-
-            <form method="POST" action="{{ route('bom.material-lists.destroy', $bom) }}" data-admin-delete-confirm data-admin-name="{{ $bom->product?->sku ?? __('bom.title') }} v{{ $bom->version_number }}" data-confirm-title="{{ __('bom.confirm_delete_title') }}" data-confirm-text="{{ __('bom.confirm_delete_text') }}" data-confirm-confirm="{{ __('bom.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('bom.confirm_delete_cancel') }}">
-                @csrf
-                @method('DELETE')
-                <x-ui.button type="submit" variant="danger-outline" class="rounded-full">{{ __('bom.remove') }}</x-ui.button>
-            </form>
-        </div>
     </x-ui.panel>
 </div>
 @endsection

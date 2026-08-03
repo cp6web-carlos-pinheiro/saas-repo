@@ -1,4 +1,4 @@
-@extends('layouts.google')
+@extends('layouts.public')
 
 @section('bodyClass', 'ind-page')
 
@@ -124,6 +124,7 @@
             <x-slot:header>
                 <div class="ind-brand-title" data-client-sidebar-content>
                     <strong>{{ __('ui.app_name') }}</strong>
+                    <span class="mt-1 block text-xs font-medium text-[#5f6368]">{{ $activeCompanyName }}</span>
                 </div>
                 <button
                     type="button"
@@ -282,7 +283,6 @@
         <div class="ind-main-area">
             <header class="ind-topbar">
                 <div class="ind-topbar-left">
-                    <span class="ind-topbar-title">{{ $activeCompanyName }}</span>
                 </div>
 
                 <div class="ind-topbar-right">
@@ -338,15 +338,6 @@
                 <path d="M8.25 7.75h6.5M8.25 10.75h6.5M8.25 13.75h4.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
         </a>
-
-        @if ($canManageAccesses)
-            <a href="{{ route('company-access.users.index') }}" class="ind-settings-nav-link" aria-label="{{ __('ui.manage_accesses') }}">
-                <span>{{ __('ui.manage_accesses') }}</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M7 7.5A3.5 3.5 0 1 1 10.5 11 3.5 3.5 0 0 1 7 7.5Zm8 1A2.5 2.5 0 1 1 17.5 11 2.5 2.5 0 0 1 15 8.5ZM4.75 18a4.25 4.25 0 0 1 8.5 0v.25H4.75V18Zm9.5.25v-.25a4.86 4.86 0 0 0-1.09-3.08A3.75 3.75 0 0 1 19.25 18v.25h-5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </a>
-        @endif
 
         <section class="ind-settings-section ind-subscription-card">
             <div class="ind-subscription-heading">

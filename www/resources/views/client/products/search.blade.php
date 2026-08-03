@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', __('product.title').' | '.__('ui.app_name'))
+@section('title', __('ui.module_products').' | '.__('ui.product_register'))
 @section('client-page-title', __('product.title'))
 
 @section('client-content')
@@ -52,7 +52,7 @@
                             </td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $product->lead_time_days }}</td>
                             <td class="px-3 py-4">
-                                <x-ui.button :href="route('products.versions', ['product_id' => $product->id])" variant="surface-muted" class="rounded-full">{{ __('ui.product_versions') }}</x-ui.button>
+                                <x-ui.button :href="route('products.versions', ['product_id' => $product->id])" variant="material-versions" class="rounded-full">{{ __('ui.product_versions') }}</x-ui.button>
                             </td>
                         </tr>
                     @empty

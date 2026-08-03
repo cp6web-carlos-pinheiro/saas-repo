@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', ($product?->sku ?? __('product.create')).' | '.__('ui.app_name'))
+@section('title', __('ui.module_products').' | '.__('ui.product_register'))
 @section('client-page-title', __('product.title'))
 
 @section('client-content')
@@ -9,7 +9,7 @@
         <div>
             <h1 class="font-display text-3xl font-bold">{{ $product ? __('product.edit') : __('product.create') }}</h1>
         </div>
-        <x-ui.button :href="$product ? route('products.show', $product) : route('products.index')" variant="surface-muted" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$product ? route('products.show', $product) : route('products.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">

@@ -109,4 +109,6 @@ return [
     'module_routing' => 'Enrutamiento',
     'module_scheduling' => 'Planificación',
     'module_tenant' => 'Tenant',
+    'no' => 'No',
+    'yes' => 'Sí',
 ];

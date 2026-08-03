@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', __('bom.structures_title').' | '.__('ui.app_name'))
+@section('title', __('ui.module_production_mrp').' | '.__('ui.bom_structures'))
 @section('client-page-title', __('bom.structures_title'))
 
 @section('client-content')

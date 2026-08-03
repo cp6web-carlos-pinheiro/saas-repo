@@ -23,7 +23,7 @@ return [
     'payment_method' => 'Forma de pagamento',
     'due_date' => 'Data de vencimento',
     'billing_cycle' => 'Ciclo de cobrança',
-    'renew_or_change_plan' => 'Renovar ou trocar plano',
+    'renew_or_change_plan' => 'Renovar ou trocar de plano',
     'select_plan_action' => 'Contratar este plano',
     'current_plan_badge' => 'Atual',
     'billing_page_title' => 'Assinatura e planos',
@@ -109,4 +109,6 @@ return [
     'module_routing' => 'Roteamento',
     'module_scheduling' => 'Programação',
     'module_tenant' => 'Tenant',
+    'no' => 'Não',
+    'yes' => 'Sim',
 ];

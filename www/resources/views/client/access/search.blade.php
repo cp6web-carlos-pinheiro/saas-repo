@@ -1,6 +1,6 @@
 @extends('layouts.client-area')
 
-@section('title', __('company_access.title').' | '.__('ui.app_name'))
+@section('title', __('ui.module_users').' | '.__('ui.manage_accesses'))
 @section('client-page-title', __('company_access.title'))
 
 @section('client-content')
