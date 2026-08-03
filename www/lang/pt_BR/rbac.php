@@ -2,7 +2,7 @@
 
 return [
     'title' => 'Console RBAC',
-    'subtitle' => 'Gestão central de perfis de acesso, permissões e exceções por empresa.',
+    'subtitle' => 'Gestão central de perfis de acesso e permissões por empresa.',
     'roles' => 'Perfis de acesso',
     'new_role' => 'Novo perfil de acesso',
     'role_name' => 'Nome do perfil de acesso',
@@ -13,13 +13,6 @@ return [
     'permission_matrix' => 'Matriz de permissões por módulo',
     'select_all_module' => 'Selecionar tudo do módulo',
     'inheritance' => 'Herança',
-    'overrides' => 'Exceções',
-    'edit_overrides' => 'Editar exceções',
-    'override_state' => 'Estado da exceção',
-    'override_inherit' => 'Herdar perfil de acesso',
-    'override_allow' => 'Permitir',
-    'override_deny' => 'Negar',
-    'override_reason' => 'Motivo da exceção',
     'save' => 'Salvar',
     'create' => 'Criar',
     'update' => 'Atualizar',
@@ -33,6 +26,5 @@ return [
     'role_created' => 'Perfil de acesso criado com sucesso.',
     'role_updated' => 'Perfil de acesso atualizado com sucesso.',
     'role_deleted' => 'Perfil de acesso removido com sucesso.',
-    'overrides_updated' => 'Exceções do usuário atualizadas com sucesso.',
     'master_role_locked' => 'Perfil master bloqueado para edição e exclusão.',
 ];

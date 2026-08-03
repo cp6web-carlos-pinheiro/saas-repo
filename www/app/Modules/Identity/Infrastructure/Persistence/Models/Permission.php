@@ -27,11 +27,6 @@ final class Permission extends Model
             ->withTimestamps();
     }
 
-    public function userOverrides(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(PermissionUserOverride::class, 'permission_id');
-    }
-
     public function label(): string
     {
         $key = 'permissions.slugs.'.$this->slug;

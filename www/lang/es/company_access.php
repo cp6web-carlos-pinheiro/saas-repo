@@ -15,7 +15,7 @@ return [
     'new_password' => 'Nueva contraseña (opcional)',
     'password_confirmation' => 'Confirmar contraseña',
     'access_section' => 'Acceso a la empresa',
-    'access_role' => 'Perfil de acceso (RBAC)',
+    'access_role' => 'Perfil de acceso',
     'access_role_help' => 'Seleccione un perfil RBAC existente para el usuario.',
     'first_user_administrator' => 'El primer usuario de la empresa siempre es Master.',
     'administrator_role_not_found' => 'No se encontró el perfil master para la empresa activa.',

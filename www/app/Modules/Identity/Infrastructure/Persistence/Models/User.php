@@ -8,7 +8,6 @@ use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -72,26 +71,10 @@ final class User extends Authenticatable implements JWTSubject
             ->withTimestamps();
     }
 
-    public function permissionOverrides(): HasMany
-    {
-        return $this->hasMany(PermissionUserOverride::class, 'user_id');
-    }
-
     public function hasPermission(string $permissionSlug, int $companyId): bool
     {
         if ($this->isCompanyAdministrator($companyId)) {
             return true;
-        }
-
-        $override = PermissionUserOverride::query()
-            ->withoutGlobalScope('tenant')
-            ->where('company_id', $companyId)
-            ->where('user_id', $this->id)
-            ->whereHas('permission', static fn ($query) => $query->where('slug', $permissionSlug))
-            ->first();
-
-        if ($override !== null) {
-            return (bool) $override->is_allowed;
         }
 
         return $this->roles()

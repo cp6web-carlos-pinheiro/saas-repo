@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Permission;
-use App\Modules\Identity\Infrastructure\Persistence\Models\PermissionUserOverride;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
@@ -30,8 +29,6 @@ final class RbacConsoleController extends Controller
     private const ROLES_UPDATE_PERMISSION = 'company-access.roles.update';
 
     private const ROLES_DELETE_PERMISSION = 'company-access.roles.delete';
-
-    private const OVERRIDES_UPDATE_PERMISSION = 'company-access.overrides.update';
 
     public function roles(Request $request): View
     {
@@ -111,24 +108,9 @@ final class RbacConsoleController extends Controller
         $role = $this->companyRoleOrFail($company, $role->id);
         $role->load(['permissions:id,name,slug,module', 'users' => static fn ($query) => $query->where('role_user.company_id', $company->id)->orderBy('name')]);
 
-        $assignedUserIds = $role->users->pluck('id')->all();
-
-        $overrideStats = PermissionUserOverride::query()
-            ->where('company_id', $company->id)
-            ->whereIn('user_id', $assignedUserIds)
-            ->get()
-            ->groupBy('user_id')
-            ->map(static function ($items): array {
-                return [
-                    'allow' => $items->where('is_allowed', true)->count(),
-                    'deny' => $items->where('is_allowed', false)->count(),
-                ];
-            });
-
         return view('client.rbac.role-show', [
             'company' => $company,
             'role' => $role,
-            'overrideStats' => $overrideStats,
         ]);
     }
 
@@ -240,128 +222,6 @@ final class RbacConsoleController extends Controller
         return redirect()->route('company-access.rbac.roles.index')->with('status', __('rbac.role_deleted'));
     }
 
-    public function editUserOverrides(Request $request, User $user): View
-    {
-        $company = $this->activeCompanyFrom($request);
-        $this->ensurePermission($request, self::OVERRIDES_UPDATE_PERMISSION, $company->id);
-
-        $user = $this->companyUserOrFail($company, $user->id);
-
-        $permissionsByModule = Permission::query()->orderBy('module')->orderBy('name')->get()->groupBy('module');
-
-        $overrideMap = PermissionUserOverride::query()
-            ->where('company_id', $company->id)
-            ->where('user_id', $user->id)
-            ->get()
-            ->keyBy('permission_id');
-
-        $inheritedPermissions = $user->roles()
-            ->wherePivot('company_id', $company->id)
-            ->with('permissions:id,slug')
-            ->get()
-            ->flatMap(static fn (Role $role) => $role->permissions->pluck('slug'))
-            ->unique()
-            ->values()
-            ->all();
-
-        return view('client.rbac.user-overrides-form', [
-            'company' => $company,
-            'customer' => $user,
-            'permissionsByModule' => $permissionsByModule,
-            'overrideMap' => $overrideMap,
-            'inheritedPermissions' => $inheritedPermissions,
-        ]);
-    }
-
-    public function updateUserOverrides(Request $request, User $user, AuditLogService $audit): RedirectResponse
-    {
-        $company = $this->activeCompanyFrom($request);
-        $this->ensurePermission($request, self::OVERRIDES_UPDATE_PERMISSION, $company->id);
-
-        $user = $this->companyUserOrFail($company, $user->id);
-
-        $data = $request->validate([
-            'overrides' => ['nullable', 'array'],
-            'overrides.*.state' => ['required_with:overrides', Rule::in(['inherit', 'allow', 'deny'])],
-            'overrides.*.reason' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $requestedOverrides = $data['overrides'] ?? [];
-        $permissionIds = array_map(static fn ($id): int => (int) $id, array_keys($requestedOverrides));
-        $knownPermissionIds = Permission::query()->whereIn('id', $permissionIds)->pluck('id')->all();
-
-        $unknownPermissionIds = array_diff($permissionIds, $knownPermissionIds);
-
-        if ($unknownPermissionIds !== []) {
-            throw ValidationException::withMessages([
-                'overrides' => ['Foram enviadas permissões inválidas para override.'],
-            ]);
-        }
-
-        $before = PermissionUserOverride::query()
-            ->where('company_id', $company->id)
-            ->where('user_id', $user->id)
-            ->get()
-            ->map(static fn (PermissionUserOverride $override): array => [
-                'permission_id' => $override->permission_id,
-                'is_allowed' => $override->is_allowed,
-                'reason' => $override->reason,
-            ])
-            ->values()
-            ->all();
-
-        DB::transaction(function () use ($company, $user, $requestedOverrides, $request): void {
-            PermissionUserOverride::query()
-                ->where('company_id', $company->id)
-                ->where('user_id', $user->id)
-                ->delete();
-
-            foreach ($requestedOverrides as $permissionId => $override) {
-                $state = (string) ($override['state'] ?? 'inherit');
-
-                if ($state === 'inherit') {
-                    continue;
-                }
-
-                PermissionUserOverride::query()->create([
-                    'company_id' => $company->id,
-                    'user_id' => $user->id,
-                    'permission_id' => (int) $permissionId,
-                    'is_allowed' => $state === 'allow',
-                    'reason' => trim((string) ($override['reason'] ?? '')) ?: null,
-                    'created_by_user_id' => $request->user()?->id,
-                ]);
-            }
-        });
-
-        $after = PermissionUserOverride::query()
-            ->where('company_id', $company->id)
-            ->where('user_id', $user->id)
-            ->get()
-            ->map(static fn (PermissionUserOverride $override): array => [
-                'permission_id' => $override->permission_id,
-                'is_allowed' => $override->is_allowed,
-                'reason' => $override->reason,
-            ])
-            ->values()
-            ->all();
-
-        $this->recordRbacAudit($audit, $request, 'rbac.user-overrides.updated', $company->id, [
-            'target_user_id' => $user->id,
-            'before' => $before,
-            'after' => $after,
-            'module' => 'users',
-        ]);
-
-        $roleId = (int) $request->input('role_id');
-
-        if ($roleId > 0) {
-            return redirect()->route('company-access.rbac.roles.show', ['role' => $roleId])->with('status', __('rbac.overrides_updated'));
-        }
-
-        return redirect()->route('company-access.rbac.roles.index')->with('status', __('rbac.overrides_updated'));
-    }
-
     private function activeCompanyFrom(Request $request): Company
     {
         $companyId = (int) ($request->user()?->current_company_id ?? 0);
@@ -399,54 +259,6 @@ final class RbacConsoleController extends Controller
             ->whereKey($userId)
             ->whereHas('companies', static fn (Builder $query) => $query->where('companies.id', $company->id))
             ->firstOrFail();
-    }
-
-    /**
-     * @return array<int, int>
-     */
-    private function validatedCompanyUsers(Company $company, array $userIds): array
-    {
-        $normalized = collect($userIds)
-            ->map(static fn ($id): int => (int) $id)
-            ->filter(static fn (int $id): bool => $id > 0)
-            ->unique()
-            ->values();
-
-        if ($normalized->isEmpty()) {
-            return [];
-        }
-
-        $allowedIds = User::query()
-            ->whereHas('companies', static fn (Builder $query) => $query->where('companies.id', $company->id))
-            ->whereIn('users.id', $normalized->all())
-            ->pluck('users.id')
-            ->map(static fn ($id): int => (int) $id)
-            ->values()
-            ->all();
-
-        if (count($allowedIds) !== $normalized->count()) {
-            throw ValidationException::withMessages([
-                'user_ids' => ['Foram informados usuários que não pertencem à empresa ativa.'],
-            ]);
-        }
-
-        return $allowedIds;
-    }
-
-    private function syncRoleUsers(Role $role, Company $company, array $userIds): void
-    {
-        DB::table('role_user')
-            ->where('role_id', $role->id)
-            ->where('company_id', $company->id)
-            ->delete();
-
-        if ($userIds === []) {
-            return;
-        }
-
-        $role->users()->attach(
-            collect($userIds)->mapWithKeys(static fn (int $id): array => [$id => ['company_id' => $company->id]])->all()
-        );
     }
 
     /**

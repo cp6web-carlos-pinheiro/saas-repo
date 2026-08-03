@@ -168,7 +168,6 @@ final class TenantRolesSeeder extends Seeder
                     'company-access.roles.create',
                     'company-access.roles.update',
                     'company-access.roles.delete',
-                    'company-access.overrides.update',
                     'company-access.dashboard.read',
                     'company-access.billing.read',
                     'company-access.billing.update',

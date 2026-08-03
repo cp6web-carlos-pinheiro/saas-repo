@@ -135,10 +135,10 @@ final class CompanyAccessUserController extends Controller
         $willBeAdmin = $isFirstCompanyUser || $access->isAdministratorRoleSlug((string) $selectedRole->slug);
         $willBeActive = (bool) ($data['is_active'] ?? false);
 
-        if ($currentIsAdmin && ! $willBeAdmin) {
+        if ($currentIsAdmin && ! $willBeAdmin && $access->countActiveCompanyAdministrators($company, $customer->id) === 0) {
             return back()
                 ->withInput()
-                ->withErrors(['customer' => __('company_access.administrator_profile_locked')]);
+                ->withErrors(['customer' => __('company_access.last_administrator_required')]);
         }
 
         if ($currentIsAdmin && ! $willBeActive && $access->countActiveCompanyAdministrators($company, $customer->id) === 0) {
@@ -302,16 +302,12 @@ final class CompanyAccessUserController extends Controller
             ? (int) ($companyAccess['role_id'] ?? $administratorRole->id)
             : (int) $administratorRole->id;
 
-        $isAdministratorProfileLocked = $customer !== null
-            && $companyAccess['profile'] === CompanyUserAccessService::ADMINISTRATOR_PROFILE;
-
         return [
             'customer' => $customer,
             'company' => $company,
             'assignableRoles' => $assignableRoles,
             'selectedRoleId' => $selectedRoleId,
             'administratorRoleId' => (int) $administratorRole->id,
-            'isAdministratorProfileLocked' => $isAdministratorProfileLocked,
             'mustBeAdministrator' => $customer === null
                 ? $company->users()->doesntExist()
                 : $access->isFirstCompanyUser($customer, $company),

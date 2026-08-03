@@ -57,14 +57,17 @@
         </x-ui.panel>
 
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-6 md:p-8">
-            <h2 class="text-lg font-semibold">{{ __('rbac.inheritance') }} + {{ __('rbac.overrides') }}</h2>
+            <h2 class="text-lg font-semibold">{{ __('rbac.role_users') }}</h2>
             <div class="mt-4 space-y-3">
                 @forelse ($role->users as $customer)
-                    @php($stats = $overrideStats->get($customer->id, ['allow' => 0, 'deny' => 0]))
                     <div class="rounded-xl border border-[#dadce0] p-4">
-                        <p class="font-semibold">{{ $customer->name }}</p>
-                        <p class="mt-1 text-xs text-[#5f6368]">{{ __('rbac.inheritance') }}: {{ $role->permissions->count() }} · Allow: {{ $stats['allow'] }} · Deny: {{ $stats['deny'] }}</p>
-                        <x-ui.button :href="route('company-access.rbac.users.overrides.edit', $customer).'?role_id='.$role->id" variant="surface-muted" class="mt-3 rounded-full text-xs">{{ __('rbac.edit_overrides') }}</x-ui.button>
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <p class="font-semibold">{{ $customer->name }}</p>
+                                <p class="mt-1 text-xs text-[#5f6368]">{{ $customer->email }}</p>
+                            </div>
+                            <x-ui.button :href="route('company-access.users.edit', $customer)" variant="surface-muted" class="rounded-full text-xs">{{ __('company_access.edit') }}</x-ui.button>
+                        </div>
                     </div>
                 @empty
                     <p class="text-sm text-[#5f6368]">{{ __('rbac.empty_roles') }}</p>

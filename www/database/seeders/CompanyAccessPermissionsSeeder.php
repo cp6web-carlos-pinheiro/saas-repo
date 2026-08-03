@@ -20,7 +20,6 @@ final class CompanyAccessPermissionsSeeder extends Seeder
             ['name' => 'Create roles', 'slug' => 'company-access.roles.create', 'module' => 'users'],
             ['name' => 'Update roles', 'slug' => 'company-access.roles.update', 'module' => 'users'],
             ['name' => 'Delete roles', 'slug' => 'company-access.roles.delete', 'module' => 'users'],
-            ['name' => 'Update user permission overrides', 'slug' => 'company-access.overrides.update', 'module' => 'users'],
             ['name' => 'Read dashboard', 'slug' => 'company-access.dashboard.read', 'module' => 'users'],
             ['name' => 'Read billing subscription', 'slug' => 'company-access.billing.read', 'module' => 'users'],
             ['name' => 'Update billing subscription', 'slug' => 'company-access.billing.update', 'module' => 'users'],

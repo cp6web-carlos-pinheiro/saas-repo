@@ -127,9 +127,6 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/roles/{role}/edit', [RbacConsoleController::class, 'editRole'])->name('roles.edit');
             Route::put('/roles/{role}', [RbacConsoleController::class, 'updateRole'])->name('roles.update');
             Route::delete('/roles/{role}', [RbacConsoleController::class, 'destroyRole'])->name('roles.destroy');
-
-            Route::get('/users/{user}/overrides', [RbacConsoleController::class, 'editUserOverrides'])->name('users.overrides.edit');
-            Route::put('/users/{user}/overrides', [RbacConsoleController::class, 'updateUserOverrides'])->name('users.overrides.update');
         });
 
         Route::prefix('purchasing/suppliers')->name('purchasing.suppliers.')->middleware(EnsureTrialIsActive::class)->group(function (): void {

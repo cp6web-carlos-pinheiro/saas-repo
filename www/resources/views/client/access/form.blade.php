@@ -52,8 +52,8 @@
             <fieldset class="rounded-2xl border border-[#dadce0] p-5">
                 <legend class="px-2 font-semibold">{{ __('company_access.access_section') }}</legend>
 
-                @if ($mustBeAdministrator || $isAdministratorProfileLocked)
-                    <x-ui.alert class="mt-2" variant="info">{{ $mustBeAdministrator ? __('company_access.first_user_administrator') : __('company_access.administrator_profile_locked') }}</x-ui.alert>
+                @if ($mustBeAdministrator)
+                    <x-ui.alert class="mt-2" variant="info">{{ __('company_access.first_user_administrator') }}</x-ui.alert>
                     <input type="hidden" name="role_id" value="{{ $administratorRoleId }}">
                 @else
                     <label class="mt-2 block text-sm font-medium">
