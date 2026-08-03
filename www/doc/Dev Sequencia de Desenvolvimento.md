@@ -9,12 +9,13 @@ Como voce esta desenvolvendo um MRP SaaS multitenant, a ordem de desenvolvimento
 Abaixo esta a sequencia que eu adotaria.
 
 ## Ultima atualizacao
-- 2026-08-02
+- 2026-08-03
 
 ## Status objetivo
-- Fases 1 a 4: Parcial avancado (Fundacao implementada; Multitenancy, Autenticacao e RBAC em consolidacao).
-- Fases 5 a 7: Em andamento (Cadastros gerais, Produto, Versoes e Lista de Materiais com entregas iniciais no tenant).
-- Fases 8 em diante: Planejado (sem fluxo funcional consolidado no cliente final).
+- Fases 1 a 4: Avancado (Fundacao implementada; Multitenancy, Autenticacao e RBAC operacionais no fluxo web tenant).
+- Fases 5 a 7: Avancado (Cadastros gerais ativos; Produto com CRUD, versoes e importacao/exportacao XLSX; Revisoes ativas no tenant com estrutura por produto).
+- Fase 8: Parcial (Compras com cadastro de fornecedores completo no tenant e validacoes de pessoa/tax id).
+- Fases 9 em diante: Planejado ou parcial inicial (demais fluxos de vendas, MRP, financeiro e observabilidade ainda em evolucao).
 
 | Fase | Modulo | Prioridade | Depende de |
 | --- | --- | --- | --- |

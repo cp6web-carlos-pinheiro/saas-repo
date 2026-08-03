@@ -3,12 +3,12 @@
 Este modulo gerencia a estrutura de produtos, componentes e quantidades que formam cada item fabricado.
 
 ## Ultima atualizacao
-- 2026-08-02
+- 2026-08-03
 
 ## Status objetivo
 - Status atual: Parcial avancado.
-- Cobertura atual: CRUD tenant de revisoes (bom_headers + bom_items) e visao de estruturas agrupadas por produto.
-- Pendencia principal: completar regras de engenharia (versionamento avancado, efetividade e governanca de alteracoes).
+- Cobertura atual: CRUD tenant de revisoes (bom_headers + bom_items), visao de estruturas agrupadas por produto e consolidacao da nomenclatura de UI para Revisoes.
+- Pendencia principal: completar regras de engenharia (versionamento avancado, efetividade, aprovacao e governanca de alteracoes).
 
 ## Tabelas relacionadas
 

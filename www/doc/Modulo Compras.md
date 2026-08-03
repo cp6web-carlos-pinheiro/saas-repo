@@ -3,11 +3,11 @@
 Este modulo controla solicitacoes de compra, pedidos e relacionamento com fornecedores para suprimento de materiais.
 
 ## Ultima atualizacao
-- 2026-08-02
+- 2026-08-03
 
 ## Status objetivo
-- Status atual: Parcial.
-- Cobertura atual: cadastro de fornecedores no fluxo tenant (CRUD web) e base de tabelas de compras definida.
+- Status atual: Parcial avancado.
+- Cobertura atual: cadastro de fornecedores no fluxo tenant (CRUD web), filtros por status/tipo de pessoa, validacao de CPF/CNPJ e base de tabelas de compras definida.
 - Pendencia principal: implementar solicitacao de compra, pedido, recebimento e integracao completa com estoque/financeiro.
 
 ## Tabelas relacionadas
