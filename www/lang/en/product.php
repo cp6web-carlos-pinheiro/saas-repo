@@ -59,6 +59,7 @@ return [
     'no' => 'No',
     'status' => 'Status',
     'lead_time_days' => 'Lead time (days)',
+    'created_at' => 'Created at',
     'version' => 'Version',
     'effective_from' => 'Effective from',
     'effective_to' => 'Effective to',

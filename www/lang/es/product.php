@@ -59,6 +59,7 @@ return [
     'no' => 'No',
     'status' => 'Estado',
     'lead_time_days' => 'Lead time (días)',
+    'created_at' => 'Registrado en',
     'version' => 'Versión',
     'effective_from' => 'Vigente desde',
     'effective_to' => 'Vigente hasta',

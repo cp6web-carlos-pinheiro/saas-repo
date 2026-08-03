@@ -32,38 +32,17 @@
     @endif
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
-        <dl class="divide-y divide-[#dadce0]">
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.version') }}</dt>
-                <dd class="font-medium">{{ $version->version_number }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.status') }}</dt>
-                <dd class="font-medium">{{ __('product.version_status_'.$version->status) }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.effective_from') }}</dt>
-                <dd class="font-medium">{{ $version->effective_from?->format('d/m/Y') ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.effective_to') }}</dt>
-                <dd class="font-medium">{{ $version->effective_to?->format('d/m/Y') ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.compatibility_rule') }}</dt>
-                <dd class="font-medium">{{ __('product.compatibility_rules.'.$version->compatibility_rule) }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.change_summary') }}</dt>
-                <dd class="font-medium text-right">{{ $version->change_summary ?? '—' }}</dd>
-            </div>
-            <div class="py-4">
-                <dt class="mb-3 text-[#5f6368]">{{ __('product.payload') }}</dt>
-                <dd class="overflow-x-auto rounded-2xl bg-slate-50 p-4 text-sm leading-6">
-                    <pre class="whitespace-pre-wrap break-words">{{ json_encode($version->payload ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}</pre>
-                </dd>
-            </div>
-        </dl>
+        <x-ui.definition-grid>
+            <x-ui.definition-item :label="__('product.version')">{{ $version->version_number }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.status')">{{ __('product.version_status_'.$version->status) }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.effective_from')">{{ $version->effective_from?->format('d/m/Y') ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.effective_to')">{{ $version->effective_to?->format('d/m/Y') ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('product.compatibility_rule')">{{ __('product.compatibility_rules.'.$version->compatibility_rule) }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-3" :label="__('product.change_summary')">{{ $version->change_summary ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-3" :label="__('product.payload')" valueClass="overflow-x-auto rounded-2xl bg-slate-50 p-4 text-sm leading-6">
+                <pre class="whitespace-pre-wrap break-words">{{ json_encode($version->payload ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}</pre>
+            </x-ui.definition-item>
+        </x-ui.definition-grid>
 
         @if ($version->status === 'DRAFT' || $version->status === 'APPROVED')
             <div class="mt-8 flex flex-wrap gap-3">

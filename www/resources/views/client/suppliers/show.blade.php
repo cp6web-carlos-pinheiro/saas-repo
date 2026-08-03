@@ -22,36 +22,15 @@
     </div>
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
-        <dl class="divide-y divide-[#dadce0]">
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('supplier.code') }}</dt>
-                <dd class="font-medium">{{ $supplier->code }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('supplier.status') }}</dt>
-                <dd class="font-medium">{{ $supplier->status === 'ACTIVE' ? __('supplier.active') : __('supplier.inactive') }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('supplier.email') }}</dt>
-                <dd class="font-medium">{{ $supplier->email ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('supplier.phone') }}</dt>
-                <dd class="font-medium">{{ $supplier->phone ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('supplier.default_lead_time_days') }}</dt>
-                <dd class="font-medium">{{ $supplier->default_lead_time_days }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('supplier.payment_terms') }}</dt>
-                <dd class="font-medium">{{ $supplier->payment_terms ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('supplier.created_at') }}</dt>
-                <dd class="font-medium">{{ $supplier->created_at->format('d/m/Y H:i') }}</dd>
-            </div>
-        </dl>
+        <x-ui.definition-grid>
+            <x-ui.definition-item :label="__('supplier.code')">{{ $supplier->code }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('supplier.status')">{{ $supplier->status === 'ACTIVE' ? __('supplier.active') : __('supplier.inactive') }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('supplier.email')">{{ $supplier->email ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('supplier.phone')">{{ $supplier->phone ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('supplier.default_lead_time_days')">{{ $supplier->default_lead_time_days }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('supplier.payment_terms')">{{ $supplier->payment_terms ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('supplier.created_at')">{{ $supplier->created_at->format('d/m/Y H:i') }}</x-ui.definition-item>
+        </x-ui.definition-grid>
     </x-ui.panel>
 </div>
 @endsection

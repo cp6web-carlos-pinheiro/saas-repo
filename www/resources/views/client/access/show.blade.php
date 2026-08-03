@@ -26,28 +26,13 @@
     @endif
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
-        <dl class="divide-y divide-[#dadce0]">
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('company_access.email') }}</dt>
-                <dd class="font-medium">{{ $customer->email }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('company_access.status') }}</dt>
-                <dd class="font-medium">{{ $customer->is_active ? __('company_access.active') : __('company_access.inactive') }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('company_access.access_role') }}</dt>
-                <dd class="font-medium">{{ $companyAccess['role_name'] ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('rbac.role_slug') }}</dt>
-                <dd class="font-medium">{{ $companyAccess['role_slug'] ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('company_access.created_at') }}</dt>
-                <dd class="font-medium">{{ $customer->created_at->format('d/m/Y H:i') }}</dd>
-            </div>
-        </dl>
+        <x-ui.definition-grid>
+            <x-ui.definition-item :label="__('company_access.email')">{{ $customer->email }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('company_access.status')">{{ $customer->is_active ? __('company_access.active') : __('company_access.inactive') }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('company_access.access_role')">{{ $companyAccess['role_name'] ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('rbac.role_slug')">{{ $companyAccess['role_slug'] ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('company_access.created_at')">{{ $customer->created_at->format('d/m/Y H:i') }}</x-ui.definition-item>
+        </x-ui.definition-grid>
     </x-ui.panel>
 </div>
 @endsection

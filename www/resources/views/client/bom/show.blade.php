@@ -27,32 +27,14 @@
     @endif
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
-        <dl class="divide-y divide-[#dadce0]">
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('bom.product') }}</dt>
-                <dd class="font-medium">{{ $bom->product?->sku ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('bom.version_number') }}</dt>
-                <dd class="font-medium">{{ $bom->version_number }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('bom.status') }}</dt>
-                <dd class="font-medium">{{ __('bom.status_'.$bom->status) }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('bom.effective_from') }}</dt>
-                <dd class="font-medium">{{ $bom->effective_from?->format('d/m/Y') ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('bom.effective_to') }}</dt>
-                <dd class="font-medium">{{ $bom->effective_to?->format('d/m/Y') ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('bom.description') }}</dt>
-                <dd class="font-medium text-right">{{ $bom->description ?? '—' }}</dd>
-            </div>
-        </dl>
+        <x-ui.definition-grid>
+            <x-ui.definition-item :label="__('bom.product')">{{ $bom->product?->sku ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('bom.version_number')">{{ $bom->version_number }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('bom.status')">{{ __('bom.status_'.$bom->status) }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('bom.effective_from')">{{ $bom->effective_from?->format('d/m/Y') ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('bom.effective_to')">{{ $bom->effective_to?->format('d/m/Y') ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-3" :label="__('bom.description')">{{ $bom->description ?? '—' }}</x-ui.definition-item>
+        </x-ui.definition-grid>
 
         <div class="mt-8 overflow-x-auto rounded-2xl border border-[#dadce0]">
             <table class="min-w-full text-sm">

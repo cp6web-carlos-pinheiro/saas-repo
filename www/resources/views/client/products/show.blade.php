@@ -24,48 +24,18 @@
     </div>
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
-        <dl class="divide-y divide-[#dadce0]">
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.sku') }}</dt>
-                <dd class="font-medium">{{ $product->sku }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.description') }}</dt>
-                <dd class="font-medium">{{ $product->description }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.status') }}</dt>
-                <dd class="font-medium">{{ $product->is_active ? __('product.active') : __('product.inactive') }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.product_type') }}</dt>
-                <dd class="font-medium">{{ __('product.types.'.$product->product_type) }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.uom') }}</dt>
-                <dd class="font-medium">{{ $product->uom }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.safety_stock') }}</dt>
-                <dd class="font-medium">{{ $product->safety_stock }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.lead_time_days') }}</dt>
-                <dd class="font-medium">{{ $product->lead_time_days }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.lot_control') }}</dt>
-                <dd class="font-medium">{{ $product->lot_control ? __('ui.yes') : __('ui.no') }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.serial_control') }}</dt>
-                <dd class="font-medium">{{ $product->serial_control ? __('ui.yes') : __('ui.no') }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('product.created_at') }}</dt>
-                <dd class="font-medium">{{ $product->created_at->format('d/m/Y H:i') }}</dd>
-            </div>
-        </dl>
+        <x-ui.definition-grid>
+            <x-ui.definition-item :label="__('product.sku')">{{ $product->sku }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-2" :label="__('product.description')">{{ $product->description }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.status')">{{ $product->is_active ? __('product.active') : __('product.inactive') }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.product_type')">{{ __('product.types.'.$product->product_type) }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.uom')">{{ $product->uom }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.safety_stock')">{{ $product->safety_stock }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.lead_time_days')">{{ $product->lead_time_days }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.lot_control')">{{ $product->lot_control ? __('ui.yes') : __('ui.no') }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.serial_control')">{{ $product->serial_control ? __('ui.yes') : __('ui.no') }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('product.created_at')">{{ $product->created_at->format('d/m/Y H:i') }}</x-ui.definition-item>
+        </x-ui.definition-grid>
     </x-ui.panel>
 </div>
 @endsection
