@@ -100,7 +100,7 @@ final class ApplyLocalePreference
 
     private function isApiRequest(Request $request): bool
     {
-        return $request->is('api') || $request->is('api/*') || $request->expectsJson();
+        return $request->is('api') || $request->is('api/*');
     }
 
     private function resolvedLocale(Request $request, string $fallback): string
