@@ -25,7 +25,7 @@
 
                 @if (! empty($devDocuments))
                     <details class="docs-folder" {{ $currentScope === 'dev' ? 'open' : '' }}>
-                        <summary>doc/dev</summary>
+                        <summary>Desenvolvimento</summary>
 
                         <x-ui.menu variant="docs" class="docs-list-nested" aria-label="doc dev">
                             @foreach ($devDocuments as $document)

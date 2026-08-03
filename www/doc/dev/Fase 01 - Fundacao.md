@@ -48,10 +48,10 @@ Definir a fundacao tecnica e visual que sera reutilizada por todo o sistema.
 | --- | --- | --- |
 | Multitenancy | Parcial avancado | Existem companies, organizations, tenants, periodo gratuito inicial de 14 dias, subscriptions, middleware de resolucao de tenant e escopo por company. A navegacao web tenant foi ampliada e padronizada, mas ainda ha refinamentos pendentes para consolidar contratos entre web e API. |
 | Autenticacao e seguranca | Parcial | Login, logout, recuperacao de senha, verificacao de email e gerenciamento de sessoes ja existem; two factor ainda nao foi identificado no projeto. |
-| Permissoes RBAC | Parcial avancado | Roles, permissions, role_user, permission_role, hasPermission e middleware de checagem ja existem e estao ativos no fluxo tenant. Foi consolidado o catalogo de modulos/permissoes (Produtos, Estoque, Compras, Vendas, Producao MRP, Financeiro, Relatorios, Auditoria, Usuarios, Fornecedores e Clientes), mas a camada de administracao visual unificada ainda precisa evoluir. |
+| Permissoes RBAC | Parcial avancado | Roles, permissions, role_user, permission_role, hasPermission e middleware de checagem ja existem e estao ativos no fluxo tenant. O escopo foi simplificado para role pura por empresa (sem templates, sem aprovacao/historico RBAC e sem overrides por usuario), com cadastro/edicao de usuario baseado em selecao de perfil RBAC existente. |
 
 ### Observacoes por subfase
 
 - Multitenancy: companies, planos, assinaturas, dominios e periodo gratuito inicial de 14 dias ja estao presentes em boa parte da base, com resolucao tenant aplicada no fluxo web.
 - Autenticacao e seguranca: login, logout, recuperacao de senha, verificacao de email e sessoes estao implementados; two factor ainda nao aparece no codigo.
-- Permissoes RBAC: roles, permissions, role permission, user role e permissoes por modulo ja tem base de dados e regras de checagem, com reorganizacao recente dos modulos para o menu operacional e seeders sincronizados.
+- Permissoes RBAC: roles, permissions, role permission, user role e permissoes por modulo ja tem base de dados e regras de checagem; o fluxo tenant atual trabalha com atribuicao direta de perfil RBAC por usuario e governanca de continuidade administrativa.
