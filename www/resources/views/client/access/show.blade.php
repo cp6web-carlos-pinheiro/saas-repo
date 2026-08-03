@@ -28,10 +28,10 @@
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('company_access.email')">{{ $customer->email }}</x-ui.definition-item>
-            <x-ui.definition-item :label="__('company_access.status')">{{ $customer->is_active ? __('company_access.active') : __('company_access.inactive') }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('company_access.access_role')">{{ $companyAccess['role_name'] ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('rbac.role_slug')">{{ $companyAccess['role_slug'] ?? '—' }}</x-ui.definition-item>
-            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('company_access.created_at')">{{ $customer->created_at->format('d/m/Y H:i') }}</x-ui.definition-item>
+            <x-ui.definition-item-status :label="__('company_access.status')" :value="$customer->is_active ? __('company_access.active') : __('company_access.inactive')" :tone="$customer->is_active ? 'success' : 'neutral'" />
+            <x-ui.definition-item-date class="sm:col-span-2 xl:col-span-1" :label="__('company_access.created_at')" :value="$customer->created_at" />
         </x-ui.definition-grid>
     </x-ui.panel>
 </div>

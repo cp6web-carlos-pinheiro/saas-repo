@@ -16,55 +16,25 @@
             </span>
         </div>
 
-        <dl class="mt-8 divide-y divide-[#dadce0]">
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('global_customer.email') }}</dt>
-                <dd class="font-medium">{{ $customer->email }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('global_customer.company') }}</dt>
-                <dd class="font-medium">{{ $customer->currentCompany?->name ?? __('global_customer.company_unlinked') }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('global_customer.company_id') }}</dt>
-                <dd class="font-medium">{{ $customer->currentCompany?->id ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-4">
-                <dt class="text-[#5f6368]">{{ __('global_customer.created_at') }}</dt>
-                <dd class="font-medium">{{ $customer->created_at->format('d/m/Y H:i') }}</dd>
-            </div>
-        </dl>
+        <x-ui.definition-grid class="mt-8" cols="sm:grid-cols-2 xl:grid-cols-4">
+            <x-ui.definition-item class="xl:col-span-2" :label="__('global_customer.email')">{{ $customer->email }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('global_customer.company')">{{ $customer->currentCompany?->name ?? __('global_customer.company_unlinked') }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('global_customer.company_id')">{{ $customer->currentCompany?->id ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item-date class="sm:col-span-2 xl:col-span-1" :label="__('global_customer.created_at')" :value="$customer->created_at" />
+        </x-ui.definition-grid>
 
         <div class="mt-8 rounded-2xl border border-[#dadce0] bg-[#f8fafd] p-5">
             <h2 class="font-display text-xl font-semibold">{{ __('global_customer.company_details') }}</h2>
 
             @if ($customer->currentCompany)
-                <dl class="mt-4 divide-y divide-[#dadce0]">
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_customer.company_id') }}</dt>
-                        <dd class="font-medium">{{ $customer->currentCompany->id }}</dd>
-                    </div>
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_customer.company_name') }}</dt>
-                        <dd class="font-medium">{{ $customer->currentCompany->name }}</dd>
-                    </div>
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_customer.company_code') }}</dt>
-                        <dd class="font-medium">{{ $customer->currentCompany->code }}</dd>
-                    </div>
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_customer.company_status') }}</dt>
-                        <dd class="font-medium">{{ $customer->currentCompany->is_active ? __('global_customer.active') : __('global_customer.inactive') }}</dd>
-                    </div>
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_customer.company_created_at') }}</dt>
-                        <dd class="font-medium">{{ $customer->currentCompany->created_at?->format('d/m/Y H:i') ?? '—' }}</dd>
-                    </div>
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_customer.company_updated_at') }}</dt>
-                        <dd class="font-medium">{{ $customer->currentCompany->updated_at?->format('d/m/Y H:i') ?? '—' }}</dd>
-                    </div>
-                </dl>
+                <x-ui.definition-grid class="mt-4" cols="sm:grid-cols-2 xl:grid-cols-3">
+                    <x-ui.definition-item :label="__('global_customer.company_id')">{{ $customer->currentCompany->id }}</x-ui.definition-item>
+                    <x-ui.definition-item class="sm:col-span-2" :label="__('global_customer.company_name')">{{ $customer->currentCompany->name }}</x-ui.definition-item>
+                    <x-ui.definition-item :label="__('global_customer.company_code')">{{ $customer->currentCompany->code }}</x-ui.definition-item>
+                    <x-ui.definition-item-status :label="__('global_customer.company_status')" :value="$customer->currentCompany->is_active ? __('global_customer.active') : __('global_customer.inactive')" :tone="$customer->currentCompany->is_active ? 'success' : 'neutral'" />
+                    <x-ui.definition-item-date :label="__('global_customer.company_created_at')" :value="$customer->currentCompany->created_at" />
+                    <x-ui.definition-item-date :label="__('global_customer.company_updated_at')" :value="$customer->currentCompany->updated_at" />
+                </x-ui.definition-grid>
             @else
                 <p class="mt-4 text-sm text-[#5f6368]">{{ __('global_customer.company_unlinked_details') }}</p>
             @endif

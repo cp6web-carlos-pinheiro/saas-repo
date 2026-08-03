@@ -42,9 +42,12 @@
               <td class="px-3 py-4 font-semibold">{{ $administrator->name }}</td>
               <td class="px-3 py-4 text-[#5f6368]">{{ $administrator->email }}</td>
               <td class="px-3 py-4">
-                <span class="rounded-full px-2 py-1 text-xs {{ $administrator->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                  {{ $administrator->is_active ? __('global_admin.active') : __('global_admin.inactive') }}
-                </span>
+                <x-ui.definition-item-status
+                  :label="__('global_admin.status')"
+                  :value="$administrator->is_active ? __('global_admin.active') : __('global_admin.inactive')"
+                  :tone="$administrator->is_active ? 'success' : 'neutral'"
+                  inline
+                />
               </td>
               <td class="px-3 py-4 text-[#5f6368]">{{ $administrator->created_at->format('d/m/Y') }}</td>
             </tr>

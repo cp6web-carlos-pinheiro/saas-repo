@@ -30,7 +30,7 @@
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('bom.product')">{{ $bom->product?->sku ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('bom.version_number')">{{ $bom->version_number }}</x-ui.definition-item>
-            <x-ui.definition-item :label="__('bom.status')">{{ __('bom.status_'.$bom->status) }}</x-ui.definition-item>
+            <x-ui.definition-item-status :label="__('bom.status')" :value="__('bom.status_'.$bom->status)" :tone="$bom->status === 'APPROVED' ? 'success' : ($bom->status === 'OBSOLETE' ? 'warning' : 'neutral')" />
             <x-ui.definition-item :label="__('bom.effective_from')">{{ $bom->effective_from?->format('d/m/Y') ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('bom.effective_to')">{{ $bom->effective_to?->format('d/m/Y') ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-3" :label="__('bom.description')">{{ $bom->description ?? '—' }}</x-ui.definition-item>

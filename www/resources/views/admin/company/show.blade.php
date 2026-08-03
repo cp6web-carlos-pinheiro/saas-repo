@@ -19,68 +19,30 @@
         <div class="mt-8 grid gap-6 md:grid-cols-2">
             <div class="rounded-2xl border border-[#dadce0] bg-white p-5">
                 <h2 class="font-display text-xl font-semibold">{{ __('global_company.details') }}</h2>
-                <dl class="mt-4 divide-y divide-[#dadce0]">
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_company.company_id') }}</dt>
-                        <dd class="font-medium">{{ $company->id }}</dd>
-                    </div>
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_company.name') }}</dt>
-                        <dd class="font-medium">{{ $company->name }}</dd>
-                    </div>
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_company.code') }}</dt>
-                        <dd class="font-medium">{{ $company->code }}</dd>
-                    </div>
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_company.status') }}</dt>
-                        <dd class="font-medium">{{ $company->is_active ? __('global_company.active') : __('global_company.inactive') }}</dd>
-                    </div>
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_company.created_at') }}</dt>
-                        <dd class="font-medium">{{ $company->created_at->format('d/m/Y H:i') }}</dd>
-                    </div>
-                    <div class="flex justify-between gap-4 py-3">
-                        <dt class="text-[#5f6368]">{{ __('global_company.updated_at') }}</dt>
-                        <dd class="font-medium">{{ $company->updated_at->format('d/m/Y H:i') }}</dd>
-                    </div>
-                </dl>
+                <x-ui.definition-grid class="mt-4" cols="sm:grid-cols-2">
+                    <x-ui.definition-item :label="__('global_company.company_id')">{{ $company->id }}</x-ui.definition-item>
+                    <x-ui.definition-item :label="__('global_company.name')">{{ $company->name }}</x-ui.definition-item>
+                    <x-ui.definition-item :label="__('global_company.code')">{{ $company->code }}</x-ui.definition-item>
+                    <x-ui.definition-item-status :label="__('global_company.status')" :value="$company->is_active ? __('global_company.active') : __('global_company.inactive')" :tone="$company->is_active ? 'success' : 'neutral'" />
+                    <x-ui.definition-item-date :label="__('global_company.created_at')" :value="$company->created_at" />
+                    <x-ui.definition-item-date :label="__('global_company.updated_at')" :value="$company->updated_at" />
+                </x-ui.definition-grid>
             </div>
 
             <div class="rounded-2xl border border-[#dadce0] bg-[#f8fafd] p-5">
                 <h2 class="font-display text-xl font-semibold">{{ __('global_company.selected_plan_details') }}</h2>
 
                 @if ($subscription !== null)
-                    <dl class="mt-4 divide-y divide-[#dadce0]">
-                        <div class="flex justify-between gap-4 py-3">
-                            <dt class="text-[#5f6368]">{{ __('global_company.plan_label') }}</dt>
-                            <dd class="font-medium">{{ $selectedPlan['label'] ?? __('global_company.no_active_plan') }}</dd>
-                        </div>
-                        <div class="flex justify-between gap-4 py-3">
-                            <dt class="text-[#5f6368]">{{ __('global_company.plan_code') }}</dt>
-                            <dd class="font-medium">{{ $subscription->plan_code }}</dd>
-                        </div>
-                        <div class="flex justify-between gap-4 py-3">
-                            <dt class="text-[#5f6368]">{{ __('global_company.plan_status') }}</dt>
-                            <dd class="font-medium">{{ $selectedPlanStatus }}</dd>
-                        </div>
-                        <div class="flex justify-between gap-4 py-3">
-                            <dt class="text-[#5f6368]">{{ __('global_company.plan_billing_cycle') }}</dt>
-                            <dd class="font-medium">{{ $selectedPlan['billing_cycle_label'] ?? '—' }}</dd>
-                        </div>
-                        <div class="flex justify-between gap-4 py-3">
-                            <dt class="text-[#5f6368]">{{ __('global_company.plan_payment_method') }}</dt>
-                            <dd class="font-medium">{{ $selectedPlan['payment_method'] ?? '—' }}</dd>
-                        </div>
-                        <div class="flex justify-between gap-4 py-3">
-                            <dt class="text-[#5f6368]">{{ __('global_company.plan_starts_at') }}</dt>
-                            <dd class="font-medium">{{ $subscription->starts_at?->format('d/m/Y H:i') ?? '—' }}</dd>
-                        </div>
-                        <div class="flex justify-between gap-4 py-3">
-                            <dt class="text-[#5f6368]">{{ __('global_company.plan_ends_at') }}</dt>
-                            <dd class="font-medium">{{ $subscription->ends_at?->format('d/m/Y H:i') ?? '—' }}</dd>
-                        </div>
-                    </dl>
+                    <x-ui.definition-grid class="mt-4" cols="sm:grid-cols-2">
+                        <x-ui.definition-item :label="__('global_company.plan_label')">{{ $selectedPlan['label'] ?? __('global_company.no_active_plan') }}</x-ui.definition-item>
+                        <x-ui.definition-item :label="__('global_company.plan_code')">{{ $subscription->plan_code }}</x-ui.definition-item>
+                        <x-ui.definition-item-status :label="__('global_company.plan_status')" :value="$selectedPlanStatus" tone="info" />
+                        <x-ui.definition-item-money :label="__('global_plan.amount_short')" :amount-cents="$selectedPlan['amount_cents'] ?? null" />
+                        <x-ui.definition-item :label="__('global_company.plan_billing_cycle')">{{ $selectedPlan['billing_cycle_label'] ?? '—' }}</x-ui.definition-item>
+                        <x-ui.definition-item :label="__('global_company.plan_payment_method')">{{ $selectedPlan['payment_method'] ?? '—' }}</x-ui.definition-item>
+                        <x-ui.definition-item-date :label="__('global_company.plan_starts_at')" :value="$subscription->starts_at" />
+                        <x-ui.definition-item-date :label="__('global_company.plan_ends_at')" :value="$subscription->ends_at" />
+                    </x-ui.definition-grid>
                 @else
                     <p class="mt-4 text-sm text-[#5f6368]">{{ __('global_company.no_selected_plan_details') }}</p>
                 @endif
@@ -114,7 +76,14 @@
                                 <td class="px-3 py-3 text-[#5f6368]">{{ $user->id }}</td>
                                 <td class="px-3 py-3 font-medium">{{ $user->name }}</td>
                                 <td class="px-3 py-3 text-[#5f6368]">{{ $user->email }}</td>
-                                <td class="px-3 py-3 text-[#5f6368]">{{ $user->is_active ? __('global_company.active') : __('global_company.inactive') }}</td>
+                                <td class="px-3 py-3 text-[#5f6368]">
+                                    <x-ui.definition-item-status
+                                        :label="__('global_company.user_status')"
+                                        :value="$user->is_active ? __('global_company.active') : __('global_company.inactive')"
+                                        :tone="$user->is_active ? 'success' : 'neutral'"
+                                        inline
+                                    />
+                                </td>
                                 <td class="px-3 py-3 text-[#5f6368]">{{ $user->email_verified_at ? $user->email_verified_at->format('d/m/Y H:i') : __('global_company.user_not_verified') }}</td>
                                 <td class="px-3 py-3 text-[#5f6368]">{{ $user->pivot?->created_at?->format('d/m/Y H:i') ?? '—' }}</td>
                                 <td class="px-3 py-3">

@@ -54,9 +54,12 @@
               <td class="px-3 py-4 text-[#5f6368]">{{ $company->active_plan_label ?? __('global_company.no_active_plan') }}</td>
               <td class="px-3 py-4 text-[#5f6368]">{{ $company->users_count }}</td>
               <td class="px-3 py-4">
-                <span class="rounded-full px-2 py-1 text-xs {{ $company->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                  {{ $company->is_active ? __('global_company.active') : __('global_company.inactive') }}
-                </span>
+                <x-ui.definition-item-status
+                  :label="__('global_company.status')"
+                  :value="$company->is_active ? __('global_company.active') : __('global_company.inactive')"
+                  :tone="$company->is_active ? 'success' : 'neutral'"
+                  inline
+                />
               </td>
               <td class="px-3 py-4 text-[#5f6368]">{{ $company->created_at->format('d/m/Y') }}</td>
             </tr>

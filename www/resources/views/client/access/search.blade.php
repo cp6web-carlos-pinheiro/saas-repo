@@ -54,9 +54,12 @@
                             <td class="px-3 py-4 font-semibold">{{ $customer->name }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $customer->email }}</td>
                             <td class="px-3 py-4">
-                                <span class="rounded-full px-2 py-1 text-xs {{ $customer->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                                    {{ $customer->is_active ? __('company_access.active') : __('company_access.inactive') }}
-                                </span>
+                                <x-ui.definition-item-status
+                                    :label="__('company_access.status')"
+                                    :value="$customer->is_active ? __('company_access.active') : __('company_access.inactive')"
+                                    :tone="$customer->is_active ? 'success' : 'neutral'"
+                                    inline
+                                />
                             </td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $customer->created_at->format('d/m/Y') }}</td>
                         </tr>

@@ -43,9 +43,12 @@
                         <h2 class="text-lg font-semibold">{{ $selectedProduct->sku }}</h2>
                         <p class="text-sm text-[#5f6368]">{{ $selectedProduct->description ?? '—' }}</p>
                     </div>
-                    <span class="rounded-full px-3 py-1 text-xs {{ $selectedProduct->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                        {{ $selectedProduct->is_active ? __('product.active') : __('product.inactive') }}
-                    </span>
+                    <x-ui.definition-item-status
+                        :label="__('product.status')"
+                        :value="$selectedProduct->is_active ? __('product.active') : __('product.inactive')"
+                        :tone="$selectedProduct->is_active ? 'success' : 'neutral'"
+                        inline
+                    />
                 </div>
 
                 <div class="mt-5 overflow-x-auto">
@@ -65,9 +68,12 @@
                                 <tr class="cursor-pointer border-b border-[#f1f3f4] transition hover:bg-[#f8fafd]" tabindex="0" onclick="window.location='{{ route('products.versions.show', [$selectedProduct, $version]) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('products.versions.show', [$selectedProduct, $version]) }}'; }">
                                     <td class="px-3 py-4 font-semibold">{{ $version->version_number }}</td>
                                     <td class="px-3 py-4">
-                                        <span class="rounded-full px-2 py-1 text-xs {{ $version->status === 'DRAFT' ? 'bg-slate-100 text-slate-600' : ($version->status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700') }}">
-                                            {{ __('product.version_status_'.$version->status) }}
-                                        </span>
+                                        <x-ui.definition-item-status
+                                            :label="__('product.status')"
+                                            :value="__('product.version_status_'.$version->status)"
+                                            :tone="$version->status === 'APPROVED' ? 'success' : ($version->status === 'OBSOLETE' ? 'warning' : 'neutral')"
+                                            inline
+                                        />
                                     </td>
                                     <td class="px-3 py-4 text-[#5f6368]">{{ $version->effective_from?->format('d/m/Y') ?? '—' }}</td>
                                     <td class="px-3 py-4 text-[#5f6368]">{{ $version->effective_to?->format('d/m/Y') ?? '—' }}</td>

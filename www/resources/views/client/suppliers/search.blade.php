@@ -54,9 +54,12 @@
                             <td class="px-3 py-4 text-[#5f6368]">{{ $supplier->email ?? '—' }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $supplier->phone ?? '—' }}</td>
                             <td class="px-3 py-4">
-                                <span class="rounded-full px-2 py-1 text-xs {{ $supplier->status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                                    {{ $supplier->status === 'ACTIVE' ? __('supplier.active') : __('supplier.inactive') }}
-                                </span>
+                                <x-ui.definition-item-status
+                                    :label="__('supplier.status')"
+                                    :value="$supplier->status === 'ACTIVE' ? __('supplier.active') : __('supplier.inactive')"
+                                    :tone="$supplier->status === 'ACTIVE' ? 'success' : 'neutral'"
+                                    inline
+                                />
                             </td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $supplier->created_at->format('d/m/Y') }}</td>
                         </tr>

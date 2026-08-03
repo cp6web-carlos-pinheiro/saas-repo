@@ -51,9 +51,12 @@
                             </td>
                             <td class="px-3 py-4 font-semibold">{{ $bom->version_number }}</td>
                             <td class="px-3 py-4">
-                                <span class="rounded-full px-2 py-1 text-xs {{ $bom->status === 'DRAFT' ? 'bg-slate-100 text-slate-600' : ($bom->status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700') }}">
-                                    {{ __('bom.status_'.$bom->status) }}
-                                </span>
+                                <x-ui.definition-item-status
+                                    :label="__('bom.status')"
+                                    :value="__('bom.status_'.$bom->status)"
+                                    :tone="$bom->status === 'APPROVED' ? 'success' : ($bom->status === 'OBSOLETE' ? 'warning' : 'neutral')"
+                                    inline
+                                />
                             </td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $bom->effective_from?->format('d/m/Y') ?? '—' }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $bom->effective_to?->format('d/m/Y') ?? '—' }}</td>

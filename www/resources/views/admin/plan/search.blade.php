@@ -58,9 +58,12 @@
               <td class="px-3 py-4 text-[#5f6368]">{{ $plan->sort_order }}</td>
               <td class="px-3 py-4 text-[#5f6368]">{{ $plan->subscriptions_count }}</td>
               <td class="px-3 py-4">
-                <span class="rounded-full px-2 py-1 text-xs {{ $plan->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                  {{ $plan->is_active ? __('global_plan.active') : __('global_plan.inactive') }}
-                </span>
+                <x-ui.definition-item-status
+                  :label="__('global_plan.status')"
+                  :value="$plan->is_active ? __('global_plan.active') : __('global_plan.inactive')"
+                  :tone="$plan->is_active ? 'success' : 'neutral'"
+                  inline
+                />
               </td>
             </tr>
           @empty

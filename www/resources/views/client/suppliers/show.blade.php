@@ -24,12 +24,12 @@
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('supplier.code')">{{ $supplier->code }}</x-ui.definition-item>
-            <x-ui.definition-item :label="__('supplier.status')">{{ $supplier->status === 'ACTIVE' ? __('supplier.active') : __('supplier.inactive') }}</x-ui.definition-item>
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('supplier.email')">{{ $supplier->email ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('supplier.phone')">{{ $supplier->phone ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item-status :label="__('supplier.status')" :value="$supplier->status === 'ACTIVE' ? __('supplier.active') : __('supplier.inactive')" :tone="$supplier->status === 'ACTIVE' ? 'success' : 'neutral'" />
             <x-ui.definition-item :label="__('supplier.default_lead_time_days')">{{ $supplier->default_lead_time_days }}</x-ui.definition-item>
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('supplier.payment_terms')">{{ $supplier->payment_terms ?? '—' }}</x-ui.definition-item>
-            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('supplier.created_at')">{{ $supplier->created_at->format('d/m/Y H:i') }}</x-ui.definition-item>
+            <x-ui.definition-item-date class="sm:col-span-2 xl:col-span-1" :label="__('supplier.created_at')" :value="$supplier->created_at" />
         </x-ui.definition-grid>
     </x-ui.panel>
 </div>

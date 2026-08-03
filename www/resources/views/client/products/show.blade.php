@@ -26,15 +26,15 @@
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('product.sku')">{{ $product->sku }}</x-ui.definition-item>
-            <x-ui.definition-item class="sm:col-span-2 xl:col-span-2" :label="__('product.description')">{{ $product->description }}</x-ui.definition-item>
-            <x-ui.definition-item :label="__('product.status')">{{ $product->is_active ? __('product.active') : __('product.inactive') }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('product.product_type')">{{ __('product.types.'.$product->product_type) }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('product.description')">{{ $product->description }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('product.uom')">{{ $product->uom }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('product.safety_stock')">{{ $product->safety_stock }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('product.lead_time_days')">{{ $product->lead_time_days }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('product.lot_control')">{{ $product->lot_control ? __('ui.yes') : __('ui.no') }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('product.serial_control')">{{ $product->serial_control ? __('ui.yes') : __('ui.no') }}</x-ui.definition-item>
-            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('product.created_at')">{{ $product->created_at->format('d/m/Y H:i') }}</x-ui.definition-item>
+            <x-ui.definition-item-status :label="__('product.status')" :value="$product->is_active ? __('product.active') : __('product.inactive')" :tone="$product->is_active ? 'success' : 'neutral'" />
+            <x-ui.definition-item-date class="sm:col-span-2 xl:col-span-2" :label="__('product.created_at')" :value="$product->created_at" />
         </x-ui.definition-grid>
     </x-ui.panel>
 </div>

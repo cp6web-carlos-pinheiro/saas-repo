@@ -46,9 +46,12 @@
                             <td class="px-3 py-4 text-[#5f6368]">{{ __('product.types.'.$product->product_type) }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $product->uom ?? '—' }}</td>
                             <td class="px-3 py-4">
-                                <span class="rounded-full px-2 py-1 text-xs {{ $product->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                                    {{ $product->is_active ? __('product.active') : __('product.inactive') }}
-                                </span>
+                                <x-ui.definition-item-status
+                                    :label="__('product.status')"
+                                    :value="$product->is_active ? __('product.active') : __('product.inactive')"
+                                    :tone="$product->is_active ? 'success' : 'neutral'"
+                                    inline
+                                />
                             </td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $product->lead_time_days }}</td>
                             <td class="px-3 py-4">

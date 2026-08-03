@@ -41,14 +41,10 @@
             <h2 class="text-lg font-semibold">{{ __('rbac.role_permissions') }}</h2>
             <div class="mt-4 grid gap-3 sm:grid-cols-2">
                 @foreach ($role->permissions->groupBy('module') as $module => $permissions)
-                    <div class="rounded-xl border border-[#dadce0] p-4">
-                        <p class="text-sm font-semibold">{{ \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleLabel($module) }}</p>
-                        <ul class="mt-2 space-y-1 text-sm text-[#5f6368]">
-                            @foreach ($permissions as $permission)
-                                <li>{{ $permission->label() }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+                    <x-ui.definition-item-list
+                        :label="\App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleLabel($module)"
+                        :items="$permissions->map(static fn ($permission) => $permission->label())->values()->all()"
+                    />
                 @endforeach
             </div>
         </x-ui.panel>

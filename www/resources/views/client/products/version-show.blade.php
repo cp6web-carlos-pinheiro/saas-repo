@@ -34,10 +34,10 @@
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('product.version')">{{ $version->version_number }}</x-ui.definition-item>
-            <x-ui.definition-item :label="__('product.status')">{{ __('product.version_status_'.$version->status) }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('product.effective_from')">{{ $version->effective_from?->format('d/m/Y') ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('product.effective_to')">{{ $version->effective_to?->format('d/m/Y') ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('product.compatibility_rule')">{{ __('product.compatibility_rules.'.$version->compatibility_rule) }}</x-ui.definition-item>
+            <x-ui.definition-item-status :label="__('product.status')" :value="__('product.version_status_'.$version->status)" :tone="$version->status === 'APPROVED' ? 'success' : ($version->status === 'OBSOLETE' ? 'warning' : 'neutral')" />
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-3" :label="__('product.change_summary')">{{ $version->change_summary ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-3" :label="__('product.payload')" valueClass="overflow-x-auto rounded-2xl bg-slate-50 p-4 text-sm leading-6">
                 <pre class="whitespace-pre-wrap break-words">{{ json_encode($version->payload ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}</pre>

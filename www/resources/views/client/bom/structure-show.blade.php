@@ -35,9 +35,12 @@
                         <tr class="cursor-pointer border-b border-[#f1f3f4] transition hover:bg-[#f8fafd]" tabindex="0" onclick="window.location='{{ route('bom.material-lists.show', $revision) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('bom.material-lists.show', $revision) }}'; }">
                             <td class="px-3 py-4 font-semibold">{{ $revision->version_number }}</td>
                             <td class="px-3 py-4">
-                                <span class="rounded-full px-2 py-1 text-xs {{ $revision->status === 'DRAFT' ? 'bg-slate-100 text-slate-600' : ($revision->status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700') }}">
-                                    {{ __('bom.status_'.$revision->status) }}
-                                </span>
+                                <x-ui.definition-item-status
+                                    :label="__('bom.status')"
+                                    :value="__('bom.status_'.$revision->status)"
+                                    :tone="$revision->status === 'APPROVED' ? 'success' : ($revision->status === 'OBSOLETE' ? 'warning' : 'neutral')"
+                                    inline
+                                />
                             </td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $revision->effective_from?->format('d/m/Y') ?? '—' }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $revision->effective_to?->format('d/m/Y') ?? '—' }}</td>
