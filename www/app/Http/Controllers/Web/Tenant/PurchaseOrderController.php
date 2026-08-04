@@ -6,20 +6,32 @@ namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Web\Tenant\Concerns\HandlesTenantAuthorization;
+use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrder;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrderLine;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Services\SaaS\AuditLogService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 final class PurchaseOrderController extends Controller
 {
     use HandlesTenantAuthorization;
+
+    private const STATUS_TRANSITIONS = [
+        'DRAFT' => ['APPROVED', 'CANCELLED'],
+        'APPROVED' => ['CANCELLED'],
+        'CANCELLED' => [],
+    ];
 
     private const READ_PERMISSION = 'purchasing.orders.read';
 
@@ -71,11 +83,16 @@ final class PurchaseOrderController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
+        $lineRows = $this->oldItemRows($request, $this->defaultLineRows());
+
         return view('client.purchasing.orders.form', [
             'order' => null,
             'company' => $company,
             'suppliers' => $this->supplierOptions($company),
             'requisitions' => $this->requisitionOptions($company),
+            'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
+            'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
+            'lineRows' => $lineRows,
         ]);
     }
 
@@ -84,7 +101,7 @@ final class PurchaseOrderController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
-        $order->load(['supplier:id,name', 'requisition:id,requisition_number'])->loadCount('lines');
+        $order->load(['supplier:id,name', 'requisition:id,requisition_number', 'lines.product:id,sku,description', 'lines.warehouse:id,code,name'])->loadCount('lines');
 
         return view('client.purchasing.orders.show', compact('order', 'company'));
     }
@@ -96,19 +113,25 @@ final class PurchaseOrderController extends Controller
 
         $data = $this->validateOrder($request);
 
-        $order = PurchaseOrder::query()->create([
-            'company_id' => $company->id,
-            'purchase_order_number' => $this->generateNumber($company),
-            'supplier_id' => (int) $data['supplier_id'],
-            'purchase_requisition_id' => isset($data['purchase_requisition_id']) ? (int) $data['purchase_requisition_id'] : null,
-            'status' => $data['status'],
-            'order_date' => $data['order_date'],
-            'expected_delivery_date' => $data['expected_delivery_date'] ?? null,
-            'created_by' => $request->user()?->id,
-            'approved_by' => $data['status'] === 'APPROVED' ? $request->user()?->id : null,
-            'approved_at' => $data['status'] === 'APPROVED' ? now() : null,
-            'notes' => $data['notes'] ?? null,
-        ]);
+        $order = DB::transaction(function () use ($company, $data, $request): PurchaseOrder {
+            $header = PurchaseOrder::query()->create([
+                'company_id' => $company->id,
+                'purchase_order_number' => $this->generateNumber($company),
+                'supplier_id' => (int) $data['supplier_id'],
+                'purchase_requisition_id' => isset($data['purchase_requisition_id']) ? (int) $data['purchase_requisition_id'] : null,
+                'status' => 'DRAFT',
+                'order_date' => $data['order_date'],
+                'expected_delivery_date' => $data['expected_delivery_date'] ?? null,
+                'created_by' => $request->user()?->id,
+                'notes' => $data['notes'] ?? null,
+            ]);
+
+            $this->syncLines($header, $data['items']);
+            $this->applyStatusAudit($header, $data['status'], $request->user()?->id);
+            $header->save();
+
+            return $header;
+        });
 
         $audit->record(
             'tenant_purchase_order.created',
@@ -130,11 +153,16 @@ final class PurchaseOrderController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
+        $lineRows = $this->oldItemRows($request, $this->lineRowsForForm($order));
+
         return view('client.purchasing.orders.form', [
             'order' => $order,
             'company' => $company,
             'suppliers' => $this->supplierOptions($company),
             'requisitions' => $this->requisitionOptions($company),
+            'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
+            'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
+            'lineRows' => $lineRows,
         ]);
     }
 
@@ -145,26 +173,21 @@ final class PurchaseOrderController extends Controller
 
         $data = $this->validateOrder($request);
 
-        $order->fill([
-            'supplier_id' => (int) $data['supplier_id'],
-            'purchase_requisition_id' => isset($data['purchase_requisition_id']) ? (int) $data['purchase_requisition_id'] : null,
-            'status' => $data['status'],
-            'order_date' => $data['order_date'],
-            'expected_delivery_date' => $data['expected_delivery_date'] ?? null,
-            'notes' => $data['notes'] ?? null,
-        ]);
+        DB::transaction(function () use ($order, $data, $request): void {
+            $this->assertStatusTransition($order->status, $data['status']);
 
-        if ($data['status'] === 'APPROVED' && $order->approved_at === null) {
-            $order->approved_by = $request->user()?->id;
-            $order->approved_at = now();
-        }
+            $order->fill([
+                'supplier_id' => (int) $data['supplier_id'],
+                'purchase_requisition_id' => isset($data['purchase_requisition_id']) ? (int) $data['purchase_requisition_id'] : null,
+                'order_date' => $data['order_date'],
+                'expected_delivery_date' => $data['expected_delivery_date'] ?? null,
+                'notes' => $data['notes'] ?? null,
+            ]);
 
-        if ($data['status'] !== 'APPROVED') {
-            $order->approved_by = null;
-            $order->approved_at = null;
-        }
-
-        $order->save();
+            $this->syncLines($order, $data['items']);
+            $this->applyStatusAudit($order, $data['status'], $request->user()?->id);
+            $order->save();
+        });
 
         $audit->record(
             'tenant_purchase_order.updated',
@@ -207,18 +230,229 @@ final class PurchaseOrderController extends Controller
     }
 
     /**
-     * @return array{supplier_id: int|string, purchase_requisition_id?: int|string|null, status: string, order_date: string, expected_delivery_date?: string|null, notes?: string|null}
+     * @return array{supplier_id: int|string, purchase_requisition_id?: int|string|null, status: string, order_date: string, expected_delivery_date?: string|null, notes?: string|null, items: array<int, array{product_id: int, warehouse_id: int|null, quantity: float, unit_price: float|null, need_by_date: string|null, promised_date: string|null}>}
      */
     private function validateOrder(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'supplier_id' => ['required', 'integer', Rule::exists('suppliers', 'id')],
             'purchase_requisition_id' => ['nullable', 'integer', Rule::exists('purchase_requisitions', 'id')],
             'status' => ['required', Rule::in(['DRAFT', 'APPROVED', 'CANCELLED'])],
             'order_date' => ['required', 'date'],
             'expected_delivery_date' => ['nullable', 'date', 'after_or_equal:order_date'],
             'notes' => ['nullable', 'string'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['required', 'integer', Rule::exists('products', 'id')],
+            'items.*.warehouse_id' => ['nullable', 'integer', Rule::exists('warehouses', 'id')],
+            'items.*.quantity' => ['required', 'numeric', 'gt:0'],
+            'items.*.unit_price' => ['nullable', 'string', 'max:30'],
+            'items.*.need_by_date' => ['nullable', 'date'],
+            'items.*.promised_date' => ['nullable', 'date'],
         ]);
+
+        $data['items'] = collect($data['items'])
+            ->map(function (array $item): array {
+                $unitPrice = isset($item['unit_price']) && trim((string) $item['unit_price']) !== ''
+                    ? $this->normalizeAmountToDecimal((string) $item['unit_price'])
+                    : null;
+
+                return [
+                    'product_id' => (int) $item['product_id'],
+                    'warehouse_id' => isset($item['warehouse_id']) ? (int) $item['warehouse_id'] : null,
+                    'quantity' => round((float) $item['quantity'], 6),
+                    'unit_price' => $unitPrice,
+                    'need_by_date' => $item['need_by_date'] ?? null,
+                    'promised_date' => $item['promised_date'] ?? null,
+                ];
+            })
+            ->all();
+
+        return $data;
+    }
+
+    /**
+     * @param array<int, array{product_id: int, warehouse_id: int|null, quantity: float, unit_price: float|null, need_by_date: string|null, promised_date: string|null}> $items
+     */
+    private function syncLines(PurchaseOrder $order, array $items): void
+    {
+        $order->lines()->delete();
+
+        foreach ($items as $item) {
+            PurchaseOrderLine::query()->create([
+                'company_id' => $order->company_id,
+                'purchase_order_id' => $order->id,
+                'product_id' => $item['product_id'],
+                'warehouse_id' => $item['warehouse_id'],
+                'quantity_ordered' => $item['quantity'],
+                'quantity_received' => 0,
+                'unit_price' => $item['unit_price'],
+                'need_by_date' => $item['need_by_date'],
+                'promised_date' => $item['promised_date'],
+                'status' => 'OPEN',
+            ]);
+        }
+    }
+
+    private function assertStatusTransition(string $from, string $to): void
+    {
+        if ($from === $to) {
+            return;
+        }
+
+        $allowed = self::STATUS_TRANSITIONS[$from] ?? [];
+
+        if (! in_array($to, $allowed, true)) {
+            throw ValidationException::withMessages([
+                'status' => __('purchase_order.invalid_transition'),
+            ]);
+        }
+    }
+
+    private function applyStatusAudit(PurchaseOrder $order, string $status, ?int $userId): void
+    {
+        $order->status = $status;
+
+        if ($status === 'APPROVED') {
+            $order->approved_by ??= $userId;
+            $order->approved_at ??= now();
+            $order->cancelled_by = null;
+            $order->cancelled_at = null;
+
+            return;
+        }
+
+        if ($status === 'CANCELLED') {
+            $order->cancelled_by ??= $userId;
+            $order->cancelled_at ??= now();
+
+            return;
+        }
+
+        $order->approved_by = null;
+        $order->approved_at = null;
+        $order->cancelled_by = null;
+        $order->cancelled_at = null;
+    }
+
+    private function normalizeAmountToDecimal(string $value): float
+    {
+        $normalized = trim($value);
+        $normalized = str_replace(['R$', ' '], '', $normalized);
+
+        if (str_contains($normalized, ',')) {
+            $normalized = str_replace('.', '', $normalized);
+            $normalized = str_replace(',', '.', $normalized);
+        }
+
+        return round((float) $normalized, 6);
+    }
+
+    /**
+     * @return array<int, array{product_id: int|null, warehouse_id: int|null, quantity: string|int|float, unit_price: string, need_by_date: string, promised_date: string}>
+     */
+    private function defaultLineRows(): array
+    {
+        return [[
+            'product_id' => null,
+            'warehouse_id' => null,
+            'quantity' => 1,
+            'unit_price' => '0,00',
+            'need_by_date' => now()->addDays(7)->toDateString(),
+            'promised_date' => now()->addDays(7)->toDateString(),
+        ]];
+    }
+
+    /**
+     * @return array<int, array{product_id: int|null, warehouse_id: int|null, quantity: string, unit_price: string, need_by_date: string, promised_date: string}>
+     */
+    private function lineRowsForForm(PurchaseOrder $order): array
+    {
+        $order->loadMissing('lines');
+
+        $rows = $order->lines
+            ->map(static fn (PurchaseOrderLine $line): array => [
+                'product_id' => $line->product_id,
+                'warehouse_id' => $line->warehouse_id,
+                'quantity' => (string) $line->quantity_ordered,
+                'unit_price' => $line->unit_price !== null ? number_format((float) $line->unit_price, 2, ',', '.') : '0,00',
+                'need_by_date' => $line->need_by_date?->format('Y-m-d') ?? '',
+                'promised_date' => $line->promised_date?->format('Y-m-d') ?? '',
+            ])->all();
+
+        return $rows !== [] ? $rows : $this->defaultLineRows();
+    }
+
+    /**
+     * @param array<int, mixed> $fallback
+     * @return array<int, mixed>
+     */
+    private function oldItemRows(Request $request, array $fallback): array
+    {
+        $items = $request->old('items');
+
+        return is_array($items) && $items !== [] ? array_values($items) : $fallback;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $lineRows
+     * @return array<int, int>
+     */
+    private function selectedProductIdsFromLineRows(array $lineRows): array
+    {
+        return collect($lineRows)
+            ->pluck('product_id')
+            ->filter(static fn ($id): bool => (int) $id > 0)
+            ->map(static fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $lineRows
+     * @return array<int, int>
+     */
+    private function selectedWarehouseIdsFromLineRows(array $lineRows): array
+    {
+        return collect($lineRows)
+            ->pluck('warehouse_id')
+            ->filter(static fn ($id): bool => (int) $id > 0)
+            ->map(static fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param array<int, int> $ids
+     */
+    private function productOptionsByIds(Company $company, array $ids): Collection
+    {
+        if ($ids === []) {
+            return collect();
+        }
+
+        return Product::query()
+            ->where('company_id', $company->id)
+            ->whereIn('id', $ids)
+            ->orderBy('sku')
+            ->get(['id', 'sku', 'description']);
+    }
+
+    /**
+     * @param array<int, int> $ids
+     */
+    private function warehouseOptionsByIds(Company $company, array $ids): Collection
+    {
+        if ($ids === []) {
+            return collect();
+        }
+
+        return Warehouse::query()
+            ->where('company_id', $company->id)
+            ->whereIn('id', $ids)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
     }
 
     private function generateNumber(Company $company): string

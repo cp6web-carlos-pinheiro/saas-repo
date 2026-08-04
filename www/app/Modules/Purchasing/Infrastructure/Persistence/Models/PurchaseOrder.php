@@ -26,6 +26,8 @@ final class PurchaseOrder extends TenantModel
         'created_by',
         'approved_by',
         'approved_at',
+        'cancelled_by',
+        'cancelled_at',
         'notes',
         'metadata',
     ];
@@ -34,6 +36,7 @@ final class PurchaseOrder extends TenantModel
         'order_date' => 'date',
         'expected_delivery_date' => 'date',
         'approved_at' => 'datetime',
+        'cancelled_at' => 'datetime',
         'metadata' => 'array',
     ];
 

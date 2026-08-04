@@ -7,6 +7,7 @@ namespace App\Modules\Purchasing\Infrastructure\Persistence\Models;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 final class PurchaseFiscalEntry extends TenantModel
 {
@@ -23,7 +24,13 @@ final class PurchaseFiscalEntry extends TenantModel
         'issue_date',
         'entry_date',
         'status',
+        'posted_by',
+        'posted_at',
+        'cancelled_by',
+        'cancelled_at',
         'amount_cents',
+        'financial_reference',
+        'financial_posted_at',
         'notes',
         'metadata',
     ];
@@ -31,7 +38,10 @@ final class PurchaseFiscalEntry extends TenantModel
     protected $casts = [
         'issue_date' => 'date',
         'entry_date' => 'date',
+        'posted_at' => 'datetime',
+        'cancelled_at' => 'datetime',
         'amount_cents' => 'integer',
+        'financial_posted_at' => 'datetime',
         'metadata' => 'array',
     ];
 
@@ -43,5 +53,10 @@ final class PurchaseFiscalEntry extends TenantModel
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class, 'supplier_id');
+    }
+
+    public function posting(): HasOne
+    {
+        return $this->hasOne(PurchaseFiscalEntryPosting::class, 'purchase_fiscal_entry_id');
     }
 }

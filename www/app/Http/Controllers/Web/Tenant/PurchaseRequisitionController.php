@@ -6,18 +6,31 @@ namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Web\Tenant\Concerns\HandlesTenantAuthorization;
+use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisitionLine;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Services\SaaS\AuditLogService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 final class PurchaseRequisitionController extends Controller
 {
     use HandlesTenantAuthorization;
+
+    private const STATUS_TRANSITIONS = [
+        'DRAFT' => ['APPROVED', 'CANCELLED'],
+        'APPROVED' => ['CANCELLED'],
+        'CANCELLED' => [],
+    ];
 
     private const READ_PERMISSION = 'purchasing.requisitions.read';
 
@@ -68,9 +81,15 @@ final class PurchaseRequisitionController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
+        $lineRows = $this->oldItemRows($request, $this->defaultLineRows());
+
         return view('client.purchasing.requisitions.form', [
             'requisition' => null,
             'company' => $company,
+            'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
+            'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
+            'suppliers' => $this->supplierOptionsByIds($company, $this->selectedSupplierIdsFromLineRows($lineRows)),
+            'lineRows' => $lineRows,
         ]);
     }
 
@@ -80,6 +99,11 @@ final class PurchaseRequisitionController extends Controller
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
         $requisition->loadCount('lines');
+        $requisition->load([
+            'lines.product:id,sku,description',
+            'lines.warehouse:id,code,name',
+            'lines.supplier:id,code,name',
+        ]);
 
         return view('client.purchasing.requisitions.show', compact('requisition', 'company'));
     }
@@ -91,17 +115,23 @@ final class PurchaseRequisitionController extends Controller
 
         $data = $this->validateRequisition($request);
 
-        $requisition = PurchaseRequisition::query()->create([
-            'company_id' => $company->id,
-            'requisition_number' => $this->generateNumber($company),
-            'required_date' => $data['required_date'] ?? null,
-            'status' => $data['status'],
-            'source_type' => $data['source_type'] ?? 'manual',
-            'requested_by' => $request->user()?->id,
-            'approved_by' => $data['status'] === 'APPROVED' ? $request->user()?->id : null,
-            'approved_at' => $data['status'] === 'APPROVED' ? now() : null,
-            'notes' => $data['notes'] ?? null,
-        ]);
+        $requisition = DB::transaction(function () use ($company, $data, $request): PurchaseRequisition {
+            $header = PurchaseRequisition::query()->create([
+                'company_id' => $company->id,
+                'requisition_number' => $this->generateNumber($company),
+                'required_date' => $data['required_date'] ?? null,
+                'status' => 'DRAFT',
+                'source_type' => $data['source_type'] ?? 'manual',
+                'requested_by' => $request->user()?->id,
+                'notes' => $data['notes'] ?? null,
+            ]);
+
+            $this->syncLines($header, $data['items']);
+            $this->applyStatusAudit($header, $data['status'], $request->user()?->id);
+            $header->save();
+
+            return $header;
+        });
 
         $audit->record(
             'tenant_purchase_requisition.created',
@@ -123,7 +153,16 @@ final class PurchaseRequisitionController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
-        return view('client.purchasing.requisitions.form', compact('requisition', 'company'));
+        $lineRows = $this->oldItemRows($request, $this->lineRowsForForm($requisition));
+
+        return view('client.purchasing.requisitions.form', [
+            'requisition' => $requisition,
+            'company' => $company,
+            'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
+            'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
+            'suppliers' => $this->supplierOptionsByIds($company, $this->selectedSupplierIdsFromLineRows($lineRows)),
+            'lineRows' => $lineRows,
+        ]);
     }
 
     public function update(Request $request, PurchaseRequisition $requisition, AuditLogService $audit): RedirectResponse
@@ -133,24 +172,19 @@ final class PurchaseRequisitionController extends Controller
 
         $data = $this->validateRequisition($request);
 
-        $requisition->fill([
-            'required_date' => $data['required_date'] ?? null,
-            'status' => $data['status'],
-            'source_type' => $data['source_type'] ?? 'manual',
-            'notes' => $data['notes'] ?? null,
-        ]);
+        DB::transaction(function () use ($requisition, $data, $request): void {
+            $this->assertStatusTransition($requisition->status, $data['status']);
 
-        if ($data['status'] === 'APPROVED' && $requisition->approved_at === null) {
-            $requisition->approved_by = $request->user()?->id;
-            $requisition->approved_at = now();
-        }
+            $requisition->fill([
+                'required_date' => $data['required_date'] ?? null,
+                'source_type' => $data['source_type'] ?? 'manual',
+                'notes' => $data['notes'] ?? null,
+            ]);
 
-        if ($data['status'] !== 'APPROVED') {
-            $requisition->approved_by = null;
-            $requisition->approved_at = null;
-        }
-
-        $requisition->save();
+            $this->syncLines($requisition, $data['items']);
+            $this->applyStatusAudit($requisition, $data['status'], $request->user()?->id);
+            $requisition->save();
+        });
 
         $audit->record(
             'tenant_purchase_requisition.updated',
@@ -193,16 +227,241 @@ final class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * @return array{required_date?: string|null, status: string, source_type?: string|null, notes?: string|null}
+     * @return array{required_date?: string|null, status: string, source_type?: string|null, notes?: string|null, items: array<int, array{product_id: int, warehouse_id: int|null, supplier_id: int|null, quantity: float, need_by_date: string, order_date: string}>}
      */
     private function validateRequisition(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'required_date' => ['nullable', 'date'],
             'status' => ['required', Rule::in(['DRAFT', 'APPROVED', 'CANCELLED'])],
             'source_type' => ['nullable', 'string', 'max:80'],
             'notes' => ['nullable', 'string'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['required', 'integer', Rule::exists('products', 'id')],
+            'items.*.warehouse_id' => ['nullable', 'integer', Rule::exists('warehouses', 'id')],
+            'items.*.supplier_id' => ['nullable', 'integer', Rule::exists('suppliers', 'id')],
+            'items.*.quantity' => ['required', 'numeric', 'gt:0'],
+            'items.*.need_by_date' => ['required', 'date'],
+            'items.*.order_date' => ['required', 'date'],
         ]);
+
+        $data['items'] = collect($data['items'])
+            ->map(static fn (array $item): array => [
+                'product_id' => (int) $item['product_id'],
+                'warehouse_id' => isset($item['warehouse_id']) ? (int) $item['warehouse_id'] : null,
+                'supplier_id' => isset($item['supplier_id']) ? (int) $item['supplier_id'] : null,
+                'quantity' => round((float) $item['quantity'], 6),
+                'need_by_date' => (string) $item['need_by_date'],
+                'order_date' => (string) $item['order_date'],
+            ])
+            ->all();
+
+        return $data;
+    }
+
+    /**
+     * @param array<int, array{product_id: int, warehouse_id: int|null, supplier_id: int|null, quantity: float, need_by_date: string, order_date: string}> $items
+     */
+    private function syncLines(PurchaseRequisition $requisition, array $items): void
+    {
+        $requisition->lines()->delete();
+
+        foreach ($items as $item) {
+            PurchaseRequisitionLine::query()->create([
+                'company_id' => $requisition->company_id,
+                'purchase_requisition_id' => $requisition->id,
+                'product_id' => $item['product_id'],
+                'warehouse_id' => $item['warehouse_id'],
+                'supplier_id' => $item['supplier_id'],
+                'suggested_quantity' => $item['quantity'],
+                'requested_quantity' => $item['quantity'],
+                'moq_applied' => 1,
+                'lead_time_days' => 0,
+                'need_by_date' => $item['need_by_date'],
+                'order_date' => $item['order_date'],
+                'status' => 'OPEN',
+            ]);
+        }
+    }
+
+    private function assertStatusTransition(string $from, string $to): void
+    {
+        if ($from === $to) {
+            return;
+        }
+
+        $allowed = self::STATUS_TRANSITIONS[$from] ?? [];
+
+        if (! in_array($to, $allowed, true)) {
+            throw ValidationException::withMessages([
+                'status' => __('purchase_requisition.invalid_transition'),
+            ]);
+        }
+    }
+
+    private function applyStatusAudit(PurchaseRequisition $requisition, string $status, ?int $userId): void
+    {
+        $requisition->status = $status;
+
+        if ($status === 'APPROVED') {
+            $requisition->approved_by ??= $userId;
+            $requisition->approved_at ??= now();
+            $requisition->cancelled_by = null;
+            $requisition->cancelled_at = null;
+
+            return;
+        }
+
+        if ($status === 'CANCELLED') {
+            $requisition->cancelled_by ??= $userId;
+            $requisition->cancelled_at ??= now();
+
+            return;
+        }
+
+        $requisition->approved_by = null;
+        $requisition->approved_at = null;
+        $requisition->cancelled_by = null;
+        $requisition->cancelled_at = null;
+    }
+
+    /**
+     * @return array<int, array{product_id: int|null, warehouse_id: int|null, supplier_id: int|null, quantity: string|float|int, need_by_date: string, order_date: string}>
+     */
+    private function defaultLineRows(): array
+    {
+        return [[
+            'product_id' => null,
+            'warehouse_id' => null,
+            'supplier_id' => null,
+            'quantity' => 1,
+            'need_by_date' => now()->addDays(7)->toDateString(),
+            'order_date' => now()->toDateString(),
+        ]];
+    }
+
+    /**
+     * @return array<int, array{product_id: int|null, warehouse_id: int|null, supplier_id: int|null, quantity: string, need_by_date: string, order_date: string}>
+     */
+    private function lineRowsForForm(PurchaseRequisition $requisition): array
+    {
+        $requisition->loadMissing('lines');
+
+        $rows = $requisition->lines
+            ->map(static fn (PurchaseRequisitionLine $line): array => [
+                'product_id' => $line->product_id,
+                'warehouse_id' => $line->warehouse_id,
+                'supplier_id' => $line->supplier_id,
+                'quantity' => (string) $line->requested_quantity,
+                'need_by_date' => $line->need_by_date?->format('Y-m-d') ?? now()->toDateString(),
+                'order_date' => $line->order_date?->format('Y-m-d') ?? now()->toDateString(),
+            ])->all();
+
+        return $rows !== [] ? $rows : $this->defaultLineRows();
+    }
+
+    /**
+     * @param array<int, mixed> $fallback
+     * @return array<int, mixed>
+     */
+    private function oldItemRows(Request $request, array $fallback): array
+    {
+        $items = $request->old('items');
+
+        return is_array($items) && $items !== [] ? array_values($items) : $fallback;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $lineRows
+     * @return array<int, int>
+     */
+    private function selectedProductIdsFromLineRows(array $lineRows): array
+    {
+        return collect($lineRows)
+            ->pluck('product_id')
+            ->filter(static fn ($id): bool => (int) $id > 0)
+            ->map(static fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $lineRows
+     * @return array<int, int>
+     */
+    private function selectedWarehouseIdsFromLineRows(array $lineRows): array
+    {
+        return collect($lineRows)
+            ->pluck('warehouse_id')
+            ->filter(static fn ($id): bool => (int) $id > 0)
+            ->map(static fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $lineRows
+     * @return array<int, int>
+     */
+    private function selectedSupplierIdsFromLineRows(array $lineRows): array
+    {
+        return collect($lineRows)
+            ->pluck('supplier_id')
+            ->filter(static fn ($id): bool => (int) $id > 0)
+            ->map(static fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param array<int, int> $ids
+     */
+    private function productOptionsByIds(Company $company, array $ids): Collection
+    {
+        if ($ids === []) {
+            return collect();
+        }
+
+        return Product::query()
+            ->where('company_id', $company->id)
+            ->whereIn('id', $ids)
+            ->orderBy('sku')
+            ->get(['id', 'sku', 'description']);
+    }
+
+    /**
+     * @param array<int, int> $ids
+     */
+    private function warehouseOptionsByIds(Company $company, array $ids): Collection
+    {
+        if ($ids === []) {
+            return collect();
+        }
+
+        return Warehouse::query()
+            ->where('company_id', $company->id)
+            ->whereIn('id', $ids)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
+    }
+
+    /**
+     * @param array<int, int> $ids
+     */
+    private function supplierOptionsByIds(Company $company, array $ids): Collection
+    {
+        if ($ids === []) {
+            return collect();
+        }
+
+        return Supplier::query()
+            ->where('company_id', $company->id)
+            ->whereIn('id', $ids)
+            ->orderBy('name')
+            ->get(['id', 'code', 'name']);
     }
 
     private function generateNumber(Company $company): string

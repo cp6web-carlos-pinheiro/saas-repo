@@ -1,6 +1,11 @@
 @extends('layouts.client-area')
 
-@php($editing = $requisition !== null)
+@php
+    $editing = $requisition !== null;
+    $productsById = $products->keyBy('id');
+    $warehousesById = $warehouses->keyBy('id');
+    $suppliersById = $suppliers->keyBy('id');
+@endphp
 
 @section('title', __('ui.module_purchasing').' | '.__('ui.purchasing_requisition'))
 @section('client-page-title', $editing ? __('purchase_requisition.edit') : __('purchase_requisition.create'))
@@ -47,6 +52,65 @@
                 @error('source_type')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
+            <section class="space-y-4">
+                <div class="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                        <h2 class="text-xl font-semibold">{{ __('purchase_requisition.items') }}</h2>
+                    </div>
+                    <button type="button" class="rounded-full border border-[#dadce0] px-4 py-2 text-sm font-medium" data-pr-add-item>{{ __('purchase_requisition.add_item') }}</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <div class="min-w-[1100px]">
+                        <div class="grid grid-cols-[2fr_1.5fr_1.5fr_1fr_1.2fr_1.2fr_auto] gap-4 border-b border-[#dadce0] pb-2 text-xs font-semibold uppercase tracking-wide text-[#5f6368]">
+                            <span>{{ __('purchase_requisition.product') }}</span>
+                            <span>{{ __('purchase_requisition.warehouse') }}</span>
+                            <span>{{ __('purchase_requisition.supplier') }}</span>
+                            <span>{{ __('purchase_requisition.quantity') }}</span>
+                            <span>{{ __('purchase_requisition.need_by_date') }}</span>
+                            <span>{{ __('purchase_requisition.order_date') }}</span>
+                            <span class="sr-only">{{ __('purchase_requisition.remove_item') }}</span>
+                        </div>
+
+                        <div class="mt-3 space-y-3" data-pr-items-container>
+                            @foreach (old('items', $lineRows) as $index => $item)
+                                <div class="grid grid-cols-[2fr_1.5fr_1.5fr_1fr_1.2fr_1.2fr_auto] items-start gap-4" data-pr-item-row>
+                                    <x-ui.select name="items[{{ $index }}][product_id]" required data-search="on" data-placeholder="{{ __('purchase_requisition.select_product') }}" data-ajax-url="{{ route('sales.products.search') }}" data-minimum-input-length="1">
+                                        <option value="">{{ __('purchase_requisition.select_product') }}</option>
+                                        @php($selectedProductId = (int) old('items.'.$index.'.product_id', $item['product_id'] ?? 0))
+                                        @if ($selectedProductId > 0 && $productsById->has($selectedProductId))
+                                            <option value="{{ $selectedProductId }}" selected>{{ $productsById[$selectedProductId]->sku }} - {{ $productsById[$selectedProductId]->description ?? '—' }}</option>
+                                        @endif
+                                    </x-ui.select>
+
+                                    <x-ui.select name="items[{{ $index }}][warehouse_id]" data-search="on">
+                                        <option value="">{{ __('purchase_requisition.select_warehouse') }}</option>
+                                        @php($selectedWarehouseId = (int) old('items.'.$index.'.warehouse_id', $item['warehouse_id'] ?? 0))
+                                        @if ($selectedWarehouseId > 0 && $warehousesById->has($selectedWarehouseId))
+                                            <option value="{{ $selectedWarehouseId }}" selected>{{ $warehousesById[$selectedWarehouseId]->code }} - {{ $warehousesById[$selectedWarehouseId]->name }}</option>
+                                        @endif
+                                    </x-ui.select>
+
+                                    <x-ui.select name="items[{{ $index }}][supplier_id]" data-search="on">
+                                        <option value="">{{ __('purchase_requisition.select_supplier') }}</option>
+                                        @php($selectedSupplierId = (int) old('items.'.$index.'.supplier_id', $item['supplier_id'] ?? 0))
+                                        @if ($selectedSupplierId > 0 && $suppliersById->has($selectedSupplierId))
+                                            <option value="{{ $selectedSupplierId }}" selected>{{ $suppliersById[$selectedSupplierId]->code }} - {{ $suppliersById[$selectedSupplierId]->name }}</option>
+                                        @endif
+                                    </x-ui.select>
+
+                                    <x-ui.input type="number" step="0.000001" min="0.000001" name="items[{{ $index }}][quantity]" :value="old('items.'.$index.'.quantity', $item['quantity'] ?? 1)" required />
+                                    <x-ui.input type="date" name="items[{{ $index }}][need_by_date]" :value="old('items.'.$index.'.need_by_date', $item['need_by_date'] ?? now()->addDays(7)->toDateString())" required />
+                                    <x-ui.input type="date" name="items[{{ $index }}][order_date]" :value="old('items.'.$index.'.order_date', $item['order_date'] ?? now()->toDateString())" required />
+
+                                    <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-pr-remove-item aria-label="{{ __('purchase_requisition.remove_item') }}">×</button>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <label class="block text-sm font-medium">
                 {{ __('purchase_requisition.notes') }}
                 <x-ui.textarea name="notes" class="mt-2" rows="4">{{ old('notes', $requisition?->notes) }}</x-ui.textarea>
@@ -60,4 +124,59 @@
         </form>
     </x-ui.panel>
 </div>
+
+<template id="pr-item-template">
+    <div class="grid grid-cols-[2fr_1.5fr_1.5fr_1fr_1.2fr_1.2fr_auto] items-start gap-4" data-pr-item-row>
+        <x-ui.select name="items[__INDEX__][product_id]" required data-search="on" data-placeholder="{{ __('purchase_requisition.select_product') }}" data-ajax-url="{{ route('sales.products.search') }}" data-minimum-input-length="1">
+            <option value="">{{ __('purchase_requisition.select_product') }}</option>
+        </x-ui.select>
+        <x-ui.select name="items[__INDEX__][warehouse_id]" data-search="on"><option value="">{{ __('purchase_requisition.select_warehouse') }}</option></x-ui.select>
+        <x-ui.select name="items[__INDEX__][supplier_id]" data-search="on"><option value="">{{ __('purchase_requisition.select_supplier') }}</option></x-ui.select>
+        <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity]" value="1" required />
+        <x-ui.input type="date" name="items[__INDEX__][need_by_date]" value="{{ now()->addDays(7)->toDateString() }}" required />
+        <x-ui.input type="date" name="items[__INDEX__][order_date]" value="{{ now()->toDateString() }}" required />
+        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-pr-remove-item aria-label="{{ __('purchase_requisition.remove_item') }}">×</button>
+    </div>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('[data-pr-items-container]');
+    const template = document.getElementById('pr-item-template');
+    const addButton = document.querySelector('[data-pr-add-item]');
+
+    if (!container || !template || !addButton) {
+        return;
+    }
+
+    const bindRow = (row) => {
+        const removeButton = row.querySelector('[data-pr-remove-item]');
+
+        if (removeButton) {
+            removeButton.addEventListener('click', () => {
+                if (container.querySelectorAll('[data-pr-item-row]').length === 1) {
+                    return;
+                }
+
+                row.remove();
+            });
+        }
+    };
+
+    container.querySelectorAll('[data-pr-item-row]').forEach(bindRow);
+
+    addButton.addEventListener('click', () => {
+        const index = container.querySelectorAll('[data-pr-item-row]').length;
+        const html = template.innerHTML.replaceAll('__INDEX__', String(index));
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html.trim();
+        const row = wrapper.firstElementChild;
+        if (!row) {
+            return;
+        }
+        container.appendChild(row);
+        bindRow(row);
+    });
+});
+</script>
 @endsection

@@ -6,20 +6,34 @@ namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Web\Tenant\Concerns\HandlesTenantAuthorization;
+use App\Modules\Product\Infrastructure\Persistence\Models\Product;
+use App\Modules\Purchasing\Application\Services\PurchasingIntegrationService;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrder;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrderLine;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseReceipt;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseReceiptLine;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Services\SaaS\AuditLogService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 final class PurchaseReceiptController extends Controller
 {
     use HandlesTenantAuthorization;
+
+    private const STATUS_TRANSITIONS = [
+        'DRAFT' => ['POSTED', 'CANCELLED'],
+        'POSTED' => [],
+        'CANCELLED' => [],
+    ];
 
     private const READ_PERMISSION = 'purchasing.receipts.read';
 
@@ -70,11 +84,17 @@ final class PurchaseReceiptController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
+        $lineRows = $this->oldItemRows($request, $this->defaultLineRows());
+
         return view('client.purchasing.receipts.form', [
             'receipt' => null,
             'company' => $company,
             'suppliers' => $this->supplierOptions($company),
             'orders' => $this->orderOptions($company),
+            'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
+            'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
+            'orderLines' => collect(),
+            'lineRows' => $lineRows,
         ]);
     }
 
@@ -83,27 +103,45 @@ final class PurchaseReceiptController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
-        $receipt->load(['supplier:id,name', 'purchaseOrder:id,purchase_order_number']);
+        $receipt->load([
+            'supplier:id,name',
+            'purchaseOrder:id,purchase_order_number',
+            'lines.product:id,sku,description',
+            'lines.warehouse:id,code,name',
+            'lines.orderLine:id,purchase_order_id',
+        ]);
 
         return view('client.purchasing.receipts.show', compact('receipt', 'company'));
     }
 
-    public function store(Request $request, AuditLogService $audit): RedirectResponse
+    public function store(Request $request, AuditLogService $audit, PurchasingIntegrationService $integration): RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
         $data = $this->validateReceipt($request);
 
-        $receipt = PurchaseReceipt::query()->create([
-            'company_id' => $company->id,
-            'receipt_number' => $this->generateNumber($company),
-            'purchase_order_id' => isset($data['purchase_order_id']) ? (int) $data['purchase_order_id'] : null,
-            'supplier_id' => isset($data['supplier_id']) ? (int) $data['supplier_id'] : null,
-            'receipt_date' => $data['receipt_date'],
-            'status' => $data['status'],
-            'notes' => $data['notes'] ?? null,
-        ]);
+        $receipt = DB::transaction(function () use ($company, $data, $request, $integration): PurchaseReceipt {
+            $header = PurchaseReceipt::query()->create([
+                'company_id' => $company->id,
+                'receipt_number' => $this->generateNumber($company),
+                'purchase_order_id' => isset($data['purchase_order_id']) ? (int) $data['purchase_order_id'] : null,
+                'supplier_id' => isset($data['supplier_id']) ? (int) $data['supplier_id'] : null,
+                'receipt_date' => $data['receipt_date'],
+                'status' => 'DRAFT',
+                'notes' => $data['notes'] ?? null,
+            ]);
+
+            $this->syncLines($header, $data['items']);
+            $this->applyStatusAudit($header, $data['status'], $request->user()?->id);
+            $header->save();
+
+            if ($data['status'] === 'POSTED') {
+                $integration->postReceiptToInventory($header, $request->user()?->id);
+            }
+
+            return $header;
+        });
 
         $audit->record(
             'tenant_purchase_receipt.created',
@@ -125,29 +163,48 @@ final class PurchaseReceiptController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
+        $lineRows = $this->oldItemRows($request, $this->lineRowsForForm($receipt));
+        $orderId = (int) old('purchase_order_id', $receipt->purchase_order_id ?? 0);
+
         return view('client.purchasing.receipts.form', [
             'receipt' => $receipt,
             'company' => $company,
             'suppliers' => $this->supplierOptions($company),
             'orders' => $this->orderOptions($company),
+            'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
+            'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
+            'orderLines' => $this->orderLineOptions($company, $orderId),
+            'lineRows' => $lineRows,
         ]);
     }
 
-    public function update(Request $request, PurchaseReceipt $receipt, AuditLogService $audit): RedirectResponse
+    public function update(Request $request, PurchaseReceipt $receipt, AuditLogService $audit, PurchasingIntegrationService $integration): RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
         $data = $this->validateReceipt($request);
 
-        $receipt->fill([
-            'purchase_order_id' => isset($data['purchase_order_id']) ? (int) $data['purchase_order_id'] : null,
-            'supplier_id' => isset($data['supplier_id']) ? (int) $data['supplier_id'] : null,
-            'receipt_date' => $data['receipt_date'],
-            'status' => $data['status'],
-            'notes' => $data['notes'] ?? null,
-        ]);
-        $receipt->save();
+        DB::transaction(function () use ($receipt, $data, $request, $integration): void {
+            $this->assertStatusTransition($receipt->status, $data['status']);
+
+            $receipt->fill([
+                'purchase_order_id' => isset($data['purchase_order_id']) ? (int) $data['purchase_order_id'] : null,
+                'supplier_id' => isset($data['supplier_id']) ? (int) $data['supplier_id'] : null,
+                'receipt_date' => $data['receipt_date'],
+                'notes' => $data['notes'] ?? null,
+            ]);
+
+            $wasPosted = $receipt->status === 'POSTED';
+
+            $this->syncLines($receipt, $data['items']);
+            $this->applyStatusAudit($receipt, $data['status'], $request->user()?->id);
+            $receipt->save();
+
+            if (! $wasPosted && $data['status'] === 'POSTED') {
+                $integration->postReceiptToInventory($receipt, $request->user()?->id);
+            }
+        });
 
         $audit->record(
             'tenant_purchase_receipt.updated',
@@ -190,17 +247,218 @@ final class PurchaseReceiptController extends Controller
     }
 
     /**
-     * @return array{supplier_id?: int|string|null, purchase_order_id?: int|string|null, receipt_date: string, status: string, notes?: string|null}
+     * @return array{supplier_id?: int|string|null, purchase_order_id?: int|string|null, receipt_date: string, status: string, notes?: string|null, items: array<int, array{purchase_order_line_id: int|null, product_id: int, warehouse_id: int, quantity_received: float, lot_number: string|null, notes: string|null}>}
      */
     private function validateReceipt(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'supplier_id' => ['nullable', 'integer', Rule::exists('suppliers', 'id')],
             'purchase_order_id' => ['nullable', 'integer', Rule::exists('purchase_orders', 'id')],
             'receipt_date' => ['required', 'date'],
             'status' => ['required', Rule::in(['DRAFT', 'POSTED', 'CANCELLED'])],
             'notes' => ['nullable', 'string'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.purchase_order_line_id' => ['nullable', 'integer', Rule::exists('purchase_order_lines', 'id')],
+            'items.*.product_id' => ['required', 'integer', Rule::exists('products', 'id')],
+            'items.*.warehouse_id' => ['required', 'integer', Rule::exists('warehouses', 'id')],
+            'items.*.quantity_received' => ['required', 'numeric', 'gt:0'],
+            'items.*.lot_number' => ['nullable', 'string', 'max:80'],
+            'items.*.notes' => ['nullable', 'string'],
         ]);
+
+        $data['items'] = collect($data['items'])
+            ->map(static fn (array $item): array => [
+                'purchase_order_line_id' => isset($item['purchase_order_line_id']) ? (int) $item['purchase_order_line_id'] : null,
+                'product_id' => (int) $item['product_id'],
+                'warehouse_id' => (int) $item['warehouse_id'],
+                'quantity_received' => round((float) $item['quantity_received'], 6),
+                'lot_number' => $item['lot_number'] ?? null,
+                'notes' => $item['notes'] ?? null,
+            ])->all();
+
+        return $data;
+    }
+
+    /**
+     * @param array<int, array{purchase_order_line_id: int|null, product_id: int, warehouse_id: int, quantity_received: float, lot_number: string|null, notes: string|null}> $items
+     */
+    private function syncLines(PurchaseReceipt $receipt, array $items): void
+    {
+        $receipt->lines()->delete();
+
+        foreach ($items as $item) {
+            PurchaseReceiptLine::query()->create([
+                'company_id' => $receipt->company_id,
+                'purchase_receipt_id' => $receipt->id,
+                'purchase_order_line_id' => $item['purchase_order_line_id'],
+                'product_id' => $item['product_id'],
+                'warehouse_id' => $item['warehouse_id'],
+                'quantity_received' => $item['quantity_received'],
+                'lot_number' => $item['lot_number'],
+                'notes' => $item['notes'],
+            ]);
+        }
+    }
+
+    private function assertStatusTransition(string $from, string $to): void
+    {
+        if ($from === $to) {
+            return;
+        }
+
+        $allowed = self::STATUS_TRANSITIONS[$from] ?? [];
+
+        if (! in_array($to, $allowed, true)) {
+            throw ValidationException::withMessages([
+                'status' => __('purchase_receipt.invalid_transition'),
+            ]);
+        }
+    }
+
+    private function applyStatusAudit(PurchaseReceipt $receipt, string $status, ?int $userId): void
+    {
+        $receipt->status = $status;
+
+        if ($status === 'POSTED') {
+            $receipt->posted_by ??= $userId;
+            $receipt->posted_at ??= now();
+            $receipt->cancelled_by = null;
+            $receipt->cancelled_at = null;
+
+            return;
+        }
+
+        if ($status === 'CANCELLED') {
+            $receipt->cancelled_by ??= $userId;
+            $receipt->cancelled_at ??= now();
+
+            return;
+        }
+    }
+
+    /**
+     * @return array<int, array{purchase_order_line_id: int|null, product_id: int|null, warehouse_id: int|null, quantity_received: string|int|float, lot_number: string|null, notes: string|null}>
+     */
+    private function defaultLineRows(): array
+    {
+        return [[
+            'purchase_order_line_id' => null,
+            'product_id' => null,
+            'warehouse_id' => null,
+            'quantity_received' => 1,
+            'lot_number' => null,
+            'notes' => null,
+        ]];
+    }
+
+    /**
+     * @return array<int, array{purchase_order_line_id: int|null, product_id: int|null, warehouse_id: int|null, quantity_received: string, lot_number: string|null, notes: string|null}>
+     */
+    private function lineRowsForForm(PurchaseReceipt $receipt): array
+    {
+        $receipt->loadMissing('lines');
+
+        $rows = $receipt->lines
+            ->map(static fn (PurchaseReceiptLine $line): array => [
+                'purchase_order_line_id' => $line->purchase_order_line_id,
+                'product_id' => $line->product_id,
+                'warehouse_id' => $line->warehouse_id,
+                'quantity_received' => (string) $line->quantity_received,
+                'lot_number' => $line->lot_number,
+                'notes' => $line->notes,
+            ])->all();
+
+        return $rows !== [] ? $rows : $this->defaultLineRows();
+    }
+
+    /**
+     * @param array<int, mixed> $fallback
+     * @return array<int, mixed>
+     */
+    private function oldItemRows(Request $request, array $fallback): array
+    {
+        $items = $request->old('items');
+
+        return is_array($items) && $items !== [] ? array_values($items) : $fallback;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $lineRows
+     * @return array<int, int>
+     */
+    private function selectedProductIdsFromLineRows(array $lineRows): array
+    {
+        return collect($lineRows)
+            ->pluck('product_id')
+            ->filter(static fn ($id): bool => (int) $id > 0)
+            ->map(static fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $lineRows
+     * @return array<int, int>
+     */
+    private function selectedWarehouseIdsFromLineRows(array $lineRows): array
+    {
+        return collect($lineRows)
+            ->pluck('warehouse_id')
+            ->filter(static fn ($id): bool => (int) $id > 0)
+            ->map(static fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param array<int, int> $ids
+     */
+    private function productOptionsByIds(Company $company, array $ids): Collection
+    {
+        if ($ids === []) {
+            return collect();
+        }
+
+        return Product::query()
+            ->where('company_id', $company->id)
+            ->whereIn('id', $ids)
+            ->orderBy('sku')
+            ->get(['id', 'sku', 'description']);
+    }
+
+    /**
+     * @param array<int, int> $ids
+     */
+    private function warehouseOptionsByIds(Company $company, array $ids): Collection
+    {
+        if ($ids === []) {
+            return collect();
+        }
+
+        return Warehouse::query()
+            ->where('company_id', $company->id)
+            ->whereIn('id', $ids)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
+    }
+
+    /**
+     * @return Collection<int, PurchaseOrderLine>
+     */
+    private function orderLineOptions(Company $company, int $orderId): Collection
+    {
+        if ($orderId <= 0) {
+            return collect();
+        }
+
+        return PurchaseOrderLine::query()
+            ->where('company_id', $company->id)
+            ->where('purchase_order_id', $orderId)
+            ->with('product:id,sku,description')
+            ->orderBy('id')
+            ->get();
     }
 
     private function generateNumber(Company $company): string

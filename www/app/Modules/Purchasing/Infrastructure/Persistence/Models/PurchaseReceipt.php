@@ -7,6 +7,7 @@ namespace App\Modules\Purchasing\Infrastructure\Persistence\Models;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class PurchaseReceipt extends TenantModel
 {
@@ -21,12 +22,18 @@ final class PurchaseReceipt extends TenantModel
         'supplier_id',
         'receipt_date',
         'status',
+        'posted_by',
+        'posted_at',
+        'cancelled_by',
+        'cancelled_at',
         'notes',
         'metadata',
     ];
 
     protected $casts = [
         'receipt_date' => 'date',
+        'posted_at' => 'datetime',
+        'cancelled_at' => 'datetime',
         'metadata' => 'array',
     ];
 
@@ -38,5 +45,11 @@ final class PurchaseReceipt extends TenantModel
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class, 'supplier_id');
+    }
+
+    public function lines(): HasMany
+    {
+        return $this->hasMany(PurchaseReceiptLine::class, 'purchase_receipt_id')
+            ->orderBy('id');
     }
 }

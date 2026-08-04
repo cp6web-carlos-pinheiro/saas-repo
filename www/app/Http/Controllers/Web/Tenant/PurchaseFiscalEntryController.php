@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Web\Tenant\Concerns\HandlesTenantAuthorization;
+use App\Modules\Purchasing\Application\Services\PurchasingIntegrationService;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseFiscalEntry;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrder;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
@@ -14,12 +15,20 @@ use App\Services\SaaS\AuditLogService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 final class PurchaseFiscalEntryController extends Controller
 {
     use HandlesTenantAuthorization;
+
+    private const STATUS_TRANSITIONS = [
+        'DRAFT' => ['POSTED', 'CANCELLED'],
+        'POSTED' => [],
+        'CANCELLED' => [],
+    ];
 
     private const READ_PERMISSION = 'purchasing.fiscal-entries.read';
 
@@ -89,25 +98,36 @@ final class PurchaseFiscalEntryController extends Controller
         return view('client.purchasing.fiscal-entries.show', compact('entry', 'company'));
     }
 
-    public function store(Request $request, AuditLogService $audit): RedirectResponse
+    public function store(Request $request, AuditLogService $audit, PurchasingIntegrationService $integration): RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
         $data = $this->validateEntry($request);
 
-        $entry = PurchaseFiscalEntry::query()->create([
-            'company_id' => $company->id,
-            'entry_number' => $this->generateNumber($company),
-            'purchase_order_id' => isset($data['purchase_order_id']) ? (int) $data['purchase_order_id'] : null,
-            'supplier_id' => isset($data['supplier_id']) ? (int) $data['supplier_id'] : null,
-            'document_number' => $data['document_number'] ?? null,
-            'issue_date' => $data['issue_date'] ?? null,
-            'entry_date' => $data['entry_date'],
-            'status' => $data['status'],
-            'amount_cents' => $this->moneyToCents((string) $data['amount']),
-            'notes' => $data['notes'] ?? null,
-        ]);
+        $entry = DB::transaction(function () use ($company, $data, $request, $integration): PurchaseFiscalEntry {
+            $header = PurchaseFiscalEntry::query()->create([
+                'company_id' => $company->id,
+                'entry_number' => $this->generateNumber($company),
+                'purchase_order_id' => isset($data['purchase_order_id']) ? (int) $data['purchase_order_id'] : null,
+                'supplier_id' => isset($data['supplier_id']) ? (int) $data['supplier_id'] : null,
+                'document_number' => $data['document_number'] ?? null,
+                'issue_date' => $data['issue_date'] ?? null,
+                'entry_date' => $data['entry_date'],
+                'status' => 'DRAFT',
+                'amount_cents' => $this->moneyToCents((string) $data['amount']),
+                'notes' => $data['notes'] ?? null,
+            ]);
+
+            $this->applyStatusAudit($header, $data['status'], $request->user()?->id);
+            $header->save();
+
+            if ($data['status'] === 'POSTED') {
+                $integration->postFiscalEntryToFinancial($header, $request->user()?->id);
+            }
+
+            return $header;
+        });
 
         $audit->record(
             'tenant_purchase_fiscal_entry.created',
@@ -137,24 +157,34 @@ final class PurchaseFiscalEntryController extends Controller
         ]);
     }
 
-    public function update(Request $request, PurchaseFiscalEntry $entry, AuditLogService $audit): RedirectResponse
+    public function update(Request $request, PurchaseFiscalEntry $entry, AuditLogService $audit, PurchasingIntegrationService $integration): RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
         $data = $this->validateEntry($request);
 
-        $entry->fill([
-            'purchase_order_id' => isset($data['purchase_order_id']) ? (int) $data['purchase_order_id'] : null,
-            'supplier_id' => isset($data['supplier_id']) ? (int) $data['supplier_id'] : null,
-            'document_number' => $data['document_number'] ?? null,
-            'issue_date' => $data['issue_date'] ?? null,
-            'entry_date' => $data['entry_date'],
-            'status' => $data['status'],
-            'amount_cents' => $this->moneyToCents((string) $data['amount']),
-            'notes' => $data['notes'] ?? null,
-        ]);
-        $entry->save();
+        DB::transaction(function () use ($entry, $data, $request, $integration): void {
+            $this->assertStatusTransition($entry->status, $data['status']);
+
+            $entry->fill([
+                'purchase_order_id' => isset($data['purchase_order_id']) ? (int) $data['purchase_order_id'] : null,
+                'supplier_id' => isset($data['supplier_id']) ? (int) $data['supplier_id'] : null,
+                'document_number' => $data['document_number'] ?? null,
+                'issue_date' => $data['issue_date'] ?? null,
+                'entry_date' => $data['entry_date'],
+                'amount_cents' => $this->moneyToCents((string) $data['amount']),
+                'notes' => $data['notes'] ?? null,
+            ]);
+
+            $wasPosted = $entry->status === 'POSTED';
+            $this->applyStatusAudit($entry, $data['status'], $request->user()?->id);
+            $entry->save();
+
+            if (! $wasPosted && $data['status'] === 'POSTED') {
+                $integration->postFiscalEntryToFinancial($entry, $request->user()?->id);
+            }
+        });
 
         $audit->record(
             'tenant_purchase_fiscal_entry.updated',
@@ -233,6 +263,42 @@ final class PurchaseFiscalEntryController extends Controller
         }
 
         return (int) round(((float) $normalized) * 100);
+    }
+
+    private function assertStatusTransition(string $from, string $to): void
+    {
+        if ($from === $to) {
+            return;
+        }
+
+        $allowed = self::STATUS_TRANSITIONS[$from] ?? [];
+
+        if (! in_array($to, $allowed, true)) {
+            throw ValidationException::withMessages([
+                'status' => __('purchase_fiscal_entry.invalid_transition'),
+            ]);
+        }
+    }
+
+    private function applyStatusAudit(PurchaseFiscalEntry $entry, string $status, ?int $userId): void
+    {
+        $entry->status = $status;
+
+        if ($status === 'POSTED') {
+            $entry->posted_by ??= $userId;
+            $entry->posted_at ??= now();
+            $entry->cancelled_by = null;
+            $entry->cancelled_at = null;
+
+            return;
+        }
+
+        if ($status === 'CANCELLED') {
+            $entry->cancelled_by ??= $userId;
+            $entry->cancelled_at ??= now();
+
+            return;
+        }
     }
 
     /**

@@ -25,6 +25,8 @@ final class PurchaseRequisition extends TenantModel
         'requested_by',
         'approved_by',
         'approved_at',
+        'cancelled_by',
+        'cancelled_at',
         'notes',
         'metadata',
     ];
@@ -32,6 +34,7 @@ final class PurchaseRequisition extends TenantModel
     protected $casts = [
         'required_date' => 'date',
         'approved_at' => 'datetime',
+        'cancelled_at' => 'datetime',
         'metadata' => 'array',
     ];
 
