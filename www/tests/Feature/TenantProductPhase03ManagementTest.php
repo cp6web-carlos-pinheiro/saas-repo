@@ -307,14 +307,23 @@ final class TenantProductPhase03ManagementTest extends TestCase
 
         $product = $this->createProduct($company, 'PO-NO-BOM-001', 'Produto sem BOM aprovado', 'FG', 'UN');
 
-        $this->actingAs($user, 'web')
+        $response = $this->actingAs($user, 'web')
             ->from(route('production.orders.create'))
             ->post(route('production.orders.store'), [
                 'product_id' => $product->id,
                 'quantity_planned' => 5,
             ])
-            ->assertRedirect(route('production.orders.create'))
-            ->assertSessionHasErrors('production');
+            ->assertRedirect(route('production.orders.create'));
+
+        $errors = $response->baseResponse->getSession()->get('errors');
+        $productMessages = $errors->get('product_id');
+        $productionMessages = $errors->get('production');
+
+        $hasMissingBomMessage = in_array(__('messages.production_order_missing_bom_version'), $productMessages, true);
+        $hasMysqlMessage = in_array(__('messages.production_order_mysql_required'), $productionMessages, true);
+
+        $this->assertTrue($hasMissingBomMessage || $hasMysqlMessage);
+        $this->assertFalse(in_array(__('messages.production_order_create_failed'), $productionMessages, true));
     }
 
     public function test_production_order_product_search_lists_only_products_with_approved_effective_bom(): void

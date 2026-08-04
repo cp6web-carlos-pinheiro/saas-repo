@@ -101,9 +101,7 @@ final class ProductionOrderController extends Controller
         } catch (DomainException $exception) {
             return redirect()->back()
                 ->withInput($request->except(['password', 'password_confirmation', 'current_password']))
-                ->withErrors([
-                    'production' => $this->productionOrderCreateErrorMessage($exception),
-                ]);
+                ->withErrors($this->productionOrderCreateErrorBag($exception));
         }
 
         $orderId = (int) ($created['id'] ?? 0);
@@ -117,26 +115,49 @@ final class ProductionOrderController extends Controller
         return redirect()->route('production.orders.show', $orderId)->with('status', 'Ordem de producao criada com sucesso.');
     }
 
-    private function productionOrderCreateErrorMessage(DomainException $exception): string
+    /**
+     * @return array<string, string>
+     */
+    private function productionOrderCreateErrorBag(DomainException $exception): array
     {
         $message = $exception->getMessage();
+        $messageLower = mb_strtolower($message);
+        $details = $exception->details();
+
+        if ($details !== []) {
+            foreach ($details as $field => $fieldMessages) {
+                if (is_array($fieldMessages) && $fieldMessages !== []) {
+                    return [(string) $field => (string) $fieldMessages[0]];
+                }
+
+                return [(string) $field => (string) $fieldMessages];
+            }
+        }
 
         if (
             $exception->status() === 404
-            && str_contains($message, 'No BOM version found for product and reference date')
+            || str_contains($message, 'No BOM version found for product and reference date')
         ) {
-            return __('messages.production_order_missing_bom_version');
+            return ['product_id' => __('messages.production_order_missing_bom_version')];
         }
 
         if (str_contains($message, 'BOM explosion recursive CTE is implemented for MySQL driver.')) {
-            return __('messages.production_order_mysql_required');
+            return ['production' => __('messages.production_order_mysql_required')];
         }
 
         if (str_contains($message, 'Tenant context is required to freeze BOM snapshot')) {
-            return __('messages.production_order_tenant_context_required');
+            return ['production' => __('messages.production_order_tenant_context_required')];
         }
 
-        return __('messages.production_order_create_failed');
+        if (str_contains($messageLower, 'warehouse')) {
+            return ['warehouse_id' => $message !== '' ? $message : __('messages.production_order_create_failed')];
+        }
+
+        if (str_contains($messageLower, 'product')) {
+            return ['product_id' => $message !== '' ? $message : __('messages.production_order_create_failed')];
+        }
+
+        return ['production' => $message !== '' ? $message : __('messages.production_order_create_failed')];
     }
 
     public function show(Request $request, ProductionOrder $order): View

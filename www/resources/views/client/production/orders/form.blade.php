@@ -27,6 +27,9 @@
                             <option value="{{ $selectedProduct->id }}" selected>{{ $selectedProduct->sku }} - {{ $selectedProduct->description }}</option>
                         @endif
                     </x-ui.select>
+                    @error('product_id')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </label>
 
                 <label class="block text-sm font-medium">
@@ -37,6 +40,9 @@
                             <option value="{{ $warehouse->id }}" @selected((string) old('warehouse_id') === (string) $warehouse->id)>{{ $warehouse->code }} - {{ $warehouse->name }}</option>
                         @endforeach
                     </x-ui.select>
+                    @error('warehouse_id')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </label>
             </div>
 
@@ -44,16 +50,25 @@
                 <label class="block text-sm font-medium">
                     Quantidade planejada
                     <x-ui.input name="quantity_planned" type="number" step="0.001" min="0.001" :value="old('quantity_planned', '1')" class="mt-2" required />
+                    @error('quantity_planned')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </label>
 
                 <label class="block text-sm font-medium">
                     Inicio previsto
                     <x-ui.input name="scheduled_start_date" type="date" :value="old('scheduled_start_date')" class="mt-2" />
+                    @error('scheduled_start_date')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </label>
 
                 <label class="block text-sm font-medium">
                     Fim previsto
                     <x-ui.input name="scheduled_end_date" type="date" :value="old('scheduled_end_date')" class="mt-2" />
+                    @error('scheduled_end_date')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </label>
             </div>
 

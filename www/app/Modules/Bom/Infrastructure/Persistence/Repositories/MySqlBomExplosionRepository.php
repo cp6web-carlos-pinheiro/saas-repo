@@ -77,8 +77,8 @@ final class MySqlBomExplosionRepository implements BomExplosionRepository
                     WHERE bh2.company_id = :company_id
                         AND bh2.product_id = bt.component_product_id
                         AND bh2.status = 'APPROVED'
-                        AND bh2.effective_from <= :reference_date
-                        AND (bh2.effective_to IS NULL OR bh2.effective_to >= :reference_date)
+                        AND bh2.effective_from <= :reference_date_from
+                        AND (bh2.effective_to IS NULL OR bh2.effective_to >= :reference_date_to)
                     ORDER BY bh2.effective_from DESC, bh2.version_number DESC
                     LIMIT 1
                 )
@@ -105,7 +105,8 @@ final class MySqlBomExplosionRepository implements BomExplosionRepository
             [
                 'root_header_id' => $rootHeader->id,
                 'company_id' => $companyId,
-                'reference_date' => $referenceDate,
+                'reference_date_from' => $referenceDate,
+                'reference_date_to' => $referenceDate,
                 'max_depth' => $maxDepth,
             ]
         );
