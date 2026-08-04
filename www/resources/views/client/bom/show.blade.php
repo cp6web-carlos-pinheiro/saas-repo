@@ -43,7 +43,6 @@
                         <th class="px-3 py-3">{{ __('bom.line_no') }}</th>
                         <th class="px-3 py-3">{{ __('bom.component_product') }}</th>
                         <th class="px-3 py-3">{{ __('bom.quantity_per') }}</th>
-                        <th class="px-3 py-3">{{ __('bom.scrap_factor') }}</th>
                         <th class="px-3 py-3">{{ __('bom.uom') }}</th>
                     </tr>
                 </thead>
@@ -56,12 +55,11 @@
                                 <div class="text-xs text-[#5f6368]">{{ $item->componentProduct?->description ?? '—' }}</div>
                             </td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $item->quantity_per }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $item->scrap_factor }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $item->uom ?? '—' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-3 py-10 text-center text-[#5f6368]">{{ __('bom.no_items') }}</td>
+                            <td colspan="4" class="px-3 py-10 text-center text-[#5f6368]">{{ __('bom.no_items') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

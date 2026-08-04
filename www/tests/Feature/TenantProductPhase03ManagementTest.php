@@ -148,7 +148,6 @@ final class TenantProductPhase03ManagementTest extends TestCase
                     [
                         'component_product_id' => $component->id,
                         'quantity_per' => 1,
-                        'scrap_factor' => 0,
                         'uom' => 'UN',
                     ],
                 ],
@@ -167,7 +166,6 @@ final class TenantProductPhase03ManagementTest extends TestCase
                     [
                         'component_product_id' => $component->id,
                         'quantity_per' => 1,
-                        'scrap_factor' => 0,
                         'uom' => 'UN',
                     ],
                 ],

@@ -25,7 +25,6 @@ final class ProductionOrderBomItemSnapshot extends TenantModel
         'line_no',
         'level',
         'quantity_per',
-        'scrap_factor',
         'quantity_required',
         'quantity_accumulated',
         'path',
@@ -34,7 +33,6 @@ final class ProductionOrderBomItemSnapshot extends TenantModel
 
     protected $casts = [
         'quantity_per' => 'float',
-        'scrap_factor' => 'float',
         'quantity_required' => 'float',
         'quantity_accumulated' => 'float',
         'is_cycle' => 'bool',

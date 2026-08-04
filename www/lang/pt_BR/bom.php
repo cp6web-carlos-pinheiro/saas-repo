@@ -31,7 +31,6 @@ return [
     'line_no' => 'Linha',
     'component_product' => 'Componente',
     'quantity_per' => 'Quantidade por',
-    'scrap_factor' => 'Fator de perda (%)',
     'uom' => 'Unidade',
     'add_item' => 'Adicionar item',
     'remove_item' => 'Remover item',

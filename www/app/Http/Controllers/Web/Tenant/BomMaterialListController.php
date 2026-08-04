@@ -70,7 +70,6 @@ final class BomMaterialListController extends Controller
             'line_no' => 1,
             'component_product_id' => null,
             'quantity_per' => 1,
-            'scrap_factor' => 0,
             'uom' => '',
         ]]);
         $selectedProductId = (int) $request->old('product_id', (int) $request->query('product_id', 0));
@@ -286,7 +285,6 @@ final class BomMaterialListController extends Controller
                 Rule::exists('products', 'id')->where('company_id', $company->id),
             ],
             'items.*.quantity_per' => ['required', 'numeric', 'gt:0'],
-            'items.*.scrap_factor' => ['nullable', 'numeric', 'min:0'],
             'items.*.uom' => ['nullable', 'string', 'max:20'],
         ]);
     }
@@ -336,7 +334,6 @@ final class BomMaterialListController extends Controller
                 'component_product_id' => $componentProduct->id,
                 'line_no' => $index + 1,
                 'quantity_per' => (float) $item['quantity_per'],
-                'scrap_factor' => (float) ($item['scrap_factor'] ?? 0),
                 'uom' => trim((string) ($item['uom'] ?? '')) !== '' ? trim((string) $item['uom']) : $componentProduct->uom,
             ]);
         }
@@ -351,7 +348,6 @@ final class BomMaterialListController extends Controller
                 'line_no' => $item->line_no,
                 'component_product_id' => $item->component_product_id,
                 'quantity_per' => $item->quantity_per,
-                'scrap_factor' => $item->scrap_factor,
                 'uom' => $item->uom ?? '',
             ])
             ->all();

@@ -31,7 +31,6 @@ return [
     'line_no' => 'Línea',
     'component_product' => 'Componente',
     'quantity_per' => 'Cantidad por',
-    'scrap_factor' => 'Factor de merma (%)',
     'uom' => 'Unidad',
     'add_item' => 'Agregar ítem',
     'remove_item' => 'Eliminar ítem',

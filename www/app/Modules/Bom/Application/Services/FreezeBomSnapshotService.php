@@ -111,7 +111,6 @@ final class FreezeBomSnapshotService extends BaseService
                     'line_no' => (int) $item['line_no'],
                     'level' => (int) $item['level'],
                     'quantity_per' => round((float) $item['quantity_per'], 6),
-                    'scrap_factor' => round((float) $item['scrap_factor'], 4),
                     'quantity_required' => round((float) $item['quantity_required'], 6),
                     'quantity_accumulated' => round((float) $item['quantity_accumulated'], 6),
                     'path' => (string) $item['path'],

@@ -102,17 +102,16 @@
 
                 <div class="overflow-x-auto">
                     <div class="min-w-[920px]">
-                        <div class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 border-b border-[#dadce0] pb-2 text-xs font-semibold uppercase tracking-wide text-[#5f6368]">
+                        <div class="grid grid-cols-[2fr_1fr_1fr_auto] gap-4 border-b border-[#dadce0] pb-2 text-xs font-semibold uppercase tracking-wide text-[#5f6368]">
                             <span>{{ __('bom.component_product') }}</span>
                             <span>{{ __('bom.quantity_per') }}</span>
-                            <span>{{ __('bom.scrap_factor') }}</span>
                             <span>{{ __('bom.uom') }}</span>
                             <span class="sr-only">{{ __('bom.remove_item') }}</span>
                         </div>
 
                         <div class="mt-3 space-y-3" data-bom-items-container>
                             @foreach ($itemRows as $index => $item)
-                                <div class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-start gap-4" data-bom-item-row>
+                                <div class="grid grid-cols-[2fr_1fr_1fr_auto] items-start gap-4" data-bom-item-row>
                                     <div>
                                         <x-ui.select name="items[{{ $index }}][component_product_id]" required data-search="on" data-placeholder="{{ __('bom.component_product') }}" data-ajax-url="{{ route('products.search') }}" data-minimum-input-length="1">
                                             <option value="">{{ __('bom.component_product') }}</option>
@@ -128,10 +127,6 @@
 
                                     <div>
                                         <x-ui.input type="number" step="0.000001" min="0.000001" name="items[{{ $index }}][quantity_per]" :value="old('items.'.$index.'.quantity_per', $item['quantity_per'] ?? 1)" required />
-                                    </div>
-
-                                    <div>
-                                        <x-ui.input type="number" step="0.0001" min="0" name="items[{{ $index }}][scrap_factor]" :value="old('items.'.$index.'.scrap_factor', $item['scrap_factor'] ?? 0)" />
                                     </div>
 
                                     <div>
@@ -168,7 +163,7 @@
 </div>
 
 <template id="bom-item-template">
-    <div class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-start gap-4" data-bom-item-row>
+    <div class="grid grid-cols-[2fr_1fr_1fr_auto] items-start gap-4" data-bom-item-row>
         <div>
             <x-ui.select name="items[__INDEX__][component_product_id]" required data-search="on" data-placeholder="{{ __('bom.component_product') }}" data-ajax-url="{{ route('products.search') }}" data-minimum-input-length="1">
                 <option value="">{{ __('bom.component_product') }}</option>
@@ -177,10 +172,6 @@
 
         <div>
             <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity_per]" value="1" required />
-        </div>
-
-        <div>
-            <x-ui.input type="number" step="0.0001" min="0" name="items[__INDEX__][scrap_factor]" value="0" />
         </div>
 
         <div>
@@ -221,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetRow = (row) => {
         row.querySelectorAll('input').forEach((input) => {
             if (input.type === 'number') {
-                input.value = input.name.includes('quantity_per') ? '1' : '0';
+                input.value = '1';
             } else {
                 input.value = '';
             }

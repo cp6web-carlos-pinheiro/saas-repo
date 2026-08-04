@@ -21,13 +21,11 @@ final class BomItem extends TenantModel
         'component_product_id',
         'line_no',
         'quantity_per',
-        'scrap_factor',
         'uom',
     ];
 
     protected $casts = [
         'quantity_per' => 'float',
-        'scrap_factor' => 'float',
     ];
 
     public function bomHeader(): BelongsTo
