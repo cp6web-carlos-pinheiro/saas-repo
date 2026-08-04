@@ -7,6 +7,7 @@ namespace App\Modules\MRP\Application\Services;
 use App\Modules\Bom\Application\Services\BomExplosionService;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryBalance;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
+use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
 use App\Shared\Application\Transactions\TransactionManager;
@@ -80,6 +81,7 @@ final class MrpPlanningService extends BaseService
         $timeBuckets = $this->buildTimeBuckets($leadTimeOffsets, $planningBucket);
         $purchaseSuggestions = $this->buildPurchaseSuggestions($leadTimeOffsets, $products, $createdBy, $referenceDate);
         $productionSuggestions = $this->buildProductionSuggestions($leadTimeOffsets, $products, $createdBy, $referenceDate);
+        $schedulerPlan = $this->buildFiniteSchedulerPlan($productionSuggestions, $referenceDate);
 
         $result = [
             'reference_date' => $referenceDate,
@@ -96,6 +98,7 @@ final class MrpPlanningService extends BaseService
             'time_buckets' => $timeBuckets,
             'purchase_suggestions' => $purchaseSuggestions,
             'production_suggestions' => $productionSuggestions,
+            'scheduler_plan' => $schedulerPlan,
         ];
 
         $this->logger->info('mrp.plan.generated', [
@@ -108,6 +111,7 @@ final class MrpPlanningService extends BaseService
             'priority_rule' => $priorityRule,
             'purchase_suggestions' => count($purchaseSuggestions),
             'production_suggestions' => count($productionSuggestions),
+            'scheduler_days' => count($schedulerPlan['days'] ?? []),
         ]);
 
         return $result;
@@ -578,6 +582,7 @@ final class MrpPlanningService extends BaseService
             'recompute_scope' => $payload['recompute_scope'] ?? null,
             'demand_lines' => $this->normalizeDemandLinesForFingerprint($payload['demand_lines'] ?? []),
             'forecast_lines' => $this->normalizeDemandLinesForFingerprint($payload['forecast_lines'] ?? []),
+            'scheduler_context' => $this->buildSchedulerFingerprintContext(),
         ], JSON_THROW_ON_ERROR));
     }
 
@@ -621,6 +626,23 @@ final class MrpPlanningService extends BaseService
                 'source_reference_type' => $demandLine['source_reference_type'] ?? null,
             ];
         }, $demandLines));
+    }
+
+    private function buildSchedulerFingerprintContext(): array
+    {
+        return WorkCenter::query()
+            ->where('is_active', true)
+            ->orderBy('code')
+            ->get(['id', 'code', 'capacity_per_day', 'efficiency_factor', 'updated_at'])
+            ->map(static fn (WorkCenter $workCenter): array => [
+                'id' => (int) $workCenter->id,
+                'code' => $workCenter->code,
+                'capacity_per_day' => round((float) $workCenter->capacity_per_day, 6),
+                'efficiency_factor' => round((float) $workCenter->efficiency_factor, 6),
+                'updated_at' => $workCenter->updated_at?->toDateTimeString(),
+            ])
+            ->values()
+            ->all();
     }
 
     private function buildPurchaseSuggestions(array $requirements, Collection $products, ?int $createdBy, string $referenceDate): array
@@ -709,5 +731,102 @@ final class MrpPlanningService extends BaseService
         }
 
         return $suggestions;
+    }
+
+    private function buildFiniteSchedulerPlan(array $productionSuggestions, string $referenceDate): array
+    {
+        $workCenters = WorkCenter::query()
+            ->where('is_active', true)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name', 'capacity_per_day', 'efficiency_factor']);
+
+        $dailyCapacity = round($workCenters->sum(static function (WorkCenter $workCenter): float {
+            return max(0.0, (float) $workCenter->capacity_per_day * ((float) $workCenter->efficiency_factor / 100));
+        }), 6);
+
+        $schedulerPlan = [
+            'mode' => 'finite',
+            'reference_date' => $referenceDate,
+            'daily_capacity_units' => $dailyCapacity,
+            'source_work_centers' => $workCenters->map(static fn (WorkCenter $workCenter): array => [
+                'id' => (int) $workCenter->id,
+                'code' => $workCenter->code,
+                'name' => $workCenter->name,
+                'capacity_per_day' => (float) $workCenter->capacity_per_day,
+                'efficiency_factor' => (float) $workCenter->efficiency_factor,
+            ])->values()->all(),
+            'days' => [],
+            'alerts' => [],
+        ];
+
+        if ($dailyCapacity <= 0.0) {
+            if (! empty($productionSuggestions)) {
+                $schedulerPlan['alerts'][] = [
+                    'alert_type' => 'NO_CAPACITY',
+                    'message' => 'No active work center capacity was found for finite scheduling.',
+                    'source_requirement_keys' => array_values(array_map(
+                        static fn (array $suggestion): string => (string) ($suggestion['source_requirement_key'] ?? ''),
+                        $productionSuggestions
+                    )),
+                ];
+            }
+
+            return $schedulerPlan;
+        }
+
+        $days = [];
+
+        $sortedSuggestions = collect($productionSuggestions)
+            ->sort(function (array $left, array $right): int {
+                return strcmp((string) ($left['release_date'] ?? ''), (string) ($right['release_date'] ?? ''))
+                    ?: ((float) ($left['quantity'] ?? 0.0) <=> (float) ($right['quantity'] ?? 0.0))
+                    ?: ((int) ($left['product_id'] ?? 0) <=> (int) ($right['product_id'] ?? 0));
+            })
+            ->values()
+            ->all();
+
+        foreach ($sortedSuggestions as $suggestion) {
+            $remainingQuantity = round((float) ($suggestion['quantity'] ?? 0.0), 6);
+            $currentDate = Carbon::parse($suggestion['release_date'] ?? $referenceDate)->toDateString();
+
+            while ($remainingQuantity > 0) {
+                if (! isset($days[$currentDate])) {
+                    $days[$currentDate] = [
+                        'date' => $currentDate,
+                        'capacity_units' => $dailyCapacity,
+                        'allocated_units' => 0.0,
+                        'remaining_units' => $dailyCapacity,
+                        'allocations' => [],
+                    ];
+                }
+
+                $availableUnits = round(max(0.0, $days[$currentDate]['remaining_units']), 6);
+
+                if ($availableUnits <= 0.0) {
+                    $currentDate = Carbon::parse($currentDate)->addDay()->toDateString();
+                    continue;
+                }
+
+                $allocatedUnits = round(min($availableUnits, $remainingQuantity), 6);
+                $days[$currentDate]['allocated_units'] = round($days[$currentDate]['allocated_units'] + $allocatedUnits, 6);
+                $days[$currentDate]['remaining_units'] = round($days[$currentDate]['capacity_units'] - $days[$currentDate]['allocated_units'], 6);
+                $days[$currentDate]['allocations'][] = [
+                    'source_requirement_key' => $suggestion['source_requirement_key'] ?? null,
+                    'product_id' => (int) ($suggestion['product_id'] ?? 0),
+                    'product_sku' => $suggestion['product_sku'] ?? null,
+                    'release_date' => $suggestion['release_date'] ?? null,
+                    'allocated_units' => $allocatedUnits,
+                ];
+                $remainingQuantity = round($remainingQuantity - $allocatedUnits, 6);
+
+                if ($remainingQuantity > 0) {
+                    $currentDate = Carbon::parse($currentDate)->addDay()->toDateString();
+                }
+            }
+        }
+
+        $schedulerPlan['days'] = array_values($days);
+
+        return $schedulerPlan;
     }
 }

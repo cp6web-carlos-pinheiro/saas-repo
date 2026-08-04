@@ -7,8 +7,8 @@ Este modulo calcula necessidades de materiais e gera sinais de reposicao e produ
 
 ## Status objetivo
 - Status atual: Parcial avancado.
-- Cobertura atual: engine de calculo, sugestoes de compra/producao, alertas de estoque minimo, entrada de previsao como demanda e priorizacao basica por demanda/estoque ativos.
-- Pendencia principal: implementar forecast estruturado, reposicao completa e scheduler finito com simulacao de cenarios.
+- Cobertura atual: engine de calculo, sugestoes de compra/producao, alertas de estoque minimo, entrada de previsao como demanda, scheduler finito simples por capacidade e priorizacao basica por demanda/estoque ativos.
+- Pendencia principal: implementar forecast estruturado, reposicao completa e evoluir o scheduler com simulacao de cenarios.
 
 ## Tabelas relacionadas
 

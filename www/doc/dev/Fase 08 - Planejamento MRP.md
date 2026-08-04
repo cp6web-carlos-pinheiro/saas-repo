@@ -4,20 +4,20 @@
 Implementar o diferencial do sistema: planejamento e sincronizacao de demanda e capacidade.
 
 ## Status de implementacao
-Parcial avancado. O motor de MRP, recalculo, sugestoes de compra/producao, alertas de estoque minimo, entradas de previsao como demanda e capacidade existem, mas um fluxo de planejamento operacional completo ainda nao esta fechado.
+Parcial avancado. O motor de MRP, recalculo, sugestoes de compra/producao, alertas de estoque minimo, entradas de previsao como demanda e um scheduler finito simples por capacidade de centro de trabalho existem, mas um fluxo de planejamento operacional completo ainda nao esta fechado.
 
 ## Escopo
 - Planejamento: parcial
 - Necessidade de Compra: parcial
 - Necessidade de Producao: parcial
-- Previsao: parcial
+- Previsao: parcial avancado
 - Sugestoes: parcial
 - Reposicao: parcial
 - Estoque Minimo: implementado
 - Lead Time: parcial
 - Capacidade: parcial
 - MRP Engine: implementado
-- Scheduler: parcial
+- Scheduler: parcial avancado
 
 ## Criterios para 100% implementado
 - Planejamento integrado completo: demanda, estoque, capacidade e restricoes operacionais em um ciclo unico.
@@ -33,7 +33,7 @@ Parcial avancado. O motor de MRP, recalculo, sugestoes de compra/producao, alert
 
 ### Por dependencia
 - Dependencia de dados: garantir qualidade de parametros (lead time, estoque minimo, capacidade, rendimento).
-- Dependencia de processos: concluir forecast estruturado e scheduler finito com simulacao de cenarios.
+- Dependencia de processos: concluir forecast estruturado e evoluir o scheduler finito com simulacao de cenarios.
 - Dependencia de compras/producao: habilitar conversao automatica das sugestoes aprovadas em documentos operacionais.
 
 ### Por area
