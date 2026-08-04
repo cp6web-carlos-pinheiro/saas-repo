@@ -119,11 +119,21 @@ final class ProductionOrderController extends Controller
 
     private function productionOrderCreateErrorMessage(DomainException $exception): string
     {
+        $message = $exception->getMessage();
+
         if (
             $exception->status() === 404
-            && str_contains($exception->getMessage(), 'No BOM version found for product and reference date')
+            && str_contains($message, 'No BOM version found for product and reference date')
         ) {
             return __('messages.production_order_missing_bom_version');
+        }
+
+        if (str_contains($message, 'BOM explosion recursive CTE is implemented for MySQL driver.')) {
+            return __('messages.production_order_mysql_required');
+        }
+
+        if (str_contains($message, 'Tenant context is required to freeze BOM snapshot')) {
+            return __('messages.production_order_tenant_context_required');
         }
 
         return __('messages.production_order_create_failed');
