@@ -30,7 +30,7 @@
       <div class="mt-8 flex min-h-0 flex-1 flex-col" data-admin-sidebar-content>
         <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1" aria-label="{{ __('global_admin.title') }}">
           <p class="px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-[#5f6368]" data-admin-sidebar-label>{{ __('global_admin.management') }}</p>
-          @php($links = [['home', route('global-admin.home'), '⌂'], ['modules.customers', route('global-admin.customers.index'), '♙'], ['modules.companies', route('global-admin.companies.index'), '▣'], ['modules.plans', route('global-admin.plans.index'), '◇'], ['modules.documentation', route('global-admin.docs.index'), '☰'], ['modules.administrators', route('global-admin.administrators.index'), '⚙']])
+          @php($links = [['home', route('global-admin.home'), '⌂'], ['modules.customers', route('global-admin.customers.index'), '♙'], ['modules.companies', route('global-admin.companies.index'), '▣'], ['modules.plans', route('global-admin.plans.index'), '◇'], ['modules.documentation', route('global-admin.docs.index'), '☰'], ['modules.tutorials', route('global-admin.tutorials.index'), '?'], ['modules.administrators', route('global-admin.administrators.index'), '⚙']])
           @foreach($links as [$label, $href, $icon])
             <a href="{{ $href }}" data-admin-sidebar-link @class(['flex items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold no-underline transition', 'bg-[#e8f0fe] text-[#174ea6]' => url()->current() === $href, 'text-[#5f6368] hover:bg-[#f1f3f4]' => url()->current() !== $href])><span class="grid h-5 w-5 shrink-0 place-items-center text-base" aria-hidden="true">{{ $icon }}</span><span data-admin-sidebar-label>{{ __('global_admin.'.$label) }}</span></a>
           @endforeach

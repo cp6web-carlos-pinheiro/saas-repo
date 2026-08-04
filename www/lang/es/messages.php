@@ -41,6 +41,7 @@ return [
     'production_order_missing_bom_version' => 'No se encontró una versión de BOM válida para el producto en la fecha de referencia. Revise la vigencia de la estructura antes de crear la orden.',
     'production_order_mysql_required' => 'La creación de la orden de producción requiere un entorno MySQL para procesar la explosión de BOM. Ajuste la configuración de base de datos e inténtelo nuevamente.',
     'production_order_tenant_context_required' => 'No fue posible identificar la empresa activa para crear la orden de producción. Recargue la sesión e inténtelo nuevamente.',
+    'tutorial_saved' => 'Tutorial de la página guardado correctamente.',
     'mfa_email_subject' => 'Codigo de verificacion de acceso',
     'mfa_email_greeting' => 'Hola, :name.',
     'mfa_email_intro' => 'Use el codigo a continuacion para completar el inicio de sesion en :app.',

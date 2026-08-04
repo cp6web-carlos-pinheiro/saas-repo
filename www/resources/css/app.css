@@ -701,6 +701,19 @@ body {
         box-shadow: 0 0 0 3px color-mix(in oklab, var(--g-primary) 30%, transparent);
     }
 
+    .ind-help-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.45rem;
+        height: 1.45rem;
+        border-radius: 999px;
+        border: 1.5px solid currentColor;
+        font-size: 0.9rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
     .ind-topbar-title {
         font-size: 0.95rem;
         font-weight: 500;
@@ -1015,6 +1028,44 @@ body {
         color: var(--g-text-muted);
         font-size: 0.875rem;
         line-height: 1.4;
+    }
+
+    .ind-tutorial-panel {
+        gap: 1rem;
+    }
+
+    .ind-tutorial-content {
+        border: 1px solid var(--g-line);
+        border-radius: 16px;
+        background: var(--g-surface);
+        padding: 1rem;
+        color: var(--g-text);
+        line-height: 1.5;
+    }
+
+    .ind-tutorial-content :first-child {
+        margin-top: 0;
+    }
+
+    .ind-tutorial-content :last-child {
+        margin-bottom: 0;
+    }
+
+    .ind-tutorial-editor {
+        border-top: 1px solid var(--g-line);
+        padding-top: 1rem;
+    }
+
+    .ind-tutorial-editor h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .ind-tutorial-hint {
+        margin: 0;
+        color: var(--g-text-muted);
+        font-size: 0.85rem;
     }
 
     .ind-settings-intro {

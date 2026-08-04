@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Global Tutorials',
+    'eyebrow' => 'Central help per page',
+    'search' => 'Search by route, title, or content',
+    'filter' => 'Search',
+    'create' => 'New tutorial',
+    'edit' => 'Edit tutorial',
+    'details' => 'Tutorial details',
+    'empty' => 'No tutorials found.',
+    'route_name' => 'Route name',
+    'page_title' => 'Page title',
+    'content_html' => 'HTML content',
+    'created_at' => 'Created at',
+    'updated_at' => 'Updated at',
+    'save' => 'Save changes',
+    'remove' => 'Delete tutorial',
+    'preview' => 'Preview',
+    'created' => 'Tutorial created successfully.',
+    'updated' => 'Tutorial updated successfully.',
+    'removed' => 'Tutorial removed successfully.',
+    'confirm_delete_title' => 'Delete tutorial?',
+    'confirm_delete_text' => 'You are about to delete the tutorial for route :name. This action cannot be undone.',
+    'confirm_delete_confirm' => 'Yes, delete',
+    'confirm_delete_cancel' => 'Cancel',
+];

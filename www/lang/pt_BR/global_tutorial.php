@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Tutoriais Globais',
+    'eyebrow' => 'Central de ajuda por página',
+    'search' => 'Buscar por rota, título ou conteúdo',
+    'filter' => 'Buscar',
+    'create' => 'Novo tutorial',
+    'edit' => 'Editar tutorial',
+    'details' => 'Detalhes do tutorial',
+    'empty' => 'Nenhum tutorial encontrado.',
+    'route_name' => 'Nome da rota',
+    'page_title' => 'Título da página',
+    'content_html' => 'Conteúdo HTML',
+    'created_at' => 'Criado em',
+    'updated_at' => 'Atualizado em',
+    'save' => 'Salvar alterações',
+    'remove' => 'Excluir tutorial',
+    'preview' => 'Pré-visualização',
+    'created' => 'Tutorial criado com sucesso.',
+    'updated' => 'Tutorial atualizado com sucesso.',
+    'removed' => 'Tutorial removido com sucesso.',
+    'confirm_delete_title' => 'Excluir tutorial?',
+    'confirm_delete_text' => 'Você está prestes a excluir o tutorial da rota :name. Essa ação não pode ser desfeita.',
+    'confirm_delete_confirm' => 'Sim, excluir',
+    'confirm_delete_cancel' => 'Cancelar',
+];

@@ -37,6 +37,7 @@ return [
         'companies' => 'Empresas',
         'plans' => 'Planos',
         'documentation' => 'Documentação',
+        'tutorials' => 'Tutoriais',
         'administrators' => 'Administradores'
     ],
     'module_coming_soon' => 'Este módulo será disponibilizado em breve.'

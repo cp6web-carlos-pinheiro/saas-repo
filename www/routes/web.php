@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\Admin\GlobalAdminHomeController;
 use App\Http\Controllers\Web\Admin\GlobalAdministratorController;
 use App\Http\Controllers\Web\Admin\GlobalCompanyController;
 use App\Http\Controllers\Web\Admin\GlobalCustomerController;
+use App\Http\Controllers\Web\Admin\GlobalPageTutorialController;
 use App\Http\Controllers\Web\Admin\GlobalPlanController;
 use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\LanguagePreferenceController;
@@ -38,6 +39,7 @@ use App\Http\Controllers\Web\Tenant\ProductionRoutingController;
 use App\Http\Controllers\Web\Tenant\ProductionSchedulingWebController;
 use App\Http\Controllers\Web\Tenant\ProductionWorkCenterController;
 use App\Http\Controllers\Web\Tenant\PurchasingLookupController;
+use App\Http\Controllers\Web\Tenant\PageTutorialController;
 use App\Http\Controllers\Web\Tenant\PurchaseOrderController;
 use App\Http\Controllers\Web\Tenant\PurchaseQuotationController;
 use App\Http\Controllers\Web\Tenant\PurchaseReceiptController;
@@ -108,6 +110,9 @@ Route::middleware('auth:web')->group(function (): void {
     Route::get('/onboarding/payment/result', [PaymentController::class, 'result'])->name('onboarding.payment.result');
 
     Route::middleware(ResolveWebTenant::class)->group(function (): void {
+        Route::post('/page-tutorials', [PageTutorialController::class, 'upsert'])
+            ->name('page-tutorials.upsert');
+
         Route::get('/billing/subscription', [SubscriptionController::class, 'show'])
             ->middleware(CheckPermission::class.':company-access.billing.read')
             ->name('billing.subscription.show');
@@ -420,4 +425,12 @@ Route::prefix('global-admin')->name('global-admin.')->middleware('auth:admin')->
     Route::get('/administrators/{administrator}/edit', [GlobalAdministratorController::class, 'edit'])->name('administrators.edit');
     Route::put('/administrators/{administrator}', [GlobalAdministratorController::class, 'update'])->name('administrators.update');
     Route::delete('/administrators/{administrator}', [GlobalAdministratorController::class, 'destroy'])->name('administrators.destroy');
+
+    Route::get('/tutorials', [GlobalPageTutorialController::class, 'index'])->name('tutorials.index');
+    Route::get('/tutorials/create', [GlobalPageTutorialController::class, 'create'])->name('tutorials.create');
+    Route::post('/tutorials', [GlobalPageTutorialController::class, 'store'])->name('tutorials.store');
+    Route::get('/tutorials/{tutorial}', [GlobalPageTutorialController::class, 'show'])->name('tutorials.show');
+    Route::get('/tutorials/{tutorial}/edit', [GlobalPageTutorialController::class, 'edit'])->name('tutorials.edit');
+    Route::put('/tutorials/{tutorial}', [GlobalPageTutorialController::class, 'update'])->name('tutorials.update');
+    Route::delete('/tutorials/{tutorial}', [GlobalPageTutorialController::class, 'destroy'])->name('tutorials.destroy');
 });

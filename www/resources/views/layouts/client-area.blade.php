@@ -130,6 +130,15 @@
         });
 
         $activeCompanyName = $company?->name ?? __('ui.app_name');
+        $currentPageTitle = trim((string) $__env->yieldContent('client-page-title'));
+        $rawTutorialRouteName = (string) (request()->route()?->getName() ?? '');
+        $tutorialRouteName = $rawTutorialRouteName !== '' ? $rawTutorialRouteName : trim((string) request()->path(), '/');
+        $pageTutorial = $tutorialRouteName !== ''
+            ? \App\Models\PageTutorial::query()->where('route_name', $tutorialRouteName)->first()
+            : null;
+        $canEditTutorial = $company !== null
+            && $user instanceof \App\Modules\Identity\Infrastructure\Persistence\Models\User
+            && app(\App\Services\SaaS\CompanyUserAccessService::class)->isCompanyAdministrator($user, $company);
     @endphp
 
     <div class="ind-layout" data-client-sidebar-shell>
@@ -299,6 +308,9 @@
                 </div>
 
                 <div class="ind-topbar-right">
+                    <button id="tutorialToggle" class="ind-icon-button" type="button" aria-label="{{ __('ui.tutorial_help') }}" aria-controls="tutorialPanel" aria-expanded="false" aria-pressed="false" title="{{ __('ui.tutorial_help') }}">
+                        <span class="ind-help-icon" aria-hidden="true">?</span>
+                    </button>
                     <button id="settingsToggle" class="ind-icon-button" type="button" aria-label="{{ __('ui.settings') }}" aria-controls="settingsPanel" aria-expanded="false" aria-pressed="false">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z" stroke="currentColor" stroke-width="2"/>
@@ -313,6 +325,49 @@
             </main>
         </div>
     </div>
+
+    <div id="tutorialOverlay" class="ind-settings-overlay" aria-hidden="true"></div>
+    <aside id="tutorialPanel" class="ind-settings-panel ind-tutorial-panel" aria-hidden="true" aria-label="{{ __('ui.tutorial_panel_title') }}">
+        <div class="ind-settings-panel-header">
+            <div>
+                <h2>{{ __('ui.tutorial_panel_title') }}</h2>
+                <p>{{ $currentPageTitle !== '' ? $currentPageTitle : __('ui.tutorial_current_page') }}</p>
+            </div>
+            <button id="tutorialClose" class="ind-settings-close" type="button">{{ __('ui.close') }}</button>
+        </div>
+
+        @if ($pageTutorial !== null)
+            <article class="ind-tutorial-content">
+                {!! $pageTutorial->content_html !!}
+            </article>
+        @else
+            <x-ui.alert variant="warning">{{ __('ui.tutorial_empty') }}</x-ui.alert>
+        @endif
+
+        @if ($canEditTutorial)
+            <section class="ind-settings-section ind-tutorial-editor">
+                <h3>{{ __('ui.tutorial_editor_title') }}</h3>
+                <p>{{ __('ui.tutorial_editor_description') }}</p>
+
+                <form method="POST" action="{{ route('page-tutorials.upsert') }}" class="space-y-3">
+                    @csrf
+                    <input type="hidden" name="route_name" value="{{ $tutorialRouteName }}" />
+
+                    <label class="block text-sm font-medium" for="tutorialTitle">{{ __('ui.tutorial_title') }}</label>
+                    <x-ui.input id="tutorialTitle" name="title" :value="old('title', $pageTutorial?->title ?? $currentPageTitle)" maxlength="190" />
+
+                    <label class="block text-sm font-medium" for="tutorialContent">{{ __('ui.tutorial_content_html') }}</label>
+                    <x-ui.textarea id="tutorialContent" name="content_html" rows="12">{{ old('content_html', $pageTutorial?->content_html ?? '') }}</x-ui.textarea>
+
+                    <div class="ind-settings-actions">
+                        <button class="ind-settings-save" type="submit">{{ __('ui.save') }}</button>
+                    </div>
+                </form>
+            </section>
+        @elseif ($pageTutorial === null)
+            <p class="ind-tutorial-hint">{{ __('ui.tutorial_admin_only_hint') }}</p>
+        @endif
+    </aside>
 
     <div id="settingsOverlay" class="ind-settings-overlay" aria-hidden="true"></div>
     <aside id="settingsPanel" class="ind-settings-panel" aria-hidden="true" aria-label="{{ __('ui.settings_panel_title') }}">
@@ -385,6 +440,10 @@
         const settingsPanel = document.getElementById('settingsPanel');
         const settingsOverlay = document.getElementById('settingsOverlay');
         const settingsClose = document.getElementById('settingsClose');
+        const tutorialToggle = document.getElementById('tutorialToggle');
+        const tutorialPanel = document.getElementById('tutorialPanel');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const tutorialClose = document.getElementById('tutorialClose');
 
         if (sidebarShell && sidebar && sidebarCollapseToggle) {
             const storageKey = 'client.sidebar-collapsed';
@@ -467,12 +526,34 @@
         }
 
         const setSettingsState = (isOpen) => {
+            if (isOpen) {
+                setTutorialState(false);
+            }
+
             settingsPanel?.classList.toggle('is-open', isOpen);
             settingsOverlay?.classList.toggle('is-open', isOpen);
             settingsPanel?.setAttribute('aria-hidden', String(!isOpen));
             settingsOverlay?.setAttribute('aria-hidden', String(!isOpen));
             settingsToggle?.setAttribute('aria-expanded', String(isOpen));
             settingsToggle?.setAttribute('aria-pressed', String(isOpen));
+        };
+
+        const setTutorialState = (isOpen) => {
+            tutorialPanel?.classList.toggle('is-open', isOpen);
+            tutorialOverlay?.classList.toggle('is-open', isOpen);
+            tutorialPanel?.setAttribute('aria-hidden', String(!isOpen));
+            tutorialOverlay?.setAttribute('aria-hidden', String(!isOpen));
+            tutorialToggle?.setAttribute('aria-expanded', String(isOpen));
+            tutorialToggle?.setAttribute('aria-pressed', String(isOpen));
+
+            if (isOpen) {
+                settingsPanel?.classList.remove('is-open');
+                settingsOverlay?.classList.remove('is-open');
+                settingsPanel?.setAttribute('aria-hidden', 'true');
+                settingsOverlay?.setAttribute('aria-hidden', 'true');
+                settingsToggle?.setAttribute('aria-expanded', 'false');
+                settingsToggle?.setAttribute('aria-pressed', 'false');
+            }
         };
 
         settingsToggle?.addEventListener('click', function () {
@@ -488,9 +569,23 @@
             setSettingsState(false);
         });
 
+        tutorialToggle?.addEventListener('click', function () {
+            const isOpen = tutorialPanel?.classList.contains('is-open') ?? false;
+            setTutorialState(!isOpen);
+        });
+
+        tutorialClose?.addEventListener('click', function () {
+            setTutorialState(false);
+        });
+
+        tutorialOverlay?.addEventListener('click', function () {
+            setTutorialState(false);
+        });
+
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape') {
                 setSettingsState(false);
+                setTutorialState(false);
             }
         });
 
