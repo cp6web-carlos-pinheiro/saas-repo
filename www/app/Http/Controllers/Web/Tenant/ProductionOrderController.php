@@ -12,6 +12,7 @@ use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOutput;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
+use App\Shared\Presentation\Exceptions\DomainException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -68,10 +69,14 @@ final class ProductionOrderController extends Controller
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
+        $referenceDate = now()->toDateString();
 
         $selectedProductId = (int) ($request->old('product_id') ?? 0);
         $selectedProduct = $selectedProductId > 0
-            ? Product::query()->where('is_active', true)->find($selectedProductId, ['id', 'sku', 'description'])
+            ? Product::query()
+                ->where('is_active', true)
+                ->whereHas('bomHeaders', fn (Builder $builder) => $this->applyEligibleBomFilter($builder, $referenceDate))
+                ->find($selectedProductId, ['id', 'sku', 'description'])
             : null;
         $warehouses = Warehouse::query()->where('is_active', true)->orderBy('name')->get(['id', 'code', 'name']);
 
@@ -91,14 +96,37 @@ final class ProductionOrderController extends Controller
             'scheduled_end_date' => ['nullable', 'date', 'after_or_equal:scheduled_start_date'],
         ]);
 
-        $created = $this->orderService->createManual($data, $request->user()?->id);
+        try {
+            $created = $this->orderService->createManual($data, $request->user()?->id);
+        } catch (DomainException $exception) {
+            return redirect()->back()
+                ->withInput($request->except(['password', 'password_confirmation', 'current_password']))
+                ->withErrors([
+                    'production' => $this->productionOrderCreateErrorMessage($exception),
+                ]);
+        }
+
         $orderId = (int) ($created['id'] ?? 0);
 
         if ($orderId <= 0) {
-            return redirect()->route('production.orders.index')->withErrors(['production' => 'Nao foi possivel criar a ordem de producao.']);
+            return redirect()->route('production.orders.index')->withErrors([
+                'production' => __('messages.production_order_create_failed'),
+            ]);
         }
 
         return redirect()->route('production.orders.show', $orderId)->with('status', 'Ordem de producao criada com sucesso.');
+    }
+
+    private function productionOrderCreateErrorMessage(DomainException $exception): string
+    {
+        if (
+            $exception->status() === 404
+            && str_contains($exception->getMessage(), 'No BOM version found for product and reference date')
+        ) {
+            return __('messages.production_order_missing_bom_version');
+        }
+
+        return __('messages.production_order_create_failed');
     }
 
     public function show(Request $request, ProductionOrder $order): View
@@ -142,9 +170,11 @@ final class ProductionOrderController extends Controller
         $term = trim((string) $request->query('q', ''));
         $page = max(1, (int) $request->query('page', 1));
         $perPage = 20;
+        $referenceDate = now()->toDateString();
 
         $query = Product::query()
             ->where('is_active', true)
+            ->whereHas('bomHeaders', fn (Builder $builder) => $this->applyEligibleBomFilter($builder, $referenceDate))
             ->select(['id', 'sku', 'description'])
             ->orderBy('sku');
 
@@ -167,6 +197,18 @@ final class ProductionOrderController extends Controller
                 'more' => $paginator->hasMorePages(),
             ],
         ]);
+    }
+
+    private function applyEligibleBomFilter(Builder $query, string $referenceDate): void
+    {
+        $query
+            ->where('status', 'APPROVED')
+            ->whereDate('effective_from', '<=', $referenceDate)
+            ->where(static function (Builder $builder) use ($referenceDate): void {
+                $builder
+                    ->whereNull('effective_to')
+                    ->orWhereDate('effective_to', '>=', $referenceDate);
+            });
     }
 
     public function release(Request $request, ProductionOrder $order): RedirectResponse

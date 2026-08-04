@@ -23,6 +23,12 @@ class ApiExceptionHandler
             return redirect()->guest(route('login'));
         }
 
+        if ($exception instanceof DomainException && ! $request->expectsJson()) {
+            return redirect()->back()
+                ->withInput($request->except(['password', 'password_confirmation', 'current_password']))
+                ->withErrors($this->normalizeDomainErrors($exception));
+        }
+
         if ($exception instanceof ValidationException) {
             if (! $request->expectsJson()) {
                 return redirect()->back()
@@ -65,5 +71,31 @@ class ApiExceptionHandler
             null,
             'INTERNAL_ERROR'
         );
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    private function normalizeDomainErrors(DomainException $exception): array
+    {
+        $details = $exception->details();
+
+        if ($details === [] || array_is_list($details)) {
+            return ['domain' => [$exception->getMessage()]];
+        }
+
+        $normalized = [];
+
+        foreach ($details as $field => $messages) {
+            if (is_array($messages)) {
+                $normalized[(string) $field] = array_map(static fn ($message): string => (string) $message, $messages);
+
+                continue;
+            }
+
+            $normalized[(string) $field] = [(string) $messages];
+        }
+
+        return $normalized !== [] ? $normalized : ['domain' => [$exception->getMessage()]];
     }
 }

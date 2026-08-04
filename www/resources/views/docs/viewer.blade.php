@@ -1,21 +1,36 @@
-@extends('layouts.public')
+@extends('layouts.global-admin')
 
 @section('title', $currentTitle.' | '.__('ui.documentation').' | '.__('ui.app_name'))
+@section('admin-content-container-class', 'w-full')
 
-@section('content')
+@section('admin-content')
     @php($indexRouteName = $indexRouteName ?? 'global-admin.docs.index')
     @php($showRouteName = $showRouteName ?? 'global-admin.docs.show')
     @php($showDevRouteName = $showDevRouteName ?? 'global-admin.docs.dev.show')
     @php($backUrl = $backUrl ?? route('global-admin.home'))
-    <div class="docs-layout">
-        <x-ui.sidebar variant="docs">
-            <x-slot:header>
-                <a class="docs-back-link" href="{{ $backUrl }}">&larr; {{ __('ui.back_to_dashboard') }}</a>
-                <h1>{{ __('ui.documentation') }}</h1>
-                <p>{{ __('ui.documentation_subtitle') }}</p>
-            </x-slot:header>
 
-                <x-ui.menu variant="docs" :aria-label="__('ui.documentation')">
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section class="min-w-0">
+            <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+                <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                        <h1 class="font-display text-3xl font-bold">{{ $currentTitle }}</h1>
+                        <p class="mt-2 text-sm text-[#5f6368]">{{ __('ui.documentation_subtitle') }}</p>
+                    </div>
+                    <x-ui.button :href="$backUrl" variant="surface-muted" class="rounded-full">{{ __('ui.back_to_dashboard') }}</x-ui.button>
+                </div>
+
+                <article class="docs-article markdown-body border-0 p-0">
+                    {!! $contentHtml !!}
+                </article>
+            </x-ui.panel>
+        </section>
+
+        <aside class="xl:sticky xl:top-8 xl:self-start">
+            <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5">
+                <h2 class="font-display text-lg font-semibold">{{ __('ui.documentation') }}</h2>
+
+                <x-ui.menu variant="docs" :aria-label="__('ui.documentation')" class="mt-4">
                     @foreach ($documents as $document)
                         <x-ui.menu-item
                             variant="docs"
@@ -44,18 +59,7 @@
                         </x-ui.menu>
                     </details>
                 @endif
-        </x-ui.sidebar>
-
-        <main class="docs-content-wrap">
-            <x-ui.breadcrumb :items="[
-                ['label' => __('ui.app_name'), 'href' => $backUrl],
-                ['label' => __('ui.documentation'), 'href' => route($indexRouteName)],
-                ['label' => $currentTitle],
-            ]" />
-
-            <article class="docs-article markdown-body">
-                {!! $contentHtml !!}
-            </article>
-        </main>
+            </x-ui.panel>
+        </aside>
     </div>
 @endsection

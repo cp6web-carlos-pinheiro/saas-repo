@@ -6,6 +6,8 @@ namespace Tests\Feature;
 
 use App\Models\SaaS\Organization;
 use App\Models\SaaS\Trial;
+use App\Modules\Bom\Infrastructure\Persistence\Models\BomHeader;
+use App\Modules\Bom\Infrastructure\Persistence\Models\BomItem;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
@@ -186,6 +188,54 @@ final class TenantProductPhase03ManagementTest extends TestCase
             ->assertSessionHasErrors('effective_from');
     }
 
+    public function test_bom_item_always_uses_component_default_unit_even_with_different_payload_unit(): void
+    {
+        ['company' => $company, 'user' => $user] = $this->contextWithRole('master');
+
+        $finishedProduct = $this->createProduct($company, 'BOM-UOM-PARENT', 'Produto pai', 'FG', 'UN');
+        $componentProduct = $this->createProduct($company, 'BOM-UOM-COMP', 'Componente com KG', 'RAW', 'KG');
+        $differentUnit = Unit::query()->firstOrCreate(
+            [
+                'company_id' => $company->id,
+                'code' => 'M',
+            ],
+            [
+                'name' => 'Metro',
+                'description' => null,
+                'is_active' => true,
+                'metadata' => null,
+            ],
+        );
+
+        $this->actingAs($user, 'web')
+            ->post(route('bom.material-lists.store'), [
+                'product_id' => $finishedProduct->id,
+                'status' => 'DRAFT',
+                'items' => [
+                    [
+                        'component_product_id' => $componentProduct->id,
+                        'quantity_per' => 2.5,
+                        'unit_id' => $differentUnit->id,
+                    ],
+                ],
+            ])
+            ->assertRedirect();
+
+        $bom = BomHeader::query()
+            ->where('company_id', $company->id)
+            ->where('product_id', $finishedProduct->id)
+            ->latest('id')
+            ->firstOrFail();
+
+        $item = BomItem::query()
+            ->where('company_id', $company->id)
+            ->where('bom_header_id', $bom->id)
+            ->firstOrFail();
+
+        $this->assertSame((int) $componentProduct->unit_id, (int) $item->unit_id);
+        $this->assertSame('KG', (string) $item->uom);
+    }
+
     public function test_purchase_receipt_requires_lot_for_controlled_product(): void
     {
         ['company' => $company, 'user' => $user] = $this->contextWithRole('master');
@@ -248,6 +298,96 @@ final class TenantProductPhase03ManagementTest extends TestCase
         $this->assertDatabaseMissing('products', [
             'company_id' => $company->id,
             'sku' => 'P-NO-UOM-ID',
+        ]);
+    }
+
+    public function test_production_order_creation_without_bom_returns_domain_error_instead_of_fatal(): void
+    {
+        ['company' => $company, 'user' => $user] = $this->contextWithRole('master');
+
+        $product = $this->createProduct($company, 'PO-NO-BOM-001', 'Produto sem BOM aprovado', 'FG', 'UN');
+
+        $this->actingAs($user, 'web')
+            ->from(route('production.orders.create'))
+            ->post(route('production.orders.store'), [
+                'product_id' => $product->id,
+                'quantity_planned' => 5,
+            ])
+            ->assertRedirect(route('production.orders.create'))
+            ->assertSessionHasErrors('production');
+    }
+
+    public function test_production_order_product_search_lists_only_products_with_approved_effective_bom(): void
+    {
+        ['company' => $company, 'user' => $user] = $this->contextWithRole('master');
+
+        $productWithBom = $this->createProduct($company, 'PO-BOM-001', 'Produto com BOM', 'FG', 'UN');
+        $productWithoutBom = $this->createProduct($company, 'PO-NOBOM-001', 'Produto sem BOM', 'FG', 'UN');
+        $productWithDraftBom = $this->createProduct($company, 'PO-DRAFT-001', 'Produto com BOM rascunho', 'FG', 'UN');
+        $productWithExpiredBom = $this->createProduct($company, 'PO-OLD-001', 'Produto com BOM expirado', 'FG', 'UN');
+
+        BomHeader::query()->create([
+            'company_id' => $company->id,
+            'product_id' => $productWithBom->id,
+            'version_number' => 1,
+            'status' => 'APPROVED',
+            'effective_from' => now()->toDateString(),
+            'effective_to' => null,
+            'description' => 'BOM base',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+        ]);
+
+        BomHeader::query()->create([
+            'company_id' => $company->id,
+            'product_id' => $productWithDraftBom->id,
+            'version_number' => 1,
+            'status' => 'DRAFT',
+            'effective_from' => now()->toDateString(),
+            'effective_to' => null,
+            'description' => 'BOM rascunho',
+            'approved_by' => null,
+            'approved_at' => null,
+        ]);
+
+        BomHeader::query()->create([
+            'company_id' => $company->id,
+            'product_id' => $productWithExpiredBom->id,
+            'version_number' => 1,
+            'status' => 'APPROVED',
+            'effective_from' => now()->subDays(30)->toDateString(),
+            'effective_to' => now()->subDay()->toDateString(),
+            'description' => 'BOM expirado',
+            'approved_by' => $user->id,
+            'approved_at' => now()->subDays(30),
+        ]);
+
+        $response = $this->actingAs($user, 'web')
+            ->getJson(route('production.products.search', ['q' => 'PO-']));
+
+        $response->assertOk();
+
+        $results = $response->json('results');
+        $texts = array_map(static fn (array $row): string => (string) ($row['text'] ?? ''), is_array($results) ? $results : []);
+
+        $this->assertTrue(collect($texts)->contains(fn (string $text): bool => str_contains($text, 'PO-BOM-001')));
+        $this->assertFalse(collect($texts)->contains(fn (string $text): bool => str_contains($text, 'PO-NOBOM-001')));
+        $this->assertFalse(collect($texts)->contains(fn (string $text): bool => str_contains($text, 'PO-DRAFT-001')));
+        $this->assertFalse(collect($texts)->contains(fn (string $text): bool => str_contains($text, 'PO-OLD-001')));
+
+        $this->assertDatabaseHas('products', [
+            'company_id' => $company->id,
+            'id' => $productWithoutBom->id,
+        ]);
+
+        $this->assertDatabaseHas('products', [
+            'company_id' => $company->id,
+            'id' => $productWithDraftBom->id,
+        ]);
+
+        $this->assertDatabaseHas('products', [
+            'company_id' => $company->id,
+            'id' => $productWithExpiredBom->id,
         ]);
     }
 

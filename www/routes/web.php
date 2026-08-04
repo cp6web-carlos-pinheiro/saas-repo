@@ -343,6 +343,9 @@ Route::middleware('auth:web')->group(function (): void {
                 Route::get('/', [BomMaterialListController::class, 'index'])->name('index');
                 Route::get('/create', [BomMaterialListController::class, 'create'])->name('create');
                 Route::post('/', [BomMaterialListController::class, 'store'])->name('store');
+                Route::get('/component-products/{product}/unit', [BomMaterialListController::class, 'componentProductUnit'])
+                    ->whereNumber('product')
+                    ->name('component-products.unit');
                 Route::get('/{bom}', [BomMaterialListController::class, 'show'])->whereNumber('bom')->name('show');
                 Route::get('/{bom}/edit', [BomMaterialListController::class, 'edit'])->whereNumber('bom')->name('edit');
                 Route::put('/{bom}', [BomMaterialListController::class, 'update'])->whereNumber('bom')->name('update');

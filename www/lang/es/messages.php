@@ -37,6 +37,8 @@ return [
     'user_without_active_company_for_member_registration' => 'Usuario sin empresa activa para registrar miembros.',
     'only_master_user_can_register_members' => 'Solo un usuario master puede registrar otros usuarios.',
     'user_already_belongs_to_account' => 'Este usuario ya pertenece a esta cuenta.',
+    'production_order_create_failed' => 'No se pudo crear la orden de producción. Revise los datos informados e inténtelo nuevamente.',
+    'production_order_missing_bom_version' => 'No se encontró una versión de BOM válida para el producto en la fecha de referencia. Revise la vigencia de la estructura antes de crear la orden.',
     'mfa_email_subject' => 'Codigo de verificacion de acceso',
     'mfa_email_greeting' => 'Hola, :name.',
     'mfa_email_intro' => 'Use el codigo a continuacion para completar el inicio de sesion en :app.',

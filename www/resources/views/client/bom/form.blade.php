@@ -109,8 +109,14 @@
                             <span class="sr-only">{{ __('bom.remove_item') }}</span>
                         </div>
 
-                        <div class="mt-3 space-y-3" data-bom-items-container>
+                        <div
+                            class="mt-3 space-y-3"
+                            data-bom-items-container
+                            data-component-unit-url-template="{{ route('bom.material-lists.component-products.unit', ['product' => '__PRODUCT__']) }}"
+                        >
                             @foreach ($itemRows as $index => $item)
+                                @php($selectedUnitId = (int) old('items.'.$index.'.unit_id', $item['unit_id'] ?? 0))
+                                @php($selectedUnitLabel = $selectedUnitId > 0 ? ($units[$selectedUnitId] ?? '') : '')
                                 <div class="grid grid-cols-[2fr_1fr_1fr_auto] items-start gap-4" data-bom-item-row>
                                     <div>
                                         <x-ui.select name="items[{{ $index }}][component_product_id]" required data-search="on" data-placeholder="{{ __('bom.component_product') }}" data-ajax-url="{{ route('products.search') }}" data-minimum-input-length="1">
@@ -130,12 +136,8 @@
                                     </div>
 
                                     <div>
-                                        <x-ui.select name="items[{{ $index }}][unit_id]" data-search="on">
-                                            <option value="">{{ __('product.select_unit') }}</option>
-                                            @foreach ($units as $unitId => $unitLabel)
-                                                <option value="{{ $unitId }}" @selected((string) old('items.'.$index.'.unit_id', $item['unit_id'] ?? '') === (string) $unitId)>{{ $unitLabel }}</option>
-                                            @endforeach
-                                        </x-ui.select>
+                                        <x-ui.input type="hidden" name="items[{{ $index }}][unit_id]" :value="$selectedUnitId > 0 ? (string) $selectedUnitId : ''" data-bom-unit-id unstyled />
+                                        <x-ui.input type="text" :value="$selectedUnitLabel" data-bom-unit-label readonly />
                                         @error('items.'.$index.'.unit_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                                     </div>
 
@@ -181,12 +183,8 @@
         </div>
 
         <div>
-            <x-ui.select name="items[__INDEX__][unit_id]" data-search="on">
-                <option value="">{{ __('product.select_unit') }}</option>
-                @foreach ($units as $unitId => $unitLabel)
-                    <option value="{{ $unitId }}">{{ $unitLabel }}</option>
-                @endforeach
-            </x-ui.select>
+            <x-ui.input type="hidden" name="items[__INDEX__][unit_id]" value="" data-bom-unit-id unstyled />
+            <x-ui.input type="text" value="" data-bom-unit-label readonly />
         </div>
 
         <div class="flex justify-end">
@@ -209,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('[data-bom-items-container]');
     const template = document.getElementById('bom-item-template');
     const addButton = document.querySelector('[data-bom-add-item]');
+    const unitUrlTemplate = container?.getAttribute('data-component-unit-url-template') ?? '';
 
     if (!container || !template || !addButton) {
         return;
@@ -231,6 +230,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
         row.querySelectorAll('select').forEach((select) => {
             select.selectedIndex = 0;
+        });
+    };
+
+    const setUnitFields = (row, unitId, unitLabel) => {
+        const unitIdInput = row.querySelector('[data-bom-unit-id]');
+        const unitLabelInput = row.querySelector('[data-bom-unit-label]');
+
+        if (unitIdInput) {
+            unitIdInput.value = unitId ? String(unitId) : '';
+        }
+
+        if (unitLabelInput) {
+            unitLabelInput.value = unitLabel ?? '';
+        }
+    };
+
+    const fetchComponentUnit = async (productId) => {
+        if (!unitUrlTemplate || productId <= 0) {
+            return null;
+        }
+
+        const url = unitUrlTemplate.replace('__PRODUCT__', String(productId));
+
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                credentials: 'same-origin',
+            });
+
+            if (!response.ok) {
+                return null;
+            }
+
+            return await response.json();
+        } catch (_) {
+            return null;
+        }
+    };
+
+    const syncRowUnitFromComponent = async (row) => {
+        const componentSelect = row.querySelector('[name$="[component_product_id]"]');
+
+        if (!componentSelect) {
+            return;
+        }
+
+        const productId = Number.parseInt(componentSelect.value || '0', 10);
+
+        if (productId <= 0) {
+            setUnitFields(row, '', '');
+            return;
+        }
+
+        const payload = await fetchComponentUnit(productId);
+
+        if (!payload) {
+            setUnitFields(row, '', '');
+            return;
+        }
+
+        setUnitFields(row, payload.unit_id ?? '', payload.unit_label ?? payload.uom ?? '');
+    };
+
+    const bindComponentSelect = (row) => {
+        const componentSelect = row.querySelector('[name$="[component_product_id]"]');
+
+        if (!componentSelect) {
+            return;
+        }
+
+        componentSelect.addEventListener('change', () => {
+            void syncRowUnitFromComponent(row);
         });
     };
 
@@ -258,6 +332,13 @@ document.addEventListener('DOMContentLoaded', () => {
         container.querySelectorAll('[data-bom-item-row]').forEach((row, index) => {
             updateRow(row, index);
             bindRemove(row);
+            bindComponentSelect(row);
+
+            const unitIdInput = row.querySelector('[data-bom-unit-id]');
+
+            if (!unitIdInput || unitIdInput.value === '') {
+                void syncRowUnitFromComponent(row);
+            }
         });
     };
 
@@ -271,6 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         bindRemove(row);
+        bindComponentSelect(row);
         container.appendChild(fragment);
         container.querySelectorAll('[data-bom-item-row]').forEach((currentRow, index) => updateRow(currentRow, index));
     });

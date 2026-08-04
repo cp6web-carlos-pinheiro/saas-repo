@@ -14,6 +14,7 @@ use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Services\SaaS\AuditLogService;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\SaaS\CompanyUserAccessService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -213,6 +214,24 @@ final class BomMaterialListController extends Controller
         return redirect()->route('bom.material-lists.show', $bom)->with('status', __('bom.updated'));
     }
 
+    public function componentProductUnit(Request $request, Product $product): JsonResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
+
+        abort_unless((int) $product->company_id === (int) $company->id, 404);
+
+        $unit = Unit::query()->find($product->unit_id, ['id', 'code', 'name']);
+        $uom = mb_strtoupper(trim((string) ($product->uom ?? '')));
+
+        return response()->json([
+            'product_id' => (int) $product->id,
+            'unit_id' => $unit instanceof Unit ? (int) $unit->id : null,
+            'uom' => $uom,
+            'unit_label' => $unit instanceof Unit ? sprintf('%s - %s', $unit->code, $unit->name) : $uom,
+        ]);
+    }
+
     public function destroy(Request $request, BomHeader $bom, AuditLogService $audit): RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
@@ -288,18 +307,6 @@ final class BomMaterialListController extends Controller
                 Rule::exists('products', 'id')->where('company_id', $company->id),
             ],
             'items.*.quantity_per' => ['required', 'numeric', 'gt:0'],
-            'items.*.unit_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('units', 'id')
-                    ->where(static function ($query) use ($company): void {
-                        $query->where('is_active', true)
-                            ->where(static function ($nested) use ($company): void {
-                                $nested->where('company_id', $company->id)
-                                    ->orWhereNull('company_id');
-                            });
-                    }),
-            ],
         ]);
     }
 
@@ -348,8 +355,8 @@ final class BomMaterialListController extends Controller
                 'component_product_id' => $componentProduct->id,
                 'line_no' => $index + 1,
                 'quantity_per' => (float) $item['quantity_per'],
-                'unit_id' => isset($item['unit_id']) && (int) $item['unit_id'] > 0 ? (int) $item['unit_id'] : null,
-                'uom' => $this->resolveItemUom($companyId, $item, $componentProduct),
+                'unit_id' => $componentProduct->unit_id !== null ? (int) $componentProduct->unit_id : null,
+                'uom' => $this->resolveItemUom($componentProduct),
             ]);
         }
     }
@@ -382,19 +389,14 @@ final class BomMaterialListController extends Controller
             ->all();
     }
 
-    /**
-     * @param array<string, mixed> $item
-     */
-    private function resolveItemUom(int $companyId, array $item, Product $componentProduct): string
+    private function resolveItemUom(Product $componentProduct): string
     {
-        if (isset($item['unit_id']) && (int) $item['unit_id'] > 0) {
-            $unitCode = Unit::query()
-                ->whereKey((int) $item['unit_id'])
-                ->value('code');
+        $unitCode = Unit::query()
+            ->whereKey($componentProduct->unit_id)
+            ->value('code');
 
-            if (is_string($unitCode) && $unitCode !== '') {
-                return mb_strtoupper($unitCode);
-            }
+        if (is_string($unitCode) && trim($unitCode) !== '') {
+            return mb_strtoupper($unitCode);
         }
 
         $fallbackUom = trim((string) ($componentProduct->uom ?? ''));
