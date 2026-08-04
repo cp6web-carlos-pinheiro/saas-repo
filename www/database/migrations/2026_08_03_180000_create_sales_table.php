@@ -15,6 +15,11 @@ return new class extends Migration {
             $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
             $table->date('sale_date');
             $table->string('status', 20)->default('DRAFT');
+            $table->foreignId('confirmed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('confirmed_at')->nullable();
+            $table->foreignId('canceled_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('canceled_at')->nullable();
+            $table->text('cancel_reason')->nullable();
             $table->string('operational_status', 20)->default('PENDING');
             $table->foreignId('picking_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('picking_at')->nullable();

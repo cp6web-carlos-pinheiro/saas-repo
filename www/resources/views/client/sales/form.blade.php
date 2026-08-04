@@ -192,6 +192,14 @@
                 @error('notes')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
+            <label class="block text-sm font-medium">
+                {{ __('sale.cancel_reason') }}
+                <x-ui.textarea name="cancel_reason" rows="4" @class(['mt-2', 'border-red-500' => $errors->has('cancel_reason') || $errors->has('status'), 'border-[#dadce0]' => ! $errors->has('cancel_reason') && ! $errors->has('status')])>{{ old('cancel_reason', $sale?->cancel_reason) }}</x-ui.textarea>
+                <span class="mt-1 block text-xs text-[#5f6368]">{{ __('sale.cancel_reason_hint') }}</span>
+                @error('cancel_reason')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                @error('status')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+            </label>
+
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <x-ui.button :href="$editing ? route('sales.show', $sale) : route('sales.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
                 <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('sale.save') : __('sale.create') }}</x-ui.button>

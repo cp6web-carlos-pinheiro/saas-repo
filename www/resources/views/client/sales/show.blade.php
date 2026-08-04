@@ -101,7 +101,12 @@
             <x-ui.definition-item-money :label="__('sale.tax_amount')" :amount-cents="$sale->tax_cents" />
             <x-ui.definition-item-money :label="__('sale.amount')" :amount-cents="$sale->amount_cents" />
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('sale.notes')">{{ $sale->notes !== null && $sale->notes !== '' ? $sale->notes : '—' }}</x-ui.definition-item>
+            <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('sale.cancel_reason')">{{ $sale->cancel_reason !== null && $sale->cancel_reason !== '' ? $sale->cancel_reason : '—' }}</x-ui.definition-item>
             <x-ui.definition-item-date :label="__('sale.created_at')" :value="$sale->created_at" />
+            <x-ui.definition-item-date :label="__('sale.confirmed_at')" :value="$sale->confirmed_at" />
+            <x-ui.definition-item :label="__('sale.confirmed_by')">{{ $sale->confirmedBy?->name ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item-date :label="__('sale.canceled_at')" :value="$sale->canceled_at" />
+            <x-ui.definition-item :label="__('sale.canceled_by')">{{ $sale->canceledBy?->name ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item-date :label="__('sale.picking_at')" :value="$sale->picking_at" />
             <x-ui.definition-item :label="__('sale.picking_by')">{{ $sale->pickingBy?->name ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item-date :label="__('sale.invoiced_at')" :value="$sale->invoiced_at" />

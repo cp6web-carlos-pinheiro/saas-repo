@@ -156,6 +156,11 @@ final class TenantSalesManagementTest extends TestCase
             'amount_cents' => 33630,
         ]);
 
+        $sale = Sale::query()->firstOrFail();
+
+        $this->assertNotNull($sale->confirmed_at);
+        $this->assertSame($user->id, $sale->confirmed_by);
+
         $this->assertDatabaseHas('sale_lines', [
             'company_id' => $company->id,
             'product_id' => $productA->id,
@@ -166,8 +171,6 @@ final class TenantSalesManagementTest extends TestCase
             'product_id' => $productB->id,
         ]);
 
-        $sale = Sale::query()->firstOrFail();
-
         $this->actingAs($user, 'web')
             ->get(route('sales.index'))
             ->assertOk()
@@ -175,6 +178,189 @@ final class TenantSalesManagementTest extends TestCase
             ->assertSee('Cliente Atlas')
             ->assertSee('336,30')
             ->assertSee('PENDING', false);
+    }
+
+    public function test_cancellation_requires_reason_and_records_audit_before_invoicing(): void
+    {
+        ['user' => $user, 'customer' => $customer, 'productA' => $productA] = $this->salesContext();
+
+        $this->actingAs($user, 'web')
+            ->post(route('sales.store'), [
+                'customer_id' => $customer->id,
+                'sale_date' => '2026-08-03',
+                'status' => 'CONFIRMED',
+                'discount_amount' => '0,00',
+                'tax_amount' => '0,00',
+                'notes' => 'Pedido cancelável.',
+                'items' => [[
+                    'product_id' => $productA->id,
+                    'quantity' => '1',
+                    'unit_price' => '12,00',
+                ]],
+            ])
+            ->assertRedirect(route('sales.index'));
+
+        $sale = Sale::query()->firstOrFail();
+
+        $this->actingAs($user, 'web')
+            ->from(route('sales.edit', $sale))
+            ->put(route('sales.update', $sale), [
+                'customer_id' => $customer->id,
+                'sale_date' => '2026-08-03',
+                'status' => 'CANCELLED',
+                'discount_amount' => '0,00',
+                'tax_amount' => '0,00',
+                'cancel_reason' => '',
+                'notes' => 'Pedido cancelável.',
+                'items' => [[
+                    'product_id' => $productA->id,
+                    'quantity' => '1',
+                    'unit_price' => '12,00',
+                ]],
+            ])
+            ->assertRedirect(route('sales.edit', $sale))
+            ->assertSessionHasErrors('cancel_reason');
+
+        $this->actingAs($user, 'web')
+            ->put(route('sales.update', $sale), [
+                'customer_id' => $customer->id,
+                'sale_date' => '2026-08-03',
+                'status' => 'CANCELLED',
+                'discount_amount' => '0,00',
+                'tax_amount' => '0,00',
+                'cancel_reason' => 'Cliente desistiu da compra.',
+                'notes' => 'Pedido cancelável.',
+                'items' => [[
+                    'product_id' => $productA->id,
+                    'quantity' => '1',
+                    'unit_price' => '12,00',
+                ]],
+            ])
+            ->assertRedirect(route('sales.index'));
+
+        $sale->refresh();
+
+        $this->assertSame('CANCELLED', $sale->status);
+        $this->assertSame('Cliente desistiu da compra.', $sale->cancel_reason);
+        $this->assertNotNull($sale->canceled_at);
+        $this->assertSame($user->id, $sale->canceled_by);
+    }
+
+    public function test_cannot_cancel_order_after_invoicing(): void
+    {
+        ['user' => $user, 'customer' => $customer, 'productA' => $productA] = $this->salesContext();
+
+        $this->actingAs($user, 'web')
+            ->post(route('sales.store'), [
+                'customer_id' => $customer->id,
+                'sale_date' => '2026-08-03',
+                'status' => 'CONFIRMED',
+                'discount_amount' => '0,00',
+                'tax_amount' => '0,00',
+                'notes' => 'Pedido não cancelável após faturamento.',
+                'items' => [[
+                    'product_id' => $productA->id,
+                    'quantity' => '1',
+                    'unit_price' => '20,00',
+                ]],
+            ])
+            ->assertRedirect(route('sales.index'));
+
+        $sale = Sale::query()->firstOrFail();
+
+        $this->actingAs($user, 'web')
+            ->post(route('sales.transition', $sale), ['next_operational_status' => 'PICKING'])
+            ->assertRedirect(route('sales.show', $sale));
+
+        $this->actingAs($user, 'web')
+            ->post(route('sales.transition', $sale), ['next_operational_status' => 'INVOICED'])
+            ->assertRedirect(route('sales.show', $sale));
+
+        $sale->refresh();
+
+        $this->actingAs($user, 'web')
+            ->put(route('sales.update', $sale), [
+                'customer_id' => $customer->id,
+                'sale_date' => '2026-08-03',
+                'status' => 'CANCELLED',
+                'discount_amount' => '0,00',
+                'tax_amount' => '0,00',
+                'cancel_reason' => 'Tentativa tardia de cancelamento.',
+                'notes' => 'Pedido não cancelável após faturamento.',
+                'items' => [[
+                    'product_id' => $productA->id,
+                    'quantity' => '1',
+                    'unit_price' => '20,00',
+                ]],
+            ])
+            ->assertSessionHasErrors('status');
+
+        $sale->refresh();
+
+        $this->assertSame('CONFIRMED', $sale->status);
+        $this->assertNull($sale->canceled_at);
+        $this->assertNull($sale->canceled_by);
+    }
+
+    public function test_transition_requires_recorded_previous_operational_step(): void
+    {
+        ['user' => $user, 'customer' => $customer, 'productA' => $productA] = $this->salesContext();
+
+        $this->actingAs($user, 'web')
+            ->post(route('sales.store'), [
+                'customer_id' => $customer->id,
+                'sale_date' => '2026-08-03',
+                'status' => 'CONFIRMED',
+                'discount_amount' => '0,00',
+                'tax_amount' => '0,00',
+                'notes' => 'Pedido inconsistente.',
+                'items' => [[
+                    'product_id' => $productA->id,
+                    'quantity' => '1',
+                    'unit_price' => '15,00',
+                ]],
+            ])
+            ->assertRedirect(route('sales.index'));
+
+        $sale = Sale::query()->firstOrFail();
+
+        $sale->forceFill([
+            'operational_status' => 'INVOICED',
+            'picking_at' => now()->subHour(),
+            'picking_by' => $user->id,
+            'invoiced_at' => null,
+            'invoiced_by' => null,
+        ])->save();
+
+        $this->actingAs($user, 'web')
+            ->post(route('sales.transition', $sale), [
+                'next_operational_status' => 'SHIPPED',
+            ])
+            ->assertRedirect(route('sales.show', $sale))
+            ->assertSessionHas('error');
+
+        $sale->refresh();
+        $this->assertSame('INVOICED', $sale->operational_status);
+        $this->assertNull($sale->shipped_at);
+
+        $sale->forceFill([
+            'operational_status' => 'SHIPPED',
+            'invoiced_at' => now()->subMinutes(30),
+            'invoiced_by' => $user->id,
+            'shipped_at' => null,
+            'shipped_by' => null,
+        ])->save();
+
+        $this->actingAs($user, 'web')
+            ->post(route('sales.transition', $sale), [
+                'next_operational_status' => 'DELIVERED',
+            ])
+            ->assertRedirect(route('sales.show', $sale))
+            ->assertSessionHas('error');
+
+        $sale->refresh();
+        $this->assertSame('SHIPPED', $sale->operational_status);
+        $this->assertNull($sale->delivered_at);
     }
 
     /**

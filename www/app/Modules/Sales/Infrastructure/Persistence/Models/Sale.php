@@ -22,6 +22,11 @@ final class Sale extends TenantModel
         'customer_id',
         'sale_date',
         'status',
+        'confirmed_by',
+        'confirmed_at',
+        'canceled_by',
+        'canceled_at',
+        'cancel_reason',
         'operational_status',
         'picking_by',
         'picking_at',
@@ -41,6 +46,8 @@ final class Sale extends TenantModel
 
     protected $casts = [
         'sale_date' => 'date',
+        'confirmed_at' => 'datetime',
+        'canceled_at' => 'datetime',
         'picking_at' => 'datetime',
         'invoiced_at' => 'datetime',
         'shipped_at' => 'datetime',
@@ -60,6 +67,16 @@ final class Sale extends TenantModel
     public function lines(): HasMany
     {
         return $this->hasMany(SaleLine::class, 'sale_id')->orderBy('id');
+    }
+
+    public function confirmedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'confirmed_by');
+    }
+
+    public function canceledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'canceled_by');
     }
 
     public function pickingBy(): BelongsTo

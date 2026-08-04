@@ -134,6 +134,8 @@ final class SaleController extends Controller
 
         $sale->load(['customer:id,name', 'lines.product:id,sku,description,uom']);
         $sale->load([
+            'confirmedBy:id,name',
+            'canceledBy:id,name',
             'pickingBy:id,name',
             'invoicedBy:id,name',
             'shippedBy:id,name',
@@ -150,7 +152,7 @@ final class SaleController extends Controller
 
         $data = $this->validateSale($request, $company);
 
-        $sale = DB::transaction(function () use ($company, $data): Sale {
+        $sale = DB::transaction(function () use ($company, $data, $request): Sale {
             $sale = Sale::query()->create([
                 'company_id' => $company->id,
                 'customer_id' => $data['customer_id'],
@@ -163,6 +165,9 @@ final class SaleController extends Controller
                 'amount_cents' => $data['amount_cents'],
                 'notes' => $data['notes'] ?? null,
             ]);
+
+            $this->applyCommercialStatusAudit($sale, $data['status'], $data['cancel_reason'] ?? null, $request->user()?->id);
+            $sale->save();
 
             $this->syncLines($sale, $data['items']);
 
@@ -211,15 +216,21 @@ final class SaleController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
+        if ((string) $request->input('status') === 'CANCELLED' && in_array($sale->operational_status, ['INVOICED', 'SHIPPED', 'DELIVERED'], true)) {
+            return redirect()
+                ->route('sales.show', $sale)
+                ->withErrors(['status' => __('sale.cancel_after_invoiced_forbidden')]);
+        }
+
         if ($this->isLockedForEditing($sale)) {
             return redirect()
                 ->route('sales.show', $sale)
                 ->with('error', __('sale.edit_locked'));
         }
 
-        $data = $this->validateSale($request, $company);
+        $data = $this->validateSale($request, $company, $sale);
 
-        DB::transaction(function () use ($sale, $data): void {
+        DB::transaction(function () use ($sale, $data, $request): void {
             $sale->fill([
                 'customer_id' => $data['customer_id'],
                 'sale_date' => $data['sale_date'],
@@ -229,7 +240,9 @@ final class SaleController extends Controller
                 'tax_cents' => $data['tax_cents'],
                 'amount_cents' => $data['amount_cents'],
                 'notes' => $data['notes'] ?? null,
+                'cancel_reason' => $data['cancel_reason'] ?? null,
             ]);
+            $this->applyCommercialStatusAudit($sale, $data['status'], $data['cancel_reason'] ?? null, $request->user()?->id);
             $sale->save();
 
             $this->syncLines($sale, $data['items']);
@@ -272,6 +285,12 @@ final class SaleController extends Controller
             return redirect()
                 ->route('sales.show', $sale)
                 ->with('error', __('sale.invalid_transition'));
+        }
+
+        if (($prerequisiteError = $this->transitionPrerequisiteError($sale, $nextStatus)) !== null) {
+            return redirect()
+                ->route('sales.show', $sale)
+                ->with('error', $prerequisiteError);
         }
 
         $fromStatus = $sale->operational_status;
@@ -378,7 +397,7 @@ final class SaleController extends Controller
         abort(403);
     }
 
-    private function validateSale(Request $request, Company $company): array
+    private function validateSale(Request $request, Company $company, ?Sale $sale = null): array
     {
         $data = $request->validate([
             'customer_id' => [
@@ -390,6 +409,7 @@ final class SaleController extends Controller
             'status' => ['required', Rule::in(['DRAFT', 'CONFIRMED', 'CANCELLED'])],
             'discount_amount' => ['nullable', 'string', 'max:30'],
             'tax_amount' => ['nullable', 'string', 'max:30'],
+            'cancel_reason' => ['nullable', 'string', 'max:2000', 'required_if:status,CANCELLED'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => [
@@ -412,8 +432,13 @@ final class SaleController extends Controller
                     'unit_price' => $unitPrice,
                     'line_total_cents' => $this->lineTotalToCents($quantity, $unitPrice),
                 ];
-            })
-            ->values();
+            })->values();
+
+            if (($sale?->operational_status !== null) && $data['status'] === 'CANCELLED' && in_array($sale->operational_status, ['INVOICED', 'SHIPPED', 'DELIVERED'], true)) {
+                throw ValidationException::withMessages([
+                    'status' => __('sale.cancel_after_invoiced_forbidden'),
+                ]);
+            }
 
         $data['items'] = $items->all();
         $data['subtotal_cents'] = (int) $items->sum('line_total_cents');
@@ -589,6 +614,51 @@ final class SaleController extends Controller
                 'delivered_at' => $sale->delivered_at ?? now(),
                 'delivered_by' => $sale->delivered_by ?? $userId,
             ]),
+            default => null,
+        };
+    }
+
+    private function applyCommercialStatusAudit(Sale $sale, string $status, ?string $cancelReason, ?int $userId): void
+    {
+        $sale->status = $status;
+
+        if ($status === 'CONFIRMED') {
+            $sale->confirmed_at ??= now();
+            $sale->confirmed_by ??= $userId;
+            $sale->cancel_reason = null;
+            $sale->canceled_at = null;
+            $sale->canceled_by = null;
+
+            return;
+        }
+
+        if ($status === 'CANCELLED') {
+            $sale->cancel_reason = $cancelReason;
+            $sale->canceled_at ??= now();
+            $sale->canceled_by ??= $userId;
+
+            return;
+        }
+
+        if ($status === 'DRAFT') {
+            $sale->cancel_reason = null;
+            $sale->canceled_at = null;
+            $sale->canceled_by = null;
+        }
+    }
+
+    private function transitionPrerequisiteError(Sale $sale, string $nextStatus): ?string
+    {
+        return match ($nextStatus) {
+            'INVOICED' => $sale->picking_at === null
+                ? __('sale.transition_requires_picking_record')
+                : null,
+            'SHIPPED' => $sale->invoiced_at === null
+                ? __('sale.transition_requires_invoiced_record')
+                : null,
+            'DELIVERED' => $sale->shipped_at === null
+                ? __('sale.transition_requires_shipped_record')
+                : null,
             default => null,
         };
     }
