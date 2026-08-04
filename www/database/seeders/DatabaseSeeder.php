@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             CompanyAccessPermissionsSeeder::class,
             TenantFoundationSeeder::class,
             TenantRolesSeeder::class,
+            PageTutorialSeeder::class,
         ]);
     }
 }

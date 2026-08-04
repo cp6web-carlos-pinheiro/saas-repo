@@ -1031,6 +1031,7 @@ body {
     }
 
     .ind-tutorial-panel {
+        width: min(560px, calc(100% - 24px));
         gap: 1rem;
     }
 
