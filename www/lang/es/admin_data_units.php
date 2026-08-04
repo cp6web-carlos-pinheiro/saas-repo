@@ -12,4 +12,8 @@ return [
     'updated' => 'Unidad actualizada con éxito.',
     'removed' => 'Unidad eliminada con éxito.',
     'remove_blocked' => 'Esta unidad tiene vínculos transaccionales. Eliminación bloqueada.',
+    'scope' => 'Alcance',
+    'global_label' => 'Global',
+    'tenant_label' => 'Local',
+    'global_readonly' => 'Las unidades globales son de solo lectura para tenants.',
 ];

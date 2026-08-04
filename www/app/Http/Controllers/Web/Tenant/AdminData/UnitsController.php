@@ -38,7 +38,6 @@ final class UnitsController extends Controller
         abort_unless(in_array($sort, ['name', 'code', 'is_active', 'created_at'], true), 404);
 
         $units = Unit::query()
-            ->where('company_id', $company->id)
             ->when($status !== '', static fn (Builder $query) => $query->where('is_active', $status === 'ACTIVE'))
             ->when($search !== '', static function (Builder $query) use ($search): void {
                 $query->where(function (Builder $nested) use ($search): void {
@@ -70,7 +69,7 @@ final class UnitsController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::PERMISSION.'.read', $company->id);
 
-        abort_unless((int) $unit->company_id === (int) $company->id, 404);
+        abort_unless($this->belongsToTenantOrIsGlobal($unit, $company->id), 404);
 
         return view('client.admin-data.units.show', compact('unit', 'company'));
     }
@@ -108,12 +107,18 @@ final class UnitsController extends Controller
         return redirect()->route('admin-data.units.index')->with('status', __('admin_data_units.created'));
     }
 
-    public function edit(Request $request, Unit $unit): View
+    public function edit(Request $request, Unit $unit): View|RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::PERMISSION.'.update', $company->id);
 
-        abort_unless((int) $unit->company_id === (int) $company->id, 404);
+        abort_unless($this->belongsToTenantOrIsGlobal($unit, $company->id), 404);
+
+        if ($this->isGlobal($unit)) {
+            return redirect()
+                ->route('admin-data.units.show', $unit)
+                ->withErrors(['record' => __('admin_data_units.global_readonly')]);
+        }
 
         return view('client.admin-data.units.form', compact('unit', 'company'));
     }
@@ -123,7 +128,13 @@ final class UnitsController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::PERMISSION.'.update', $company->id);
 
-        abort_unless((int) $unit->company_id === (int) $company->id, 404);
+        abort_unless($this->belongsToTenantOrIsGlobal($unit, $company->id), 404);
+
+        if ($this->isGlobal($unit)) {
+            return redirect()
+                ->route('admin-data.units.show', $unit)
+                ->withErrors(['record' => __('admin_data_units.global_readonly')]);
+        }
 
         $data = $this->validateUnit($request, $company, $unit);
 
@@ -157,7 +168,13 @@ final class UnitsController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::PERMISSION.'.update', $company->id);
 
-        abort_unless((int) $unit->company_id === (int) $company->id, 404);
+        abort_unless($this->belongsToTenantOrIsGlobal($unit, $company->id), 404);
+
+        if ($this->isGlobal($unit)) {
+            return redirect()
+                ->route('admin-data.units.show', $unit)
+                ->withErrors(['record' => __('admin_data_units.global_readonly')]);
+        }
 
         if ($this->hasDependencies($unit)) {
             return redirect()->route('admin-data.units.show', $unit)->withErrors(['record' => __('admin_data_units.remove_blocked')]);
@@ -213,5 +230,19 @@ final class UnitsController extends Controller
     private function hasDependencies(Unit $unit): bool
     {
         return \DB::table('products')->where('company_id', (int) $unit->company_id)->where('unit_id', (int) $unit->id)->exists();
+    }
+
+    private function belongsToTenantOrIsGlobal(Unit $unit, int $companyId): bool
+    {
+        if ($unit->company_id === null) {
+            return true;
+        }
+
+        return (int) $unit->company_id === $companyId;
+    }
+
+    private function isGlobal(Unit $unit): bool
+    {
+        return $unit->company_id === null;
     }
 }

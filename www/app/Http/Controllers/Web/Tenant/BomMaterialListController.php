@@ -292,7 +292,13 @@ final class BomMaterialListController extends Controller
                 'nullable',
                 'integer',
                 Rule::exists('units', 'id')
-                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('is_active', true)),
+                    ->where(static function ($query) use ($company): void {
+                        $query->where('is_active', true)
+                            ->where(static function ($nested) use ($company): void {
+                                $nested->where('company_id', $company->id)
+                                    ->orWhereNull('company_id');
+                            });
+                    }),
             ],
         ]);
     }
@@ -368,8 +374,8 @@ final class BomMaterialListController extends Controller
     private function unitOptions(int $companyId): array
     {
         return Unit::query()
-            ->where('company_id', $companyId)
             ->where('is_active', true)
+            ->orderByRaw('CASE WHEN company_id = ? THEN 0 ELSE 1 END', [$companyId])
             ->orderBy('name')
             ->get(['id', 'code', 'name'])
             ->mapWithKeys(static fn (Unit $unit): array => [$unit->id => sprintf('%s - %s', $unit->code, $unit->name)])
@@ -383,7 +389,6 @@ final class BomMaterialListController extends Controller
     {
         if (isset($item['unit_id']) && (int) $item['unit_id'] > 0) {
             $unitCode = Unit::query()
-                ->where('company_id', $companyId)
                 ->whereKey((int) $item['unit_id'])
                 ->value('code');
 

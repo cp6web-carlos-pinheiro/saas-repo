@@ -163,33 +163,24 @@ final class ProductService extends BaseService
     {
         $unitId = isset($payload['unit_id']) ? (int) $payload['unit_id'] : 0;
 
-        if ($unitId > 0) {
-            $unit = Unit::query()
-                ->where('is_active', true)
-                ->find($unitId);
-
-            if ($unit === null) {
-                throw new DomainException('Unit is invalid or inactive', 422, [
-                    'unit_id' => [$unitId],
-                ]);
-            }
-
-            $payload['unit_id'] = $unit->id;
-            $payload['uom'] = mb_strtoupper((string) $unit->code);
-
-            return $payload;
-        }
-
-        $uom = mb_strtoupper(trim((string) ($payload['uom'] ?? '')));
-
-        if ($uom === '') {
+        if ($unitId <= 0) {
             throw new DomainException('unit_id is required', 422, [
                 'unit_id' => ['required'],
             ]);
         }
 
-        $payload['unit_id'] = null;
-        $payload['uom'] = $uom;
+        $unit = Unit::query()
+            ->where('is_active', true)
+            ->find($unitId);
+
+        if ($unit === null) {
+            throw new DomainException('Unit is invalid or inactive', 422, [
+                'unit_id' => [$unitId],
+            ]);
+        }
+
+        $payload['unit_id'] = $unit->id;
+        $payload['uom'] = mb_strtoupper((string) $unit->code);
 
         return $payload;
     }

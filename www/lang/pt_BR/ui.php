@@ -117,7 +117,7 @@ return [
     'purchasing_receipt' => 'Recebimento',
     'module_routing' => 'Roteamento',
     'module_scheduling' => 'Programação',
-    'module_tenant' => 'Tenant',
+    'module_tenant' => 'Local',
     'coming_soon' => 'em breve',
     'no' => 'Não',
     'yes' => 'Sim',

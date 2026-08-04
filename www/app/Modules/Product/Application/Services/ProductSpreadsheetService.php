@@ -112,6 +112,7 @@ final class ProductSpreadsheetService
             }
 
             $normalizedRow = $this->normalizeRow($headers, $row, $rowNumber);
+            $unit = $this->resolveUnit($company->id, $normalizedRow['uom'], $rowNumber);
 
             $product = Product::query()
                 ->where('company_id', $company->id)
@@ -123,8 +124,8 @@ final class ProductSpreadsheetService
                 'sku' => $normalizedRow['sku'],
                 'description' => $normalizedRow['description'],
                 'product_type' => $normalizedRow['product_type'],
-                'uom' => $normalizedRow['uom'],
-                'unit_id' => $this->resolveUnitId($company->id, $normalizedRow['uom']),
+                'uom' => mb_strtoupper((string) $unit->code),
+                'unit_id' => (int) $unit->id,
                 'safety_stock' => $normalizedRow['safety_stock'],
                 'lead_time_days' => $normalizedRow['lead_time_days'],
                 'lot_control' => $normalizedRow['lot_control'],
@@ -242,21 +243,23 @@ final class ProductSpreadsheetService
         return (int) $value;
     }
 
-    private function resolveUnitId(int $companyId, string $uom): ?int
+    private function resolveUnit(int $companyId, string $uom, int $rowNumber): Unit
     {
         $code = mb_strtoupper(trim($uom));
 
-        if ($code === '') {
-            return null;
-        }
-
-        $unitId = Unit::query()
-            ->where('company_id', $companyId)
+        $unit = Unit::query()
             ->where('is_active', true)
             ->whereRaw('UPPER(code) = ?', [$code])
-            ->value('id');
+            ->orderByRaw('CASE WHEN company_id = ? THEN 0 ELSE 1 END', [$companyId])
+            ->first();
 
-        return $unitId !== null ? (int) $unitId : null;
+        if (! $unit instanceof Unit) {
+            throw new DomainException(__('product.import_invalid_row', ['row' => $rowNumber]), 422, [
+                'uom' => [$code],
+            ]);
+        }
+
+        return $unit;
     }
 
     private function normalizeBoolean(string $value, int $rowNumber, string $field): bool

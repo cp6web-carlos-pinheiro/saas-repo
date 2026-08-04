@@ -81,7 +81,8 @@ final class ProductController extends Controller
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
         $data = $this->validateProduct($request, $company);
-        $resolvedUom = $this->resolveUom($company, $data);
+        $unitId = (int) $data['unit_id'];
+        $resolvedUom = $this->resolveUnitCode($company, $unitId);
 
         $product = Product::query()->create([
             'company_id' => $company->id,
@@ -89,7 +90,7 @@ final class ProductController extends Controller
             'description' => $data['description'],
             'product_type' => $data['product_type'],
             'uom' => $resolvedUom,
-            'unit_id' => isset($data['unit_id']) ? (int) $data['unit_id'] : null,
+            'unit_id' => $unitId,
             'category_id' => isset($data['category_id']) ? (int) $data['category_id'] : null,
             'brand_id' => isset($data['brand_id']) ? (int) $data['brand_id'] : null,
             'safety_stock' => (int) $data['safety_stock'],
@@ -140,14 +141,15 @@ final class ProductController extends Controller
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
         $data = $this->validateProduct($request, $company, $product);
-        $resolvedUom = $this->resolveUom($company, $data);
+        $unitId = (int) $data['unit_id'];
+        $resolvedUom = $this->resolveUnitCode($company, $unitId);
 
         $product->fill([
             'sku' => $data['sku'],
             'description' => $data['description'],
             'product_type' => $data['product_type'],
             'uom' => $resolvedUom,
-            'unit_id' => isset($data['unit_id']) ? (int) $data['unit_id'] : null,
+            'unit_id' => $unitId,
             'category_id' => isset($data['category_id']) ? (int) $data['category_id'] : null,
             'brand_id' => isset($data['brand_id']) ? (int) $data['brand_id'] : null,
             'safety_stock' => (int) $data['safety_stock'],
@@ -324,7 +326,13 @@ final class ProductController extends Controller
                 'required',
                 'integer',
                 Rule::exists('units', 'id')
-                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('is_active', true)),
+                    ->where(static function ($query) use ($company): void {
+                        $query->where('is_active', true)
+                            ->where(static function ($nested) use ($company): void {
+                                $nested->where('company_id', $company->id)
+                                    ->orWhereNull('company_id');
+                            });
+                    }),
             ],
             'category_id' => [
                 'nullable',
@@ -381,8 +389,8 @@ final class ProductController extends Controller
     {
         if ($domain === 'units') {
             return Unit::query()
-                ->where('company_id', $company->id)
                 ->where('is_active', true)
+                ->orderByRaw('CASE WHEN company_id = ? THEN 0 ELSE 1 END', [$company->id])
                 ->orderBy('name')
                 ->get(['id', 'code', 'name'])
                 ->mapWithKeys(static fn (Unit $record): array => [$record->id => sprintf('%s - %s', $record->code, $record->name)])
@@ -415,19 +423,23 @@ final class ProductController extends Controller
     /**
      * @param array<string, mixed> $data
      */
-    private function resolveUom(Company $company, array $data): string
+    private function resolveUnitCode(Company $company, int $unitId): string
     {
-        if (isset($data['unit_id']) && (int) $data['unit_id'] > 0) {
-            $unitCode = Unit::query()
-                ->where('company_id', $company->id)
-                ->whereKey((int) $data['unit_id'])
-                ->value('code');
+        $unitCode = Unit::query()
+            ->where('is_active', true)
+            ->where(static function (Builder $query) use ($company): void {
+                $query->where('company_id', $company->id)
+                    ->orWhereNull('company_id');
+            })
+            ->whereKey($unitId)
+            ->value('code');
 
-            if (is_string($unitCode) && $unitCode !== '') {
-                return mb_strtoupper($unitCode);
-            }
+        if (! is_string($unitCode) || $unitCode === '') {
+            throw ValidationException::withMessages([
+                'unit_id' => __('validation.exists', ['attribute' => 'unit_id']),
+            ]);
         }
 
-        return mb_strtoupper((string) ($data['uom'] ?? 'UN'));
+        return mb_strtoupper($unitCode);
     }
 }

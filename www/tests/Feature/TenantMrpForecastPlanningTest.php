@@ -9,6 +9,7 @@ use App\Modules\MRP\Application\Services\MrpPlanningService;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Shared\Infrastructure\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -83,7 +84,6 @@ final class TenantMrpForecastPlanningTest extends TestCase
             'code' => 'ATL',
             'is_active' => true,
         ]);
-
         app(TenantContext::class)->setCompanyId($company->id);
 
         $plant = Plant::query()->create([
@@ -108,6 +108,12 @@ final class TenantMrpForecastPlanningTest extends TestCase
             'description' => 'Insumo planejado',
             'product_type' => 'RAW',
             'uom' => 'KG',
+            'unit_id' => Unit::query()->create([
+                'company_id' => $company->id,
+                'code' => 'KG',
+                'name' => 'Quilograma',
+                'is_active' => true,
+            ])->id,
             'safety_stock' => 0,
             'lead_time_days' => 3,
             'lot_control' => false,

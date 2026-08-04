@@ -226,6 +226,31 @@ final class TenantProductPhase03ManagementTest extends TestCase
             ->assertSessionHasErrors('items.0.lot_number');
     }
 
+    public function test_product_creation_requires_unit_id_consistency(): void
+    {
+        ['company' => $company, 'user' => $user] = $this->contextWithRole('master');
+
+        $this->actingAs($user, 'web')
+            ->from(route('products.create'))
+            ->post(route('products.store'), [
+                'sku' => 'P-NO-UOM-ID',
+                'description' => 'Produto sem unidade',
+                'product_type' => 'FG',
+                'safety_stock' => 0,
+                'lead_time_days' => 0,
+                'lot_control' => '0',
+                'serial_control' => '0',
+                'is_active' => '1',
+            ])
+            ->assertRedirect(route('products.create'))
+            ->assertSessionHasErrors('unit_id');
+
+        $this->assertDatabaseMissing('products', [
+            'company_id' => $company->id,
+            'sku' => 'P-NO-UOM-ID',
+        ]);
+    }
+
     /**
      * @return array{company: Company, user: User}
      */
@@ -276,12 +301,28 @@ final class TenantProductPhase03ManagementTest extends TestCase
 
     private function createProduct(Company $company, string $sku, string $description, string $type, string $uom, bool $lotControl = false): Product
     {
+        $unitCode = mb_strtoupper(trim($uom));
+
+        $unit = Unit::query()->firstOrCreate(
+            [
+                'company_id' => $company->id,
+                'code' => $unitCode,
+            ],
+            [
+                'name' => $unitCode,
+                'description' => null,
+                'is_active' => true,
+                'metadata' => null,
+            ],
+        );
+
         return Product::query()->create([
             'company_id' => $company->id,
             'sku' => $sku,
             'description' => $description,
             'product_type' => $type,
-            'uom' => $uom,
+            'uom' => $unitCode,
+            'unit_id' => $unit->id,
             'safety_stock' => 0,
             'lead_time_days' => 0,
             'lot_control' => $lotControl,

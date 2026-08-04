@@ -9,6 +9,7 @@ use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryReservation
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Shared\Infrastructure\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -201,6 +202,12 @@ final class TenantInventoryMovementFlowTest extends TestCase
             'description' => 'Produto de teste de estoque',
             'product_type' => 'FG',
             'uom' => 'UN',
+            'unit_id' => Unit::query()->create([
+                'company_id' => $company->id,
+                'code' => 'UN',
+                'name' => 'Unidade',
+                'is_active' => true,
+            ])->id,
             'lot_control' => false,
             'serial_control' => false,
             'is_active' => true,

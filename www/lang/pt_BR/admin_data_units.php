@@ -12,4 +12,8 @@ return [
     'updated' => 'Unidade atualizada com sucesso.',
     'removed' => 'Unidade removida com sucesso.',
     'remove_blocked' => 'Existem vínculos ativos para esta unidade. Remoção bloqueada.',
+    'scope' => 'Escopo',
+    'global_label' => 'Global',
+    'tenant_label' => 'Local',
+    'global_readonly' => 'Unidades globais são somente leitura para tenants.',
 ];

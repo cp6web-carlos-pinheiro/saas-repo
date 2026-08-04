@@ -12,6 +12,7 @@ use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -412,6 +413,12 @@ final class TenantSalesManagementTest extends TestCase
             'description' => 'Produto A',
             'product_type' => 'FG',
             'uom' => 'UN',
+            'unit_id' => Unit::query()->create([
+                'company_id' => $company->id,
+                'code' => 'UN',
+                'name' => 'Unidade',
+                'is_active' => true,
+            ])->id,
             'safety_stock' => 0,
             'lead_time_days' => 0,
             'lot_control' => false,
@@ -425,6 +432,12 @@ final class TenantSalesManagementTest extends TestCase
             'description' => 'Produto B',
             'product_type' => 'FG',
             'uom' => 'UN',
+            'unit_id' => Unit::query()->create([
+                'company_id' => $company->id,
+                'code' => 'UN2',
+                'name' => 'Unidade 2',
+                'is_active' => true,
+            ])->id,
             'safety_stock' => 0,
             'lead_time_days' => 0,
             'lot_control' => false,

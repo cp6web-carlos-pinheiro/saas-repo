@@ -181,6 +181,75 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
             ->get(route('admin-data.units.index'));
     }
 
+    public function test_tenant_can_use_global_unit_when_creating_product(): void
+    {
+        ['company' => $company, 'user' => $user] = $this->contextWithRole('master');
+
+        $globalUnit = Unit::query()->withoutGlobalScope('tenant')->create([
+            'company_id' => null,
+            'code' => 'KG',
+            'name' => 'Quilograma Global',
+            'description' => 'Unidade global para uso compartilhado',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user, 'web')
+            ->post(route('products.store'), [
+                'sku' => 'P-GLOBAL-UOM-001',
+                'description' => 'Produto com unidade global',
+                'product_type' => 'RAW',
+                'unit_id' => $globalUnit->id,
+                'uom' => '',
+                'safety_stock' => 0,
+                'lead_time_days' => 0,
+                'lot_control' => '0',
+                'serial_control' => '0',
+                'is_active' => '1',
+            ])
+            ->assertRedirect(route('products.index'));
+
+        $this->assertDatabaseHas('products', [
+            'company_id' => $company->id,
+            'sku' => 'P-GLOBAL-UOM-001',
+            'unit_id' => $globalUnit->id,
+            'uom' => 'KG',
+        ]);
+    }
+
+    public function test_tenant_cannot_edit_or_delete_global_units(): void
+    {
+        ['user' => $user] = $this->contextWithRole('master');
+
+        $globalUnit = Unit::query()->withoutGlobalScope('tenant')->create([
+            'company_id' => null,
+            'code' => 'L',
+            'name' => 'Litro Global',
+            'description' => 'Unidade global para bloqueio de alteracao',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user, 'web')
+            ->get(route('admin-data.units.show', $globalUnit))
+            ->assertOk();
+
+        $this->actingAs($user, 'web')
+            ->get(route('admin-data.units.edit', $globalUnit))
+            ->assertRedirect(route('admin-data.units.show', $globalUnit));
+
+        $this->actingAs($user, 'web')
+            ->put(route('admin-data.units.update', $globalUnit), [
+                'code' => 'L',
+                'name' => 'Litro Global Alterado',
+                'description' => 'Alteracao bloqueada',
+                'is_active' => '1',
+            ])
+            ->assertRedirect(route('admin-data.units.show', $globalUnit));
+
+        $this->actingAs($user, 'web')
+            ->delete(route('admin-data.units.destroy', $globalUnit))
+            ->assertRedirect(route('admin-data.units.show', $globalUnit));
+    }
+
     /**
      * @return array{company: Company, user: User}
      */

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Product\Infrastructure\Persistence\Models;
 
 use App\Modules\Bom\Infrastructure\Persistence\Models\BomHeader;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\ValidationException;
 
 final class Product extends TenantModel
 {
@@ -49,6 +51,34 @@ final class Product extends TenantModel
         'image_urls' => 'array',
         'attachment_urls' => 'array',
     ];
+
+    protected static function booted(): void
+    {
+        parent::booted();
+
+        static::saving(function (self $product): void {
+            $unitId = (int) ($product->unit_id ?? 0);
+
+            if ($unitId <= 0) {
+                throw ValidationException::withMessages([
+                    'unit_id' => ['The unit_id field is required.'],
+                ]);
+            }
+
+            $unit = Unit::query()
+                ->where('is_active', true)
+                ->whereKey($unitId)
+                ->first();
+
+            if (! $unit instanceof Unit) {
+                throw ValidationException::withMessages([
+                    'unit_id' => ['The selected unit_id is invalid.'],
+                ]);
+            }
+
+            $product->setAttribute('uom', mb_strtoupper((string) $unit->code));
+        });
+    }
 
     public function versions(): HasMany
     {

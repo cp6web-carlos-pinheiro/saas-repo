@@ -9,6 +9,7 @@ use App\Modules\MRP\Application\Services\MrpPlanningService;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Shared\Infrastructure\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -96,6 +97,12 @@ final class TenantMrpPlanningTest extends TestCase
             'description' => 'Materia-prima critica',
             'product_type' => 'RAW',
             'uom' => 'KG',
+                'unit_id' => Unit::query()->create([
+                    'company_id' => $company->id,
+                    'code' => 'KG',
+                    'name' => 'Quilograma',
+                    'is_active' => true,
+                ])->id,
             'safety_stock' => 10,
             'lead_time_days' => 5,
             'lot_control' => false,

@@ -12,4 +12,8 @@ return [
     'updated' => 'Unit updated successfully.',
     'removed' => 'Unit removed successfully.',
     'remove_blocked' => 'This unit is linked to transactional data. Deletion blocked.',
+    'scope' => 'Scope',
+    'global_label' => 'Global',
+    'tenant_label' => 'Local',
+    'global_readonly' => 'Global units are read-only for tenants.',
 ];

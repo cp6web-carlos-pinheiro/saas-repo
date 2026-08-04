@@ -38,6 +38,7 @@
                         <th class="px-3 py-3">ID</th>
                         <th class="px-3 py-3"><a href="{{ $sortUrl('code') }}">{{ __('admin_data.code') }} ↕</a></th>
                         <th class="px-3 py-3"><a href="{{ $sortUrl('name') }}">{{ __('admin_data.name') }} ↕</a></th>
+                        <th class="px-3 py-3">{{ __('admin_data_units.scope') }}</th>
                         <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('admin_data.status') }} ↕</a></th>
                         <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('admin_data.created_at') }} ↕</a></th>
                     </tr>
@@ -53,6 +54,7 @@
                             <td class="px-3 py-4 text-[#5f6368]">{{ $unit->id }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $unit->code }}</td>
                             <td class="px-3 py-4">{{ $unit->name }}</td>
+                            <td class="px-3 py-4 text-[#5f6368]">{{ $unit->company_id === null ? __('admin_data_units.global_label') : __('admin_data_units.tenant_label') }}</td>
                             <td class="px-3 py-4">
                                 <x-ui.definition-item-status
                                     :label="__('admin_data.status')"
@@ -65,7 +67,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-3 py-10 text-center text-[#5f6368]">{{ __('admin_data_units.empty') }}</td>
+                            <td colspan="6" class="px-3 py-10 text-center text-[#5f6368]">{{ __('admin_data_units.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

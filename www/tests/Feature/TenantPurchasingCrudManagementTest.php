@@ -17,6 +17,7 @@ use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -331,6 +332,12 @@ final class TenantPurchasingCrudManagementTest extends TestCase
             'description' => 'Produto de compra',
             'product_type' => 'raw_material',
             'uom' => 'UN',
+            'unit_id' => Unit::query()->create([
+                'company_id' => $company->id,
+                'code' => 'UN',
+                'name' => 'Unidade',
+                'is_active' => true,
+            ])->id,
             'safety_stock' => 0,
             'lead_time_days' => 3,
             'lot_control' => false,
