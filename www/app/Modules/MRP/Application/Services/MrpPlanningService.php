@@ -59,10 +59,10 @@ final class MrpPlanningService extends BaseService
 
     private function buildPlan(array $payload, ?int $createdBy, bool $incremental): array
     {
+        $payload = $this->normalizePlanningPayload($payload);
         $referenceDate = Carbon::parse($payload['reference_date'] ?? now())->toDateString();
         $planningBucket = (string) ($payload['planning_bucket'] ?? 'daily');
         $priorityRule = (string) ($payload['priority_rule'] ?? 'priority_due_date');
-
         $sliceResults = $this->buildDemandSlices($payload, $referenceDate, $incremental);
         $demandAggregation = array_column($sliceResults, 'demand_lines');
         $demandAggregation = array_merge(...$demandAggregation);
@@ -144,6 +144,25 @@ final class MrpPlanningService extends BaseService
         return $slices;
     }
 
+    private function normalizePlanningPayload(array $payload): array
+    {
+        $normalized = $payload;
+        $demandLines = array_values($payload['demand_lines'] ?? []);
+        $forecastLines = array_values($payload['forecast_lines'] ?? []);
+
+        foreach ($forecastLines as $forecastLine) {
+            $demandLines[] = array_merge($forecastLine, [
+                'source_type' => $forecastLine['source_type'] ?? 'forecast',
+                'source_reference_type' => $forecastLine['source_reference_type'] ?? 'forecast',
+                'source_reference_id' => $forecastLine['source_reference_id'] ?? null,
+            ]);
+        }
+
+        $normalized['demand_lines'] = $demandLines;
+
+        return $normalized;
+    }
+
     private function rebuildDemandSlice(array $demandLine, string $referenceDate, array $payload): array
     {
         $aggregatedDemand = $this->aggregateDemandLines([$demandLine], $referenceDate);
@@ -187,6 +206,7 @@ final class MrpPlanningService extends BaseService
                     'bom_version_number' => isset($demandLine['bom_version_number']) ? (int) $demandLine['bom_version_number'] : null,
                     'routing_version_id' => isset($demandLine['routing_version_id']) ? (int) $demandLine['routing_version_id'] : null,
                     'source_type' => $demandLine['source_type'] ?? 'demand',
+                    'source_types' => [($demandLine['source_type'] ?? 'demand')],
                     'source_reference_id' => isset($demandLine['source_reference_id']) ? (int) $demandLine['source_reference_id'] : null,
                     'source_reference_type' => $demandLine['source_reference_type'] ?? null,
                     'source_keys' => [],
@@ -196,13 +216,21 @@ final class MrpPlanningService extends BaseService
 
             $aggregated[$aggregationKey]['quantity_gross'] = round((float) $aggregated[$aggregationKey]['quantity_gross'] + $quantity, 6);
             $aggregated[$aggregationKey]['source_keys'][] = sprintf('demand-%d', $index + 1);
+            $aggregated[$aggregationKey]['source_types'] = array_values(array_unique(array_merge(
+                $aggregated[$aggregationKey]['source_types'],
+                [$demandLine['source_type'] ?? 'demand']
+            )));
 
             if (! empty($demandLine['metadata'])) {
                 $aggregated[$aggregationKey]['metadata'][] = $demandLine['metadata'];
             }
         }
 
-        return array_values($aggregated);
+        return array_values(array_map(static function (array $row): array {
+            $row['source_type'] = count($row['source_types']) === 1 ? $row['source_types'][0] : 'mixed';
+
+            return $row;
+        }, $aggregated));
     }
 
     private function explodeDemand(array $demandAggregation, string $referenceDate): array
@@ -549,6 +577,7 @@ final class MrpPlanningService extends BaseService
             'priority_rule' => (string) ($payload['priority_rule'] ?? 'priority_due_date'),
             'recompute_scope' => $payload['recompute_scope'] ?? null,
             'demand_lines' => $this->normalizeDemandLinesForFingerprint($payload['demand_lines'] ?? []),
+            'forecast_lines' => $this->normalizeDemandLinesForFingerprint($payload['forecast_lines'] ?? []),
         ], JSON_THROW_ON_ERROR));
     }
 

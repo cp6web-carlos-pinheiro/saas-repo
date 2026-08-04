@@ -31,6 +31,18 @@ final class RunMrpPlanRequest extends FormRequest
             'demand_lines.*.source_reference_id' => ['nullable', 'integer', 'min:1'],
             'demand_lines.*.source_reference_type' => ['nullable', 'string', 'max:120'],
             'demand_lines.*.metadata' => ['nullable', 'array'],
+            'forecast_lines' => ['nullable', 'array'],
+            'forecast_lines.*.product_id' => ['required', 'integer', 'exists:products,id'],
+            'forecast_lines.*.warehouse_id' => ['nullable', 'integer', 'exists:warehouses,id'],
+            'forecast_lines.*.quantity' => ['required', 'numeric', 'min:0.000001'],
+            'forecast_lines.*.need_by_date' => ['required', 'date'],
+            'forecast_lines.*.bom_version_number' => ['nullable', 'integer', 'min:1'],
+            'forecast_lines.*.routing_version_id' => ['nullable', 'integer', 'exists:routing_versions,id'],
+            'forecast_lines.*.priority' => ['nullable', 'integer', 'min:1'],
+            'forecast_lines.*.source_type' => ['nullable', 'string', 'max:80'],
+            'forecast_lines.*.source_reference_id' => ['nullable', 'integer', 'min:1'],
+            'forecast_lines.*.source_reference_type' => ['nullable', 'string', 'max:120'],
+            'forecast_lines.*.metadata' => ['nullable', 'array'],
         ];
     }
 }
