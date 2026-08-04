@@ -23,19 +23,11 @@
                 @method('PUT')
             @endif
 
-            <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('warehouse.name') }}
-                    <x-ui.input name="name" :value="old('name', $warehouse?->name)" class="mt-2" required />
-                    @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
-
-                <label class="block text-sm font-medium">
-                    {{ __('warehouse.code') }}
-                    <x-ui.input name="code" :value="old('code', $warehouse?->code)" class="mt-2" required />
-                    @error('code')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
-            </div>
+            <label class="block text-sm font-medium">
+                {{ __('warehouse.name') }}
+                <x-ui.input name="name" :value="old('name', $warehouse?->name)" class="mt-2" required />
+                @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+            </label>
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <label class="block text-sm font-medium">

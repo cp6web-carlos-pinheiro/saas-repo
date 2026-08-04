@@ -103,11 +103,11 @@
             <form class="mt-4 space-y-4" method="POST" action="{{ route('production.orders.consumptions.store', $order) }}">
                 @csrf
                 <label class="block text-sm font-medium">Produto consumido
-                    <x-ui.select class="mt-2" name="product_id" required data-search="on">
+                    <x-ui.select class="mt-2" name="product_id" required data-search="on" data-placeholder="Selecione um produto" data-ajax-url="{{ route('production.products.search') }}" data-minimum-input-length="1">
                         <option value="">Selecione um produto</option>
-                        @foreach ($products as $product)
-                            <option value="{{ $product->id }}">{{ $product->sku }} - {{ $product->description }}</option>
-                        @endforeach
+                        @if ($selectedConsumptionProduct)
+                            <option value="{{ $selectedConsumptionProduct->id }}" selected>{{ $selectedConsumptionProduct->sku }} - {{ $selectedConsumptionProduct->description }}</option>
+                        @endif
                     </x-ui.select>
                 </label>
 

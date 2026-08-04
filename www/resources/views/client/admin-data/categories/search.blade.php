@@ -1,13 +1,13 @@
 @extends('layouts.client-area')
 
-@section('title', __('ui.module_inventory').' | '.__('admin_data.'.$domain.'.title'))
-@section('client-page-title', __('admin_data.'.$domain.'.title'))
+@section('title', __('ui.module_inventory').' | '.__('admin_data_categories.title'))
+@section('client-page-title', __('admin_data_categories.title'))
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ __('admin_data.'.$domain.'.title') }}</h1>
-        <x-ui.button :href="route('admin-data.create', ['domain' => $domain])" variant="brand-primary" class="rounded-full">{{ __('admin_data.create') }}</x-ui.button>
+        <h1 class="font-display text-3xl font-bold">{{ __('admin_data_categories.title') }}</h1>
+        <x-ui.button :href="route('admin-data.categories.create')" variant="brand-primary" class="rounded-full">{{ __('admin_data_categories.create') }}</x-ui.button>
     </div>
 
     @if (session('status'))
@@ -16,13 +16,13 @@
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
         <form class="flex gap-3" method="GET">
-            <label for="admin-data-search" class="sr-only">{{ __('admin_data.search') }}</label>
-            <x-ui.input id="admin-data-search" name="search" :value="$search" class="min-w-0 flex-1" placeholder="{{ __('admin_data.search') }}" />
+            <label for="categories-search" class="sr-only">{{ __('admin_data_categories.search') }}</label>
+            <x-ui.input id="categories-search" name="search" :value="$search" class="min-w-0 flex-1" placeholder="{{ __('admin_data_categories.search') }}" />
             <input type="hidden" name="status" value="{{ $status }}">
             <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('admin_data.filter') }}</x-ui.button>
         </form>
 
-        @php($filterUrl = fn ($overrides = []) => route('admin-data.index', array_merge(['domain' => $domain, 'search' => $search, 'sort' => $sort, 'direction' => $direction, 'status' => $status], $overrides)))
+        @php($filterUrl = fn ($overrides = []) => route('admin-data.categories.index', array_merge(['search' => $search, 'sort' => $sort, 'direction' => $direction, 'status' => $status], $overrides)))
         @php($sortUrl = fn ($column) => $filterUrl(['sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
 
         <div class="mt-4 flex flex-wrap gap-2 text-sm">
@@ -36,43 +36,41 @@
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
                         <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('code') }}">{{ __('admin_data.code') }} ↕</a></th>
                         <th class="px-3 py-3"><a href="{{ $sortUrl('name') }}">{{ __('admin_data.name') }} ↕</a></th>
                         <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('admin_data.status') }} ↕</a></th>
                         <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('admin_data.created_at') }} ↕</a></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($records as $record)
+                    @forelse ($categories as $category)
                         <tr
                             class="cursor-pointer border-b border-[#f1f3f4] transition hover:bg-[#f8fafd]"
                             tabindex="0"
-                            onclick="window.location='{{ route('admin-data.show', ['domain' => $domain, 'record' => $record]) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('admin-data.show', ['domain' => $domain, 'record' => $record]) }}'; }"
+                            onclick="window.location='{{ route('admin-data.categories.show', $category) }}'"
+                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('admin-data.categories.show', $category) }}'; }"
                         >
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $record->id }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $record->code }}</td>
-                            <td class="px-3 py-4">{{ $record->name }}</td>
+                            <td class="px-3 py-4 text-[#5f6368]">{{ $category->id }}</td>
+                            <td class="px-3 py-4">{{ $category->name }}</td>
                             <td class="px-3 py-4">
                                 <x-ui.definition-item-status
                                     :label="__('admin_data.status')"
-                                    :value="$record->is_active ? __('admin_data.active') : __('admin_data.inactive')"
-                                    :tone="$record->is_active ? 'success' : 'neutral'"
+                                    :value="$category->is_active ? __('admin_data.active') : __('admin_data.inactive')"
+                                    :tone="$category->is_active ? 'success' : 'neutral'"
                                     inline
                                 />
                             </td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $record->created_at?->format('d/m/Y') }}</td>
+                            <td class="px-3 py-4 text-[#5f6368]">{{ $category->created_at?->format('d/m/Y') }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-3 py-10 text-center text-[#5f6368]">{{ __('admin_data.empty') }}</td>
+                            <td colspan="4" class="px-3 py-10 text-center text-[#5f6368]">{{ __('admin_data_categories.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        <div class="mt-6">{{ $records->links() }}</div>
+        <div class="mt-6">{{ $categories->links() }}</div>
     </x-ui.panel>
 </div>
 @endsection

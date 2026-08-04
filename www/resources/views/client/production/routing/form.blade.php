@@ -24,11 +24,11 @@
             @endif
 
             <label class="block text-sm font-medium">Produto
-                <x-ui.select class="mt-2" name="product_id" required data-search="on">
+                <x-ui.select class="mt-2" name="product_id" required data-search="on" data-placeholder="Selecione" data-ajax-url="{{ route('production.products.search') }}" data-minimum-input-length="1">
                     <option value="">Selecione</option>
-                    @foreach ($products as $product)
-                        <option value="{{ $product->id }}" @selected((string) old('product_id', $version?->product_id) === (string) $product->id)>{{ $product->sku }} - {{ $product->description }}</option>
-                    @endforeach
+                    @if ($selectedProduct)
+                        <option value="{{ $selectedProduct->id }}" selected>{{ $selectedProduct->sku }} - {{ $selectedProduct->description }}</option>
+                    @endif
                 </x-ui.select>
             </label>
 

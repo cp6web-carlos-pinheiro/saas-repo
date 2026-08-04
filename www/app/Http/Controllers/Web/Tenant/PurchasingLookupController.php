@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Web\Tenant\Concerns\HandlesTenantAuthorization;
+use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrder;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrderLine;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition;
@@ -152,6 +153,38 @@ final class PurchasingLookupController extends Controller
             'results' => $paginator->getCollection()->map(static fn (Warehouse $warehouse): array => [
                 'id' => $warehouse->id,
                 'text' => sprintf('%s - %s', $warehouse->code, $warehouse->name),
+            ])->values(),
+            'pagination' => ['more' => $paginator->hasMorePages()],
+        ]);
+    }
+
+    public function products(Request $request): JsonResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensureAnyPermission($request, $company->id, self::PERMISSIONS);
+
+        $term = trim((string) $request->query('q', ''));
+        $page = max(1, (int) $request->query('page', 1));
+
+        $query = Product::query()
+            ->where('company_id', $company->id)
+            ->where('is_active', true)
+            ->select(['id', 'sku', 'description'])
+            ->orderBy('sku');
+
+        if ($term !== '') {
+            $query->where(function ($nested) use ($term): void {
+                $nested->where('sku', 'like', "%{$term}%")
+                    ->orWhere('description', 'like', "%{$term}%");
+            });
+        }
+
+        $paginator = $query->paginate(20, ['id', 'sku', 'description'], 'page', $page);
+
+        return response()->json([
+            'results' => $paginator->getCollection()->map(static fn (Product $product): array => [
+                'id' => $product->id,
+                'text' => sprintf('%s - %s', $product->sku, $product->description ?? '—'),
             ])->values(),
             'pagination' => ['more' => $paginator->hasMorePages()],
         ]);

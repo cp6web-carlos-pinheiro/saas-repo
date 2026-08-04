@@ -22,9 +22,11 @@ use App\Http\Controllers\Web\Onboarding\OnboardingController;
 use App\Http\Controllers\Web\Onboarding\PaymentController;
 use App\Http\Controllers\Web\Tenant\CompanyAccessUserController;
 use App\Http\Controllers\Web\Tenant\RbacConsoleController;
+use App\Http\Controllers\Web\Tenant\AdminData\BrandsController;
+use App\Http\Controllers\Web\Tenant\AdminData\CategoriesController;
+use App\Http\Controllers\Web\Tenant\AdminData\UnitsController;
 use App\Http\Controllers\Web\Tenant\BomMaterialListController;
 use App\Http\Controllers\Web\Tenant\BomStructureController;
-use App\Http\Controllers\Web\Tenant\MasterDataController;
 use App\Http\Controllers\Web\Tenant\CustomerController;
 use App\Http\Controllers\Web\Tenant\PlantController;
 use App\Http\Controllers\Web\Tenant\ProductController;
@@ -207,6 +209,7 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/suppliers', [PurchasingLookupController::class, 'suppliers'])->name('suppliers');
             Route::get('/requisitions', [PurchasingLookupController::class, 'requisitions'])->name('requisitions');
             Route::get('/orders', [PurchasingLookupController::class, 'orders'])->name('orders');
+            Route::get('/products', [PurchasingLookupController::class, 'products'])->name('products');
             Route::get('/warehouses', [PurchasingLookupController::class, 'warehouses'])->name('warehouses');
             Route::get('/order-lines', [PurchasingLookupController::class, 'orderLines'])->name('order-lines');
         });
@@ -222,13 +225,35 @@ Route::middleware('auth:web')->group(function (): void {
         });
 
         Route::prefix('admin-data')->name('admin-data.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
-            Route::get('/{domain}', [MasterDataController::class, 'index'])->name('index');
-            Route::get('/{domain}/create', [MasterDataController::class, 'create'])->name('create');
-            Route::post('/{domain}', [MasterDataController::class, 'store'])->name('store');
-            Route::get('/{domain}/{record}', [MasterDataController::class, 'show'])->name('show');
-            Route::get('/{domain}/{record}/edit', [MasterDataController::class, 'edit'])->name('edit');
-            Route::put('/{domain}/{record}', [MasterDataController::class, 'update'])->name('update');
-            Route::delete('/{domain}/{record}', [MasterDataController::class, 'destroy'])->name('destroy');
+            Route::prefix('units')->name('units.')->group(function (): void {
+                Route::get('/', [UnitsController::class, 'index'])->name('index');
+                Route::get('/create', [UnitsController::class, 'create'])->name('create');
+                Route::post('/', [UnitsController::class, 'store'])->name('store');
+                Route::get('/{unit}', [UnitsController::class, 'show'])->name('show');
+                Route::get('/{unit}/edit', [UnitsController::class, 'edit'])->name('edit');
+                Route::put('/{unit}', [UnitsController::class, 'update'])->name('update');
+                Route::delete('/{unit}', [UnitsController::class, 'destroy'])->name('destroy');
+            });
+
+            Route::prefix('categories')->name('categories.')->group(function (): void {
+                Route::get('/', [CategoriesController::class, 'index'])->name('index');
+                Route::get('/create', [CategoriesController::class, 'create'])->name('create');
+                Route::post('/', [CategoriesController::class, 'store'])->name('store');
+                Route::get('/{category}', [CategoriesController::class, 'show'])->name('show');
+                Route::get('/{category}/edit', [CategoriesController::class, 'edit'])->name('edit');
+                Route::put('/{category}', [CategoriesController::class, 'update'])->name('update');
+                Route::delete('/{category}', [CategoriesController::class, 'destroy'])->name('destroy');
+            });
+
+            Route::prefix('brands')->name('brands.')->group(function (): void {
+                Route::get('/', [BrandsController::class, 'index'])->name('index');
+                Route::get('/create', [BrandsController::class, 'create'])->name('create');
+                Route::post('/', [BrandsController::class, 'store'])->name('store');
+                Route::get('/{brand}', [BrandsController::class, 'show'])->name('show');
+                Route::get('/{brand}/edit', [BrandsController::class, 'edit'])->name('edit');
+                Route::put('/{brand}', [BrandsController::class, 'update'])->name('update');
+                Route::delete('/{brand}', [BrandsController::class, 'destroy'])->name('destroy');
+            });
         });
 
         Route::prefix('inventory/plants')->name('inventory.plants.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
@@ -264,6 +289,8 @@ Route::middleware('auth:web')->group(function (): void {
         });
 
         Route::prefix('production')->name('production.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/products/search', [ProductionOrderController::class, 'searchProducts'])->name('products.search');
+
             Route::get('/orders', [ProductionOrderController::class, 'index'])->name('orders.index');
             Route::get('/orders/create', [ProductionOrderController::class, 'create'])->name('orders.create');
             Route::post('/orders', [ProductionOrderController::class, 'store'])->name('orders.store');

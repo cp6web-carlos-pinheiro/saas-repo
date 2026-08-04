@@ -13,6 +13,7 @@ use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOutp
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -68,10 +69,13 @@ final class ProductionOrderController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
-        $products = Product::query()->where('is_active', true)->orderBy('description')->get(['id', 'sku', 'description']);
+        $selectedProductId = (int) ($request->old('product_id') ?? 0);
+        $selectedProduct = $selectedProductId > 0
+            ? Product::query()->where('is_active', true)->find($selectedProductId, ['id', 'sku', 'description'])
+            : null;
         $warehouses = Warehouse::query()->where('is_active', true)->orderBy('name')->get(['id', 'code', 'name']);
 
-        return view('client.production.orders.form', compact('products', 'warehouses', 'company'));
+        return view('client.production.orders.form', compact('selectedProduct', 'warehouses', 'company'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -113,10 +117,56 @@ final class ProductionOrderController extends Controller
             'materialConsumptions.warehouse:id,code,name',
         ]);
 
-        $products = Product::query()->where('is_active', true)->orderBy('description')->get(['id', 'sku', 'description']);
+        $selectedConsumptionProductId = (int) ($request->old('product_id') ?? 0);
+        $selectedConsumptionProduct = $selectedConsumptionProductId > 0
+            ? Product::query()->where('is_active', true)->find($selectedConsumptionProductId, ['id', 'sku', 'description'])
+            : null;
         $warehouses = Warehouse::query()->where('is_active', true)->orderBy('name')->get(['id', 'code', 'name']);
 
-        return view('client.production.orders.show', compact('order', 'products', 'warehouses', 'company'));
+        return view('client.production.orders.show', compact('order', 'selectedConsumptionProduct', 'warehouses', 'company'));
+    }
+
+    public function searchProducts(Request $request): JsonResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensureAnyPermission($request, $company->id, [
+            self::READ_PERMISSION,
+            self::CREATE_PERMISSION,
+            self::PARTIAL_PERMISSION,
+            self::CONSUMPTION_CREATE_PERMISSION,
+            'routing-versions.read',
+            'routing-versions.create',
+            'routing-versions.update',
+        ]);
+
+        $term = trim((string) $request->query('q', ''));
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 20;
+
+        $query = Product::query()
+            ->where('is_active', true)
+            ->select(['id', 'sku', 'description'])
+            ->orderBy('sku');
+
+        if ($term !== '') {
+            $query->where(function (Builder $inner) use ($term): void {
+                $inner
+                    ->where('sku', 'like', "%{$term}%")
+                    ->orWhere('description', 'like', "%{$term}%");
+            });
+        }
+
+        $paginator = $query->paginate($perPage, ['id', 'sku', 'description'], 'page', $page);
+
+        return response()->json([
+            'results' => $paginator->getCollection()->map(fn (Product $product): array => [
+                'id' => $product->id,
+                'text' => sprintf('%s - %s', $product->sku, $product->description ?? '—'),
+            ])->values(),
+            'pagination' => [
+                'more' => $paginator->hasMorePages(),
+            ],
+        ]);
     }
 
     public function release(Request $request, ProductionOrder $order): RedirectResponse

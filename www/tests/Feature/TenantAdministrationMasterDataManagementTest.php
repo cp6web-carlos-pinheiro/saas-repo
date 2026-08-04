@@ -15,8 +15,10 @@ use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
-use App\Modules\Tenant\Infrastructure\Persistence\Models\MasterDataRecord;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\ProductBrand;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\ProductCategory;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -176,7 +178,7 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
         $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
 
         $this->actingAs($user, 'web')
-            ->get(route('admin-data.index', ['domain' => 'units']));
+            ->get(route('admin-data.units.index'));
     }
 
     /**
@@ -241,13 +243,30 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
         }
 
         $this->actingAs($user, 'web')
-            ->post(route('admin-data.store', ['domain' => $domain]), $payload)
-            ->assertRedirect(route('admin-data.index', ['domain' => $domain]));
+            ->post(match ($domain) {
+                'units' => route('admin-data.units.store'),
+                'categories' => route('admin-data.categories.store'),
+                'brands' => route('admin-data.brands.store'),
+            }, $payload)
+            ->assertRedirect(match ($domain) {
+                'units' => route('admin-data.units.index'),
+                'categories' => route('admin-data.categories.index'),
+                'brands' => route('admin-data.brands.index'),
+            });
 
-        return (int) MasterDataRecord::query()
-            ->where('company_id', (int) $user->current_company_id)
-            ->where('domain', $domain)
-            ->where('code', $code)
-            ->value('id');
+        return match ($domain) {
+            'units' => (int) Unit::query()
+                ->where('company_id', (int) $user->current_company_id)
+                ->where('code', $code)
+                ->value('id'),
+            'categories' => (int) ProductCategory::query()
+                ->where('company_id', (int) $user->current_company_id)
+                ->where('name', $name)
+                ->value('id'),
+            'brands' => (int) ProductBrand::query()
+                ->where('company_id', (int) $user->current_company_id)
+                ->where('name', $name)
+                ->value('id'),
+        };
     }
 }

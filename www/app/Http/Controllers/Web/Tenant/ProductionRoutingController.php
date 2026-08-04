@@ -65,12 +65,15 @@ final class ProductionRoutingController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
-        $products = Product::query()->where('is_active', true)->orderBy('description')->get(['id', 'sku', 'description']);
+        $selectedProductId = (int) ($request->old('product_id') ?? 0);
+        $selectedProduct = $selectedProductId > 0
+            ? Product::query()->where('is_active', true)->find($selectedProductId, ['id', 'sku', 'description'])
+            : null;
 
         return view('client.production.routing.form', [
             'company' => $company,
             'version' => null,
-            'products' => $products,
+            'selectedProduct' => $selectedProduct,
         ]);
     }
 
@@ -113,12 +116,15 @@ final class ProductionRoutingController extends Controller
         $this->ensureAnyPermission($request, $company->id, [self::UPDATE_PERMISSION, self::CREATE_PERMISSION]);
         abort_unless((int) $version->company_id === (int) $company->id, 404);
 
-        $products = Product::query()->where('is_active', true)->orderBy('description')->get(['id', 'sku', 'description']);
+        $selectedProductId = (int) ($request->old('product_id') ?? $version->product_id ?? 0);
+        $selectedProduct = $selectedProductId > 0
+            ? Product::query()->where('is_active', true)->find($selectedProductId, ['id', 'sku', 'description'])
+            : null;
 
         return view('client.production.routing.form', [
             'company' => $company,
             'version' => $version,
-            'products' => $products,
+            'selectedProduct' => $selectedProduct,
         ]);
     }
 

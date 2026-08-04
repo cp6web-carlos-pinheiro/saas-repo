@@ -13,6 +13,7 @@ use App\Services\SaaS\AuditLogService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -99,7 +100,7 @@ final class WarehouseController extends Controller
             'company_id' => $company->id,
             'plant_id' => (int) $data['plant_id'],
             'name' => (string) $data['name'],
-            'code' => mb_strtoupper((string) $data['code']),
+            'code' => $this->generateWarehouseCode($company->id, (string) $data['name']),
             'is_active' => (bool) ($data['is_active'] ?? true),
         ]);
 
@@ -144,7 +145,6 @@ final class WarehouseController extends Controller
         $warehouse->fill([
             'plant_id' => (int) $data['plant_id'],
             'name' => (string) $data['name'],
-            'code' => mb_strtoupper((string) $data['code']),
             'is_active' => (bool) ($data['is_active'] ?? true),
         ]);
         $warehouse->save();
@@ -192,20 +192,12 @@ final class WarehouseController extends Controller
     }
 
     /**
-     * @return array{name: string, code: string, plant_id: int|string, is_active?: bool}
+     * @return array{name: string, plant_id: int|string, is_active?: bool}
      */
     private function validateWarehouse(Request $request, Company $company, ?Warehouse $warehouse = null): array
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:150'],
-            'code' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('warehouses', 'code')
-                    ->where(static fn ($query) => $query->where('company_id', $company->id))
-                    ->ignore($warehouse?->id),
-            ],
             'plant_id' => [
                 'required',
                 'integer',
@@ -213,6 +205,32 @@ final class WarehouseController extends Controller
             ],
             'is_active' => ['nullable', 'boolean'],
         ]);
+    }
+
+    private function generateWarehouseCode(int $companyId, string $name): string
+    {
+        $base = Str::of($name)
+            ->ascii()
+            ->upper()
+            ->replaceMatches('/[^A-Z0-9]+/', '-')
+            ->trim('-')
+            ->value();
+
+        if ($base === '') {
+            $base = 'WAREHOUSE';
+        }
+
+        $base = mb_substr($base, 0, 44);
+        $candidate = $base;
+        $counter = 2;
+
+        while (Warehouse::query()->where('company_id', $companyId)->where('code', $candidate)->exists()) {
+            $suffix = '-'.$counter;
+            $candidate = mb_substr($base, 0, max(1, 50 - mb_strlen($suffix))).$suffix;
+            $counter++;
+        }
+
+        return $candidate;
     }
 
     /**

@@ -25,8 +25,4 @@ return [
     'updated' => 'Cadastro atualizado com sucesso.',
     'removed' => 'Cadastro removido com sucesso.',
     'remove_blocked' => 'Existem vínculos ativos para este cadastro. Remoção bloqueada.',
-
-    'units' => ['title' => 'Unidades'],
-    'categories' => ['title' => 'Categorias'],
-    'brands' => ['title' => 'Marcas'],
 ];

@@ -75,12 +75,12 @@
                         <div class="mt-3 space-y-3" data-pr-items-container>
                             @foreach (old('items', $lineRows) as $index => $item)
                                 <div class="grid grid-cols-[2fr_1.5fr_1.5fr_1fr_1.2fr_1.2fr_auto] items-start gap-4" data-pr-item-row>
-                                    <x-ui.select name="items[{{ $index }}][product_id]" required data-search="on">
+                                    <x-ui.select name="items[{{ $index }}][product_id]" required data-search="on" data-placeholder="{{ __('purchase_requisition.select_product') }}" data-ajax-url="{{ route('purchasing.lookups.products') }}" data-minimum-input-length="1">
                                         <option value="">{{ __('purchase_requisition.select_product') }}</option>
                                         @php($selectedProductId = (int) old('items.'.$index.'.product_id', $item['product_id'] ?? 0))
-                                        @foreach ($products as $product)
-                                            <option value="{{ $product->id }}" @selected($selectedProductId === $product->id)>{{ $product->sku }} - {{ $product->description ?? '—' }}</option>
-                                        @endforeach
+                                        @if ($selectedProductId > 0 && $productsById->has($selectedProductId))
+                                            <option value="{{ $selectedProductId }}" selected>{{ $productsById[$selectedProductId]->sku }} - {{ $productsById[$selectedProductId]->description ?? '—' }}</option>
+                                        @endif
                                     </x-ui.select>
 
                                     <x-ui.select name="items[{{ $index }}][warehouse_id]" data-search="on">
@@ -135,11 +135,8 @@
 
 <template id="pr-item-template">
     <div class="grid grid-cols-[2fr_1.5fr_1.5fr_1fr_1.2fr_1.2fr_auto] items-start gap-4" data-pr-item-row>
-        <x-ui.select name="items[__INDEX__][product_id]" required data-search="on">
+        <x-ui.select name="items[__INDEX__][product_id]" required data-search="on" data-placeholder="{{ __('purchase_requisition.select_product') }}" data-ajax-url="{{ route('purchasing.lookups.products') }}" data-minimum-input-length="1">
             <option value="">{{ __('purchase_requisition.select_product') }}</option>
-            @foreach ($products as $product)
-                <option value="{{ $product->id }}">{{ $product->sku }} - {{ $product->description ?? '—' }}</option>
-            @endforeach
         </x-ui.select>
         <x-ui.select name="items[__INDEX__][warehouse_id]" data-search="on">
             <option value="">{{ __('purchase_requisition.select_warehouse') }}</option>

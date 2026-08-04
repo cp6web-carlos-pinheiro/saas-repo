@@ -25,8 +25,4 @@ return [
     'updated' => 'Registro actualizado con éxito.',
     'removed' => 'Registro eliminado con éxito.',
     'remove_blocked' => 'Este registro tiene vínculos transaccionales. Eliminación bloqueada.',
-
-    'units' => ['title' => 'Unidades'],
-    'categories' => ['title' => 'Categorías'],
-    'brands' => ['title' => 'Marcas'],
 ];

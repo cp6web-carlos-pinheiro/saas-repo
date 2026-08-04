@@ -25,8 +25,4 @@ return [
     'updated' => 'Record updated successfully.',
     'removed' => 'Record removed successfully.',
     'remove_blocked' => 'This record is linked to transactional data. Deletion blocked.',
-
-    'units' => ['title' => 'Units'],
-    'categories' => ['title' => 'Categories'],
-    'brands' => ['title' => 'Brands'],
 ];

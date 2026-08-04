@@ -21,11 +21,11 @@
             <div class="grid gap-5 sm:grid-cols-2">
                 <label class="block text-sm font-medium">
                     Produto
-                    <x-ui.select name="product_id" class="mt-2" required data-search="on">
+                    <x-ui.select name="product_id" class="mt-2" required data-search="on" data-placeholder="Selecione um produto" data-ajax-url="{{ route('production.products.search') }}" data-minimum-input-length="1">
                         <option value="">Selecione um produto</option>
-                        @foreach ($products as $product)
-                            <option value="{{ $product->id }}" @selected((string) old('product_id') === (string) $product->id)>{{ $product->sku }} - {{ $product->description }}</option>
-                        @endforeach
+                        @if ($selectedProduct)
+                            <option value="{{ $selectedProduct->id }}" selected>{{ $selectedProduct->sku }} - {{ $selectedProduct->description }}</option>
+                        @endif
                     </x-ui.select>
                 </label>
 

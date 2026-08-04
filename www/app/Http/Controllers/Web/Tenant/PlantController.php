@@ -12,6 +12,7 @@ use App\Services\SaaS\AuditLogService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -94,7 +95,7 @@ final class PlantController extends Controller
         $plant = Plant::query()->create([
             'company_id' => $company->id,
             'name' => (string) $data['name'],
-            'code' => mb_strtoupper((string) $data['code']),
+            'code' => $this->generatePlantCode($company->id, (string) $data['name']),
             'timezone' => (string) $data['timezone'],
             'is_active' => (bool) ($data['is_active'] ?? true),
         ]);
@@ -138,7 +139,6 @@ final class PlantController extends Controller
 
         $plant->fill([
             'name' => (string) $data['name'],
-            'code' => mb_strtoupper((string) $data['code']),
             'timezone' => (string) $data['timezone'],
             'is_active' => (bool) ($data['is_active'] ?? true),
         ]);
@@ -191,22 +191,40 @@ final class PlantController extends Controller
     }
 
     /**
-    * @return array{name: string, code: string, timezone: string, is_active?: bool}
+    * @return array{name: string, timezone: string, is_active?: bool}
      */
     private function validatePlant(Request $request, Company $company, ?Plant $plant = null): array
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:150'],
-            'code' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('plants', 'code')
-                    ->where(static fn ($query) => $query->where('company_id', $company->id))
-                    ->ignore($plant?->id),
-            ],
             'timezone' => ['required', 'string', 'max:50'],
             'is_active' => ['nullable', 'boolean'],
         ]);
+    }
+
+    private function generatePlantCode(int $companyId, string $name): string
+    {
+        $base = Str::of($name)
+            ->ascii()
+            ->upper()
+            ->replaceMatches('/[^A-Z0-9]+/', '-')
+            ->trim('-')
+            ->value();
+
+        if ($base === '') {
+            $base = 'PLANT';
+        }
+
+        $base = mb_substr($base, 0, 44);
+        $candidate = $base;
+        $counter = 2;
+
+        while (Plant::query()->where('company_id', $companyId)->where('code', $candidate)->exists()) {
+            $suffix = '-'.$counter;
+            $candidate = mb_substr($base, 0, max(1, 50 - mb_strlen($suffix))).$suffix;
+            $counter++;
+        }
+
+        return $candidate;
     }
 }

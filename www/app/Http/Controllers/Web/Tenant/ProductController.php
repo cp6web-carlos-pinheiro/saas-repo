@@ -10,7 +10,9 @@ use App\Modules\Product\Application\Services\ProductSpreadsheetService;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Product\Presentation\Http\Requests\ImportProductsRequest;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
-use App\Modules\Tenant\Infrastructure\Persistence\Models\MasterDataRecord;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\ProductBrand;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\ProductCategory;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
@@ -321,20 +323,20 @@ final class ProductController extends Controller
             'unit_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('master_data_records', 'id')
-                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'units')->where('is_active', true)),
+                Rule::exists('units', 'id')
+                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('is_active', true)),
             ],
             'category_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('master_data_records', 'id')
-                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'categories')),
+                Rule::exists('product_categories', 'id')
+                    ->where(static fn ($query) => $query->where('company_id', $company->id)),
             ],
             'brand_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('master_data_records', 'id')
-                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'brands')),
+                Rule::exists('product_brands', 'id')
+                    ->where(static fn ($query) => $query->where('company_id', $company->id)),
             ],
             'safety_stock' => ['required', 'integer', 'min:0'],
             'lead_time_days' => ['required', 'integer', 'min:0'],
@@ -377,14 +379,37 @@ final class ProductController extends Controller
      */
     private function masterDataOptions(Company $company, string $domain): array
     {
-        return MasterDataRecord::query()
-            ->where('company_id', $company->id)
-            ->where('domain', $domain)
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'code', 'name'])
-            ->mapWithKeys(static fn (MasterDataRecord $record): array => [$record->id => sprintf('%s - %s', $record->code, $record->name)])
-            ->all();
+        if ($domain === 'units') {
+            return Unit::query()
+                ->where('company_id', $company->id)
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'code', 'name'])
+                ->mapWithKeys(static fn (Unit $record): array => [$record->id => sprintf('%s - %s', $record->code, $record->name)])
+                ->all();
+        }
+
+        if ($domain === 'categories') {
+            return ProductCategory::query()
+                ->where('company_id', $company->id)
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->mapWithKeys(static fn (ProductCategory $record): array => [$record->id => $record->name])
+                ->all();
+        }
+
+        if ($domain === 'brands') {
+            return ProductBrand::query()
+                ->where('company_id', $company->id)
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->mapWithKeys(static fn (ProductBrand $record): array => [$record->id => $record->name])
+                ->all();
+        }
+
+        return [];
     }
 
     /**
@@ -393,9 +418,8 @@ final class ProductController extends Controller
     private function resolveUom(Company $company, array $data): string
     {
         if (isset($data['unit_id']) && (int) $data['unit_id'] > 0) {
-            $unitCode = MasterDataRecord::query()
+            $unitCode = Unit::query()
                 ->where('company_id', $company->id)
-                ->where('domain', 'units')
                 ->whereKey((int) $data['unit_id'])
                 ->value('code');
 

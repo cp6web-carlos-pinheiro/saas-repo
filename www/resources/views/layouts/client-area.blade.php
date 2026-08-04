@@ -64,9 +64,9 @@
             'inventory' => [
                 ['label' => __('ui.inventory_plants'), 'href' => route('inventory.plants.index'), 'active' => request()->routeIs('inventory.plants.*')],
                 ['label' => __('ui.inventory_warehouses'), 'href' => route('inventory.warehouses.index'), 'active' => request()->routeIs('inventory.warehouses.*')],
-                ['label' => __('ui.admin_units'), 'href' => route('admin-data.index', ['domain' => 'units']), 'active' => request()->routeIs('admin-data.*') && request()->route('domain') === 'units'],
-                ['label' => __('ui.admin_categories'), 'href' => route('admin-data.index', ['domain' => 'categories']), 'active' => request()->routeIs('admin-data.*') && request()->route('domain') === 'categories'],
-                ['label' => __('ui.admin_brands'), 'href' => route('admin-data.index', ['domain' => 'brands']), 'active' => request()->routeIs('admin-data.*') && request()->route('domain') === 'brands'],
+                ['label' => __('ui.admin_units'), 'href' => route('admin-data.units.index'), 'active' => request()->routeIs('admin-data.units.*')],
+                ['label' => __('ui.admin_categories'), 'href' => route('admin-data.categories.index'), 'active' => request()->routeIs('admin-data.categories.*')],
+                ['label' => __('ui.admin_brands'), 'href' => route('admin-data.brands.index'), 'active' => request()->routeIs('admin-data.brands.*')],
                 ['label' => __('ui.inventory_movements'), 'href' => null, 'active' => false],
                 ['label' => __('ui.inventory_count'), 'href' => null, 'active' => false],
             ],
