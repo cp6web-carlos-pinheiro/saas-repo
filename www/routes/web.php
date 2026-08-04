@@ -26,6 +26,7 @@ use App\Http\Controllers\Web\Tenant\BomStructureController;
 use App\Http\Controllers\Web\Tenant\CustomerController;
 use App\Http\Controllers\Web\Tenant\ProductController;
 use App\Http\Controllers\Web\Tenant\ProductVersionController;
+use App\Http\Controllers\Web\Tenant\SaleController;
 use App\Http\Controllers\Web\Tenant\SupplierController;
 use App\Http\Middleware\EnsureTrialIsActive;
 use App\Modules\Identity\Presentation\Http\Middleware\CheckPermission;
@@ -148,6 +149,18 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
             Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
             Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('sales')->name('sales.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [SaleController::class, 'index'])->name('index');
+            Route::get('/products/search', [SaleController::class, 'searchProducts'])->name('products.search');
+            Route::get('/create', [SaleController::class, 'create'])->name('create');
+            Route::post('/', [SaleController::class, 'store'])->name('store');
+            Route::get('/{sale}', [SaleController::class, 'show'])->name('show');
+            Route::get('/{sale}/edit', [SaleController::class, 'edit'])->name('edit');
+            Route::post('/{sale}/transition', [SaleController::class, 'transition'])->name('transition');
+            Route::put('/{sale}', [SaleController::class, 'update'])->name('update');
+            Route::delete('/{sale}', [SaleController::class, 'destroy'])->name('destroy');
         });
 
         Route::middleware([EnsureTrialIsActive::class, CheckPermission::class.':bom.explode'])->group(function (): void {

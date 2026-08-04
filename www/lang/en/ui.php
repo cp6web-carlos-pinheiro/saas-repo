@@ -96,6 +96,7 @@ return [
     'module_users' => 'Users',
     'module_suppliers' => 'Suppliers',
     'module_customers' => 'Customers',
+    'sales_register' => 'Sales Register',
     'product_register' => 'Register',
     'product_versions' => 'Versions',
     'module_production' => 'Production',

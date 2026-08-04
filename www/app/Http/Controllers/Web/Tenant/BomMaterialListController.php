@@ -12,6 +12,7 @@ use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
+use Illuminate\Support\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -63,25 +64,26 @@ final class BomMaterialListController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::WRITE_PERMISSION, $company->id);
 
-        $products = $this->companyProducts($company->id);
-        $selectedProductId = (int) $request->query('product_id', 0);
-        $selectedProduct = $selectedProductId > 0
-            ? $products->firstWhere('id', $selectedProductId)
-            : null;
+        $itemsForm = $this->oldItemsForm($request, [[
+            'line_no' => 1,
+            'component_product_id' => null,
+            'quantity_per' => 1,
+            'scrap_factor' => 0,
+            'uom' => '',
+        ]]);
+        $selectedProductId = (int) $request->old('product_id', (int) $request->query('product_id', 0));
+        $products = $this->companyProductsByIds(
+            $company->id,
+            $this->selectedProductIds($selectedProductId, $itemsForm, 'component_product_id')
+        );
 
         return view('client.bom.form', [
             'company' => $company,
             'bom' => null,
             'products' => $products,
             'editing' => false,
-            'selectedProductId' => $selectedProduct?->id,
-            'itemsForm' => [[
-                'line_no' => 1,
-                'component_product_id' => null,
-                'quantity_per' => 1,
-                'scrap_factor' => 0,
-                'uom' => '',
-            ]],
+            'selectedProductId' => $selectedProductId > 0 ? $selectedProductId : null,
+            'itemsForm' => $itemsForm,
         ]);
     }
 
@@ -150,14 +152,18 @@ final class BomMaterialListController extends Controller
         $this->ensureBomBelongsToCompany($bom, $company->id);
 
         $bom->load(['product', 'items.componentProduct']);
+        $itemsForm = $this->oldItemsForm($request, $this->itemsForm($bom));
 
         return view('client.bom.form', [
             'company' => $company,
             'bom' => $bom,
-            'products' => $this->companyProducts($company->id),
+            'products' => $this->companyProductsByIds(
+                $company->id,
+                $this->selectedProductIds((int) $request->old('product_id', $bom->product_id), $itemsForm, 'component_product_id')
+            ),
             'editing' => true,
             'selectedProductId' => $bom->product_id,
-            'itemsForm' => $this->itemsForm($bom),
+            'itemsForm' => $itemsForm,
         ]);
     }
 
@@ -281,12 +287,36 @@ final class BomMaterialListController extends Controller
         ]);
     }
 
-    private function companyProducts(int $companyId)
+    private function companyProductsByIds(int $companyId, array $ids): Collection
     {
+        if ($ids === []) {
+            return collect();
+        }
+
         return Product::query()
             ->where('company_id', $companyId)
+            ->whereIn('id', $ids)
             ->orderBy('sku')
             ->get(['id', 'sku', 'description', 'uom']);
+    }
+
+    private function oldItemsForm(Request $request, array $fallback): array
+    {
+        $items = $request->old('items');
+
+        return is_array($items) && $items !== [] ? array_values($items) : $fallback;
+    }
+
+    private function selectedProductIds(int $primaryId, array $items, string $itemKey): array
+    {
+        return collect($items)
+            ->pluck($itemKey)
+            ->prepend($primaryId > 0 ? $primaryId : null)
+            ->filter(static fn ($id): bool => (int) $id > 0)
+            ->map(static fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     private function syncItems(BomHeader $bom, int $companyId, array $items): void

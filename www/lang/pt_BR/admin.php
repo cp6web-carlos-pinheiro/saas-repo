@@ -32,7 +32,7 @@ return [
     'trial' => 'Período gratuito (14 dias)',
     'company_status_col' => 'Status Empresa',
     'actions' => 'Ações',
-    'code' => 'CÃ³digo',
+    'code' => 'Código',
     'slug' => 'Identificador',
     'organization_missing' => 'Sem organização vinculada',
     'without_plan' => 'sem-plano',

@@ -26,6 +26,8 @@ final class PurchasingPermissionsSeeder extends Seeder
             ['name' => 'Create Customers', 'slug' => 'sales.customers.create', 'module' => 'customers'],
             ['name' => 'Update Customers', 'slug' => 'sales.customers.update', 'module' => 'customers'],
             ['name' => 'Read Sales', 'slug' => 'sales.read', 'module' => 'sales'],
+            ['name' => 'Create Sales', 'slug' => 'sales.create', 'module' => 'sales'],
+            ['name' => 'Update Sales', 'slug' => 'sales.update', 'module' => 'sales'],
         ];
 
         foreach ($permissions as $permission) {

@@ -7,6 +7,7 @@
 @php
     $selectedStatus = old('status', $bom?->status ?? 'DRAFT');
     $itemRows = old('items', $itemsForm);
+    $productsById = $products->keyBy('id');
 @endphp
 
 <div class="w-full p-5 md:p-8">
@@ -46,13 +47,13 @@
                 <div class="grid gap-5 md:grid-cols-2">
                     <div class="md:col-span-2">
                         <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="product_id">{{ __('bom.select_product') }}</label>
-                        <x-ui.select id="product_id" name="product_id" required data-search="on">
+                        <x-ui.select id="product_id" name="product_id" required data-search="on" data-placeholder="{{ __('bom.select_product') }}" data-ajax-url="{{ route('products.search') }}" data-minimum-input-length="1">
                             <option value="">{{ __('bom.select_product') }}</option>
-                            @foreach ($products as $product)
-                                <option value="{{ $product->id }}" @selected((string) old('product_id') === (string) $product->id)>
-                                    {{ $product->sku }} - {{ $product->description ?? __('bom.product_hint') }}
+                            @if ($selectedProductId !== null && $productsById->has((int) $selectedProductId))
+                                <option value="{{ $selectedProductId }}" selected>
+                                    {{ $productsById[(int) $selectedProductId]->sku }} - {{ $productsById[(int) $selectedProductId]->description ?? __('bom.product_hint') }}
                                 </option>
-                            @endforeach
+                            @endif
                         </x-ui.select>
                         <p class="mt-2 text-sm text-[#5f6368]">{{ __('bom.product_hint') }}</p>
                         @error('product_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -113,13 +114,14 @@
                             @foreach ($itemRows as $index => $item)
                                 <div class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-start gap-4" data-bom-item-row>
                                     <div>
-                                        <x-ui.select name="items[{{ $index }}][component_product_id]" required data-search="on">
+                                        <x-ui.select name="items[{{ $index }}][component_product_id]" required data-search="on" data-placeholder="{{ __('bom.component_product') }}" data-ajax-url="{{ route('products.search') }}" data-minimum-input-length="1">
                                             <option value="">{{ __('bom.component_product') }}</option>
-                                            @foreach ($products as $product)
-                                                <option value="{{ $product->id }}" @selected((string) old('items.'.$index.'.component_product_id', $item['component_product_id'] ?? '') === (string) $product->id)>
-                                                    {{ $product->sku }} - {{ $product->description ?? '—' }}
+                                            @php($selectedComponentId = (int) old('items.'.$index.'.component_product_id', $item['component_product_id'] ?? 0))
+                                            @if ($selectedComponentId > 0 && $productsById->has($selectedComponentId))
+                                                <option value="{{ $selectedComponentId }}" selected>
+                                                    {{ $productsById[$selectedComponentId]->sku }} - {{ $productsById[$selectedComponentId]->description ?? '—' }}
                                                 </option>
-                                            @endforeach
+                                            @endif
                                         </x-ui.select>
                                         @error('items.'.$index.'.component_product_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                                     </div>
@@ -168,11 +170,8 @@
 <template id="bom-item-template">
     <div class="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-start gap-4" data-bom-item-row>
         <div>
-            <x-ui.select name="items[__INDEX__][component_product_id]" required data-search="on">
+            <x-ui.select name="items[__INDEX__][component_product_id]" required data-search="on" data-placeholder="{{ __('bom.component_product') }}" data-ajax-url="{{ route('products.search') }}" data-minimum-input-length="1">
                 <option value="">{{ __('bom.component_product') }}</option>
-                @foreach ($products as $product)
-                    <option value="{{ $product->id }}">{{ $product->sku }} - {{ $product->description ?? '—' }}</option>
-                @endforeach
             </x-ui.select>
         </div>
 

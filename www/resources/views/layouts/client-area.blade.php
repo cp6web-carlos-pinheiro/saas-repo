@@ -42,6 +42,9 @@
                 ['label' => __('ui.product_register'), 'href' => route('products.index'), 'active' => request()->routeIs('products.index') || request()->routeIs('products.create') || request()->routeIs('products.show') || request()->routeIs('products.edit')],
                 ['label' => __('ui.product_versions'), 'href' => route('products.versions'), 'active' => request()->routeIs('products.versions') || request()->routeIs('products.versions.*')],
             ],
+            'sales' => [
+                ['label' => __('ui.sales_register'), 'href' => route('sales.index'), 'active' => request()->routeIs('sales.*')],
+            ],
             'production_mrp' => [
                 ['label' => __('ui.bom_structures'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
                 ['label' => __('ui.bom_revisions'), 'href' => route('bom.material-lists.index'), 'active' => request()->routeIs('bom.material-lists.*')],
