@@ -29,6 +29,12 @@ use App\Http\Controllers\Web\Tenant\CustomerController;
 use App\Http\Controllers\Web\Tenant\PlantController;
 use App\Http\Controllers\Web\Tenant\ProductController;
 use App\Http\Controllers\Web\Tenant\ProductVersionController;
+use App\Http\Controllers\Web\Tenant\ProductionAnalyticsController;
+use App\Http\Controllers\Web\Tenant\ProductionCalendarWebController;
+use App\Http\Controllers\Web\Tenant\ProductionOrderController;
+use App\Http\Controllers\Web\Tenant\ProductionRoutingController;
+use App\Http\Controllers\Web\Tenant\ProductionSchedulingWebController;
+use App\Http\Controllers\Web\Tenant\ProductionWorkCenterController;
 use App\Http\Controllers\Web\Tenant\PurchasingLookupController;
 use App\Http\Controllers\Web\Tenant\PurchaseOrderController;
 use App\Http\Controllers\Web\Tenant\PurchaseQuotationController;
@@ -255,6 +261,41 @@ Route::middleware('auth:web')->group(function (): void {
             Route::post('/{sale}/transition', [SaleController::class, 'transition'])->name('transition');
             Route::put('/{sale}', [SaleController::class, 'update'])->name('update');
             Route::delete('/{sale}', [SaleController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('production')->name('production.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/orders', [ProductionOrderController::class, 'index'])->name('orders.index');
+            Route::get('/orders/create', [ProductionOrderController::class, 'create'])->name('orders.create');
+            Route::post('/orders', [ProductionOrderController::class, 'store'])->name('orders.store');
+            Route::get('/orders/{order}', [ProductionOrderController::class, 'show'])->whereNumber('order')->name('orders.show');
+            Route::post('/orders/{order}/release', [ProductionOrderController::class, 'release'])->whereNumber('order')->name('orders.release');
+            Route::post('/orders/{order}/complete', [ProductionOrderController::class, 'complete'])->whereNumber('order')->name('orders.complete');
+            Route::post('/orders/{order}/outputs', [ProductionOrderController::class, 'recordOutput'])->whereNumber('order')->name('orders.outputs.store');
+            Route::post('/orders/{order}/consumptions', [ProductionOrderController::class, 'recordConsumption'])->whereNumber('order')->name('orders.consumptions.store');
+            Route::post('/orders/{order}/outputs/{output}/inspection', [ProductionOrderController::class, 'updateInspection'])
+                ->whereNumber('order')
+                ->whereNumber('output')
+                ->name('orders.outputs.inspection.update');
+
+            Route::get('/analytics', [ProductionAnalyticsController::class, 'index'])->name('analytics.index');
+
+            Route::get('/routing', [ProductionRoutingController::class, 'index'])->name('routing.index');
+            Route::post('/routing', [ProductionRoutingController::class, 'store'])->name('routing.store');
+            Route::get('/routing/{version}', [ProductionRoutingController::class, 'show'])->whereNumber('version')->name('routing.show');
+            Route::post('/routing/{version}/operations', [ProductionRoutingController::class, 'storeOperation'])->whereNumber('version')->name('routing.operations.store');
+            Route::post('/routing/{version}/approve', [ProductionRoutingController::class, 'approve'])->whereNumber('version')->name('routing.approve');
+
+            Route::get('/work-centers', [ProductionWorkCenterController::class, 'index'])->name('work-centers.index');
+            Route::post('/work-centers', [ProductionWorkCenterController::class, 'store'])->name('work-centers.store');
+            Route::get('/work-centers/{workCenter}', [ProductionWorkCenterController::class, 'show'])->whereNumber('workCenter')->name('work-centers.show');
+            Route::post('/work-centers/{workCenter}/shifts', [ProductionWorkCenterController::class, 'storeShift'])->whereNumber('workCenter')->name('work-centers.shifts.store');
+
+            Route::get('/calendar', [ProductionCalendarWebController::class, 'index'])->name('calendar.index');
+            Route::post('/calendar/day', [ProductionCalendarWebController::class, 'upsertDay'])->name('calendar.days.upsert');
+            Route::post('/calendar/generate', [ProductionCalendarWebController::class, 'generate'])->name('calendar.generate');
+
+            Route::get('/scheduling', [ProductionSchedulingWebController::class, 'index'])->name('scheduling.index');
+            Route::post('/scheduling/run', [ProductionSchedulingWebController::class, 'run'])->name('scheduling.run');
         });
 
         Route::middleware([EnsureTrialIsActive::class, CheckPermission::class.':bom.explode'])->group(function (): void {

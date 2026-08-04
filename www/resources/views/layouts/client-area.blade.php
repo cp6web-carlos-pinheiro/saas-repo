@@ -47,12 +47,12 @@
             'production_mrp' => [
                 ['label' => __('ui.bom_structures'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
                 ['label' => __('ui.bom_revisions'), 'href' => route('bom.material-lists.index'), 'active' => request()->routeIs('bom.material-lists.*')],
-                ['label' => __('ui.production_orders').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
-                ['label' => __('ui.production_postings').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
-                ['label' => __('ui.module_routing').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
-                ['label' => __('ui.work_centers').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
-                ['label' => __('ui.production_calendar').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
-                ['label' => __('ui.module_scheduling').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
+                ['label' => __('ui.production_orders'), 'href' => route('production.orders.index'), 'active' => request()->routeIs('production.orders.*')],
+                ['label' => __('ui.production_postings'), 'href' => route('production.analytics.index'), 'active' => request()->routeIs('production.analytics.*')],
+                ['label' => __('ui.module_routing'), 'href' => route('production.routing.index'), 'active' => request()->routeIs('production.routing.*')],
+                ['label' => __('ui.work_centers'), 'href' => route('production.work-centers.index'), 'active' => request()->routeIs('production.work-centers.*')],
+                ['label' => __('ui.production_calendar'), 'href' => route('production.calendar.index'), 'active' => request()->routeIs('production.calendar.*')],
+                ['label' => __('ui.module_scheduling'), 'href' => route('production.scheduling.index'), 'active' => request()->routeIs('production.scheduling.*')],
             ],
             'purchasing' => [
                 ['label' => __('ui.purchasing_suppliers'), 'href' => route('purchasing.suppliers.index'), 'active' => request()->routeIs('purchasing.suppliers.*')],
