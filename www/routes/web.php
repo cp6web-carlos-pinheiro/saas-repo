@@ -24,6 +24,7 @@ use App\Http\Controllers\Web\Tenant\RbacConsoleController;
 use App\Http\Controllers\Web\Tenant\BomMaterialListController;
 use App\Http\Controllers\Web\Tenant\BomStructureController;
 use App\Http\Controllers\Web\Tenant\CustomerController;
+use App\Http\Controllers\Web\Tenant\PlantController;
 use App\Http\Controllers\Web\Tenant\ProductController;
 use App\Http\Controllers\Web\Tenant\ProductVersionController;
 use App\Http\Controllers\Web\Tenant\PurchaseFiscalEntryController;
@@ -218,6 +219,16 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/{warehouse}/edit', [WarehouseController::class, 'edit'])->name('edit');
             Route::put('/{warehouse}', [WarehouseController::class, 'update'])->name('update');
             Route::delete('/{warehouse}', [WarehouseController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('inventory/plants')->name('inventory.plants.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [PlantController::class, 'index'])->name('index');
+            Route::get('/create', [PlantController::class, 'create'])->name('create');
+            Route::post('/', [PlantController::class, 'store'])->name('store');
+            Route::get('/{plant}', [PlantController::class, 'show'])->name('show');
+            Route::get('/{plant}/edit', [PlantController::class, 'edit'])->name('edit');
+            Route::put('/{plant}', [PlantController::class, 'update'])->name('update');
+            Route::delete('/{plant}', [PlantController::class, 'destroy'])->name('destroy');
         });
 
         Route::prefix('customers')->name('customers.')->middleware(EnsureTrialIsActive::class)->group(function (): void {

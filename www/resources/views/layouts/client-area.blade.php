@@ -44,6 +44,7 @@
             ],
             'sales' => [
                 ['label' => __('ui.sales_register'), 'href' => route('sales.index'), 'active' => request()->routeIs('sales.*')],
+                ['label' => __('ui.sales_customers'), 'href' => route('customers.index'), 'active' => request()->routeIs('customers.*')],
             ],
             'production_mrp' => [
                 ['label' => __('ui.bom_structures'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
@@ -56,6 +57,7 @@
                 ['label' => __('ui.module_scheduling').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
             ],
             'purchasing' => [
+                ['label' => __('ui.purchasing_suppliers'), 'href' => route('purchasing.suppliers.index'), 'active' => request()->routeIs('purchasing.suppliers.*')],
                 ['label' => __('ui.purchasing_requisition'), 'href' => route('purchasing.requisitions.index'), 'active' => request()->routeIs('purchasing.requisitions.*')],
                 ['label' => __('ui.purchasing_quotation'), 'href' => route('purchasing.quotations.index'), 'active' => request()->routeIs('purchasing.quotations.*')],
                 ['label' => __('ui.purchasing_order'), 'href' => route('purchasing.orders.index'), 'active' => request()->routeIs('purchasing.orders.*')],
@@ -63,6 +65,7 @@
                 ['label' => __('ui.purchasing_fiscal_entry'), 'href' => route('purchasing.fiscal-entries.index'), 'active' => request()->routeIs('purchasing.fiscal-entries.*')],
             ],
             'inventory' => [
+                ['label' => __('ui.inventory_plants'), 'href' => route('inventory.plants.index'), 'active' => request()->routeIs('inventory.plants.*')],
                 ['label' => __('ui.inventory_warehouses'), 'href' => route('inventory.warehouses.index'), 'active' => request()->routeIs('inventory.warehouses.*')],
                 ['label' => __('ui.inventory_movements'), 'href' => null, 'active' => false],
                 ['label' => __('ui.inventory_count'), 'href' => null, 'active' => false],
@@ -107,6 +110,7 @@
                     ? app(\App\Services\SaaS\AccountOnboardingService::class)->planForCode($subscription->plan_code)
                     : null;
                 $availableModules = app(\App\Services\SaaS\CompanyUserAccessService::class)->accessibleModules($user, $company);
+                $availableModules = array_values(array_diff($availableModules, ['suppliers', 'customers']));
                 $canManageAccesses = app(\App\Services\SaaS\CompanyUserAccessService::class)->canManageCompanyAccess($user, $company);
 
             }

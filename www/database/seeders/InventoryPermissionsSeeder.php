@@ -14,6 +14,9 @@ final class InventoryPermissionsSeeder extends Seeder
         $permissions = [
             ['name' => 'Read Inventory', 'slug' => 'inventory.read', 'module' => 'inventory'],
             ['name' => 'Update Inventory', 'slug' => 'inventory.update', 'module' => 'inventory'],
+            ['name' => 'Read Plants', 'slug' => 'inventory.plants.read', 'module' => 'inventory'],
+            ['name' => 'Create Plants', 'slug' => 'inventory.plants.create', 'module' => 'inventory'],
+            ['name' => 'Update Plants', 'slug' => 'inventory.plants.update', 'module' => 'inventory'],
             ['name' => 'Read Warehouses', 'slug' => 'inventory.warehouses.read', 'module' => 'inventory'],
             ['name' => 'Create Warehouses', 'slug' => 'inventory.warehouses.create', 'module' => 'inventory'],
             ['name' => 'Update Warehouses', 'slug' => 'inventory.warehouses.update', 'module' => 'inventory'],

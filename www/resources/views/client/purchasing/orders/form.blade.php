@@ -123,7 +123,15 @@
                                     <x-ui.input type="date" name="items[{{ $index }}][need_by_date]" :value="old('items.'.$index.'.need_by_date', $item['need_by_date'] ?? '')" />
                                     <x-ui.input type="date" name="items[{{ $index }}][promised_date]" :value="old('items.'.$index.'.promised_date', $item['promised_date'] ?? '')" />
 
-                                    <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-po-remove-item aria-label="{{ __('purchase_order.remove_item') }}">×</button>
+                                    <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-po-remove-item aria-label="{{ __('purchase_order.remove_item') }}" title="{{ __('purchase_order.remove_item') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M3 6h18" />
+                                            <path d="M8 6V4h8v2" />
+                                            <path d="M19 6l-1 14H6L5 6" />
+                                            <path d="M10 11v6" />
+                                            <path d="M14 11v6" />
+                                        </svg>
+                                    </button>
                                 </div>
                             @endforeach
                         </div>
@@ -157,7 +165,15 @@
         <x-ui.input type="text" name="items[__INDEX__][unit_price]" value="0,00" data-currency-mask="brl" inputmode="decimal" />
         <x-ui.input type="date" name="items[__INDEX__][need_by_date]" />
         <x-ui.input type="date" name="items[__INDEX__][promised_date]" />
-        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-po-remove-item aria-label="{{ __('purchase_order.remove_item') }}">×</button>
+        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-po-remove-item aria-label="{{ __('purchase_order.remove_item') }}" title="{{ __('purchase_order.remove_item') }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M19 6l-1 14H6L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+            </svg>
+        </button>
     </div>
 </template>
 

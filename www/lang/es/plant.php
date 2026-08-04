@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Plantas',
+    'search' => 'Buscar por nombre, código, zona horaria o ID',
+    'filter' => 'Buscar',
+    'empty' => 'No se encontraron plantas.',
+    'create' => 'Nueva planta',
+    'edit' => 'Editar planta',
+    'reference' => 'Referencia',
+    'name' => 'Nombre',
+    'code' => 'Código',
+    'timezone' => 'Zona horaria',
+    'status' => 'Estado',
+    'active' => 'Activo',
+    'inactive' => 'Inactivo',
+    'all_statuses' => 'Todos los estados',
+    'created_at' => 'Creado en',
+    'save' => 'Guardar cambios',
+    'remove' => 'Eliminar planta',
+    'confirm_delete_title' => '¿Eliminar planta?',
+    'confirm_delete_text' => 'Está a punto de eliminar :name. Esta acción no se puede deshacer.',
+    'confirm_delete_confirm' => 'Sí, eliminar',
+    'confirm_delete_cancel' => 'Cancelar',
+    'created' => 'Planta creada con éxito.',
+    'updated' => 'Planta actualizada con éxito.',
+    'removed' => 'Planta eliminada con éxito.',
+];

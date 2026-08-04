@@ -125,7 +125,15 @@
                                     <x-ui.input name="items[{{ $index }}][lot_number]" :value="old('items.'.$index.'.lot_number', $item['lot_number'] ?? null)" />
                                     <x-ui.input name="items[{{ $index }}][notes]" :value="old('items.'.$index.'.notes', $item['notes'] ?? null)" />
 
-                                    <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-prc-remove-item aria-label="{{ __('purchase_receipt.remove_item') }}">×</button>
+                                    <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-prc-remove-item aria-label="{{ __('purchase_receipt.remove_item') }}" title="{{ __('purchase_receipt.remove_item') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M3 6h18" />
+                                            <path d="M8 6V4h8v2" />
+                                            <path d="M19 6l-1 14H6L5 6" />
+                                            <path d="M10 11v6" />
+                                            <path d="M14 11v6" />
+                                        </svg>
+                                    </button>
                                 </div>
                             @endforeach
                         </div>
@@ -164,7 +172,15 @@
         <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity_received]" value="1" required />
         <x-ui.input name="items[__INDEX__][lot_number]" />
         <x-ui.input name="items[__INDEX__][notes]" />
-        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-prc-remove-item aria-label="{{ __('purchase_receipt.remove_item') }}">×</button>
+        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-prc-remove-item aria-label="{{ __('purchase_receipt.remove_item') }}" title="{{ __('purchase_receipt.remove_item') }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M19 6l-1 14H6L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+            </svg>
+        </button>
     </div>
 </template>
 

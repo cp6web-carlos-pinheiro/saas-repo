@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Plants',
+    'search' => 'Search by name, code, time zone, or ID',
+    'filter' => 'Search',
+    'empty' => 'No plants found.',
+    'create' => 'New plant',
+    'edit' => 'Edit plant',
+    'reference' => 'Reference',
+    'name' => 'Name',
+    'code' => 'Code',
+    'timezone' => 'Time zone',
+    'status' => 'Status',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'all_statuses' => 'All statuses',
+    'created_at' => 'Created at',
+    'save' => 'Save changes',
+    'remove' => 'Delete plant',
+    'confirm_delete_title' => 'Delete plant?',
+    'confirm_delete_text' => 'You are about to delete :name. This action cannot be undone.',
+    'confirm_delete_confirm' => 'Yes, delete',
+    'confirm_delete_cancel' => 'Cancel',
+    'created' => 'Plant created successfully.',
+    'updated' => 'Plant updated successfully.',
+    'removed' => 'Plant removed successfully.',
+];
