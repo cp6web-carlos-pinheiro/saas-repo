@@ -42,7 +42,11 @@ final class AdminAuthController extends Controller
             $audit->record(
                 event: 'auth.login.failed',
                 severity: 'warning',
-                context: ['channel' => 'admin', 'email' => mb_strtolower((string) $credentials['email'])],
+                context: [
+                    'channel' => 'admin',
+                    'admin_id' => null,
+                    'email' => mb_strtolower((string) $credentials['email']),
+                ],
                 ipAddress: $request->ip(),
                 userAgent: $request->userAgent(),
             );
@@ -64,8 +68,7 @@ final class AdminAuthController extends Controller
 
         $audit->record(
             event: 'auth.login.success',
-            context: ['channel' => 'admin'],
-            userId: $admin?->id,
+            context: ['channel' => 'admin', 'admin_id' => $admin?->id],
             ipAddress: $request->ip(),
             userAgent: $request->userAgent(),
         );
@@ -85,8 +88,7 @@ final class AdminAuthController extends Controller
 
         $audit->record(
             event: 'auth.logout',
-            context: ['channel' => 'admin'],
-            userId: $admin?->id,
+            context: ['channel' => 'admin', 'admin_id' => $admin?->id],
             ipAddress: $request->ip(),
             userAgent: $request->userAgent(),
         );

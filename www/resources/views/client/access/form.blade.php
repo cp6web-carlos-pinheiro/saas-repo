@@ -70,9 +70,10 @@
             </fieldset>
 
             @if ($editing)
-                <label class="flex items-center gap-2 text-sm">
-                    <x-ui.input name="is_active" type="checkbox" value="1" @checked(old('is_active', $customer->is_active)) unstyled />
-                    {{ __('company_access.active') }}
+                <label class="flex items-center gap-2 rounded-xl border border-[#dadce0] bg-white px-4 py-3 text-sm text-[#202124]">
+                    <input type="hidden" name="is_active" value="0" />
+                    <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $customer->is_active)) class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
+                    <span>{{ __('company_access.active') }}</span>
                 </label>
             @endif
 

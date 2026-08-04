@@ -831,6 +831,7 @@ body {
         gap: 0.15rem;
         margin-left: 0.85rem;
         padding-left: 0.6rem;
+        padding-bottom: 0.35rem;
         border-left: 1px solid var(--g-line);
         max-height: 0;
         overflow: hidden;
@@ -840,7 +841,7 @@ body {
     }
 
     .ind-module-group.is-open .ind-module-subitems {
-        max-height: 320px;
+        max-height: 900px;
         opacity: 1;
         pointer-events: auto;
     }

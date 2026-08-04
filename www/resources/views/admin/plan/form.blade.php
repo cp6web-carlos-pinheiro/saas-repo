@@ -91,19 +91,22 @@
             </label>
 
             <div class="grid gap-3 md:grid-cols-2">
-                <label class="flex items-center gap-2 text-sm">
-                    <x-ui.input name="renewable" type="checkbox" value="1" @checked(old('renewable', $plan?->renewable ?? true)) unstyled />
-                    {{ __('global_plan.renewable') }}
+                <label class="flex items-center gap-2 rounded-xl border border-[#dadce0] bg-white px-4 py-3 text-sm text-[#202124]">
+                    <input type="hidden" name="renewable" value="0" />
+                    <input name="renewable" type="checkbox" value="1" @checked(old('renewable', $plan?->renewable ?? true)) class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
+                    <span>{{ __('global_plan.renewable') }}</span>
                 </label>
 
-                <label class="flex items-center gap-2 text-sm">
-                    <x-ui.input name="allow_once" type="checkbox" value="1" @checked(old('allow_once', $plan?->allow_once ?? false)) unstyled />
-                    {{ __('global_plan.allow_once') }}
+                <label class="flex items-center gap-2 rounded-xl border border-[#dadce0] bg-white px-4 py-3 text-sm text-[#202124]">
+                    <input type="hidden" name="allow_once" value="0" />
+                    <input name="allow_once" type="checkbox" value="1" @checked(old('allow_once', $plan?->allow_once ?? false)) class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
+                    <span>{{ __('global_plan.allow_once') }}</span>
                 </label>
 
-                <label class="flex items-center gap-2 text-sm md:col-span-2">
-                    <x-ui.input name="is_active" type="checkbox" value="1" @checked(old('is_active', $plan?->is_active ?? true)) unstyled />
-                    {{ __('global_plan.active') }}
+                <label class="flex items-center gap-2 rounded-xl border border-[#dadce0] bg-white px-4 py-3 text-sm text-[#202124] md:col-span-2">
+                    <input type="hidden" name="is_active" value="0" />
+                    <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $plan?->is_active ?? true)) class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
+                    <span>{{ __('global_plan.active') }}</span>
                 </label>
             </div>
 

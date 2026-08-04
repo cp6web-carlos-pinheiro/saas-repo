@@ -113,20 +113,20 @@
                 @error('lead_time_days')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
-            <div class="flex items-center gap-6 md:col-span-2">
-                <label class="inline-flex items-center gap-2">
-                    <x-ui.input type="hidden" name="lot_control" value="0" unstyled />
-                    <x-ui.input type="checkbox" name="lot_control" value="1" @checked(old('lot_control', $product->lot_control ?? false)) unstyled />
+            <div class="grid gap-4 md:col-span-2 md:grid-cols-3">
+                <label class="flex items-center gap-2 rounded-xl border border-[#dadce0] bg-white px-4 py-3 text-sm text-[#202124]">
+                    <input type="hidden" name="lot_control" value="0" />
+                    <input id="lot_control_checkbox" type="checkbox" name="lot_control" value="1" @checked(old('lot_control', $product->lot_control ?? false)) class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
                     <span>{{ __('product.lot_control') }}</span>
                 </label>
-                <label class="inline-flex items-center gap-2">
-                    <x-ui.input type="hidden" name="serial_control" value="0" unstyled />
-                    <x-ui.input type="checkbox" name="serial_control" value="1" @checked(old('serial_control', $product->serial_control ?? false)) unstyled />
+                <label class="flex items-center gap-2 rounded-xl border border-[#dadce0] bg-white px-4 py-3 text-sm text-[#202124]">
+                    <input type="hidden" name="serial_control" value="0" />
+                    <input id="serial_control_checkbox" type="checkbox" name="serial_control" value="1" @checked(old('serial_control', $product->serial_control ?? false)) class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
                     <span>{{ __('product.serial_control') }}</span>
                 </label>
-                <label class="inline-flex items-center gap-2">
-                    <x-ui.input type="hidden" name="is_active" value="0" unstyled />
-                    <x-ui.input type="checkbox" name="is_active" value="1" @checked(old('is_active', $product->is_active ?? true)) unstyled />
+                <label class="flex items-center gap-2 rounded-xl border border-[#dadce0] bg-white px-4 py-3 text-sm text-[#202124]">
+                    <input type="hidden" name="is_active" value="0" />
+                    <input id="is_active_checkbox" type="checkbox" name="is_active" value="1" @checked(old('is_active', $product->is_active ?? true)) class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
                     <span>{{ __('product.active') }}</span>
                 </label>
             </div>

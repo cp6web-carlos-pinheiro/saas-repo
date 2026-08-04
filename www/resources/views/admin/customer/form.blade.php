@@ -90,7 +90,7 @@
                         @foreach ($modules as $module => $permissions)
                             @php($moduleIsSelected = $mustBeAdministrator || $selectedProfile === 'administrator' || in_array($module, (array) $selectedModuleNames, true))
                             <label class="flex items-start gap-3 rounded-xl border border-[#dadce0] p-4">
-                                <x-ui.input name="modules[]" type="checkbox" value="{{ $module }}" @checked($moduleIsSelected) class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" unstyled />
+                                <input type="checkbox" name="modules[]" value="{{ $module }}" @checked($moduleIsSelected) class="mt-1 h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
                                 <span>
                                     <span class="block font-medium">{{ \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleLabel((string) $module) }}</span>
                                     @php($moduleDescription = \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleDescription((string) $module))
@@ -106,9 +106,10 @@
             </fieldset>
 
             @if ($editing)
-                <label class="flex items-center gap-2 text-sm">
-                    <x-ui.input name="is_active" type="checkbox" value="1" @checked(old('is_active', $customer->is_active)) unstyled />
-                    {{ __('global_customer.active') }}
+                <label class="flex items-center gap-2 rounded-xl border border-[#dadce0] bg-white px-4 py-3 text-sm text-[#202124]">
+                    <input type="hidden" name="is_active" value="0" />
+                    <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $customer->is_active)) class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />
+                    <span>{{ __('global_customer.active') }}</span>
                 </label>
             @endif
 

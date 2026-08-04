@@ -21,7 +21,7 @@
 			<label class="block text-sm font-medium">{{ __('global_admin.email') }}<x-ui.input name="email" type="email" :value="old('email', $administrator->email)" required class="mt-2" /></label>
 			<label class="block text-sm font-medium">{{ __('global_admin.new_password') }}<x-ui.input name="password" type="password" class="mt-2" /></label>
 			<label class="block text-sm font-medium">{{ __('global_admin.password_confirmation') }}<x-ui.input name="password_confirmation" type="password" class="mt-2" /></label>
-			<label class="flex items-center gap-2 text-sm"><x-ui.input name="is_active" type="checkbox" value="1" @checked(old('is_active', $administrator->is_active)) unstyled />{{ __('global_admin.active') }}</label>
+			<label class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"><input type="hidden" name="is_active" value="0" /><input name="is_active" type="checkbox" value="1" @checked(old('is_active', $administrator->is_active)) class="h-4 w-4 rounded border-slate-300 text-[#1a73e8] focus:ring-[#1a73e8]/35" />{{ __('global_admin.active') }}</label>
 
 			<x-ui.button type="submit" variant="brand-primary" :full="true" class="rounded-full">{{ __('global_admin.save') }}</x-ui.button>
 		</form>
