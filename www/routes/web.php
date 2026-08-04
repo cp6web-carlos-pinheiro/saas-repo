@@ -26,6 +26,11 @@ use App\Http\Controllers\Web\Tenant\BomStructureController;
 use App\Http\Controllers\Web\Tenant\CustomerController;
 use App\Http\Controllers\Web\Tenant\ProductController;
 use App\Http\Controllers\Web\Tenant\ProductVersionController;
+use App\Http\Controllers\Web\Tenant\PurchaseFiscalEntryController;
+use App\Http\Controllers\Web\Tenant\PurchaseOrderController;
+use App\Http\Controllers\Web\Tenant\PurchaseQuotationController;
+use App\Http\Controllers\Web\Tenant\PurchaseReceiptController;
+use App\Http\Controllers\Web\Tenant\PurchaseRequisitionController;
 use App\Http\Controllers\Web\Tenant\SaleController;
 use App\Http\Controllers\Web\Tenant\SupplierController;
 use App\Http\Middleware\EnsureTrialIsActive;
@@ -139,6 +144,56 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/{supplier}/edit', [SupplierController::class, 'edit'])->name('edit');
             Route::put('/{supplier}', [SupplierController::class, 'update'])->name('update');
             Route::delete('/{supplier}', [SupplierController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('purchasing/requisitions')->name('purchasing.requisitions.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [PurchaseRequisitionController::class, 'index'])->name('index');
+            Route::get('/create', [PurchaseRequisitionController::class, 'create'])->name('create');
+            Route::post('/', [PurchaseRequisitionController::class, 'store'])->name('store');
+            Route::get('/{requisition}', [PurchaseRequisitionController::class, 'show'])->name('show');
+            Route::get('/{requisition}/edit', [PurchaseRequisitionController::class, 'edit'])->name('edit');
+            Route::put('/{requisition}', [PurchaseRequisitionController::class, 'update'])->name('update');
+            Route::delete('/{requisition}', [PurchaseRequisitionController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('purchasing/quotations')->name('purchasing.quotations.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [PurchaseQuotationController::class, 'index'])->name('index');
+            Route::get('/create', [PurchaseQuotationController::class, 'create'])->name('create');
+            Route::post('/', [PurchaseQuotationController::class, 'store'])->name('store');
+            Route::get('/{quotation}', [PurchaseQuotationController::class, 'show'])->name('show');
+            Route::get('/{quotation}/edit', [PurchaseQuotationController::class, 'edit'])->name('edit');
+            Route::put('/{quotation}', [PurchaseQuotationController::class, 'update'])->name('update');
+            Route::delete('/{quotation}', [PurchaseQuotationController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('purchasing/orders')->name('purchasing.orders.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [PurchaseOrderController::class, 'index'])->name('index');
+            Route::get('/create', [PurchaseOrderController::class, 'create'])->name('create');
+            Route::post('/', [PurchaseOrderController::class, 'store'])->name('store');
+            Route::get('/{order}', [PurchaseOrderController::class, 'show'])->name('show');
+            Route::get('/{order}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
+            Route::put('/{order}', [PurchaseOrderController::class, 'update'])->name('update');
+            Route::delete('/{order}', [PurchaseOrderController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('purchasing/receipts')->name('purchasing.receipts.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [PurchaseReceiptController::class, 'index'])->name('index');
+            Route::get('/create', [PurchaseReceiptController::class, 'create'])->name('create');
+            Route::post('/', [PurchaseReceiptController::class, 'store'])->name('store');
+            Route::get('/{receipt}', [PurchaseReceiptController::class, 'show'])->name('show');
+            Route::get('/{receipt}/edit', [PurchaseReceiptController::class, 'edit'])->name('edit');
+            Route::put('/{receipt}', [PurchaseReceiptController::class, 'update'])->name('update');
+            Route::delete('/{receipt}', [PurchaseReceiptController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('purchasing/fiscal-entries')->name('purchasing.fiscal-entries.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [PurchaseFiscalEntryController::class, 'index'])->name('index');
+            Route::get('/create', [PurchaseFiscalEntryController::class, 'create'])->name('create');
+            Route::post('/', [PurchaseFiscalEntryController::class, 'store'])->name('store');
+            Route::get('/{entry}', [PurchaseFiscalEntryController::class, 'show'])->name('show');
+            Route::get('/{entry}/edit', [PurchaseFiscalEntryController::class, 'edit'])->name('edit');
+            Route::put('/{entry}', [PurchaseFiscalEntryController::class, 'update'])->name('update');
+            Route::delete('/{entry}', [PurchaseFiscalEntryController::class, 'destroy'])->name('destroy');
         });
 
         Route::prefix('customers')->name('customers.')->middleware(EnsureTrialIsActive::class)->group(function (): void {

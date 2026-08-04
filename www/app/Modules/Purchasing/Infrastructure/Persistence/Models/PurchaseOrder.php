@@ -42,6 +42,11 @@ final class PurchaseOrder extends TenantModel
         return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
+    public function requisition(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseRequisition::class, 'purchase_requisition_id');
+    }
+
     public function lines(): HasMany
     {
         return $this->hasMany(PurchaseOrderLine::class, 'purchase_order_id')

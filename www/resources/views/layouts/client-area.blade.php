@@ -56,11 +56,11 @@
                 ['label' => __('ui.module_scheduling').' ('.__('ui.coming_soon').')', 'href' => null, 'active' => false],
             ],
             'purchasing' => [
-                ['label' => __('ui.purchasing_requisition'), 'href' => null, 'active' => false],
-                ['label' => __('ui.purchasing_quotation'), 'href' => null, 'active' => false],
-                ['label' => __('ui.purchasing_order'), 'href' => null, 'active' => false],
-                ['label' => __('ui.purchasing_receipt'), 'href' => null, 'active' => false],
-                ['label' => __('ui.purchasing_fiscal_entry'), 'href' => null, 'active' => false],
+                ['label' => __('ui.purchasing_requisition'), 'href' => route('purchasing.requisitions.index'), 'active' => request()->routeIs('purchasing.requisitions.*')],
+                ['label' => __('ui.purchasing_quotation'), 'href' => route('purchasing.quotations.index'), 'active' => request()->routeIs('purchasing.quotations.*')],
+                ['label' => __('ui.purchasing_order'), 'href' => route('purchasing.orders.index'), 'active' => request()->routeIs('purchasing.orders.*')],
+                ['label' => __('ui.purchasing_receipt'), 'href' => route('purchasing.receipts.index'), 'active' => request()->routeIs('purchasing.receipts.*')],
+                ['label' => __('ui.purchasing_fiscal_entry'), 'href' => route('purchasing.fiscal-entries.index'), 'active' => request()->routeIs('purchasing.fiscal-entries.*')],
             ],
             'inventory' => [
                 ['label' => __('ui.inventory_items'), 'href' => null, 'active' => false],
