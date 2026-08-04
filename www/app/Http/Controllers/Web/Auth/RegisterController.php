@@ -8,13 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Mail\TrialVerificationMail;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Services\SaaS\AccountOnboardingService;
+use App\Support\Security\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 final class RegisterController extends Controller
@@ -29,7 +29,7 @@ final class RegisterController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email:rfc,dns', 'max:190'],
-            'password' => ['required', 'confirmed', Password::min(10)->mixedCase()->numbers()->symbols()],
+            'password' => ['required', 'confirmed', PasswordPolicy::rule()],
             'preferred_locale' => ['required', 'string', 'in:pt_BR,en,es'],
             'terms' => ['accepted'],
         ], [

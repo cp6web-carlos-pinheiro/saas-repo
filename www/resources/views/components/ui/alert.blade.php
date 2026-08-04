@@ -9,8 +9,9 @@
     ];
 
     $classes = $variantClasses[$variant] ?? $variantClasses['info'];
+    $role = in_array($variant, ['error', 'warning'], true) ? 'alert' : 'status';
 @endphp
 
-<div {{ $attributes->class(['rounded-2xl border px-4 py-3 text-sm', $classes]) }}>
+<div role="{{ $role }}" aria-live="polite" {{ $attributes->class(['rounded-2xl border px-4 py-3 text-sm', $classes]) }}>
     {{ $slot }}
 </div>

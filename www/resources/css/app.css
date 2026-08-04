@@ -75,6 +75,18 @@ body {
     overflow-x: hidden;
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 @keyframes float {
     0%,
     100% {
@@ -847,6 +859,13 @@ body {
     .ind-module-list .ind-module-subitem:hover {
         background: var(--g-surface-muted);
         color: var(--g-text);
+    }
+
+    .ind-module-list .ind-module-subitem:focus-visible,
+    .ind-module-list .ind-module-parent-toggle:focus-visible,
+    .ind-module-list a:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--g-primary) 28%, transparent);
     }
 
     .ind-module-list .ind-module-subitem.is-active {

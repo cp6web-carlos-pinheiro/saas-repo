@@ -7,9 +7,9 @@ namespace App\Http\Controllers\Web\Onboarding;
 use App\Http\Controllers\Controller;
 use App\Models\SaaS\AccountInvitation;
 use App\Services\SaaS\AccountOnboardingService;
+use App\Support\Security\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 final class AccountInvitationController extends Controller
@@ -59,7 +59,7 @@ final class AccountInvitationController extends Controller
         } else {
             $validated = $request->validate([
                 'name' => ['required', 'string', 'max:150'],
-                'password' => ['required', 'confirmed', Password::min(10)->mixedCase()->numbers()->symbols()],
+                'password' => ['required', 'confirmed', PasswordPolicy::rule()],
             ]);
 
             $acceptedUser = $service->acceptInvitation($invitation, $validated, $request);

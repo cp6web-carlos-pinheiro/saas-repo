@@ -4,7 +4,7 @@ Este diretório concentra documentos funcionais dos módulos do sistema Beyond M
 
 ## Painel de Status Atual
 
-Ultima atualizacao consolidada: 2026-08-03
+Ultima atualizacao consolidada: 2026-08-04
 
 Resumo executivo:
 - Fundacao, multitenancy e RBAC: avancado.
@@ -12,6 +12,9 @@ Resumo executivo:
 - Compras: avancado (CRUDs operacionais com linhas, transicoes, bloqueios apos POSTED, estorno com categoria+motivo e auditoria).
 - Vendas: parcial avancado (CRUD principal e clientes no tenant; menu de clientes integrado em Vendas).
 - Estoque: parcial avancado (ledger, saldos/lotes/seriais, CRUD de armazens e plantas, integracao com recebimento de compras).
+- Engenharia de Plataforma: baseline obrigatorio implementado (CI com gates de qualidade e testes, padrao inicial de telemetria com request-id e canal dedicado).
+- Seguranca: baseline obrigatorio implementado (MFA por codigo via e-mail no login web, politica de senha centralizada, monitoramento de autenticacao em canal dedicado).
+- Produto/UX: baseline obrigatorio implementado (fortalecimento de acessibilidade em componentes compartilhados e foco visivel em navegacao).
 - MRP, financeiro, observabilidade e automacoes: em evolucao.
 
 Atalhos de status:

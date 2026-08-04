@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\Admin\GlobalPlanController;
 use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\LanguagePreferenceController;
 use App\Http\Controllers\Web\Auth\LoginController;
+use App\Http\Controllers\Web\Auth\MfaChallengeController;
 use App\Http\Controllers\Web\Auth\PasswordRecoveryController;
 use App\Http\Controllers\Web\Auth\RegisterController;
 use App\Http\Controllers\Web\Auth\SessionManagementController;
@@ -79,6 +80,10 @@ Route::get('/convite/{token}', [AccountInvitationController::class, 'show'])->na
 Route::post('/convite/{token}', [AccountInvitationController::class, 'accept'])->name('account-invitations.accept');
 
 Route::middleware('auth:web')->group(function (): void {
+    Route::get('/mfa/challenge', [MfaChallengeController::class, 'create'])->name('mfa.challenge');
+    Route::post('/mfa/challenge', [MfaChallengeController::class, 'store'])->name('mfa.challenge.store');
+    Route::post('/mfa/challenge/resend', [MfaChallengeController::class, 'resend'])->name('mfa.challenge.resend');
+
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     Route::post('/preferences/language', [LanguagePreferenceController::class, 'update'])->name('preferences.language.update');
     Route::get('/docs', [DocumentationController::class, 'index'])->name('docs.index');

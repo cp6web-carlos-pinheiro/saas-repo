@@ -10,6 +10,7 @@ use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
+use App\Support\Security\PasswordPolicy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -276,7 +277,7 @@ final class CompanyAccessUserController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email', 'max:190', Rule::unique('users', 'email')->ignore($customer)],
-            'password' => [$customer ? 'nullable' : 'required', 'confirmed', 'min:10'],
+            'password' => [$customer ? 'nullable' : 'required', 'confirmed', PasswordPolicy::rule()],
             'is_active' => ['nullable', 'boolean'],
             'role_id' => ['required', 'integer', Rule::exists('roles', 'id')->where('company_id', $company->id)],
         ]);

@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\ApplyLocalePreference;
+use App\Http\Middleware\EnsureMfaIsVerified;
+use App\Http\Middleware\RequestTelemetry;
 use App\Http\Middleware\SecurityHeaders;
 use App\Shared\Presentation\Exceptions\ApiExceptionHandler;
 use Illuminate\Foundation\Application;
@@ -15,7 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(RequestTelemetry::class);
         $middleware->appendToGroup('web', ApplyLocalePreference::class);
+        $middleware->appendToGroup('web', EnsureMfaIsVerified::class);
         $middleware->appendToGroup('api', ApplyLocalePreference::class);
         $middleware->append(SecurityHeaders::class);
         $middleware->redirectUsersTo(function ($request): string {

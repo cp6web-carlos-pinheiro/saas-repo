@@ -9,7 +9,7 @@ Como voce esta desenvolvendo um MRP SaaS multitenant, a ordem de desenvolvimento
 Abaixo esta a sequencia que eu adotaria.
 
 ## Ultima atualizacao
-- 2026-08-03
+- 2026-08-04
 
 ## Status objetivo
 - Fases 1 a 4: Avancado (Fundacao implementada; Multitenancy, Autenticacao e RBAC operacionais no fluxo web tenant).
@@ -24,6 +24,11 @@ Abaixo esta a sequencia que eu adotaria.
 - Estoque: CRUD web de Armazens implementado e publicado no menu de Estoque.
 - Estoque: CRUD web de Plantas implementado e publicado no menu de Estoque.
 - Navegacao: Fornecedores movido para subitem de Compras e Clientes movido para subitem de Vendas.
+- Engenharia de Plataforma: workflow de CI criado com gates de validacao (`composer validate`), estilo (`composer pint --test`) e testes (`php artisan test`) em SQLite em memoria.
+- Seguranca: MFA de baixo atrito habilitavel por configuracao com desafio por codigo enviado por e-mail no login web.
+- Seguranca: politica de senha centralizada em helper unico e aplicada nos fluxos web/admin/api.
+- Observabilidade: middleware de telemetria com `X-Request-Id`, contexto padrao e canal dedicado `telemetry`.
+- UX/Acessibilidade: componentes base (`input`, `select`, `textarea`, `alert`) com defaults de acessibilidade e foco visivel reforcado no menu lateral.
 
 | Fase | Modulo | Prioridade | Depende de |
 | --- | --- | --- | --- |

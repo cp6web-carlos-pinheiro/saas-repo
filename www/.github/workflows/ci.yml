@@ -1,0 +1,64 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+env:
+  APP_ENV: testing
+  APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+  CACHE_STORE: array
+  QUEUE_CONNECTION: sync
+  SESSION_DRIVER: array
+  DB_CONNECTION: sqlite
+  DB_DATABASE: ':memory:'
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.composer/cache/files
+            www/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('www/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        working-directory: www
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Prepare environment
+        working-directory: www
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+
+      - name: Validate Composer
+        working-directory: www
+        run: composer validate --strict
+
+      - name: Lint with Pint
+        working-directory: www
+        run: composer pint --test
+
+      - name: Run tests
+        working-directory: www
+        run: php artisan test --without-tty

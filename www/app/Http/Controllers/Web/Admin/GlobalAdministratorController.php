@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Web\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Services\SaaS\AuditLogService;
+use App\Support\Security\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -87,7 +88,7 @@ final class GlobalAdministratorController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:150'], 'email' => ['required', 'email', 'max:190', Rule::unique('admins', 'email')->ignore($administrator)],
-            'password' => [$administrator ? 'nullable' : 'required', 'confirmed', 'min:10'], 'is_active' => ['nullable', 'boolean'],
+            'password' => [$administrator ? 'nullable' : 'required', 'confirmed', PasswordPolicy::rule()], 'is_active' => ['nullable', 'boolean'],
         ]);
     }
 

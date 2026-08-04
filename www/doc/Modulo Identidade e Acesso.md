@@ -3,12 +3,13 @@
 Este modulo gerencia autenticacao, autorizacao e controle de permissoes de usuarios na plataforma.
 
 ## Ultima atualizacao
-- 2026-08-02
+- 2026-08-04
 
 ## Status objetivo
-- Status atual: Parcial avancado.
+- Status atual: Avancado.
 - Cobertura atual: login/logout, recuperacao de senha, verificacao de email, RBAC com roles/permissoes e middleware de checagem por modulo.
-- Pendencia principal: evoluir camada administrativa unificada e avaliar inclusao de two factor no fluxo padrao.
+- Seguranca adicional: MFA por codigo via e-mail no login web (habilitavel por configuracao), politica de senha centralizada e monitoramento de autenticacao com logs dedicados.
+- Pendencia principal: evoluir camada administrativa unificada e ampliar opcoes de MFA (ex.: app autenticador/TOTP).
 
 ## Tabelas relacionadas
 
@@ -82,3 +83,9 @@ Este modulo gerencia autenticacao, autorizacao e controle de permissoes de usuar
 
 - O primeiro usuario da empresa permanece obrigatoriamente com perfil administrativo.
 - Para os demais usuarios, o perfil RBAC e sempre selecionavel na tela de edicao.
+
+## Baseline de seguranca implementado
+
+- Politica de senha unificada em `App\Support\Security\PasswordPolicy` aplicada em fluxos de cadastro, convite, reset e criacao de usuarios web/admin/api.
+- MFA web via desafio de codigo com expiracao e reenvio, controlado por `AUTH_MFA_ENABLED`.
+- Eventos de autenticacao monitorados em canal dedicado (`storage/logs/auth.log`) com contexto operacional.

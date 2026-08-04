@@ -10,6 +10,7 @@ use App\Models\SaaS\SocialAccount;
 use App\Models\SaaS\Trial;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Services\SaaS\TrialOnboardingService;
+use App\Support\Security\PasswordPolicy;
 use App\Shared\Presentation\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Validation\Rules\Password as PasswordRule;
 use Laravel\Socialite\Facades\Socialite;
 
 final class SaaSOnboardingApiController
@@ -29,7 +29,7 @@ final class SaaSOnboardingApiController
             'name' => ['required', 'string', 'max:150'],
             'company' => ['required', 'string', 'max:180'],
             'email' => ['required', 'email:rfc,dns', 'max:190'],
-            'password' => ['required', 'confirmed', PasswordRule::min(10)->mixedCase()->numbers()->symbols()],
+            'password' => ['required', 'confirmed', PasswordPolicy::rule()],
             'terms' => ['accepted'],
         ]);
 
@@ -92,7 +92,7 @@ final class SaaSOnboardingApiController
         $payload = $request->validate([
             'token' => ['required', 'string'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', PasswordRule::min(10)->mixedCase()->numbers()->symbols()],
+            'password' => ['required', 'confirmed', PasswordPolicy::rule()],
         ]);
 
         $status = Password::broker('users')->reset(
@@ -286,7 +286,7 @@ final class SaaSOnboardingApiController
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email:rfc,dns', 'max:190'],
-            'password' => ['required', 'confirmed', PasswordRule::min(10)->mixedCase()->numbers()->symbols()],
+            'password' => ['required', 'confirmed', PasswordPolicy::rule()],
             'role' => ['nullable', 'in:member,master'],
             'activate' => ['nullable', 'boolean'],
         ]);
