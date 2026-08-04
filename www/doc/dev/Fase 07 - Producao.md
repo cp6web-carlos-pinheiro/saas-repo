@@ -4,7 +4,7 @@
 Implementar o nucleo de execucao da manufatura (coracao do MRP).
 
 ## Status de implementacao
-Implementado. Ordem de producao, consumo de materiais, producao parcial/finalizacao, roteiros, centros de trabalho e calendario de producao estao ligados no codigo.
+Parcial avancado. Ordem de producao, consumo de materiais, apontamento operacional basico, producao parcial/finalizacao, roteiros, centros de trabalho e calendario de producao estao ligados no codigo.
 
 ## Escopo
 - Ordem de Producao: implementado
@@ -13,7 +13,7 @@ Implementado. Ordem de producao, consumo de materiais, producao parcial/finaliza
 - Centros de Trabalho: implementado
 - Operacoes: implementado
 - Consumo: implementado
-- Apontamentos: parcial
+- Apontamentos: implementado
 - Producao: implementado
 - Refugo: parcial
 - Finalizacao: implementado
@@ -36,7 +36,7 @@ Implementado. Ordem de producao, consumo de materiais, producao parcial/finaliza
 - Dependencia de analytics: consolidar indicadores de OEE, paradas e causas de perdas.
 
 ### Por area
-- Area de Producao: definir padrao de apontamento e governanca de desvios.
+- Area de Producao: ampliar padrao de apontamento e governanca de desvios.
 - Area de Qualidade: configurar gates de liberacao por operacao.
 - Area de Engenharia Industrial: consolidar regras de roteiro/capacidade.
 - Area de Engenharia de Software: implementar controles e telemetria de execucao.

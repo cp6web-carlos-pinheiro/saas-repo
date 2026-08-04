@@ -3,12 +3,12 @@
 Este modulo gerencia ordens de producao, saidas e registros operacionais para controle da execucao produtiva.
 
 ## Ultima atualizacao
-- 2026-08-02
+- 2026-08-04
 
 ## Status objetivo
-- Status atual: Planejado.
-- Cobertura atual: dominio e tabelas de ordens/consumos/saidas definidos.
-- Pendencia principal: implementar ciclo funcional de ordem de producao (abertura, apontamento, consumo, fechamento).
+- Status atual: Parcial avancado.
+- Cobertura atual: ordens de producao, consumo de materiais, apontamentos operacionais basicos, producao parcial/finalizacao e entrada de produto acabado no estoque.
+- Pendencia principal: consolidar inspecoes formais em processo, retrabalho/refugo por operacao e indicadores de capacidade.
 
 ## Tabelas relacionadas
 

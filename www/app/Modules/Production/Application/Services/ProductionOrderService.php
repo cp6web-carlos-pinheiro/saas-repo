@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Production\Application\Services;
 
 use App\Modules\Bom\Application\Services\FreezeBomSnapshotService;
+use App\Modules\Inventory\Application\Services\InventoryService;
 use App\Modules\Production\Application\Services\FreezeProductionOrderSnapshotService;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOutput;
@@ -25,6 +26,7 @@ final class ProductionOrderService extends BaseService
     public function __construct(
         private readonly FreezeBomSnapshotService $bomSnapshotService,
         private readonly FreezeProductionOrderSnapshotService $snapshotService,
+        private readonly InventoryService $inventoryService,
         TransactionManager $transaction,
         CacheManager $cache,
         AppLogger $logger
@@ -82,11 +84,20 @@ final class ProductionOrderService extends BaseService
                 'production_order_id' => $order->id,
                 'quantity_completed' => $quantityCompleted,
                 'quantity_scrapped' => $quantityScrapped,
+                'operation_no' => $payload['operation_no'] ?? null,
+                'work_center_id' => $payload['work_center_id'] ?? null,
+                'setup_time_minutes' => round((float) ($payload['setup_time_minutes'] ?? 0), 6),
+                'process_time_minutes' => round((float) ($payload['process_time_minutes'] ?? 0), 6),
+                'inspection_status' => strtoupper((string) ($payload['inspection_status'] ?? 'APPROVED')),
+                'inspected_at' => isset($payload['inspected_at']) ? now()->parse($payload['inspected_at']) : null,
+                'inspection_notes' => $payload['inspection_notes'] ?? null,
                 'lot_number' => $payload['lot_number'] ?? null,
                 'produced_at' => isset($payload['produced_at']) ? now()->parse($payload['produced_at']) : now(),
                 'created_by' => $userId,
                 'metadata' => $payload['metadata'] ?? null,
             ]);
+
+            $this->postFinishedGoodsReceipt($order, $output, $userId);
 
             $order->quantity_produced = round((float) $order->quantity_produced + $quantityCompleted, 6);
             $order->quantity_scrapped = round((float) $order->quantity_scrapped + $quantityScrapped, 6);
@@ -134,17 +145,25 @@ final class ProductionOrderService extends BaseService
                 $missingQuantity = round((float) $order->quantity_planned - (float) $order->quantity_produced, 6);
 
                 if ($missingQuantity > 0) {
-                    ProductionOrderOutput::query()->create([
+                    $output = ProductionOrderOutput::query()->create([
                         'company_id' => $order->company_id,
                         'production_order_id' => $order->id,
                         'quantity_completed' => $missingQuantity,
                         'quantity_scrapped' => 0,
+                        'operation_no' => null,
+                        'work_center_id' => null,
+                        'setup_time_minutes' => 0,
+                        'process_time_minutes' => 0,
+                        'inspection_status' => 'APPROVED',
+                        'inspected_at' => now(),
+                        'inspection_notes' => null,
                         'lot_number' => null,
                         'produced_at' => now(),
                         'created_by' => $userId,
                         'metadata' => ['auto_completion' => true],
                     ]);
 
+                    $this->postFinishedGoodsReceipt($order, $output, $userId);
                     $order->quantity_produced = round((float) $order->quantity_planned, 6);
                 }
             }
@@ -260,6 +279,36 @@ final class ProductionOrderService extends BaseService
         ]);
 
         return $order->fresh()->load(['product', 'warehouse', 'outputs'])->toArray();
+    }
+
+    private function postFinishedGoodsReceipt(ProductionOrder $order, ProductionOrderOutput $output, ?int $userId): void
+    {
+        if ($order->warehouse_id === null || (float) $output->quantity_completed <= 0) {
+            return;
+        }
+
+        $this->inventoryService->postMovement([
+            'warehouse_id' => $order->warehouse_id,
+            'product_id' => $order->product_id,
+            'movement_type' => 'RECEIPT',
+            'quantity' => (float) $output->quantity_completed,
+            'lot_number' => $output->lot_number,
+            'reference_type' => 'production_order',
+            'reference_id' => $order->id,
+            'notes' => $output->inspection_notes,
+            'metadata' => [
+                'production_order_output_id' => $output->id,
+                'quantity_scrapped' => (float) $output->quantity_scrapped,
+                'operation_no' => $output->operation_no,
+                'work_center_id' => $output->work_center_id,
+                'setup_time_minutes' => (float) $output->setup_time_minutes,
+                'process_time_minutes' => (float) $output->process_time_minutes,
+                'inspection_status' => $output->inspection_status,
+                'inspected_at' => $output->inspected_at?->toDateTimeString(),
+                'inspection_notes' => $output->inspection_notes,
+            ],
+            'movement_at' => $output->produced_at?->toDateTimeString() ?? now()->toDateTimeString(),
+        ], $userId);
     }
 
     private function generateOrderNumber(): string
