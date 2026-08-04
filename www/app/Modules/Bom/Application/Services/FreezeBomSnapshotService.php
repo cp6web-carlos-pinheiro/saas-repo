@@ -108,6 +108,7 @@ final class FreezeBomSnapshotService extends BaseService
                     'source_bom_version_number' => (int) $item['bom_version_number'],
                     'parent_product_id' => (int) $item['parent_product_id'],
                     'component_product_id' => (int) $item['component_product_id'],
+                    'unit_id' => isset($item['unit_id']) && $item['unit_id'] !== null ? (int) $item['unit_id'] : null,
                     'line_no' => (int) $item['line_no'],
                     'level' => (int) $item['level'],
                     'quantity_per' => round((float) $item['quantity_per'], 6),

@@ -10,6 +10,7 @@ use App\Modules\Bom\Infrastructure\Persistence\Models\BomItem;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Services\SaaS\AuditLogService;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\SaaS\CompanyUserAccessService;
@@ -70,7 +71,7 @@ final class BomMaterialListController extends Controller
             'line_no' => 1,
             'component_product_id' => null,
             'quantity_per' => 1,
-            'uom' => '',
+            'unit_id' => null,
         ]]);
         $selectedProductId = (int) $request->old('product_id', (int) $request->query('product_id', 0));
         $products = $this->companyProductsByIds(
@@ -82,6 +83,7 @@ final class BomMaterialListController extends Controller
             'company' => $company,
             'bom' => null,
             'products' => $products,
+            'units' => $this->unitOptions($company->id),
             'editing' => false,
             'selectedProductId' => $selectedProductId > 0 ? $selectedProductId : null,
             'itemsForm' => $itemsForm,
@@ -163,6 +165,7 @@ final class BomMaterialListController extends Controller
                 $company->id,
                 $this->selectedProductIds((int) $request->old('product_id', $bom->product_id), $itemsForm, 'component_product_id')
             ),
+            'units' => $this->unitOptions($company->id),
             'editing' => true,
             'selectedProductId' => $bom->product_id,
             'itemsForm' => $itemsForm,
@@ -285,7 +288,12 @@ final class BomMaterialListController extends Controller
                 Rule::exists('products', 'id')->where('company_id', $company->id),
             ],
             'items.*.quantity_per' => ['required', 'numeric', 'gt:0'],
-            'items.*.uom' => ['nullable', 'string', 'max:20'],
+            'items.*.unit_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('units', 'id')
+                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('is_active', true)),
+            ],
         ]);
     }
 
@@ -334,7 +342,8 @@ final class BomMaterialListController extends Controller
                 'component_product_id' => $componentProduct->id,
                 'line_no' => $index + 1,
                 'quantity_per' => (float) $item['quantity_per'],
-                'uom' => trim((string) ($item['uom'] ?? '')) !== '' ? trim((string) $item['uom']) : $componentProduct->uom,
+                'unit_id' => isset($item['unit_id']) && (int) $item['unit_id'] > 0 ? (int) $item['unit_id'] : null,
+                'uom' => $this->resolveItemUom($companyId, $item, $componentProduct),
             ]);
         }
     }
@@ -348,9 +357,44 @@ final class BomMaterialListController extends Controller
                 'line_no' => $item->line_no,
                 'component_product_id' => $item->component_product_id,
                 'quantity_per' => $item->quantity_per,
-                'uom' => $item->uom ?? '',
+                'unit_id' => $item->unit_id,
             ])
             ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function unitOptions(int $companyId): array
+    {
+        return Unit::query()
+            ->where('company_id', $companyId)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'code', 'name'])
+            ->mapWithKeys(static fn (Unit $unit): array => [$unit->id => sprintf('%s - %s', $unit->code, $unit->name)])
+            ->all();
+    }
+
+    /**
+     * @param array<string, mixed> $item
+     */
+    private function resolveItemUom(int $companyId, array $item, Product $componentProduct): string
+    {
+        if (isset($item['unit_id']) && (int) $item['unit_id'] > 0) {
+            $unitCode = Unit::query()
+                ->where('company_id', $companyId)
+                ->whereKey((int) $item['unit_id'])
+                ->value('code');
+
+            if (is_string($unitCode) && $unitCode !== '') {
+                return mb_strtoupper($unitCode);
+            }
+        }
+
+        $fallbackUom = trim((string) ($componentProduct->uom ?? ''));
+
+        return $fallbackUom !== '' ? mb_strtoupper($fallbackUom) : 'UN';
     }
 
     private function ensureBomBelongsToCompany(BomHeader $bom, int $companyId): void

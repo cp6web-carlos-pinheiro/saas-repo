@@ -22,6 +22,7 @@ final class ProductionOrderBomItemSnapshot extends TenantModel
         'source_bom_version_number',
         'parent_product_id',
         'component_product_id',
+        'unit_id',
         'line_no',
         'level',
         'quantity_per',
@@ -32,6 +33,7 @@ final class ProductionOrderBomItemSnapshot extends TenantModel
     ];
 
     protected $casts = [
+        'unit_id' => 'integer',
         'quantity_per' => 'float',
         'quantity_required' => 'float',
         'quantity_accumulated' => 'float',

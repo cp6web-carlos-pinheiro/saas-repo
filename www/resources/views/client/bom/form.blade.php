@@ -130,7 +130,13 @@
                                     </div>
 
                                     <div>
-                                        <x-ui.input type="text" name="items[{{ $index }}][uom]" :value="old('items.'.$index.'.uom', $item['uom'] ?? '')" maxlength="20" />
+                                        <x-ui.select name="items[{{ $index }}][unit_id]" data-search="on">
+                                            <option value="">{{ __('product.select_unit') }}</option>
+                                            @foreach ($units as $unitId => $unitLabel)
+                                                <option value="{{ $unitId }}" @selected((string) old('items.'.$index.'.unit_id', $item['unit_id'] ?? '') === (string) $unitId)>{{ $unitLabel }}</option>
+                                            @endforeach
+                                        </x-ui.select>
+                                        @error('items.'.$index.'.unit_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                                     </div>
 
                                     <div class="flex justify-end">
@@ -175,7 +181,12 @@
         </div>
 
         <div>
-            <x-ui.input type="text" name="items[__INDEX__][uom]" value="" maxlength="20" />
+            <x-ui.select name="items[__INDEX__][unit_id]" data-search="on">
+                <option value="">{{ __('product.select_unit') }}</option>
+                @foreach ($units as $unitId => $unitLabel)
+                    <option value="{{ $unitId }}">{{ $unitLabel }}</option>
+                @endforeach
+            </x-ui.select>
         </div>
 
         <div class="flex justify-end">
