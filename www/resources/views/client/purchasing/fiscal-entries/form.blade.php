@@ -26,7 +26,7 @@
             <div class="grid gap-5 sm:grid-cols-2">
                 <label class="block text-sm font-medium">
                     {{ __('purchase_fiscal_entry.supplier') }}
-                    <x-ui.select name="supplier_id" class="mt-2">
+                    <x-ui.select name="supplier_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_fiscal_entry.select_supplier') }}" data-ajax-url="{{ route('purchasing.lookups.suppliers') }}" data-minimum-input-length="1">
                         <option value="">{{ __('purchase_fiscal_entry.select_supplier') }}</option>
                         @foreach ($suppliers as $id => $name)
                             <option value="{{ $id }}" @selected((string) old('supplier_id', $entry?->supplier_id) === (string) $id)>{{ $name }}</option>
@@ -37,7 +37,7 @@
 
                 <label class="block text-sm font-medium">
                     {{ __('purchase_fiscal_entry.order') }}
-                    <x-ui.select name="purchase_order_id" class="mt-2">
+                    <x-ui.select name="purchase_order_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_fiscal_entry.select_order') }}" data-ajax-url="{{ route('purchasing.lookups.orders') }}" data-minimum-input-length="1">
                         <option value="">{{ __('purchase_fiscal_entry.select_order') }}</option>
                         @foreach ($orders as $id => $number)
                             <option value="{{ $id }}" @selected((string) old('purchase_order_id', $entry?->purchase_order_id) === (string) $id)>{{ $number }}</option>

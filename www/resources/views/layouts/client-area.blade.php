@@ -63,7 +63,7 @@
                 ['label' => __('ui.purchasing_fiscal_entry'), 'href' => route('purchasing.fiscal-entries.index'), 'active' => request()->routeIs('purchasing.fiscal-entries.*')],
             ],
             'inventory' => [
-                ['label' => __('ui.inventory_items'), 'href' => null, 'active' => false],
+                ['label' => __('ui.inventory_warehouses'), 'href' => route('inventory.warehouses.index'), 'active' => request()->routeIs('inventory.warehouses.*')],
                 ['label' => __('ui.inventory_movements'), 'href' => null, 'active' => false],
                 ['label' => __('ui.inventory_count'), 'href' => null, 'active' => false],
             ],

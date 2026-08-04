@@ -27,12 +27,14 @@ use App\Http\Controllers\Web\Tenant\CustomerController;
 use App\Http\Controllers\Web\Tenant\ProductController;
 use App\Http\Controllers\Web\Tenant\ProductVersionController;
 use App\Http\Controllers\Web\Tenant\PurchaseFiscalEntryController;
+use App\Http\Controllers\Web\Tenant\PurchasingLookupController;
 use App\Http\Controllers\Web\Tenant\PurchaseOrderController;
 use App\Http\Controllers\Web\Tenant\PurchaseQuotationController;
 use App\Http\Controllers\Web\Tenant\PurchaseReceiptController;
 use App\Http\Controllers\Web\Tenant\PurchaseRequisitionController;
 use App\Http\Controllers\Web\Tenant\SaleController;
 use App\Http\Controllers\Web\Tenant\SupplierController;
+use App\Http\Controllers\Web\Tenant\WarehouseController;
 use App\Http\Middleware\EnsureTrialIsActive;
 use App\Modules\Identity\Presentation\Http\Middleware\CheckPermission;
 use App\Http\Middleware\ResolveWebTenant;
@@ -147,6 +149,7 @@ Route::middleware('auth:web')->group(function (): void {
         });
 
         Route::prefix('purchasing/requisitions')->name('purchasing.requisitions.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/lookup', [PurchasingLookupController::class, 'requisitions'])->name('lookup');
             Route::get('/', [PurchaseRequisitionController::class, 'index'])->name('index');
             Route::get('/create', [PurchaseRequisitionController::class, 'create'])->name('create');
             Route::post('/', [PurchaseRequisitionController::class, 'store'])->name('store');
@@ -167,6 +170,7 @@ Route::middleware('auth:web')->group(function (): void {
         });
 
         Route::prefix('purchasing/orders')->name('purchasing.orders.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/lookup', [PurchasingLookupController::class, 'orders'])->name('lookup');
             Route::get('/', [PurchaseOrderController::class, 'index'])->name('index');
             Route::get('/create', [PurchaseOrderController::class, 'create'])->name('create');
             Route::post('/', [PurchaseOrderController::class, 'store'])->name('store');
@@ -182,6 +186,7 @@ Route::middleware('auth:web')->group(function (): void {
             Route::post('/', [PurchaseReceiptController::class, 'store'])->name('store');
             Route::get('/{receipt}', [PurchaseReceiptController::class, 'show'])->name('show');
             Route::get('/{receipt}/edit', [PurchaseReceiptController::class, 'edit'])->name('edit');
+            Route::post('/{receipt}/reverse', [PurchaseReceiptController::class, 'reverse'])->name('reverse');
             Route::put('/{receipt}', [PurchaseReceiptController::class, 'update'])->name('update');
             Route::delete('/{receipt}', [PurchaseReceiptController::class, 'destroy'])->name('destroy');
         });
@@ -192,8 +197,27 @@ Route::middleware('auth:web')->group(function (): void {
             Route::post('/', [PurchaseFiscalEntryController::class, 'store'])->name('store');
             Route::get('/{entry}', [PurchaseFiscalEntryController::class, 'show'])->name('show');
             Route::get('/{entry}/edit', [PurchaseFiscalEntryController::class, 'edit'])->name('edit');
+            Route::post('/{entry}/reverse', [PurchaseFiscalEntryController::class, 'reverse'])->name('reverse');
             Route::put('/{entry}', [PurchaseFiscalEntryController::class, 'update'])->name('update');
             Route::delete('/{entry}', [PurchaseFiscalEntryController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('purchasing/lookups')->name('purchasing.lookups.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/suppliers', [PurchasingLookupController::class, 'suppliers'])->name('suppliers');
+            Route::get('/requisitions', [PurchasingLookupController::class, 'requisitions'])->name('requisitions');
+            Route::get('/orders', [PurchasingLookupController::class, 'orders'])->name('orders');
+            Route::get('/warehouses', [PurchasingLookupController::class, 'warehouses'])->name('warehouses');
+            Route::get('/order-lines', [PurchasingLookupController::class, 'orderLines'])->name('order-lines');
+        });
+
+        Route::prefix('inventory/warehouses')->name('inventory.warehouses.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/', [WarehouseController::class, 'index'])->name('index');
+            Route::get('/create', [WarehouseController::class, 'create'])->name('create');
+            Route::post('/', [WarehouseController::class, 'store'])->name('store');
+            Route::get('/{warehouse}', [WarehouseController::class, 'show'])->name('show');
+            Route::get('/{warehouse}/edit', [WarehouseController::class, 'edit'])->name('edit');
+            Route::put('/{warehouse}', [WarehouseController::class, 'update'])->name('update');
+            Route::delete('/{warehouse}', [WarehouseController::class, 'destroy'])->name('destroy');
         });
 
         Route::prefix('customers')->name('customers.')->middleware(EnsureTrialIsActive::class)->group(function (): void {

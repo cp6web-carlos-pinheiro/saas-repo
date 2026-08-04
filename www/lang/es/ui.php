@@ -82,6 +82,7 @@ return [
     'module_identity' => 'Identidad',
     'module_inventory' => 'Inventario',
     'inventory_items' => 'Artículos',
+    'inventory_warehouses' => 'Almacenes',
     'inventory_movements' => 'Movimientos',
     'inventory_count' => 'Inventario',
     'module_mes' => 'MES',

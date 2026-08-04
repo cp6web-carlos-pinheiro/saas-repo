@@ -36,4 +36,30 @@ trait HandlesTenantAuthorization
 
         abort_unless($user->hasPermission($permission, $companyId), 403);
     }
+
+    /**
+     * @param list<string> $permissions
+     */
+    private function ensureAnyPermission(Request $request, int $companyId, array $permissions): void
+    {
+        $user = $request->user();
+
+        if (! $user instanceof User) {
+            abort(403);
+        }
+
+        $company = Company::query()->findOrFail($companyId);
+
+        if (app(CompanyUserAccessService::class)->isCompanyAdministrator($user, $company)) {
+            return;
+        }
+
+        foreach ($permissions as $permission) {
+            if ($user->hasPermission($permission, $companyId)) {
+                return;
+            }
+        }
+
+        abort(403);
+    }
 }

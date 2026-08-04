@@ -164,6 +164,10 @@ final class PurchaseReceiptController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
+        if ($receipt->status === 'POSTED') {
+            abort(403, __('purchase_receipt.locked_posted'));
+        }
+
         $lineRows = $this->oldItemRows($request, $this->lineRowsForForm($receipt));
         $orderId = (int) old('purchase_order_id', $receipt->purchase_order_id ?? 0);
 
@@ -183,6 +187,8 @@ final class PurchaseReceiptController extends Controller
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
+
+        $this->ensureNotPosted($receipt);
 
         $data = $this->validateReceipt($request);
 
@@ -227,6 +233,8 @@ final class PurchaseReceiptController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
+        $this->ensureNotPosted($receipt);
+
         $receiptId = $receipt->id;
         $receiptNumber = $receipt->receipt_number;
         $receipt->delete();
@@ -245,6 +253,57 @@ final class PurchaseReceiptController extends Controller
         );
 
         return redirect()->route('purchasing.receipts.index')->with('status', __('purchase_receipt.removed'));
+    }
+
+    public function reverse(Request $request, PurchaseReceipt $receipt, AuditLogService $audit, PurchasingIntegrationService $integration): RedirectResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
+        $data = $request->validate([
+            'reverse_category' => ['required', Rule::in(['quality', 'fiscal', 'supplier', 'master_data'])],
+            'reverse_reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        if ($receipt->status !== 'POSTED') {
+            throw ValidationException::withMessages([
+                'status' => __('purchase_receipt.reverse_only_posted'),
+            ]);
+        }
+
+        DB::transaction(function () use ($receipt, $request, $integration, $data): void {
+            $integration->reverseReceiptFromInventory($receipt, (string) $data['reverse_category'], (string) $data['reverse_reason'], $request->user()?->id);
+
+            $metadata = is_array($receipt->metadata) ? $receipt->metadata : [];
+            $metadata['reversal'] = [
+                'category' => (string) $data['reverse_category'],
+                'reason' => (string) $data['reverse_reason'],
+                'reversed_by' => $request->user()?->id,
+                'reversed_at' => now()->toIso8601String(),
+            ];
+
+            $receipt->status = 'CANCELLED';
+            $receipt->cancelled_by = $request->user()?->id;
+            $receipt->cancelled_at = now();
+            $receipt->metadata = $metadata;
+            $receipt->save();
+        });
+
+        $audit->record(
+            'tenant_purchase_receipt.reversed',
+            context: [
+                'purchase_receipt_id' => $receipt->id,
+                'purchase_receipt_number' => $receipt->receipt_number,
+                'reverse_category' => (string) $data['reverse_category'],
+                'reverse_reason' => (string) $data['reverse_reason'],
+                'company_id' => $company->id,
+                'actor_user_id' => $request->user()?->id,
+            ],
+            userId: $request->user()?->id,
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent(),
+        );
+
+        return redirect()->route('purchasing.receipts.show', $receipt)->with('status', __('purchase_receipt.reversed'));
     }
 
     /**
@@ -334,6 +393,15 @@ final class PurchaseReceiptController extends Controller
             $receipt->cancelled_at ??= now();
 
             return;
+        }
+    }
+
+    private function ensureNotPosted(PurchaseReceipt $receipt): void
+    {
+        if ($receipt->status === 'POSTED') {
+            throw ValidationException::withMessages([
+                'status' => __('purchase_receipt.locked_posted'),
+            ]);
         }
     }
 

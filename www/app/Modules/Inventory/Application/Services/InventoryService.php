@@ -252,7 +252,7 @@ final class InventoryService extends BaseService
         );
     }
 
-    private function allocateIssueMovement(StockLedgerMovement $issueMovement, array $payload, \Illuminate\Support\Carbon $movementAt): void
+    private function allocateIssueMovement(StockLedgerMovement $issueMovement, array $payload, Carbon $movementAt): void
     {
         $strategy = strtoupper((string) ($payload['allocation_strategy'] ?? 'FIFO'));
 

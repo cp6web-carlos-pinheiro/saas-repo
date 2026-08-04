@@ -30,7 +30,7 @@
             <div class="grid gap-5 sm:grid-cols-2">
                 <label class="block text-sm font-medium">
                     {{ __('purchase_receipt.supplier') }}
-                    <x-ui.select name="supplier_id" class="mt-2">
+                    <x-ui.select name="supplier_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_receipt.select_supplier') }}" data-ajax-url="{{ route('purchasing.lookups.suppliers') }}" data-minimum-input-length="1">
                         <option value="">{{ __('purchase_receipt.select_supplier') }}</option>
                         @foreach ($suppliers as $id => $name)
                             <option value="{{ $id }}" @selected((string) old('supplier_id', $receipt?->supplier_id) === (string) $id)>{{ $name }}</option>
@@ -41,7 +41,7 @@
 
                 <label class="block text-sm font-medium">
                     {{ __('purchase_receipt.order') }}
-                    <x-ui.select name="purchase_order_id" class="mt-2">
+                    <x-ui.select name="purchase_order_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_receipt.select_order') }}" data-ajax-url="{{ route('purchasing.lookups.orders') }}" data-minimum-input-length="1">
                         <option value="">{{ __('purchase_receipt.select_order') }}</option>
                         @foreach ($orders as $id => $number)
                             <option value="{{ $id }}" @selected((string) old('purchase_order_id', $receipt?->purchase_order_id) === (string) $id)>{{ $number }}</option>
@@ -96,7 +96,7 @@
                         <div class="mt-3 space-y-3" data-prc-items-container>
                             @foreach (old('items', $lineRows) as $index => $item)
                                 <div class="grid grid-cols-[1.6fr_2fr_1.4fr_1fr_1fr_1.4fr_auto] items-start gap-4" data-prc-item-row>
-                                    <x-ui.select name="items[{{ $index }}][purchase_order_line_id]" data-search="on">
+                                    <x-ui.select name="items[{{ $index }}][purchase_order_line_id]" data-search="on" data-placeholder="{{ __('purchase_receipt.select_order_line') }}" data-ajax-url="{{ route('purchasing.lookups.order-lines', ['order_id' => (int) old('purchase_order_id', $receipt?->purchase_order_id ?? 0)]) }}" data-minimum-input-length="1">
                                         <option value="">{{ __('purchase_receipt.select_order_line') }}</option>
                                         @foreach ($orderLines as $line)
                                             <option value="{{ $line->id }}" @selected((int) old('items.'.$index.'.purchase_order_line_id', $item['purchase_order_line_id'] ?? 0) === $line->id)>
@@ -143,7 +143,7 @@
 
 <template id="prc-item-template">
     <div class="grid grid-cols-[1.6fr_2fr_1.4fr_1fr_1fr_1.4fr_auto] items-start gap-4" data-prc-item-row>
-        <x-ui.select name="items[__INDEX__][purchase_order_line_id]" data-search="on">
+        <x-ui.select name="items[__INDEX__][purchase_order_line_id]" data-search="on" data-placeholder="{{ __('purchase_receipt.select_order_line') }}" data-ajax-url="{{ route('purchasing.lookups.order-lines', ['order_id' => (int) old('purchase_order_id', $receipt?->purchase_order_id ?? 0)]) }}" data-minimum-input-length="1">
             <option value="">{{ __('purchase_receipt.select_order_line') }}</option>
             @foreach ($orderLines as $line)
                 <option value="{{ $line->id }}">#{{ $line->id }} - {{ $line->product?->sku }} ({{ number_format((float) $line->quantity_ordered, 6, ',', '.') }})</option>
@@ -173,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('[data-prc-items-container]');
     const template = document.getElementById('prc-item-template');
     const addButton = document.querySelector('[data-prc-add-item]');
+    const orderSelect = document.querySelector('select[name="purchase_order_id"]');
 
     if (!container || !template || !addButton) {
         return;
@@ -194,6 +195,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     container.querySelectorAll('[data-prc-item-row]').forEach(bindRow);
 
+    const buildOrderLineLookupUrl = () => {
+        const baseUrl = "{{ route('purchasing.lookups.order-lines') }}";
+        const orderId = orderSelect && orderSelect.value ? Number.parseInt(orderSelect.value, 10) : 0;
+        const url = new URL(baseUrl, window.location.origin);
+
+        if (!Number.isNaN(orderId) && orderId > 0) {
+            url.searchParams.set('order_id', String(orderId));
+        }
+
+        return `${url.pathname}${url.search}`;
+    };
+
+    const refreshOrderLineSelects = () => {
+        const selects = container.querySelectorAll('select[name$="[purchase_order_line_id]"]');
+        const ajaxUrl = buildOrderLineLookupUrl();
+
+        for (const select of selects) {
+            select.dataset.ajaxUrl = ajaxUrl;
+
+            if (typeof window.jQuery?.fn?.select2 === 'function' && window.jQuery(select).hasClass('select2-hidden-accessible')) {
+                window.jQuery(select).val(null).trigger('change');
+                window.jQuery(select).select2('destroy');
+            }
+
+            const firstOption = select.querySelector('option[value=""]');
+            select.innerHTML = '';
+
+            if (firstOption) {
+                select.appendChild(firstOption);
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = "{{ __('purchase_receipt.select_order_line') }}";
+                select.appendChild(option);
+            }
+        }
+
+        if (typeof window.initializeUiSelects === 'function') {
+            window.initializeUiSelects();
+        }
+    };
+
+    if (orderSelect) {
+        orderSelect.addEventListener('change', refreshOrderLineSelects);
+    }
+
     addButton.addEventListener('click', () => {
         const index = container.querySelectorAll('[data-prc-item-row]').length;
         const html = template.innerHTML.replaceAll('__INDEX__', String(index));
@@ -205,6 +252,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         container.appendChild(row);
         bindRow(row);
+
+        if (typeof window.initializeUiSelects === 'function') {
+            window.initializeUiSelects();
+        }
     });
 });
 </script>

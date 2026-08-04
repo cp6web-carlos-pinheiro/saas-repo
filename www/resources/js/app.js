@@ -419,3 +419,103 @@ for (const form of adminDeleteForms) {
 		}
 	});
 }
+
+const adminReverseForms = document.querySelectorAll('form[data-admin-reverse-confirm]');
+
+for (const form of adminReverseForms) {
+	form.addEventListener('submit', async (event) => {
+		if (form.dataset.confirmed === 'true') {
+			return;
+		}
+
+		event.preventDefault();
+
+		const title = form.dataset.reverseTitle ?? 'Confirm reversal';
+		const bodyText = form.dataset.reverseText ?? 'This operation will reverse posted effects.';
+		const confirmLabel = form.dataset.reverseConfirm ?? 'Reverse';
+		const cancelLabel = form.dataset.reverseCancel ?? 'Cancel';
+		const reasonLabel = form.dataset.reverseReasonLabel ?? 'Reason';
+		const reasonPlaceholder = form.dataset.reverseReasonPlaceholder ?? 'Describe why this reversal is needed';
+		const requiredMessage = form.dataset.reverseReasonRequired ?? 'Reason is required.';
+		const categoryLabel = form.dataset.reverseCategoryLabel ?? 'Category';
+		const categoryRequiredMessage = form.dataset.reverseCategoryRequired ?? 'Category is required.';
+		const categoryQuality = form.dataset.reverseCategoryQuality ?? 'Quality';
+		const categoryFiscal = form.dataset.reverseCategoryFiscal ?? 'Fiscal';
+		const categorySupplier = form.dataset.reverseCategorySupplier ?? 'Supplier';
+		const categoryMasterData = form.dataset.reverseCategoryMasterData ?? 'Master Data';
+
+		const result = await Swal.fire({
+			title,
+			html: `
+				<p class="mb-3">${bodyText}</p>
+				<label for="swal-reverse-category" class="mb-1 block text-left text-sm font-medium">${categoryLabel}</label>
+				<select id="swal-reverse-category" class="swal2-select" style="display:block;width:100%;margin:0 0 12px 0;">
+					<option value="">---</option>
+					<option value="quality">${categoryQuality}</option>
+					<option value="fiscal">${categoryFiscal}</option>
+					<option value="supplier">${categorySupplier}</option>
+					<option value="master_data">${categoryMasterData}</option>
+				</select>
+				<label for="swal-reverse-reason" class="mb-1 block text-left text-sm font-medium">${reasonLabel}</label>
+				<textarea id="swal-reverse-reason" class="swal2-textarea" placeholder="${reasonPlaceholder}" maxlength="1000" style="display:block;width:100%;margin:0;"> </textarea>
+			`,
+			icon: 'warning',
+			preConfirm: () => {
+				const categoryElement = document.getElementById('swal-reverse-category');
+				const reasonElement = document.getElementById('swal-reverse-reason');
+
+				const category = categoryElement instanceof HTMLSelectElement ? categoryElement.value.trim() : '';
+				const reason = reasonElement instanceof HTMLTextAreaElement ? reasonElement.value.trim() : '';
+
+				if (category === '') {
+					Swal.showValidationMessage(categoryRequiredMessage);
+					return false;
+				}
+
+				if (reason === '') {
+					Swal.showValidationMessage(requiredMessage);
+					return false;
+				}
+
+				return { category, reason };
+			},
+			showCancelButton: true,
+			focusCancel: true,
+			confirmButtonText: confirmLabel,
+			cancelButtonText: cancelLabel,
+			customClass: {
+				popup: 'g-swal-popup',
+				title: 'g-swal-title',
+				htmlContainer: 'g-swal-body',
+				actions: 'g-swal-actions',
+				confirmButton: 'g-swal-confirm',
+				cancelButton: 'g-swal-cancel',
+			},
+			buttonsStyling: false,
+		});
+
+		if (result.isConfirmed) {
+			let hiddenReason = form.querySelector('input[name="reverse_reason"]');
+			let hiddenCategory = form.querySelector('input[name="reverse_category"]');
+
+			if (!(hiddenReason instanceof HTMLInputElement)) {
+				hiddenReason = document.createElement('input');
+				hiddenReason.type = 'hidden';
+				hiddenReason.name = 'reverse_reason';
+				form.appendChild(hiddenReason);
+			}
+
+			if (!(hiddenCategory instanceof HTMLInputElement)) {
+				hiddenCategory = document.createElement('input');
+				hiddenCategory.type = 'hidden';
+				hiddenCategory.name = 'reverse_category';
+				form.appendChild(hiddenCategory);
+			}
+
+			hiddenCategory.value = String(result.value?.category ?? '').trim();
+			hiddenReason.value = String(result.value?.reason ?? '').trim();
+			form.dataset.confirmed = 'true';
+			HTMLFormElement.prototype.submit.call(form);
+		}
+	});
+}

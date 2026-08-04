@@ -191,6 +191,128 @@ final class TenantPurchasingCrudManagementTest extends TestCase
         $this->assertSame('POSTED', $posting->status);
 
         $this->actingAs($user, 'web')
+            ->put(route('purchasing.receipts.update', $receipt), [
+                'supplier_id' => $supplier->id,
+                'purchase_order_id' => $order->id,
+                'receipt_date' => '2026-08-05',
+                'status' => 'CANCELLED',
+                'notes' => 'Tentativa de alteração após lançamento.',
+                'items' => [[
+                    'purchase_order_line_id' => $orderLine->id,
+                    'product_id' => $product->id,
+                    'warehouse_id' => $warehouse->id,
+                    'quantity_received' => '5',
+                    'lot_number' => 'LOT-001',
+                    'notes' => 'Recebido sem avarias.',
+                ]],
+            ])
+            ->assertSessionHasErrors('status');
+
+        $this->actingAs($user, 'web')
+            ->delete(route('purchasing.receipts.destroy', $receipt))
+            ->assertSessionHasErrors('status');
+
+        $this->actingAs($user, 'web')
+            ->post(route('purchasing.receipts.reverse', $receipt))
+            ->assertSessionHasErrors('reverse_category')
+            ->assertSessionHasErrors('reverse_reason');
+
+        $receiptReverseReason = 'Avaria identificada na inspeção e devolução imediata.';
+        $receiptReverseCategory = 'quality';
+
+        $this->actingAs($user, 'web')
+            ->post(route('purchasing.receipts.reverse', $receipt), [
+                'reverse_category' => $receiptReverseCategory,
+                'reverse_reason' => $receiptReverseReason,
+            ])
+            ->assertRedirect(route('purchasing.receipts.show', $receipt));
+
+        $this->assertDatabaseHas('purchase_receipts', [
+            'id' => $receipt->id,
+            'status' => 'CANCELLED',
+        ]);
+
+        $receipt->refresh();
+        $this->assertSame($receiptReverseCategory, $receipt->metadata['reversal']['category'] ?? null);
+        $this->assertSame($receiptReverseReason, $receipt->metadata['reversal']['reason'] ?? null);
+
+        $this->assertDatabaseHas('stock_ledger_movements', [
+            'reference_type' => 'purchase_receipt_reversal',
+            'reference_id' => $receipt->id,
+            'movement_type' => 'ISSUE',
+        ]);
+
+        $this->actingAs($user, 'web')
+            ->put(route('purchasing.fiscal-entries.update', $entry), [
+                'supplier_id' => $supplier->id,
+                'purchase_order_id' => $order->id,
+                'document_number' => 'NF-123',
+                'issue_date' => '2026-08-05',
+                'entry_date' => '2026-08-06',
+                'status' => 'CANCELLED',
+                'amount' => '200,50',
+                'notes' => 'Tentativa de alteração após lançamento.',
+            ])
+            ->assertSessionHasErrors('status');
+
+        $this->actingAs($user, 'web')
+            ->delete(route('purchasing.fiscal-entries.destroy', $entry))
+            ->assertSessionHasErrors('status');
+
+        $this->actingAs($user, 'web')
+            ->post(route('purchasing.fiscal-entries.reverse', $entry))
+            ->assertSessionHasErrors('reverse_category')
+            ->assertSessionHasErrors('reverse_reason');
+
+        $entryReverseReason = 'Divergência de impostos validada pelo fiscal.';
+        $entryReverseCategory = 'fiscal';
+
+        $this->actingAs($user, 'web')
+            ->post(route('purchasing.fiscal-entries.reverse', $entry), [
+                'reverse_category' => $entryReverseCategory,
+                'reverse_reason' => $entryReverseReason,
+            ])
+            ->assertRedirect(route('purchasing.fiscal-entries.show', $entry));
+
+        $this->assertDatabaseHas('purchase_fiscal_entries', [
+            'id' => $entry->id,
+            'status' => 'CANCELLED',
+        ]);
+
+        $entry->refresh();
+        $this->assertSame($entryReverseCategory, $entry->metadata['reversal']['category'] ?? null);
+        $this->assertSame($entryReverseReason, $entry->metadata['reversal']['reason'] ?? null);
+
+        $this->assertDatabaseHas('purchase_fiscal_entry_postings', [
+            'purchase_fiscal_entry_id' => $entry->id,
+            'status' => 'REVERSED',
+        ]);
+
+        $posting = PurchaseFiscalEntryPosting::query()->where('purchase_fiscal_entry_id', $entry->id)->firstOrFail();
+        $this->assertSame($entryReverseCategory, $posting->payload['reversal']['category'] ?? null);
+        $this->assertSame($entryReverseReason, $posting->payload['reversal']['reason'] ?? null);
+
+        $this->actingAs($user, 'web')
+            ->getJson(route('purchasing.lookups.suppliers', ['q' => 'SUP', 'page' => 1]))
+            ->assertOk()
+            ->assertJsonStructure(['results', 'pagination' => ['more']]);
+
+        $this->actingAs($user, 'web')
+            ->getJson(route('purchasing.lookups.requisitions', ['q' => 'REQ', 'page' => 1]))
+            ->assertOk()
+            ->assertJsonStructure(['results', 'pagination' => ['more']]);
+
+        $this->actingAs($user, 'web')
+            ->getJson(route('purchasing.lookups.orders', ['q' => 'PUR', 'page' => 1]))
+            ->assertOk()
+            ->assertJsonStructure(['results', 'pagination' => ['more']]);
+
+        $this->actingAs($user, 'web')
+            ->getJson(route('purchasing.lookups.order-lines', ['q' => 'P-001', 'order_id' => $order->id, 'page' => 1]))
+            ->assertOk()
+            ->assertJsonStructure(['results', 'pagination' => ['more']]);
+
+        $this->actingAs($user, 'web')
             ->get(route('purchasing.requisitions.index'))
             ->assertOk()
             ->assertSee($requisition->requisition_number);

@@ -149,6 +149,10 @@ final class PurchaseFiscalEntryController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
+        if ($entry->status === 'POSTED') {
+            abort(403, __('purchase_fiscal_entry.locked_posted'));
+        }
+
         return view('client.purchasing.fiscal-entries.form', [
             'entry' => $entry,
             'company' => $company,
@@ -161,6 +165,8 @@ final class PurchaseFiscalEntryController extends Controller
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
+
+        $this->ensureNotPosted($entry);
 
         $data = $this->validateEntry($request);
 
@@ -206,6 +212,8 @@ final class PurchaseFiscalEntryController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
+        $this->ensureNotPosted($entry);
+
         $entryId = $entry->id;
         $entryNumber = $entry->entry_number;
         $entry->delete();
@@ -224,6 +232,57 @@ final class PurchaseFiscalEntryController extends Controller
         );
 
         return redirect()->route('purchasing.fiscal-entries.index')->with('status', __('purchase_fiscal_entry.removed'));
+    }
+
+    public function reverse(Request $request, PurchaseFiscalEntry $entry, AuditLogService $audit, PurchasingIntegrationService $integration): RedirectResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
+        $data = $request->validate([
+            'reverse_category' => ['required', Rule::in(['quality', 'fiscal', 'supplier', 'master_data'])],
+            'reverse_reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        if ($entry->status !== 'POSTED') {
+            throw ValidationException::withMessages([
+                'status' => __('purchase_fiscal_entry.reverse_only_posted'),
+            ]);
+        }
+
+        DB::transaction(function () use ($entry, $request, $integration, $data): void {
+            $integration->reverseFiscalEntryPosting($entry, (string) $data['reverse_category'], (string) $data['reverse_reason'], $request->user()?->id);
+
+            $metadata = is_array($entry->metadata) ? $entry->metadata : [];
+            $metadata['reversal'] = [
+                'category' => (string) $data['reverse_category'],
+                'reason' => (string) $data['reverse_reason'],
+                'reversed_by' => $request->user()?->id,
+                'reversed_at' => now()->toIso8601String(),
+            ];
+
+            $entry->status = 'CANCELLED';
+            $entry->cancelled_by = $request->user()?->id;
+            $entry->cancelled_at = now();
+            $entry->metadata = $metadata;
+            $entry->save();
+        });
+
+        $audit->record(
+            'tenant_purchase_fiscal_entry.reversed',
+            context: [
+                'purchase_fiscal_entry_id' => $entry->id,
+                'purchase_fiscal_entry_number' => $entry->entry_number,
+                'reverse_category' => (string) $data['reverse_category'],
+                'reverse_reason' => (string) $data['reverse_reason'],
+                'company_id' => $company->id,
+                'actor_user_id' => $request->user()?->id,
+            ],
+            userId: $request->user()?->id,
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent(),
+        );
+
+        return redirect()->route('purchasing.fiscal-entries.show', $entry)->with('status', __('purchase_fiscal_entry.reversed'));
     }
 
     /**
@@ -298,6 +357,15 @@ final class PurchaseFiscalEntryController extends Controller
             $entry->cancelled_at ??= now();
 
             return;
+        }
+    }
+
+    private function ensureNotPosted(PurchaseFiscalEntry $entry): void
+    {
+        if ($entry->status === 'POSTED') {
+            throw ValidationException::withMessages([
+                'status' => __('purchase_fiscal_entry.locked_posted'),
+            ]);
         }
     }
 
