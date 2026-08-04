@@ -11,12 +11,14 @@ use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
+use Illuminate\Database\Eloquent\Builder;
 use App\Services\SaaS\CompanyUserAccessService;
 use Illuminate\Support\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 final class BomMaterialListController extends Controller
@@ -93,6 +95,7 @@ final class BomMaterialListController extends Controller
         $this->ensurePermission($request, self::WRITE_PERMISSION, $company->id);
 
         $validated = $this->validateBom($request, $company);
+        $this->ensureApprovedWindowDoesNotOverlap($company, $validated);
 
         $bom = DB::transaction(function () use ($validated, $company, $request): BomHeader {
             $versionNumber = ((int) BomHeader::query()
@@ -174,6 +177,7 @@ final class BomMaterialListController extends Controller
         $this->ensureBomBelongsToCompany($bom, $company->id);
 
         $validated = $this->validateBom($request, $company, $bom);
+        $this->ensureApprovedWindowDoesNotOverlap($company, $validated, $bom);
 
         DB::transaction(function () use ($bom, $company, $validated, $request): void {
             $bom->fill([
@@ -356,5 +360,43 @@ final class BomMaterialListController extends Controller
     private function ensureBomBelongsToCompany(BomHeader $bom, int $companyId): void
     {
         abort_unless((int) $bom->company_id === $companyId, 404);
+    }
+
+    private function ensureApprovedWindowDoesNotOverlap(Company $company, array $validated, ?BomHeader $current = null): void
+    {
+        if (($validated['status'] ?? 'DRAFT') !== 'APPROVED') {
+            return;
+        }
+
+        $effectiveFrom = isset($validated['effective_from']) && $validated['effective_from'] !== ''
+            ? (string) $validated['effective_from']
+            : null;
+        $effectiveTo = isset($validated['effective_to']) && $validated['effective_to'] !== ''
+            ? (string) $validated['effective_to']
+            : null;
+
+        if ($effectiveFrom === null) {
+            return;
+        }
+
+        $query = BomHeader::query()
+            ->where('company_id', $company->id)
+            ->where('product_id', (int) $validated['product_id'])
+            ->where('status', 'APPROVED')
+            ->whereDate('effective_from', '<=', $effectiveTo ?? $effectiveFrom)
+            ->where(static function (Builder $builder) use ($effectiveFrom): void {
+                $builder->whereNull('effective_to')
+                    ->orWhereDate('effective_to', '>=', $effectiveFrom);
+            });
+
+        if ($current instanceof BomHeader) {
+            $query->where('id', '!=', $current->id);
+        }
+
+        if ($query->exists()) {
+            throw ValidationException::withMessages([
+                'effective_from' => __('bom.approved_overlap_window'),
+            ]);
+        }
     }
 }

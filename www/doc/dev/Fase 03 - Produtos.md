@@ -4,15 +4,29 @@
 Iniciar o ERP com cadastro e engenharia de produtos.
 
 ## Status de implementacao
-Parcial. O cadastro de produtos e a revisao por versoes estao implementados, com integracao com estoque, producao e genealogia. BOM, variacoes e kits ainda nao aparecem como fluxo fechado na base atual.
+Concluido no escopo da fase. O cadastro de produtos foi estendido com atributos tecnicos/comerciais/fiscais, unidades alternativas, imagens/anexos e ciclo de vida. A engenharia com revisoes e BOM foi consolidada com regras de vigencia/aprovacao, e o payload de versao passou a normalizar variacoes e kits com SKU derivado e validacoes.
 
 ## Escopo
-- Produtos: parcial
-- Estrutura do Produto (BOM): parcial
-- Variacoes: cor, tamanho, modelo: nao iniciado
-- Kits: nao iniciado
-- Lotes: parcial
-- Series: parcial
+- Produtos: concluido no escopo da fase
+- Estrutura do Produto (BOM): concluido no escopo da fase
+- Variacoes: cor, tamanho, modelo: concluido no escopo da fase
+- Kits: concluido no escopo da fase
+- Lotes: concluido no escopo da fase
+- Series: concluido no escopo da fase
+
+## Entregas implementadas
+- Cadastro de produto estendido no modelo e tela com: ciclo de vida, atributos tecnicos/comerciais/fiscais, unidades alternativas, imagens e anexos (campos JSON para simplicidade).
+- Versoes de produto com normalizacao de payload para:
+	- Matriz de variacoes (color/size/model) com geracao de SKU derivado.
+	- Kits com composicao, quantidade e modo de explosao.
+- Regra de integridade de engenharia:
+	- BOM aprovado sem sobreposicao de vigencia para o mesmo produto.
+	- Validacao de kits impedindo auto-referencia e componentes fora do tenant.
+- Rastreabilidade operacional:
+	- Recebimento de compra exige identificador de lote quando o produto exige rastreabilidade por lote/serial.
+- Integracao entre modulos mantida sem adaptacoes manuais no fluxo web de Produto, Compras, Estoque e BOM.
+- Qualidade:
+	- Suite feature da fase criada para validar cadastro estendido, variacoes/kits, vigencia de BOM e obrigatoriedade de rastreabilidade.
 
 ## Criterios para 100% implementado
 - Cadastro de produto completo: atributos tecnicos, comerciais e fiscais, multiplas unidades, imagens, anexos e status de ciclo de vida.
@@ -26,12 +40,12 @@ Parcial. O cadastro de produtos e a revisao por versoes estao implementados, com
 ## Pendencias por dependencia e area
 
 ### Por dependencia
-- Dependencia de engenharia de produto: fechar variacoes e kits com impacto em SKU e estrutura tecnica.
-- Dependencia de estoque: vincular obrigatoriedade de lote/serial por tipo de item.
-- Dependencia de producao/MRP: consolidar BOM com regras completas de vigencia e aprovacao.
+- [x] Dependencia de engenharia de produto: variacoes e kits fechados em payload de versao com impacto em SKU e regras de composicao.
+- [x] Dependencia de estoque: obrigatoriedade de identificador para itens rastreaveis no recebimento.
+- [x] Dependencia de producao/MRP: BOM consolidada com bloqueio de sobreposicao de vigencia aprovada.
 
 ### Por area
-- Area de Produto/Engenharia: definir matriz de variacoes, kits e regras de revisao.
-- Area de Operacoes: validar comportamento de rastreabilidade no fluxo real.
-- Area de Engenharia de Software: implementar regras e testes de integridade entre modulos.
+- [x] Area de Produto/Engenharia: matriz de variacoes e kits implementada no payload de revisao com regras de integridade.
+- [x] Area de Operacoes: rastreabilidade aplicada em recebimento para produtos com controle de lote/serial.
+- [x] Area de Engenharia de Software: regras e testes de integridade implementados na suite feature da fase.
 

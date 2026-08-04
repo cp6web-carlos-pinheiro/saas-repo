@@ -33,9 +33,29 @@
             <x-ui.definition-item :label="__('product.lead_time_days')">{{ $product->lead_time_days }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('product.lot_control')">{{ $product->lot_control ? __('ui.yes') : __('ui.no') }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('product.serial_control')">{{ $product->serial_control ? __('ui.yes') : __('ui.no') }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('product.lifecycle_status')">{{ __('product.lifecycle_statuses.'.$product->lifecycle_status) }}</x-ui.definition-item>
             <x-ui.definition-item-status :label="__('product.status')" :value="$product->is_active ? __('product.active') : __('product.inactive')" :tone="$product->is_active ? 'success' : 'neutral'" />
             <x-ui.definition-item-date class="sm:col-span-2 xl:col-span-2" :label="__('product.created_at')" :value="$product->created_at" />
         </x-ui.definition-grid>
+
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+            <div class="rounded-2xl border border-[#dadce0] bg-white p-4">
+                <h3 class="font-semibold">{{ __('product.technical_attributes') }}</h3>
+                <pre class="mt-2 overflow-x-auto text-xs text-[#5f6368]">{{ json_encode($product->technical_attributes ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+            </div>
+            <div class="rounded-2xl border border-[#dadce0] bg-white p-4">
+                <h3 class="font-semibold">{{ __('product.commercial_attributes') }}</h3>
+                <pre class="mt-2 overflow-x-auto text-xs text-[#5f6368]">{{ json_encode($product->commercial_attributes ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+            </div>
+            <div class="rounded-2xl border border-[#dadce0] bg-white p-4">
+                <h3 class="font-semibold">{{ __('product.fiscal_attributes') }}</h3>
+                <pre class="mt-2 overflow-x-auto text-xs text-[#5f6368]">{{ json_encode($product->fiscal_attributes ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+            </div>
+            <div class="rounded-2xl border border-[#dadce0] bg-white p-4">
+                <h3 class="font-semibold">{{ __('product.alternate_uoms') }}</h3>
+                <pre class="mt-2 overflow-x-auto text-xs text-[#5f6368]">{{ json_encode($product->alternate_uoms ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+            </div>
+        </div>
     </x-ui.panel>
 </div>
 @endsection

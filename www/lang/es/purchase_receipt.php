@@ -60,4 +60,5 @@ return [
     'invalid_transition' => 'Transición de estado de la recepción inválida.',
     'locked_posted' => 'Una recepción contabilizada no se puede editar ni eliminar. Use reversión.',
     'reverse_only_posted' => 'Solo las recepciones contabilizadas se pueden revertir.',
+    'lot_or_serial_required' => 'Informe un identificador de lote/trazabilidad para ítems con control de lote o serie.',
 ];

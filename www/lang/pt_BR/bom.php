@@ -44,4 +44,5 @@ return [
     'latest_revision' => 'Última revisão',
     'open_structure' => 'Abrir estrutura',
     'create_revision' => 'Nova revisão',
+    'approved_overlap_window' => 'Já existe uma revisão aprovada com vigência sobreposta para este produto.',
 ];

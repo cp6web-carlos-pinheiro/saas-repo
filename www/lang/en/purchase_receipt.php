@@ -60,4 +60,5 @@ return [
     'invalid_transition' => 'Invalid receipt status transition.',
     'locked_posted' => 'Posted receipts cannot be edited or deleted. Use reversal.',
     'reverse_only_posted' => 'Only posted receipts can be reversed.',
+    'lot_or_serial_required' => 'Provide a lot/trace identifier for items that require lot or serial control.',
 ];

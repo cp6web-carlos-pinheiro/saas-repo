@@ -120,7 +120,7 @@ final class PurchaseReceiptController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
-        $data = $this->validateReceipt($request);
+        $data = $this->validateReceipt($request, $company);
 
         $receipt = DB::transaction(function () use ($company, $data, $request, $integration): PurchaseReceipt {
             $header = PurchaseReceipt::query()->create([
@@ -190,7 +190,7 @@ final class PurchaseReceiptController extends Controller
 
         $this->ensureNotPosted($receipt);
 
-        $data = $this->validateReceipt($request);
+        $data = $this->validateReceipt($request, $company);
 
         DB::transaction(function () use ($receipt, $data, $request, $integration): void {
             $this->assertStatusTransition($receipt->status, $data['status']);
@@ -309,7 +309,7 @@ final class PurchaseReceiptController extends Controller
     /**
      * @return array{supplier_id?: int|string|null, purchase_order_id?: int|string|null, receipt_date: string, status: string, notes?: string|null, items: array<int, array{purchase_order_line_id: int|null, product_id: int, warehouse_id: int, quantity_received: float, lot_number: string|null, notes: string|null}>}
      */
-    private function validateReceipt(Request $request): array
+    private function validateReceipt(Request $request, Company $company): array
     {
         $data = $request->validate([
             'supplier_id' => ['nullable', 'integer', Rule::exists('suppliers', 'id')],
@@ -335,6 +335,40 @@ final class PurchaseReceiptController extends Controller
                 'lot_number' => $item['lot_number'] ?? null,
                 'notes' => $item['notes'] ?? null,
             ])->all();
+
+        $productIds = collect($data['items'])
+            ->pluck('product_id')
+            ->map(static fn (int $id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $products = Product::query()
+            ->where('company_id', $company->id)
+            ->whereIn('id', $productIds)
+            ->get(['id', 'lot_control', 'serial_control'])
+            ->keyBy('id');
+
+        $errors = [];
+
+        foreach ($data['items'] as $index => $item) {
+            $product = $products->get((int) $item['product_id']);
+
+            if (! $product instanceof Product) {
+                continue;
+            }
+
+            $requiresTrace = (bool) $product->lot_control || (bool) $product->serial_control;
+            $hasLotNumber = trim((string) ($item['lot_number'] ?? '')) !== '';
+
+            if ($requiresTrace && ! $hasLotNumber) {
+                $errors[sprintf('items.%d.lot_number', $index)] = __('purchase_receipt.lot_or_serial_required');
+            }
+        }
+
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
+        }
 
         return $data;
     }

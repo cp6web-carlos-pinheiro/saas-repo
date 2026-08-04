@@ -97,6 +97,13 @@ final class ProductController extends Controller
             'lot_control' => (bool) ($data['lot_control'] ?? false),
             'serial_control' => (bool) ($data['serial_control'] ?? false),
             'is_active' => (bool) ($data['is_active'] ?? true),
+            'lifecycle_status' => (string) ($data['lifecycle_status'] ?? 'ACTIVE'),
+            'alternate_uoms' => $this->decodeJsonArrayField($request, 'alternate_uoms_json'),
+            'technical_attributes' => $this->decodeJsonArrayField($request, 'technical_attributes_json'),
+            'commercial_attributes' => $this->decodeJsonArrayField($request, 'commercial_attributes_json'),
+            'fiscal_attributes' => $this->decodeJsonArrayField($request, 'fiscal_attributes_json'),
+            'image_urls' => $this->decodeJsonArrayField($request, 'image_urls_json'),
+            'attachment_urls' => $this->decodeJsonArrayField($request, 'attachment_urls_json'),
         ]);
 
         $audit->record(
@@ -151,6 +158,13 @@ final class ProductController extends Controller
             'lot_control' => (bool) ($data['lot_control'] ?? false),
             'serial_control' => (bool) ($data['serial_control'] ?? false),
             'is_active' => (bool) ($data['is_active'] ?? true),
+            'lifecycle_status' => (string) ($data['lifecycle_status'] ?? 'ACTIVE'),
+            'alternate_uoms' => $this->decodeJsonArrayField($request, 'alternate_uoms_json'),
+            'technical_attributes' => $this->decodeJsonArrayField($request, 'technical_attributes_json'),
+            'commercial_attributes' => $this->decodeJsonArrayField($request, 'commercial_attributes_json'),
+            'fiscal_attributes' => $this->decodeJsonArrayField($request, 'fiscal_attributes_json'),
+            'image_urls' => $this->decodeJsonArrayField($request, 'image_urls_json'),
+            'attachment_urls' => $this->decodeJsonArrayField($request, 'attachment_urls_json'),
         ]);
         $product->save();
 
@@ -339,7 +353,36 @@ final class ProductController extends Controller
             'lot_control' => ['required', 'boolean'],
             'serial_control' => ['required', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
+            'lifecycle_status' => ['nullable', 'string', Rule::in(['ACTIVE', 'PHASE_OUT', 'OBSOLETE'])],
+            'alternate_uoms_json' => ['nullable', 'string'],
+            'technical_attributes_json' => ['nullable', 'string'],
+            'commercial_attributes_json' => ['nullable', 'string'],
+            'fiscal_attributes_json' => ['nullable', 'string'],
+            'image_urls_json' => ['nullable', 'string'],
+            'attachment_urls_json' => ['nullable', 'string'],
         ]);
+    }
+
+    /**
+     * @return array<int|string, mixed>|null
+     */
+    private function decodeJsonArrayField(Request $request, string $field): ?array
+    {
+        $raw = trim((string) $request->input($field, ''));
+
+        if ($raw === '') {
+            return null;
+        }
+
+        $decoded = json_decode($raw, true);
+
+        if (! is_array($decoded) || json_last_error() !== JSON_ERROR_NONE) {
+            throw ValidationException::withMessages([
+                $field => __('product.json_field_invalid', ['field' => $field]),
+            ]);
+        }
+
+        return $decoded;
     }
 
     /**

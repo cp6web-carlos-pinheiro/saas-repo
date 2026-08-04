@@ -44,4 +44,5 @@ return [
     'latest_revision' => 'Latest revision',
     'open_structure' => 'Open structure',
     'create_revision' => 'New revision',
+    'approved_overlap_window' => 'There is already an approved revision with an overlapping effective window for this product.',
 ];

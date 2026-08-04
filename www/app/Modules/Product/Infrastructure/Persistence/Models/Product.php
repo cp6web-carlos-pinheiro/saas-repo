@@ -30,6 +30,13 @@ final class Product extends TenantModel
         'lot_control',
         'serial_control',
         'is_active',
+        'lifecycle_status',
+        'technical_attributes',
+        'commercial_attributes',
+        'fiscal_attributes',
+        'alternate_uoms',
+        'image_urls',
+        'attachment_urls',
     ];
 
     protected $casts = [
@@ -38,6 +45,12 @@ final class Product extends TenantModel
         'lot_control' => 'bool',
         'serial_control' => 'bool',
         'is_active' => 'bool',
+        'technical_attributes' => 'array',
+        'commercial_attributes' => 'array',
+        'fiscal_attributes' => 'array',
+        'alternate_uoms' => 'array',
+        'image_urls' => 'array',
+        'attachment_urls' => 'array',
     ];
 
     public function versions(): HasMany

@@ -13,6 +13,7 @@ use App\Modules\Product\Application\Services\ProductVersionService;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Product\Infrastructure\Persistence\Models\ProductVersion;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Shared\Presentation\Exceptions\DomainException;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
 use Illuminate\Http\JsonResponse;
@@ -103,7 +104,13 @@ final class ProductVersionController extends Controller
         $this->ensurePermission($request, self::WRITE_PERMISSION, $company->id);
 
         $validated = $this->validateVersion($request);
-        $version = $service->createDraft($product->id, CreateProductVersionDTO::fromArray($validated), $request->user()?->id);
+        try {
+            $version = $service->createDraft($product->id, CreateProductVersionDTO::fromArray($validated), $request->user()?->id);
+        } catch (DomainException $exception) {
+            throw ValidationException::withMessages([
+                'payload_json' => $exception->getMessage(),
+            ]);
+        }
 
         $audit->record(
             'tenant_product_version.created',
@@ -152,7 +159,13 @@ final class ProductVersionController extends Controller
         $this->ensureVersionBelongsToProduct($product, $version);
 
         $validated = $this->validateVersion($request);
-        $service->updateDraft($product->id, $version->id, UpdateProductVersionDTO::fromArray($validated));
+        try {
+            $service->updateDraft($product->id, $version->id, UpdateProductVersionDTO::fromArray($validated));
+        } catch (DomainException $exception) {
+            throw ValidationException::withMessages([
+                'payload_json' => $exception->getMessage(),
+            ]);
+        }
 
         $audit->record(
             'tenant_product_version.updated',
@@ -204,7 +217,13 @@ final class ProductVersionController extends Controller
         $this->ensureVersionBelongsToProduct($product, $version);
 
         $validated = $this->validateVersionApproval($request);
-        $service->approve($product->id, $version->id, ApproveProductVersionDTO::fromArray($validated), $request->user()?->id);
+        try {
+            $service->approve($product->id, $version->id, ApproveProductVersionDTO::fromArray($validated), $request->user()?->id);
+        } catch (DomainException $exception) {
+            throw ValidationException::withMessages([
+                'effective_from' => $exception->getMessage(),
+            ]);
+        }
 
         $audit->record(
             'tenant_product_version.approved',

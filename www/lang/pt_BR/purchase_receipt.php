@@ -60,4 +60,5 @@ return [
     'invalid_transition' => 'Transição de status do recebimento inválida.',
     'locked_posted' => 'Recebimento lançado não pode ser editado ou excluído. Use o estorno.',
     'reverse_only_posted' => 'Somente recebimentos lançados podem ser estornados.',
+    'lot_or_serial_required' => 'Informe o lote/identificador para itens com controle de lote ou serial.',
 ];

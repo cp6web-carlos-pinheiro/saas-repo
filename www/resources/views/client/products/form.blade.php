@@ -35,6 +35,16 @@
                 @error('product_type')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
+            <div>
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="lifecycle_status">{{ __('product.lifecycle_status') }}</label>
+                <x-ui.select id="lifecycle_status" name="lifecycle_status" required data-search="off">
+                    @foreach (__('product.lifecycle_statuses') as $statusValue => $statusLabel)
+                        <option value="{{ $statusValue }}" @selected(old('lifecycle_status', $product->lifecycle_status ?? 'ACTIVE') === $statusValue)>{{ $statusLabel }}</option>
+                    @endforeach
+                </x-ui.select>
+                @error('lifecycle_status')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
             <div class="md:col-span-2">
                 <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="description">{{ __('product.description') }}</label>
                 <x-ui.input id="description" name="description" :value="old('description', $product->description ?? '')" required maxlength="255" />
@@ -119,6 +129,42 @@
                     <x-ui.input type="checkbox" name="is_active" value="1" @checked(old('is_active', $product->is_active ?? true)) unstyled />
                     <span>{{ __('product.active') }}</span>
                 </label>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="alternate_uoms_json">{{ __('product.alternate_uoms') }}</label>
+                <x-ui.textarea id="alternate_uoms_json" name="alternate_uoms_json" rows="3" class="font-mono text-sm">{{ old('alternate_uoms_json', json_encode($product->alternate_uoms ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}</x-ui.textarea>
+                @error('alternate_uoms_json')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="technical_attributes_json">{{ __('product.technical_attributes') }}</label>
+                <x-ui.textarea id="technical_attributes_json" name="technical_attributes_json" rows="4" class="font-mono text-sm">{{ old('technical_attributes_json', json_encode($product->technical_attributes ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}</x-ui.textarea>
+                @error('technical_attributes_json')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="commercial_attributes_json">{{ __('product.commercial_attributes') }}</label>
+                <x-ui.textarea id="commercial_attributes_json" name="commercial_attributes_json" rows="4" class="font-mono text-sm">{{ old('commercial_attributes_json', json_encode($product->commercial_attributes ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}</x-ui.textarea>
+                @error('commercial_attributes_json')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="fiscal_attributes_json">{{ __('product.fiscal_attributes') }}</label>
+                <x-ui.textarea id="fiscal_attributes_json" name="fiscal_attributes_json" rows="4" class="font-mono text-sm">{{ old('fiscal_attributes_json', json_encode($product->fiscal_attributes ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}</x-ui.textarea>
+                @error('fiscal_attributes_json')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="image_urls_json">{{ __('product.image_urls') }}</label>
+                <x-ui.textarea id="image_urls_json" name="image_urls_json" rows="3" class="font-mono text-sm">{{ old('image_urls_json', json_encode($product->image_urls ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}</x-ui.textarea>
+                @error('image_urls_json')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="attachment_urls_json">{{ __('product.attachment_urls') }}</label>
+                <x-ui.textarea id="attachment_urls_json" name="attachment_urls_json" rows="3" class="font-mono text-sm">{{ old('attachment_urls_json', json_encode($product->attachment_urls ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}</x-ui.textarea>
+                @error('attachment_urls_json')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div class="flex flex-wrap gap-3 md:col-span-2">
