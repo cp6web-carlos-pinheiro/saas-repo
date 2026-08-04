@@ -46,7 +46,6 @@ return [
     'confirm_reverse_cancel' => 'Voltar',
     'reverse_category' => 'Categoria do estorno',
     'reverse_category_required' => 'Informe a categoria do estorno.',
-    'reverse_category_quality' => 'Qualidade',
     'reverse_category_fiscal' => 'Fiscal',
     'reverse_category_supplier' => 'Fornecedor',
     'reverse_category_master_data' => 'Cadastro',

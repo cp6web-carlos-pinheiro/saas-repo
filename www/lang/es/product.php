@@ -79,7 +79,6 @@ return [
     'alternate_uoms' => 'Unidades alternativas (JSON)',
     'technical_attributes' => 'Atributos técnicos (JSON)',
     'commercial_attributes' => 'Atributos comerciales (JSON)',
-    'fiscal_attributes' => 'Atributos fiscales (JSON)',
     'image_urls' => 'Imágenes (JSON)',
     'attachment_urls' => 'Adjuntos (JSON)',
     'created_at' => 'Registrado en',

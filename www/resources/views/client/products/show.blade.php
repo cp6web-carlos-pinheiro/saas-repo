@@ -48,10 +48,6 @@
                 <pre class="mt-2 overflow-x-auto text-xs text-[#5f6368]">{{ json_encode($product->commercial_attributes ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
             </div>
             <div class="rounded-2xl border border-[#dadce0] bg-white p-4">
-                <h3 class="font-semibold">{{ __('product.fiscal_attributes') }}</h3>
-                <pre class="mt-2 overflow-x-auto text-xs text-[#5f6368]">{{ json_encode($product->fiscal_attributes ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
-            </div>
-            <div class="rounded-2xl border border-[#dadce0] bg-white p-4">
                 <h3 class="font-semibold">{{ __('product.alternate_uoms') }}</h3>
                 <pre class="mt-2 overflow-x-auto text-xs text-[#5f6368]">{{ json_encode($product->alternate_uoms ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
             </div>

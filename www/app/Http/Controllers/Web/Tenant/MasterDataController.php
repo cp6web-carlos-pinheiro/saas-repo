@@ -29,7 +29,6 @@ final class MasterDataController extends Controller
         'units' => ['permission' => 'admin-data.units', 'code_max' => 20],
         'categories' => ['permission' => 'admin-data.categories', 'code_max' => 40],
         'brands' => ['permission' => 'admin-data.brands', 'code_max' => 40],
-        'ncms' => ['permission' => 'admin-data.ncms', 'code_regex' => '/^[0-9]{8}$/', 'code_max' => 8],
         'cfops' => ['permission' => 'admin-data.cfops', 'code_regex' => '/^[0-9]{4}$/', 'code_max' => 4],
         'taxes' => ['permission' => 'admin-data.taxes', 'code_max' => 30],
     ];
@@ -276,7 +275,6 @@ final class MasterDataController extends Controller
             'units' => DB::table('products')->where('company_id', $companyId)->where('unit_id', $id)->exists(),
             'categories' => DB::table('products')->where('company_id', $companyId)->where('category_id', $id)->exists(),
             'brands' => DB::table('products')->where('company_id', $companyId)->where('brand_id', $id)->exists(),
-            'ncms' => DB::table('products')->where('company_id', $companyId)->where('ncm_id', $id)->exists(),
             'cfops' => DB::table('suppliers')->where('company_id', $companyId)->where('default_cfop_id', $id)->exists() || DB::table('customers')->where('company_id', $companyId)->where('default_cfop_id', $id)->exists(),
             'taxes' => DB::table('suppliers')->where('company_id', $companyId)->where('tax_profile_id', $id)->exists() || DB::table('customers')->where('company_id', $companyId)->where('tax_profile_id', $id)->exists(),
             default => false,

@@ -90,7 +90,6 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
         $unitId = $this->createMasterData($user, 'units', 'UN', 'Unidade');
         $categoryId = $this->createMasterData($user, 'categories', 'CAT-RAW', 'Materia Prima');
         $brandId = $this->createMasterData($user, 'brands', 'BR-ATLAS', 'Atlas');
-        $ncmId = $this->createMasterData($user, 'ncms', '12345678', 'NCM Base');
         $cfopId = $this->createMasterData($user, 'cfops', '5102', 'CFOP Padrao');
         $taxId = $this->createMasterData($user, 'taxes', 'TRB-STD', 'Tributo Padrao', 17.5);
 
@@ -102,7 +101,6 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
                 'unit_id' => $unitId,
                 'category_id' => $categoryId,
                 'brand_id' => $brandId,
-                'ncm_id' => $ncmId,
                 'uom' => '',
                 'safety_stock' => 0,
                 'lead_time_days' => 2,
@@ -119,7 +117,6 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
             'unit_id' => $unitId,
             'category_id' => $categoryId,
             'brand_id' => $brandId,
-            'ncm_id' => $ncmId,
             'uom' => 'UN',
         ]);
 

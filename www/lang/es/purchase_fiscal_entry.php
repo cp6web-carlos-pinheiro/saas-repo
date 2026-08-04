@@ -39,7 +39,6 @@ return [
     'confirm_reverse_cancel' => 'Volver',
     'reverse_category' => 'Categoría de la reversión',
     'reverse_category_required' => 'La categoría de la reversión es obligatoria.',
-    'reverse_category_quality' => 'Calidad',
     'reverse_category_fiscal' => 'Fiscal',
     'reverse_category_supplier' => 'Proveedor',
     'reverse_category_master_data' => 'Datos maestros',

@@ -91,17 +91,6 @@
             </div>
 
             <div>
-                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="ncm_id">{{ __('product.ncm_id') }}</label>
-                <x-ui.select id="ncm_id" name="ncm_id" data-search="on">
-                    <option value="">{{ __('product.select_ncm') }}</option>
-                    @foreach ($ncms as $id => $label)
-                        <option value="{{ $id }}" @selected((string) old('ncm_id', $product->ncm_id ?? '') === (string) $id)>{{ $label }}</option>
-                    @endforeach
-                </x-ui.select>
-                @error('ncm_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
-            </div>
-
-            <div>
                 <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="safety_stock">{{ __('product.safety_stock') }}</label>
                 <x-ui.input id="safety_stock" type="number" min="0" name="safety_stock" :value="old('safety_stock', $product->safety_stock ?? 0)" required />
                 @error('safety_stock')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -147,12 +136,6 @@
                 <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="commercial_attributes_json">{{ __('product.commercial_attributes') }}</label>
                 <x-ui.textarea id="commercial_attributes_json" name="commercial_attributes_json" rows="4" class="font-mono text-sm">{{ old('commercial_attributes_json', json_encode($product->commercial_attributes ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}</x-ui.textarea>
                 @error('commercial_attributes_json')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
-            </div>
-
-            <div class="md:col-span-2">
-                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="fiscal_attributes_json">{{ __('product.fiscal_attributes') }}</label>
-                <x-ui.textarea id="fiscal_attributes_json" name="fiscal_attributes_json" rows="4" class="font-mono text-sm">{{ old('fiscal_attributes_json', json_encode($product->fiscal_attributes ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}</x-ui.textarea>
-                @error('fiscal_attributes_json')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div class="md:col-span-2">

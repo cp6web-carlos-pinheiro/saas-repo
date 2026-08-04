@@ -49,66 +49,6 @@ Abaixo esta a sequencia que eu adotaria.
 | 15 | Automacoes | Baixa | Todos |
 | 16 | Marketplace/Integracoes | Baixa | API |
 
----
-
-# Fase 1 - Fundacao
-
-Esta e a parte que praticamente nunca muda.
-
-## 1. Arquitetura Base
-
-- Laravel
-- Blade
-- Tailwind
-- Alpine.js
-- Vite
-- MySQL
-- Queues
-- Jobs
-- Events
-- Notifications
-- Cache
-- Logs
-- Docker
-- Testes
-
-Tambem definir:
-
-- Layout
-- Componentes Blade
-- Tema
-- Sidebar
-- Menu
-- Breadcrumb
-- Dashboard
-
----
-
-## 2. Multitenancy
-
-Provavelmente o modulo mais importante.
-
-Criar:
-
-- Companies
-- Plans
-- Subscription
-- Domains
-- Periodo gratuito inicial (14 dias)
-- Tenant Middleware
-- Tenant Resolver
-- Tenant Settings
-
-Definir:
-
-```text
-Company
-
-↓
-
-Users
-
-↓
 
 Modules
 
@@ -131,46 +71,6 @@ Implementar:
 - Logout
 - Forgot Password
 - Reset Password
-- Verify Email
-- Two Factor
-- Remember Me
-- Sessoes
-- OAuth futuro
-
----
-
-## 4. Sistema de Permissoes
-
-Separar completamente.
-
-Tabelas:
-
-```text
-Roles
-
-Permissions
-
-RolePermission
-
-UserRole
-```
-
-Permissoes por modulo.
-
-Exemplo:
-
-```text
-Products.View
-
-Products.Create
-
-Products.Update
-
-Products.Delete
-```
-
----
-
 # Fase 2 - Administracao
 
 Agora o sistema comeca a existir.
@@ -456,54 +356,6 @@ Boletos
 PIX
 
 Cartoes
-
----
-
-# Fase 10 - CRM
-
-Clientes
-
-Prospects
-
-Atividades
-
-Funil
-
-Oportunidades
-
----
-
-# Fase 11 - Qualidade
-
-Inspecoes
-
-Nao Conformidade
-
-Rastreabilidade
-
-Auditorias
-
----
-
-# Fase 12 - Manutencao
-
-Equipamentos
-
-Ordens
-
-Preventiva
-
-Corretiva
-
----
-
-# Fase 13 - RH
-
-Funcionarios
-
-Turnos
-
-Apontamentos
 
 ---
 

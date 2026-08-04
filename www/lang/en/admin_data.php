@@ -32,7 +32,6 @@ return [
     'units' => ['title' => 'Units'],
     'categories' => ['title' => 'Categories'],
     'brands' => ['title' => 'Brands'],
-    'ncms' => ['title' => 'NCM'],
     'cfops' => ['title' => 'CFOP'],
     'taxes' => ['title' => 'Taxes'],
 ];

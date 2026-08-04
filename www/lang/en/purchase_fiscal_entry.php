@@ -39,7 +39,6 @@ return [
     'confirm_reverse_cancel' => 'Back',
     'reverse_category' => 'Reversal category',
     'reverse_category_required' => 'Reversal category is required.',
-    'reverse_category_quality' => 'Quality',
     'reverse_category_fiscal' => 'Fiscal',
     'reverse_category_supplier' => 'Supplier',
     'reverse_category_master_data' => 'Master Data',

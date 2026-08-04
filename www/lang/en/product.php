@@ -79,7 +79,6 @@ return [
     'alternate_uoms' => 'Alternate UOMs (JSON)',
     'technical_attributes' => 'Technical attributes (JSON)',
     'commercial_attributes' => 'Commercial attributes (JSON)',
-    'fiscal_attributes' => 'Fiscal attributes (JSON)',
     'image_urls' => 'Images (JSON)',
     'attachment_urls' => 'Attachments (JSON)',
     'created_at' => 'Created at',

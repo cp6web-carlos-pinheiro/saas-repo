@@ -42,7 +42,6 @@ final class TenantProductPhase03ManagementTest extends TestCase
                 ], JSON_THROW_ON_ERROR),
                 'technical_attributes_json' => json_encode(['weight_kg' => 2.3], JSON_THROW_ON_ERROR),
                 'commercial_attributes_json' => json_encode(['price_table' => 'A'], JSON_THROW_ON_ERROR),
-                'fiscal_attributes_json' => json_encode(['cest' => '12.345.67'], JSON_THROW_ON_ERROR),
                 'image_urls_json' => json_encode(['https://cdn.example.test/p-f03-001.png'], JSON_THROW_ON_ERROR),
                 'attachment_urls_json' => json_encode(['https://cdn.example.test/p-f03-001.pdf'], JSON_THROW_ON_ERROR),
             ])

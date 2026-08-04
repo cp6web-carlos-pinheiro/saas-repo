@@ -62,7 +62,6 @@ final class ProductController extends Controller
             'units' => $this->masterDataOptions($company, 'units'),
             'categories' => $this->masterDataOptions($company, 'categories'),
             'brands' => $this->masterDataOptions($company, 'brands'),
-            'ncms' => $this->masterDataOptions($company, 'ncms'),
         ]);
     }
 
@@ -91,7 +90,6 @@ final class ProductController extends Controller
             'unit_id' => isset($data['unit_id']) ? (int) $data['unit_id'] : null,
             'category_id' => isset($data['category_id']) ? (int) $data['category_id'] : null,
             'brand_id' => isset($data['brand_id']) ? (int) $data['brand_id'] : null,
-            'ncm_id' => isset($data['ncm_id']) ? (int) $data['ncm_id'] : null,
             'safety_stock' => (int) $data['safety_stock'],
             'lead_time_days' => (int) $data['lead_time_days'],
             'lot_control' => (bool) ($data['lot_control'] ?? false),
@@ -101,7 +99,6 @@ final class ProductController extends Controller
             'alternate_uoms' => $this->decodeJsonArrayField($request, 'alternate_uoms_json'),
             'technical_attributes' => $this->decodeJsonArrayField($request, 'technical_attributes_json'),
             'commercial_attributes' => $this->decodeJsonArrayField($request, 'commercial_attributes_json'),
-            'fiscal_attributes' => $this->decodeJsonArrayField($request, 'fiscal_attributes_json'),
             'image_urls' => $this->decodeJsonArrayField($request, 'image_urls_json'),
             'attachment_urls' => $this->decodeJsonArrayField($request, 'attachment_urls_json'),
         ]);
@@ -132,7 +129,6 @@ final class ProductController extends Controller
             'units' => $this->masterDataOptions($company, 'units'),
             'categories' => $this->masterDataOptions($company, 'categories'),
             'brands' => $this->masterDataOptions($company, 'brands'),
-            'ncms' => $this->masterDataOptions($company, 'ncms'),
         ]);
     }
 
@@ -152,7 +148,6 @@ final class ProductController extends Controller
             'unit_id' => isset($data['unit_id']) ? (int) $data['unit_id'] : null,
             'category_id' => isset($data['category_id']) ? (int) $data['category_id'] : null,
             'brand_id' => isset($data['brand_id']) ? (int) $data['brand_id'] : null,
-            'ncm_id' => isset($data['ncm_id']) ? (int) $data['ncm_id'] : null,
             'safety_stock' => (int) $data['safety_stock'],
             'lead_time_days' => (int) $data['lead_time_days'],
             'lot_control' => (bool) ($data['lot_control'] ?? false),
@@ -162,7 +157,6 @@ final class ProductController extends Controller
             'alternate_uoms' => $this->decodeJsonArrayField($request, 'alternate_uoms_json'),
             'technical_attributes' => $this->decodeJsonArrayField($request, 'technical_attributes_json'),
             'commercial_attributes' => $this->decodeJsonArrayField($request, 'commercial_attributes_json'),
-            'fiscal_attributes' => $this->decodeJsonArrayField($request, 'fiscal_attributes_json'),
             'image_urls' => $this->decodeJsonArrayField($request, 'image_urls_json'),
             'attachment_urls' => $this->decodeJsonArrayField($request, 'attachment_urls_json'),
         ]);
@@ -342,12 +336,6 @@ final class ProductController extends Controller
                 Rule::exists('master_data_records', 'id')
                     ->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'brands')),
             ],
-            'ncm_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('master_data_records', 'id')
-                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'ncms')),
-            ],
             'safety_stock' => ['required', 'integer', 'min:0'],
             'lead_time_days' => ['required', 'integer', 'min:0'],
             'lot_control' => ['required', 'boolean'],
@@ -357,7 +345,6 @@ final class ProductController extends Controller
             'alternate_uoms_json' => ['nullable', 'string'],
             'technical_attributes_json' => ['nullable', 'string'],
             'commercial_attributes_json' => ['nullable', 'string'],
-            'fiscal_attributes_json' => ['nullable', 'string'],
             'image_urls_json' => ['nullable', 'string'],
             'attachment_urls_json' => ['nullable', 'string'],
         ]);

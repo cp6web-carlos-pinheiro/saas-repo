@@ -23,7 +23,6 @@ final class CompanyAccessPermissionsSeeder extends Seeder
             ['name' => 'Read dashboard', 'slug' => 'company-access.dashboard.read', 'module' => 'users'],
             ['name' => 'Read billing subscription', 'slug' => 'company-access.billing.read', 'module' => 'users'],
             ['name' => 'Update billing subscription', 'slug' => 'company-access.billing.update', 'module' => 'users'],
-            ['name' => 'Read financial data', 'slug' => 'financial.read', 'module' => 'financial'],
             ['name' => 'Read reports', 'slug' => 'reports.read', 'module' => 'reports'],
         ];
 
