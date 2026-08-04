@@ -31,6 +31,33 @@
             <x-ui.definition-item :label="__('purchase_order.notes')">{{ $order->notes ?: '—' }}</x-ui.definition-item>
             <x-ui.definition-item-date :label="__('purchase_order.created_at')" :value="$order->created_at" />
         </x-ui.definition-grid>
+
+        <div class="mt-6 overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                        <th class="px-3 py-3">{{ __('purchase_order.product') }}</th>
+                        <th class="px-3 py-3">{{ __('purchase_order.warehouse') }}</th>
+                        <th class="px-3 py-3">{{ __('purchase_order.quantity') }}</th>
+                        <th class="px-3 py-3">{{ __('purchase_order.unit_price') }}</th>
+                        <th class="px-3 py-3">{{ __('purchase_order.need_by_date') }}</th>
+                        <th class="px-3 py-3">{{ __('purchase_order.promised_date') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($order->lines as $line)
+                        <tr class="border-b border-[#f1f3f4]">
+                            <td class="px-3 py-3">{{ $line->product?->sku }} - {{ $line->product?->description }}</td>
+                            <td class="px-3 py-3 text-[#5f6368]">{{ $line->warehouse?->code ?? '—' }}</td>
+                            <td class="px-3 py-3 text-[#5f6368]">{{ number_format((float) $line->quantity_ordered, 6, ',', '.') }}</td>
+                            <td class="px-3 py-3 text-[#5f6368]">{{ $line->unit_price !== null ? number_format((float) $line->unit_price, 2, ',', '.') : '—' }}</td>
+                            <td class="px-3 py-3 text-[#5f6368]">{{ $line->need_by_date?->format('d/m/Y') ?? '—' }}</td>
+                            <td class="px-3 py-3 text-[#5f6368]">{{ $line->promised_date?->format('d/m/Y') ?? '—' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </x-ui.panel>
 </div>
 @endsection

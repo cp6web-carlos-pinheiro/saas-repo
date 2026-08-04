@@ -1,6 +1,9 @@
 @extends('layouts.client-area')
 
-@php($editing = $quotation !== null)
+@php
+    $editing = $quotation !== null;
+    $productsById = $products->keyBy('id');
+@endphp
 
 @section('title', __('ui.module_purchasing').' | '.__('ui.purchasing_quotation'))
 @section('client-page-title', $editing ? __('purchase_quotation.edit') : __('purchase_quotation.create'))
@@ -47,7 +50,7 @@
                 </label>
             </div>
 
-            <div class="grid gap-5 sm:grid-cols-4">
+            <div class="grid gap-5 sm:grid-cols-3">
                 <label class="block text-sm font-medium">
                     {{ __('purchase_quotation.quotation_date') }}
                     <x-ui.input type="date" name="quotation_date" :value="old('quotation_date', $quotation?->quotation_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required />
@@ -70,13 +73,45 @@
                     </x-ui.select>
                     @error('status')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
-
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_quotation.amount') }}
-                    <x-ui.input name="amount" :value="old('amount', $editing ? number_format(((int) $quotation->amount_cents) / 100, 2, ',', '.') : '0,00')" class="mt-2" required />
-                    @error('amount')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
             </div>
+
+            <section class="space-y-4">
+                <div class="flex flex-wrap items-end justify-between gap-3">
+                    <h2 class="text-xl font-semibold">{{ __('purchase_quotation.items') }}</h2>
+                    <button type="button" class="rounded-full border border-[#dadce0] px-4 py-2 text-sm font-medium" data-pq-add-item>{{ __('purchase_quotation.add_item') }}</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <div class="min-w-[920px]">
+                        <div class="grid grid-cols-[2.2fr_1fr_1fr_1.6fr_auto] gap-4 border-b border-[#dadce0] pb-2 text-xs font-semibold uppercase tracking-wide text-[#5f6368]">
+                            <span>{{ __('purchase_quotation.product') }}</span>
+                            <span>{{ __('purchase_quotation.quantity') }}</span>
+                            <span>{{ __('purchase_quotation.unit_price') }}</span>
+                            <span>{{ __('purchase_quotation.notes') }}</span>
+                            <span class="sr-only">{{ __('purchase_quotation.remove_item') }}</span>
+                        </div>
+
+                        <div class="mt-3 space-y-3" data-pq-items-container>
+                            @foreach (old('items', $lineRows) as $index => $item)
+                                <div class="grid grid-cols-[2.2fr_1fr_1fr_1.6fr_auto] items-start gap-4" data-pq-item-row>
+                                    <x-ui.select name="items[{{ $index }}][product_id]" required data-search="on">
+                                        <option value="">{{ __('purchase_quotation.select_product') }}</option>
+                                        @php($selectedProductId = (int) old('items.'.$index.'.product_id', $item['product_id'] ?? 0))
+                                        @foreach ($products as $product)
+                                            <option value="{{ $product->id }}" @selected($selectedProductId === $product->id)>{{ $product->sku }} - {{ $product->description ?? '—' }}</option>
+                                        @endforeach
+                                    </x-ui.select>
+
+                                    <x-ui.input type="number" step="0.000001" min="0.000001" name="items[{{ $index }}][quantity]" :value="old('items.'.$index.'.quantity', $item['quantity'] ?? 1)" required />
+                                    <x-ui.input name="items[{{ $index }}][unit_price]" :value="old('items.'.$index.'.unit_price', $item['unit_price'] ?? '0,00')" data-currency-mask="brl" inputmode="decimal" required />
+                                    <x-ui.input name="items[{{ $index }}][notes]" :value="old('items.'.$index.'.notes', $item['notes'] ?? null)" />
+                                    <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-pq-remove-item aria-label="{{ __('purchase_quotation.remove_item') }}">×</button>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <label class="block text-sm font-medium">
                 {{ __('purchase_quotation.notes') }}
@@ -91,4 +126,60 @@
         </form>
     </x-ui.panel>
 </div>
+
+<template id="pq-item-template">
+    <div class="grid grid-cols-[2.2fr_1fr_1fr_1.6fr_auto] items-start gap-4" data-pq-item-row>
+        <x-ui.select name="items[__INDEX__][product_id]" required data-search="on">
+            <option value="">{{ __('purchase_quotation.select_product') }}</option>
+            @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->sku }} - {{ $product->description ?? '—' }}</option>
+            @endforeach
+        </x-ui.select>
+        <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity]" value="1" required />
+        <x-ui.input name="items[__INDEX__][unit_price]" value="0,00" data-currency-mask="brl" inputmode="decimal" required />
+        <x-ui.input name="items[__INDEX__][notes]" />
+        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-pq-remove-item aria-label="{{ __('purchase_quotation.remove_item') }}">×</button>
+    </div>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('[data-pq-items-container]');
+    const template = document.getElementById('pq-item-template');
+    const addButton = document.querySelector('[data-pq-add-item]');
+
+    if (!container || !template || !addButton) {
+        return;
+    }
+
+    const bindRow = (row) => {
+        const removeButton = row.querySelector('[data-pq-remove-item]');
+
+        if (removeButton) {
+            removeButton.addEventListener('click', () => {
+                if (container.querySelectorAll('[data-pq-item-row]').length === 1) {
+                    return;
+                }
+
+                row.remove();
+            });
+        }
+    };
+
+    container.querySelectorAll('[data-pq-item-row]').forEach(bindRow);
+
+    addButton.addEventListener('click', () => {
+        const index = container.querySelectorAll('[data-pq-item-row]').length;
+        const html = template.innerHTML.replaceAll('__INDEX__', String(index));
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html.trim();
+        const row = wrapper.firstElementChild;
+        if (!row) {
+            return;
+        }
+        container.appendChild(row);
+        bindRow(row);
+    });
+});
+</script>
 @endsection

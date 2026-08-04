@@ -22,6 +22,8 @@ return [
     'status_cancelled' => 'Cancelled',
     'all_statuses' => 'All statuses',
     'amount' => 'Amount',
+    'financial_reference' => 'Financial reference',
+    'financial_posted_at' => 'Financial posted at',
     'notes' => 'Notes',
     'created_at' => 'Created at',
     'save' => 'Save changes',
@@ -33,4 +35,5 @@ return [
     'created' => 'Fiscal entry created successfully.',
     'updated' => 'Fiscal entry updated successfully.',
     'removed' => 'Fiscal entry removed successfully.',
+    'invalid_transition' => 'Invalid fiscal entry status transition.',
 ];

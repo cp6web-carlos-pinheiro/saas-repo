@@ -421,13 +421,9 @@ final class PurchaseRequisitionController extends Controller
      */
     private function productOptionsByIds(Company $company, array $ids): Collection
     {
-        if ($ids === []) {
-            return collect();
-        }
-
         return Product::query()
             ->where('company_id', $company->id)
-            ->whereIn('id', $ids)
+            ->when($ids !== [], static fn (Builder $query) => $query->whereIn('id', $ids))
             ->orderBy('sku')
             ->get(['id', 'sku', 'description']);
     }
@@ -437,13 +433,9 @@ final class PurchaseRequisitionController extends Controller
      */
     private function warehouseOptionsByIds(Company $company, array $ids): Collection
     {
-        if ($ids === []) {
-            return collect();
-        }
-
         return Warehouse::query()
             ->where('company_id', $company->id)
-            ->whereIn('id', $ids)
+            ->when($ids !== [], static fn (Builder $query) => $query->whereIn('id', $ids))
             ->orderBy('code')
             ->get(['id', 'code', 'name']);
     }
@@ -453,13 +445,9 @@ final class PurchaseRequisitionController extends Controller
      */
     private function supplierOptionsByIds(Company $company, array $ids): Collection
     {
-        if ($ids === []) {
-            return collect();
-        }
-
         return Supplier::query()
             ->where('company_id', $company->id)
-            ->whereIn('id', $ids)
+            ->when($ids !== [], static fn (Builder $query) => $query->whereIn('id', $ids))
             ->orderBy('name')
             ->get(['id', 'code', 'name']);
     }

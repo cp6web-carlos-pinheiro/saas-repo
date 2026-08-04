@@ -29,6 +29,31 @@
             <x-ui.definition-item :label="__('purchase_receipt.notes')">{{ $receipt->notes ?: '—' }}</x-ui.definition-item>
             <x-ui.definition-item-date :label="__('purchase_receipt.created_at')" :value="$receipt->created_at" />
         </x-ui.definition-grid>
+
+        <div class="mt-6 overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                        <th class="px-3 py-3">{{ __('purchase_receipt.product') }}</th>
+                        <th class="px-3 py-3">{{ __('purchase_receipt.warehouse') }}</th>
+                        <th class="px-3 py-3">{{ __('purchase_receipt.quantity_received') }}</th>
+                        <th class="px-3 py-3">{{ __('purchase_receipt.lot_number') }}</th>
+                        <th class="px-3 py-3">{{ __('purchase_receipt.stock_movement') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($receipt->lines as $line)
+                        <tr class="border-b border-[#f1f3f4]">
+                            <td class="px-3 py-3">{{ $line->product?->sku }} - {{ $line->product?->description }}</td>
+                            <td class="px-3 py-3 text-[#5f6368]">{{ $line->warehouse?->code ?? '—' }}</td>
+                            <td class="px-3 py-3 text-[#5f6368]">{{ number_format((float) $line->quantity_received, 6, ',', '.') }}</td>
+                            <td class="px-3 py-3 text-[#5f6368]">{{ $line->lot_number ?? '—' }}</td>
+                            <td class="px-3 py-3 text-[#5f6368]">{{ $line->stock_ledger_movement_id ? '#'.$line->stock_ledger_movement_id : '—' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </x-ui.panel>
 </div>
 @endsection

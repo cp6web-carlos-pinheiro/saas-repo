@@ -29,6 +29,8 @@
             <x-ui.definition-item :label="__('purchase_fiscal_entry.issue_date')">{{ $entry->issue_date?->format('d/m/Y') ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('purchase_fiscal_entry.entry_date')">{{ $entry->entry_date?->format('d/m/Y') ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('purchase_fiscal_entry.amount')">{{ number_format(((int) $entry->amount_cents) / 100, 2, ',', '.') }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('purchase_fiscal_entry.financial_reference')">{{ $entry->financial_reference ?: '—' }}</x-ui.definition-item>
+            <x-ui.definition-item :label="__('purchase_fiscal_entry.financial_posted_at')">{{ $entry->financial_posted_at?->format('d/m/Y H:i') ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('purchase_fiscal_entry.notes')">{{ $entry->notes ?: '—' }}</x-ui.definition-item>
             <x-ui.definition-item-date :label="__('purchase_fiscal_entry.created_at')" :value="$entry->created_at" />
         </x-ui.definition-grid>

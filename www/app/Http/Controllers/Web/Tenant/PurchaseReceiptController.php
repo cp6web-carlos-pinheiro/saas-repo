@@ -85,6 +85,7 @@ final class PurchaseReceiptController extends Controller
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
         $lineRows = $this->oldItemRows($request, $this->defaultLineRows());
+        $orderId = (int) old('purchase_order_id', 0);
 
         return view('client.purchasing.receipts.form', [
             'receipt' => null,
@@ -93,7 +94,7 @@ final class PurchaseReceiptController extends Controller
             'orders' => $this->orderOptions($company),
             'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
             'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
-            'orderLines' => collect(),
+            'orderLines' => $this->orderLineOptions($company, $orderId),
             'lineRows' => $lineRows,
         ]);
     }
@@ -417,13 +418,9 @@ final class PurchaseReceiptController extends Controller
      */
     private function productOptionsByIds(Company $company, array $ids): Collection
     {
-        if ($ids === []) {
-            return collect();
-        }
-
         return Product::query()
             ->where('company_id', $company->id)
-            ->whereIn('id', $ids)
+            ->when($ids !== [], static fn (Builder $query) => $query->whereIn('id', $ids))
             ->orderBy('sku')
             ->get(['id', 'sku', 'description']);
     }
@@ -433,13 +430,9 @@ final class PurchaseReceiptController extends Controller
      */
     private function warehouseOptionsByIds(Company $company, array $ids): Collection
     {
-        if ($ids === []) {
-            return collect();
-        }
-
         return Warehouse::query()
             ->where('company_id', $company->id)
-            ->whereIn('id', $ids)
+            ->when($ids !== [], static fn (Builder $query) => $query->whereIn('id', $ids))
             ->orderBy('code')
             ->get(['id', 'code', 'name']);
     }

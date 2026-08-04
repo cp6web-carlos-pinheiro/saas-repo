@@ -22,6 +22,8 @@ return [
     'status_cancelled' => 'Cancelada',
     'all_statuses' => 'Todos os status',
     'amount' => 'Valor',
+    'financial_reference' => 'Referência financeira',
+    'financial_posted_at' => 'Lançamento financeiro em',
     'notes' => 'Observações',
     'created_at' => 'Cadastrada em',
     'save' => 'Salvar alterações',
@@ -33,4 +35,5 @@ return [
     'created' => 'Entrada fiscal criada com sucesso.',
     'updated' => 'Entrada fiscal atualizada com sucesso.',
     'removed' => 'Entrada fiscal removida com sucesso.',
+    'invalid_transition' => 'Transição de status da entrada fiscal inválida.',
 ];

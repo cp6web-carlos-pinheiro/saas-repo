@@ -8,13 +8,18 @@ use App\Models\SaaS\Organization;
 use App\Models\SaaS\Trial;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Modules\Inventory\Infrastructure\Persistence\Models\StockLedgerMovement;
+use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseFiscalEntry;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseFiscalEntryPosting;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrder;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseQuotation;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseReceipt;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -24,7 +29,7 @@ final class TenantPurchasingCrudManagementTest extends TestCase
 
     public function test_company_administrator_can_create_and_list_basic_purchasing_cruds(): void
     {
-        ['company' => $company, 'user' => $user, 'supplier' => $supplier] = $this->purchasingContext();
+        ['company' => $company, 'user' => $user, 'supplier' => $supplier, 'warehouse' => $warehouse, 'product' => $product] = $this->purchasingContext();
 
         $this->actingAs($user, 'web')
             ->post(route('purchasing.requisitions.store'), [
@@ -32,6 +37,14 @@ final class TenantPurchasingCrudManagementTest extends TestCase
                 'status' => 'DRAFT',
                 'source_type' => 'manual',
                 'notes' => 'Solicitação inicial.',
+                'items' => [[
+                    'product_id' => $product->id,
+                    'warehouse_id' => $warehouse->id,
+                    'supplier_id' => $supplier->id,
+                    'quantity' => '5',
+                    'need_by_date' => '2026-08-10',
+                    'order_date' => '2026-08-06',
+                ]],
             ])
             ->assertRedirect(route('purchasing.requisitions.index'));
 
@@ -45,10 +58,19 @@ final class TenantPurchasingCrudManagementTest extends TestCase
                 'order_date' => '2026-08-03',
                 'expected_delivery_date' => '2026-08-12',
                 'notes' => 'Pedido inicial.',
+                'items' => [[
+                    'product_id' => $product->id,
+                    'warehouse_id' => $warehouse->id,
+                    'quantity' => '5',
+                    'unit_price' => '30,00',
+                    'need_by_date' => '2026-08-10',
+                    'promised_date' => '2026-08-12',
+                ]],
             ])
             ->assertRedirect(route('purchasing.orders.index'));
 
         $order = PurchaseOrder::query()->firstOrFail();
+        $orderLine = $order->lines()->firstOrFail();
 
         $this->actingAs($user, 'web')
             ->post(route('purchasing.quotations.store'), [
@@ -57,8 +79,13 @@ final class TenantPurchasingCrudManagementTest extends TestCase
                 'quotation_date' => '2026-08-03',
                 'valid_until' => '2026-08-20',
                 'status' => 'RECEIVED',
-                'amount' => '150,00',
                 'notes' => 'Cotação recebida.',
+                'items' => [[
+                    'product_id' => $product->id,
+                    'quantity' => '5',
+                    'unit_price' => '30,00',
+                    'notes' => 'Preço negociado.',
+                ]],
             ])
             ->assertRedirect(route('purchasing.quotations.index'));
 
@@ -67,8 +94,16 @@ final class TenantPurchasingCrudManagementTest extends TestCase
                 'supplier_id' => $supplier->id,
                 'purchase_order_id' => $order->id,
                 'receipt_date' => '2026-08-05',
-                'status' => 'DRAFT',
+                'status' => 'POSTED',
                 'notes' => 'Recebimento parcial.',
+                'items' => [[
+                    'purchase_order_line_id' => $orderLine->id,
+                    'product_id' => $product->id,
+                    'warehouse_id' => $warehouse->id,
+                    'quantity_received' => '5',
+                    'lot_number' => 'LOT-001',
+                    'notes' => 'Recebido sem avarias.',
+                ]],
             ])
             ->assertRedirect(route('purchasing.receipts.index'));
 
@@ -112,7 +147,7 @@ final class TenantPurchasingCrudManagementTest extends TestCase
         $this->assertDatabaseHas('purchase_receipts', [
             'company_id' => $company->id,
             'id' => $receipt->id,
-            'status' => 'DRAFT',
+            'status' => 'POSTED',
         ]);
 
         $this->assertDatabaseHas('purchase_fiscal_entries', [
@@ -121,6 +156,39 @@ final class TenantPurchasingCrudManagementTest extends TestCase
             'status' => 'POSTED',
             'amount_cents' => 20050,
         ]);
+
+        $this->assertDatabaseHas('purchase_requisition_lines', [
+            'company_id' => $company->id,
+            'purchase_requisition_id' => $requisition->id,
+            'product_id' => $product->id,
+        ]);
+
+        $this->assertDatabaseHas('purchase_order_lines', [
+            'company_id' => $company->id,
+            'purchase_order_id' => $order->id,
+            'product_id' => $product->id,
+            'quantity_ordered' => 5,
+        ]);
+
+        $this->assertDatabaseHas('purchase_quotation_lines', [
+            'company_id' => $company->id,
+            'purchase_quotation_id' => $quotation->id,
+            'product_id' => $product->id,
+        ]);
+
+        $this->assertDatabaseHas('purchase_receipt_lines', [
+            'company_id' => $company->id,
+            'purchase_receipt_id' => $receipt->id,
+            'product_id' => $product->id,
+            'warehouse_id' => $warehouse->id,
+        ]);
+
+        $movement = StockLedgerMovement::query()->where('reference_type', 'purchase_receipt')->where('reference_id', $receipt->id)->first();
+        $this->assertNotNull($movement);
+
+        $posting = PurchaseFiscalEntryPosting::query()->where('purchase_fiscal_entry_id', $entry->id)->first();
+        $this->assertNotNull($posting);
+        $this->assertSame('POSTED', $posting->status);
 
         $this->actingAs($user, 'web')
             ->get(route('purchasing.requisitions.index'))
@@ -149,7 +217,7 @@ final class TenantPurchasingCrudManagementTest extends TestCase
     }
 
     /**
-     * @return array{company: Company, user: User, supplier: Supplier}
+    * @return array{company: Company, user: User, supplier: Supplier, warehouse: Warehouse, product: Product}
      */
     private function purchasingContext(): array
     {
@@ -201,6 +269,35 @@ final class TenantPurchasingCrudManagementTest extends TestCase
             'status' => 'ACTIVE',
         ]);
 
-        return compact('company', 'user', 'supplier');
+        $plant = Plant::query()->create([
+            'company_id' => $company->id,
+            'name' => 'Planta Atlas',
+            'code' => 'PLT-001',
+            'timezone' => 'UTC',
+            'is_active' => true,
+        ]);
+
+        $warehouse = Warehouse::query()->create([
+            'company_id' => $company->id,
+            'plant_id' => $plant->id,
+            'name' => 'Almoxarifado Central',
+            'code' => 'WH-001',
+            'is_active' => true,
+        ]);
+
+        $product = Product::query()->create([
+            'company_id' => $company->id,
+            'sku' => 'P-001',
+            'description' => 'Produto de compra',
+            'product_type' => 'raw_material',
+            'uom' => 'UN',
+            'safety_stock' => 0,
+            'lead_time_days' => 3,
+            'lot_control' => false,
+            'serial_control' => false,
+            'is_active' => true,
+        ]);
+
+        return compact('company', 'user', 'supplier', 'warehouse', 'product');
     }
 }
