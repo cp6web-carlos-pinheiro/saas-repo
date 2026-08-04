@@ -24,13 +24,11 @@ use App\Http\Controllers\Web\Tenant\CompanyAccessUserController;
 use App\Http\Controllers\Web\Tenant\RbacConsoleController;
 use App\Http\Controllers\Web\Tenant\BomMaterialListController;
 use App\Http\Controllers\Web\Tenant\BomStructureController;
-use App\Http\Controllers\Web\Tenant\BranchController;
 use App\Http\Controllers\Web\Tenant\MasterDataController;
 use App\Http\Controllers\Web\Tenant\CustomerController;
 use App\Http\Controllers\Web\Tenant\PlantController;
 use App\Http\Controllers\Web\Tenant\ProductController;
 use App\Http\Controllers\Web\Tenant\ProductVersionController;
-use App\Http\Controllers\Web\Tenant\PurchaseFiscalEntryController;
 use App\Http\Controllers\Web\Tenant\PurchasingLookupController;
 use App\Http\Controllers\Web\Tenant\PurchaseOrderController;
 use App\Http\Controllers\Web\Tenant\PurchaseQuotationController;
@@ -39,7 +37,6 @@ use App\Http\Controllers\Web\Tenant\PurchaseRequisitionController;
 use App\Http\Controllers\Web\Tenant\SaleController;
 use App\Http\Controllers\Web\Tenant\SupplierController;
 use App\Http\Controllers\Web\Tenant\WarehouseController;
-use App\Http\Controllers\Web\Tenant\WarehouseLocationController;
 use App\Http\Middleware\EnsureTrialIsActive;
 use App\Modules\Identity\Presentation\Http\Middleware\CheckPermission;
 use App\Http\Middleware\ResolveWebTenant;
@@ -200,17 +197,6 @@ Route::middleware('auth:web')->group(function (): void {
             Route::delete('/{receipt}', [PurchaseReceiptController::class, 'destroy'])->name('destroy');
         });
 
-        Route::prefix('purchasing/fiscal-entries')->name('purchasing.fiscal-entries.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
-            Route::get('/', [PurchaseFiscalEntryController::class, 'index'])->name('index');
-            Route::get('/create', [PurchaseFiscalEntryController::class, 'create'])->name('create');
-            Route::post('/', [PurchaseFiscalEntryController::class, 'store'])->name('store');
-            Route::get('/{entry}', [PurchaseFiscalEntryController::class, 'show'])->name('show');
-            Route::get('/{entry}/edit', [PurchaseFiscalEntryController::class, 'edit'])->name('edit');
-            Route::post('/{entry}/reverse', [PurchaseFiscalEntryController::class, 'reverse'])->name('reverse');
-            Route::put('/{entry}', [PurchaseFiscalEntryController::class, 'update'])->name('update');
-            Route::delete('/{entry}', [PurchaseFiscalEntryController::class, 'destroy'])->name('destroy');
-        });
-
         Route::prefix('purchasing/lookups')->name('purchasing.lookups.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
             Route::get('/suppliers', [PurchasingLookupController::class, 'suppliers'])->name('suppliers');
             Route::get('/requisitions', [PurchasingLookupController::class, 'requisitions'])->name('requisitions');
@@ -227,26 +213,6 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/{warehouse}/edit', [WarehouseController::class, 'edit'])->name('edit');
             Route::put('/{warehouse}', [WarehouseController::class, 'update'])->name('update');
             Route::delete('/{warehouse}', [WarehouseController::class, 'destroy'])->name('destroy');
-        });
-
-        Route::prefix('inventory/branches')->name('inventory.branches.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
-            Route::get('/', [BranchController::class, 'index'])->name('index');
-            Route::get('/create', [BranchController::class, 'create'])->name('create');
-            Route::post('/', [BranchController::class, 'store'])->name('store');
-            Route::get('/{branch}', [BranchController::class, 'show'])->name('show');
-            Route::get('/{branch}/edit', [BranchController::class, 'edit'])->name('edit');
-            Route::put('/{branch}', [BranchController::class, 'update'])->name('update');
-            Route::delete('/{branch}', [BranchController::class, 'destroy'])->name('destroy');
-        });
-
-        Route::prefix('inventory/warehouse-locations')->name('inventory.warehouse-locations.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
-            Route::get('/', [WarehouseLocationController::class, 'index'])->name('index');
-            Route::get('/create', [WarehouseLocationController::class, 'create'])->name('create');
-            Route::post('/', [WarehouseLocationController::class, 'store'])->name('store');
-            Route::get('/{location}', [WarehouseLocationController::class, 'show'])->name('show');
-            Route::get('/{location}/edit', [WarehouseLocationController::class, 'edit'])->name('edit');
-            Route::put('/{location}', [WarehouseLocationController::class, 'update'])->name('update');
-            Route::delete('/{location}', [WarehouseLocationController::class, 'destroy'])->name('destroy');
         });
 
         Route::prefix('admin-data')->name('admin-data.')->middleware(EnsureTrialIsActive::class)->group(function (): void {

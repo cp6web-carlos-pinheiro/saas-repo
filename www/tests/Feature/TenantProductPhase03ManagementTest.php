@@ -10,7 +10,6 @@ use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Product\Infrastructure\Persistence\Models\ProductVersion;
-use App\Modules\Tenant\Infrastructure\Persistence\Models\Branch;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
@@ -181,16 +180,8 @@ final class TenantProductPhase03ManagementTest extends TestCase
     {
         ['company' => $company, 'user' => $user] = $this->contextWithRole('master');
 
-        $branch = Branch::query()->create([
-            'company_id' => $company->id,
-            'code' => 'BR-001',
-            'name' => 'Filial 1',
-            'is_active' => true,
-        ]);
-
         $plant = Plant::query()->create([
             'company_id' => $company->id,
-            'branch_id' => $branch->id,
             'code' => 'PL-001',
             'name' => 'Planta 1',
             'timezone' => 'UTC',

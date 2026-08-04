@@ -12,7 +12,6 @@ use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrderLine;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
-use App\Modules\Tenant\Infrastructure\Persistence\Models\MasterDataRecord;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Services\SaaS\AuditLogService;
 use Illuminate\Database\Eloquent\Collection;
@@ -89,8 +88,6 @@ final class PurchaseOrderController extends Controller
         return view('client.purchasing.orders.form', [
             'order' => null,
             'company' => $company,
-            'departments' => $this->masterDataOptions($company, 'departments'),
-            'costCenters' => $this->masterDataOptions($company, 'cost-centers'),
             'suppliers' => $this->supplierOptions($company),
             'requisitions' => $this->requisitionOptions($company),
             'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
@@ -122,8 +119,6 @@ final class PurchaseOrderController extends Controller
                 'purchase_order_number' => $this->generateNumber($company),
                 'supplier_id' => (int) $data['supplier_id'],
                 'purchase_requisition_id' => isset($data['purchase_requisition_id']) ? (int) $data['purchase_requisition_id'] : null,
-                'department_id' => isset($data['department_id']) ? (int) $data['department_id'] : null,
-                'cost_center_id' => isset($data['cost_center_id']) ? (int) $data['cost_center_id'] : null,
                 'status' => 'DRAFT',
                 'order_date' => $data['order_date'],
                 'expected_delivery_date' => $data['expected_delivery_date'] ?? null,
@@ -163,8 +158,6 @@ final class PurchaseOrderController extends Controller
         return view('client.purchasing.orders.form', [
             'order' => $order,
             'company' => $company,
-            'departments' => $this->masterDataOptions($company, 'departments'),
-            'costCenters' => $this->masterDataOptions($company, 'cost-centers'),
             'suppliers' => $this->supplierOptions($company),
             'requisitions' => $this->requisitionOptions($company),
             'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
@@ -186,8 +179,6 @@ final class PurchaseOrderController extends Controller
             $order->fill([
                 'supplier_id' => (int) $data['supplier_id'],
                 'purchase_requisition_id' => isset($data['purchase_requisition_id']) ? (int) $data['purchase_requisition_id'] : null,
-                'department_id' => isset($data['department_id']) ? (int) $data['department_id'] : null,
-                'cost_center_id' => isset($data['cost_center_id']) ? (int) $data['cost_center_id'] : null,
                 'order_date' => $data['order_date'],
                 'expected_delivery_date' => $data['expected_delivery_date'] ?? null,
                 'notes' => $data['notes'] ?? null,
@@ -239,25 +230,13 @@ final class PurchaseOrderController extends Controller
     }
 
     /**
-     * @return array{supplier_id: int|string, purchase_requisition_id?: int|string|null, department_id?: int|string|null, cost_center_id?: int|string|null, status: string, order_date: string, expected_delivery_date?: string|null, notes?: string|null, items: array<int, array{product_id: int, warehouse_id: int|null, quantity: float, unit_price: float|null, need_by_date: string|null, promised_date: string|null}>}
+     * @return array{supplier_id: int|string, purchase_requisition_id?: int|string|null, status: string, order_date: string, expected_delivery_date?: string|null, notes?: string|null, items: array<int, array{product_id: int, warehouse_id: int|null, quantity: float, unit_price: float|null, need_by_date: string|null, promised_date: string|null}>}
      */
     private function validateOrder(Request $request): array
     {
-        $company = $this->activeCompanyFrom($request);
-
         $data = $request->validate([
             'supplier_id' => ['required', 'integer', Rule::exists('suppliers', 'id')],
             'purchase_requisition_id' => ['nullable', 'integer', Rule::exists('purchase_requisitions', 'id')],
-            'department_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'departments')),
-            ],
-            'cost_center_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'cost-centers')),
-            ],
             'status' => ['required', Rule::in(['DRAFT', 'APPROVED', 'CANCELLED'])],
             'order_date' => ['required', 'date'],
             'expected_delivery_date' => ['nullable', 'date', 'after_or_equal:order_date'],
@@ -504,18 +483,4 @@ final class PurchaseOrderController extends Controller
             ->all();
     }
 
-    /**
-     * @return array<int, string>
-     */
-    private function masterDataOptions(Company $company, string $domain): array
-    {
-        return MasterDataRecord::query()
-            ->where('company_id', $company->id)
-            ->where('domain', $domain)
-            ->where('is_active', true)
-            ->orderBy('code')
-            ->get(['id', 'code', 'name'])
-            ->mapWithKeys(static fn (MasterDataRecord $record): array => [$record->id => sprintf('%s - %s', $record->code, $record->name)])
-            ->all();
-    }
 }

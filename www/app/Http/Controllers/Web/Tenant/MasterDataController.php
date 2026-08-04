@@ -24,13 +24,9 @@ final class MasterDataController extends Controller
      * @var array<string, array{permission: string, code_regex?: string, code_max: int}>
      */
     private const DOMAINS = [
-        'departments' => ['permission' => 'admin-data.departments', 'code_max' => 40],
-        'cost-centers' => ['permission' => 'admin-data.cost-centers', 'code_max' => 40],
         'units' => ['permission' => 'admin-data.units', 'code_max' => 20],
         'categories' => ['permission' => 'admin-data.categories', 'code_max' => 40],
         'brands' => ['permission' => 'admin-data.brands', 'code_max' => 40],
-        'cfops' => ['permission' => 'admin-data.cfops', 'code_regex' => '/^[0-9]{4}$/', 'code_max' => 4],
-        'taxes' => ['permission' => 'admin-data.taxes', 'code_max' => 30],
     ];
 
     public function index(Request $request, string $domain): View
@@ -109,7 +105,7 @@ final class MasterDataController extends Controller
             'is_active' => (bool) ($data['is_active'] ?? true),
             'created_by' => $request->user()?->id,
             'updated_by' => $request->user()?->id,
-            'metadata' => $domain === 'taxes' ? ['rate' => $data['tax_rate'] ?? null] : null,
+            'metadata' => null,
         ]);
 
         $audit->record(
@@ -155,7 +151,7 @@ final class MasterDataController extends Controller
             'description' => $data['description'] ?? null,
             'is_active' => (bool) ($data['is_active'] ?? true),
             'updated_by' => $request->user()?->id,
-            'metadata' => $domain === 'taxes' ? ['rate' => $data['tax_rate'] ?? null] : null,
+            'metadata' => null,
         ]);
         $record->save();
 
@@ -212,7 +208,7 @@ final class MasterDataController extends Controller
 
     /**
      * @param array{permission: string, code_max: int, code_regex?: string} $config
-     * @return array{code: string, name: string, description?: string|null, is_active?: bool, tax_rate?: float|null}
+        * @return array{code: string, name: string, description?: string|null, is_active?: bool}
      */
     private function validateRecord(Request $request, Company $company, string $domain, ?MasterDataRecord $record, array $config): array
     {
@@ -241,10 +237,6 @@ final class MasterDataController extends Controller
             $rules['code'][] = 'regex:'.$config['code_regex'];
         }
 
-        if ($domain === 'taxes') {
-            $rules['tax_rate'] = ['nullable', 'numeric', 'min:0', 'max:100'];
-        }
-
         return $request->validate($rules);
     }
 
@@ -270,30 +262,10 @@ final class MasterDataController extends Controller
         $companyId = (int) $record->company_id;
 
         return match ($record->domain) {
-            'departments' => $this->hasAny(['purchase_requisitions.department_id', 'purchase_orders.department_id', 'sales.department_id', 'production_orders.department_id'], $id, $companyId),
-            'cost-centers' => $this->hasAny(['purchase_requisitions.cost_center_id', 'purchase_orders.cost_center_id', 'sales.cost_center_id', 'production_orders.cost_center_id'], $id, $companyId),
             'units' => DB::table('products')->where('company_id', $companyId)->where('unit_id', $id)->exists(),
             'categories' => DB::table('products')->where('company_id', $companyId)->where('category_id', $id)->exists(),
             'brands' => DB::table('products')->where('company_id', $companyId)->where('brand_id', $id)->exists(),
-            'cfops' => DB::table('suppliers')->where('company_id', $companyId)->where('default_cfop_id', $id)->exists() || DB::table('customers')->where('company_id', $companyId)->where('default_cfop_id', $id)->exists(),
-            'taxes' => DB::table('suppliers')->where('company_id', $companyId)->where('tax_profile_id', $id)->exists() || DB::table('customers')->where('company_id', $companyId)->where('tax_profile_id', $id)->exists(),
             default => false,
         };
-    }
-
-    /**
-     * @param list<string> $qualifiedColumns
-     */
-    private function hasAny(array $qualifiedColumns, int $id, int $companyId): bool
-    {
-        foreach ($qualifiedColumns as $qualifiedColumn) {
-            [$table, $column] = explode('.', $qualifiedColumn, 2);
-
-            if (DB::table($table)->where('company_id', $companyId)->where($column, $id)->exists()) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

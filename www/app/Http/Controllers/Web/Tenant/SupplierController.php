@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
-use App\Modules\Tenant\Infrastructure\Persistence\Models\MasterDataRecord;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
 use Illuminate\Database\Eloquent\Builder;
@@ -66,8 +65,6 @@ final class SupplierController extends Controller
         return view('client.suppliers.form', [
             'supplier' => null,
             'company' => $company,
-            'cfops' => $this->masterDataOptions($company, 'cfops'),
-            'taxProfiles' => $this->masterDataOptions($company, 'taxes'),
         ]);
     }
 
@@ -90,14 +87,11 @@ final class SupplierController extends Controller
             'code' => $this->generateCode($company),
             'name' => $data['name'],
             'person_type' => $data['person_type'],
-            'tax_id' => $data['tax_id'] ?? null,
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
             'status' => $data['status'],
             'default_lead_time_days' => (int) ($data['default_lead_time_days'] ?? 0),
             'payment_terms' => $data['payment_terms'] ?? null,
-            'default_cfop_id' => isset($data['default_cfop_id']) ? (int) $data['default_cfop_id'] : null,
-            'tax_profile_id' => isset($data['tax_profile_id']) ? (int) $data['tax_profile_id'] : null,
         ]);
 
         $audit->record(
@@ -123,8 +117,6 @@ final class SupplierController extends Controller
         return view('client.suppliers.form', [
             'supplier' => $supplier,
             'company' => $company,
-            'cfops' => $this->masterDataOptions($company, 'cfops'),
-            'taxProfiles' => $this->masterDataOptions($company, 'taxes'),
         ]);
     }
 
@@ -138,14 +130,11 @@ final class SupplierController extends Controller
         $supplier->fill([
             'name' => $data['name'],
             'person_type' => $data['person_type'],
-            'tax_id' => $data['tax_id'] ?? null,
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
             'status' => $data['status'],
             'default_lead_time_days' => (int) ($data['default_lead_time_days'] ?? 0),
             'payment_terms' => $data['payment_terms'] ?? null,
-            'default_cfop_id' => isset($data['default_cfop_id']) ? (int) $data['default_cfop_id'] : null,
-            'tax_profile_id' => isset($data['tax_profile_id']) ? (int) $data['tax_profile_id'] : null,
         ]);
         $supplier->save();
 
@@ -220,53 +209,12 @@ final class SupplierController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:180'],
             'person_type' => ['required', Rule::in(['PF', 'PJ'])],
-            'tax_id' => [
-                'nullable',
-                'string',
-                'max:30',
-                function (string $attribute, mixed $value, \Closure $fail) use ($request): void {
-                    if ($value === null || $value === '') {
-                        return;
-                    }
-
-                    $personType = (string) $request->input('person_type', 'PJ');
-
-                    if (! $this->isValidTaxIdFormat((string) $value, $personType)) {
-                        $fail(__('validation.regex', ['attribute' => $attribute]));
-                    }
-                },
-            ],
             'email' => ['nullable', 'email', 'max:180'],
             'phone' => ['nullable', 'string', 'max:50'],
             'status' => ['required', Rule::in(['ACTIVE', 'INACTIVE'])],
             'default_lead_time_days' => ['nullable', 'integer', 'min:0'],
             'payment_terms' => ['nullable', 'string', 'max:80'],
-            'default_cfop_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'cfops')),
-            ],
-            'tax_profile_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'taxes')),
-            ],
         ]);
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function masterDataOptions(Company $company, string $domain): array
-    {
-        return MasterDataRecord::query()
-            ->where('company_id', $company->id)
-            ->where('domain', $domain)
-            ->where('is_active', true)
-            ->orderBy('code')
-            ->get(['id', 'code', 'name'])
-            ->mapWithKeys(static fn (MasterDataRecord $record): array => [$record->id => sprintf('%s - %s', $record->code, $record->name)])
-            ->all();
     }
 
     private function generateCode(Company $company): string
@@ -278,97 +226,6 @@ final class SupplierController extends Controller
         return $code;
     }
 
-    private function isValidTaxIdFormat(string $taxId, string $personType): bool
-    {
-        $digits = preg_replace('/\D+/', '', $taxId) ?? '';
-
-        if ($personType === 'PF') {
-            if (strlen($digits) !== 11) {
-                return false;
-            }
-
-            if (preg_match('/^(\d)\1{10}$/', $digits) === 1) {
-                return false;
-            }
-
-            if (preg_match('/^(\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11})$/', $taxId) !== 1) {
-                return false;
-            }
-
-            return $this->isValidCpfDigits($digits);
-        }
-
-        if (strlen($digits) !== 14) {
-            return false;
-        }
-
-        if (preg_match('/^(\d)\1{13}$/', $digits) === 1) {
-            return false;
-        }
-
-        if (preg_match('/^(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{14})$/', $taxId) !== 1) {
-            return false;
-        }
-
-        return $this->isValidCnpjDigits($digits);
-    }
-
-    private function isValidCpfDigits(string $digits): bool
-    {
-        $sum = 0;
-
-        for ($i = 0; $i < 9; $i++) {
-            $sum += ((int) $digits[$i]) * (10 - $i);
-        }
-
-        $remainder = $sum % 11;
-        $firstDigit = $remainder < 2 ? 0 : 11 - $remainder;
-
-        if ($firstDigit !== (int) $digits[9]) {
-            return false;
-        }
-
-        $sum = 0;
-
-        for ($i = 0; $i < 10; $i++) {
-            $sum += ((int) $digits[$i]) * (11 - $i);
-        }
-
-        $remainder = $sum % 11;
-        $secondDigit = $remainder < 2 ? 0 : 11 - $remainder;
-
-        return $secondDigit === (int) $digits[10];
-    }
-
-    private function isValidCnpjDigits(string $digits): bool
-    {
-        $firstWeights = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-        $secondWeights = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-
-        $sum = 0;
-
-        for ($i = 0; $i < 12; $i++) {
-            $sum += ((int) $digits[$i]) * $firstWeights[$i];
-        }
-
-        $remainder = $sum % 11;
-        $firstDigit = $remainder < 2 ? 0 : 11 - $remainder;
-
-        if ($firstDigit !== (int) $digits[12]) {
-            return false;
-        }
-
-        $sum = 0;
-
-        for ($i = 0; $i < 13; $i++) {
-            $sum += ((int) $digits[$i]) * $secondWeights[$i];
-        }
-
-        $remainder = $sum % 11;
-        $secondDigit = $remainder < 2 ? 0 : 11 - $remainder;
-
-        return $secondDigit === (int) $digits[13];
-    }
 
     /**
      * @param  array<int, string>  $searchTerms
@@ -379,7 +236,6 @@ final class SupplierController extends Controller
             $query->where(function (Builder $nested) use ($term): void {
                 $nested->whereRaw('LOWER(name) like ?', ["%{$term}%"])
                     ->orWhereRaw('LOWER(person_type) like ?', ["%{$term}%"])
-                    ->orWhereRaw("LOWER(coalesce(tax_id, '')) like ?", ["%{$term}%"])
                     ->orWhereRaw("LOWER(coalesce(email, '')) like ?", ["%{$term}%"])
                     ->orWhereRaw("LOWER(coalesce(phone, '')) like ?", ["%{$term}%"])
                     ->orWhereRaw('LOWER(status) like ?', ["%{$term}%"]);

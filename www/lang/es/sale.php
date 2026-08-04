@@ -34,7 +34,6 @@ return [
     'amount' => 'Importe total',
     'subtotal' => 'Subtotal',
     'discount_amount' => 'Descuento',
-    'tax_amount' => 'Impuesto',
     'confirmed_at' => 'Confirmado el',
     'confirmed_by' => 'Confirmado por',
     'canceled_at' => 'Cancelado el',

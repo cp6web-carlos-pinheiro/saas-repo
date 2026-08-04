@@ -20,8 +20,6 @@ final class Sale extends TenantModel
     protected $fillable = [
         'company_id',
         'customer_id',
-        'department_id',
-        'cost_center_id',
         'sale_date',
         'status',
         'confirmed_by',
@@ -40,7 +38,6 @@ final class Sale extends TenantModel
         'delivered_at',
         'subtotal_cents',
         'discount_cents',
-        'tax_cents',
         'amount_cents',
         'notes',
         'metadata',
@@ -56,7 +53,6 @@ final class Sale extends TenantModel
         'delivered_at' => 'datetime',
         'subtotal_cents' => 'integer',
         'discount_cents' => 'integer',
-        'tax_cents' => 'integer',
         'amount_cents' => 'integer',
         'metadata' => 'array',
     ];

@@ -17,7 +17,6 @@ return [
     'inactive' => 'Inactivo',
     'all_statuses' => 'Todos los estados',
     'created_at' => 'Creado en',
-    'tax_rate' => 'Tasa (%)',
     'confirm_delete_title' => '¿Eliminar registro?',
     'confirm_delete_text' => 'Está a punto de eliminar :name. Esta acción no se puede deshacer.',
     'confirm_delete_confirm' => 'Sí, eliminar',
@@ -27,11 +26,7 @@ return [
     'removed' => 'Registro eliminado con éxito.',
     'remove_blocked' => 'Este registro tiene vínculos transaccionales. Eliminación bloqueada.',
 
-    'departments' => ['title' => 'Departamentos'],
-    'cost-centers' => ['title' => 'Centros de costo'],
     'units' => ['title' => 'Unidades'],
     'categories' => ['title' => 'Categorías'],
     'brands' => ['title' => 'Marcas'],
-    'cfops' => ['title' => 'CFOP'],
-    'taxes' => ['title' => 'Impuestos'],
 ];

@@ -3,7 +3,7 @@
 return [
     'title' => 'Customers',
     'company_context' => 'Active company',
-    'search' => 'Search by name, person type, tax ID, email, phone, status or ID',
+    'search' => 'Search by name, person type, email, phone, status or ID',
     'filter' => 'Search',
     'empty' => 'No customers found.',
     'create' => 'New customer',
@@ -13,7 +13,6 @@ return [
     'person_type' => 'Person type',
     'person_type_pf' => 'Individual',
     'person_type_pj' => 'Legal entity',
-    'tax_id' => 'Tax ID',
     'email' => 'Email',
     'phone' => 'Phone',
     'status' => 'Status',

@@ -9,14 +9,19 @@ Ultima atualizacao consolidada: 2026-08-04
 Resumo executivo:
 - Fundacao, multitenancy e RBAC: avancado.
 - Produtos e revisoes: avancado.
-- Compras: avancado (CRUDs operacionais com linhas, transicoes, bloqueios apos POSTED, estorno com categoria+motivo e auditoria).
+- Compras: avancado (CRUDs operacionais com linhas, transicoes, bloqueios apos POSTED, estorno com categoria+motivo e auditoria, sem entrada fiscal/tributaria).
 - Vendas: parcial avancado (CRUD principal e clientes no tenant; menu de clientes integrado em Vendas).
 - Estoque: parcial avancado (ledger, saldos/lotes/seriais, CRUD de armazens e plantas, integracao com recebimento de compras, transferencia/reversao operacional no ledger, reservas por origem/prioridade).
 - Producao: parcial avancado (ordens, consumo, apontamento basico e entrada de produto acabado no estoque).
 - Engenharia de Plataforma: baseline obrigatorio implementado (CI com gates de qualidade e testes, padrao inicial de telemetria com request-id e canal dedicado).
 - Seguranca: baseline obrigatorio implementado (MFA por codigo via e-mail no login web, politica de senha centralizada, monitoramento de autenticacao em canal dedicado).
 - Produto/UX: baseline obrigatorio implementado (fortalecimento de acessibilidade em componentes compartilhados e foco visivel em navegacao).
-- MRP, financeiro, observabilidade e automacoes: em evolucao, com MRP parcial avancado (motor, sugestoes, alertas de estoque minimo, previsao simples e scheduler finito por capacidade).
+- MRP, observabilidade e automacoes: em evolucao, com MRP parcial avancado (motor, sugestoes, alertas de estoque minimo, previsao simples e scheduler finito por capacidade).
+
+Escopo removido do sistema (nao controlado):
+- Tributos, NCM, CFOP e quaisquer atributos fiscais/financeiros de produto, compra, venda, cliente e fornecedor.
+- Filiais, localizacoes de armazem, departamentos e centros de custo.
+- Modulos fora do foco MRP definido anteriormente (CRM, RH, Qualidade, Manutencao e Financeiro).
 
 Atalhos de status:
 - Visao geral da sequencia: [Dev Sequencia de Desenvolvimento.md](Dev%20Sequencia%20de%20Desenvolvimento.md)

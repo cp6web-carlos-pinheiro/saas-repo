@@ -17,7 +17,6 @@ return [
     'inactive' => 'Inativo',
     'all_statuses' => 'Todos os status',
     'created_at' => 'Cadastrado em',
-    'tax_rate' => 'Alíquota (%)',
     'confirm_delete_title' => 'Excluir cadastro?',
     'confirm_delete_text' => 'Você está prestes a excluir :name. Essa ação não pode ser desfeita.',
     'confirm_delete_confirm' => 'Sim, excluir',
@@ -27,11 +26,7 @@ return [
     'removed' => 'Cadastro removido com sucesso.',
     'remove_blocked' => 'Existem vínculos ativos para este cadastro. Remoção bloqueada.',
 
-    'departments' => ['title' => 'Departamentos'],
-    'cost-centers' => ['title' => 'Centros de custo'],
     'units' => ['title' => 'Unidades'],
     'categories' => ['title' => 'Categorias'],
     'brands' => ['title' => 'Marcas'],
-    'cfops' => ['title' => 'CFOP'],
-    'taxes' => ['title' => 'Tributos'],
 ];

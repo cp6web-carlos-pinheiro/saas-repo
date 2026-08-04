@@ -75,30 +75,6 @@
                 </label>
             </div>
 
-            <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_order.department_id') }}
-                    <x-ui.select name="department_id" class="mt-2" data-search="on">
-                        <option value="">{{ __('purchase_order.select_department') }}</option>
-                        @foreach ($departments as $id => $label)
-                            <option value="{{ $id }}" @selected((string) old('department_id', $order?->department_id) === (string) $id)>{{ $label }}</option>
-                        @endforeach
-                    </x-ui.select>
-                    @error('department_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
-
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_order.cost_center_id') }}
-                    <x-ui.select name="cost_center_id" class="mt-2" data-search="on">
-                        <option value="">{{ __('purchase_order.select_cost_center') }}</option>
-                        @foreach ($costCenters as $id => $label)
-                            <option value="{{ $id }}" @selected((string) old('cost_center_id', $order?->cost_center_id) === (string) $id)>{{ $label }}</option>
-                        @endforeach
-                    </x-ui.select>
-                    @error('cost_center_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
-            </div>
-
             <label class="block text-sm font-medium">
                 {{ __('purchase_order.notes') }}
                 <x-ui.textarea name="notes" class="mt-2" rows="4">{{ old('notes', $order?->notes) }}</x-ui.textarea>

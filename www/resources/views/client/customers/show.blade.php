@@ -24,7 +24,6 @@
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('customer.person_type')">{{ $customer->person_type === 'PF' ? __('customer.person_type_pf') : __('customer.person_type_pj') }}</x-ui.definition-item>
-            <x-ui.definition-item :label="__('customer.tax_id')">{{ $customer->tax_id ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('customer.email')">{{ $customer->email ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('customer.phone')">{{ $customer->phone ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item-status :label="__('customer.status')" :value="$customer->status === 'ACTIVE' ? __('customer.active') : __('customer.inactive')" :tone="$customer->status === 'ACTIVE' ? 'success' : 'neutral'" />

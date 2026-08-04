@@ -37,8 +37,7 @@
                     return $carry + (int) round(($quantity * $unitPrice) * 100);
                 }, 0);
         $initialDiscountCents = (int) round((float) str_replace(',', '.', str_replace('.', '', (string) old('discount_amount', $editing ? number_format(($sale?->discount_cents ?? 0) / 100, 2, ',', '.') : '0,00'))) * 100);
-        $initialTaxCents = (int) round((float) str_replace(',', '.', str_replace('.', '', (string) old('tax_amount', $editing ? number_format(($sale?->tax_cents ?? 0) / 100, 2, ',', '.') : '0,00'))) * 100);
-        $initialTotalCents = max(0, $initialSubtotalCents - $initialDiscountCents + $initialTaxCents);
+        $initialTotalCents = max(0, $initialSubtotalCents - $initialDiscountCents);
         @endphp
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
@@ -92,27 +91,6 @@
                     <p class="mt-2 text-sm text-[#5f6368]">{{ __('sale.operational_status_hint') }}</p>
                 </div>
 
-                <label class="block text-sm font-medium">
-                    {{ __('sale.department_id') }}
-                    <x-ui.select name="department_id" class="mt-2" data-search="on">
-                        <option value="">{{ __('sale.select_department') }}</option>
-                        @foreach ($departments as $id => $label)
-                            <option value="{{ $id }}" @selected((string) old('department_id', $sale?->department_id) === (string) $id)>{{ $label }}</option>
-                        @endforeach
-                    </x-ui.select>
-                    @error('department_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
-
-                <label class="block text-sm font-medium">
-                    {{ __('sale.cost_center_id') }}
-                    <x-ui.select name="cost_center_id" class="mt-2" data-search="on">
-                        <option value="">{{ __('sale.select_cost_center') }}</option>
-                        @foreach ($costCenters as $id => $label)
-                            <option value="{{ $id }}" @selected((string) old('cost_center_id', $sale?->cost_center_id) === (string) $id)>{{ $label }}</option>
-                        @endforeach
-                    </x-ui.select>
-                    @error('cost_center_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
             </div>
 
             <section class="space-y-4">
@@ -188,12 +166,6 @@
                         {{ __('sale.discount_amount') }}
                         <x-ui.input name="discount_amount" :value="old('discount_amount', $editing ? number_format(($sale?->discount_cents ?? 0) / 100, 2, ',', '.') : '0,00')" class="mt-2" inputmode="decimal" data-currency-mask="brl" data-sale-discount />
                         @error('discount_amount')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                    </label>
-
-                    <label class="block text-sm font-medium">
-                        {{ __('sale.tax_amount') }}
-                        <x-ui.input name="tax_amount" :value="old('tax_amount', $editing ? number_format(($sale?->tax_cents ?? 0) / 100, 2, ',', '.') : '0,00')" class="mt-2" inputmode="decimal" data-currency-mask="brl" data-sale-tax />
-                        @error('tax_amount')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                     </label>
 
                     <div class="flex items-center justify-between rounded-xl border border-[#dadce0] bg-white px-4 py-3">
@@ -272,9 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const grandTotal = document.querySelector('[data-sale-grand-total]');
     const subtotalElement = document.querySelector('[data-sale-subtotal]');
     const discountInput = document.querySelector('[data-sale-discount]');
-    const taxInput = document.querySelector('[data-sale-tax]');
-
-    if (!container || !template || !addButton || !grandTotal || !subtotalElement || !discountInput || !taxInput) {
+    if (!container || !template || !addButton || !grandTotal || !subtotalElement || !discountInput) {
         return;
     }
 
@@ -317,8 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const discountCents = parseMoneyToCents(discountInput.value);
-        const taxCents = parseMoneyToCents(taxInput.value);
-        const totalCents = Math.max(0, subtotalCents - discountCents + taxCents);
+        const totalCents = Math.max(0, subtotalCents - discountCents);
 
         subtotalElement.dataset.subtotalCents = String(subtotalCents);
         subtotalElement.textContent = formatMoney(subtotalCents);
@@ -368,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bindRow(row);
     }
 
-    for (const field of [discountInput, taxInput]) {
+    for (const field of [discountInput]) {
         formatMoneyInput(field);
         field.addEventListener('input', () => {
             formatMoneyInput(field);

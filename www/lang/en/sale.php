@@ -34,7 +34,6 @@ return [
     'amount' => 'Total amount',
     'subtotal' => 'Subtotal',
     'discount_amount' => 'Discount',
-    'tax_amount' => 'Tax',
     'confirmed_at' => 'Confirmed at',
     'confirmed_by' => 'Confirmed by',
     'canceled_at' => 'Canceled at',

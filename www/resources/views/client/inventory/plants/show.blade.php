@@ -27,7 +27,6 @@
             <x-ui.definition-item :label="__('plant.reference')">#{{ $plant->id }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('plant.name')">{{ $plant->name }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('plant.code')">{{ $plant->code }}</x-ui.definition-item>
-            <x-ui.definition-item :label="__('plant.branch')">{{ $plant->branch?->code }} - {{ $plant->branch?->name }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('plant.timezone')">{{ $plant->timezone }}</x-ui.definition-item>
             <x-ui.definition-item-status :label="__('plant.status')" :value="$plant->is_active ? __('plant.active') : __('plant.inactive')" :tone="$plant->is_active ? 'success' : 'neutral'" />
             <x-ui.definition-item-date :label="__('plant.created_at')" :value="$plant->created_at" />

@@ -18,12 +18,9 @@ final class Customer extends TenantModel
         'code',
         'name',
         'person_type',
-        'tax_id',
         'email',
         'phone',
         'status',
-        'default_cfop_id',
-        'tax_profile_id',
         'metadata',
     ];
 

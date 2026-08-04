@@ -31,9 +31,6 @@ final class PurchasingLookupController extends Controller
         'purchasing.receipts.read',
         'purchasing.receipts.create',
         'purchasing.receipts.update',
-        'purchasing.fiscal-entries.read',
-        'purchasing.fiscal-entries.create',
-        'purchasing.fiscal-entries.update',
     ];
 
     public function suppliers(Request $request): JsonResponse

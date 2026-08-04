@@ -14,12 +14,10 @@ use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrder;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
-use App\Modules\Tenant\Infrastructure\Persistence\Models\Branch;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\MasterDataRecord;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
-use App\Modules\Tenant\Infrastructure\Persistence\Models\WarehouseLocation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,20 +30,9 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
         ['company' => $company, 'user' => $user] = $this->contextWithRole('master');
 
         $this->actingAs($user, 'web')
-            ->post(route('inventory.branches.store'), [
-                'name' => 'Filial Sul',
-                'code' => 'BR-SUL',
-                'is_active' => '1',
-            ])
-            ->assertRedirect(route('inventory.branches.index'));
-
-        $branch = Branch::query()->where('company_id', $company->id)->firstOrFail();
-
-        $this->actingAs($user, 'web')
             ->post(route('inventory.plants.store'), [
                 'name' => 'Planta Sul',
                 'code' => 'PL-SUL',
-                'branch_id' => $branch->id,
                 'timezone' => 'UTC',
                 'is_active' => '1',
             ])
@@ -64,34 +51,9 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
 
         $warehouse = Warehouse::query()->where('company_id', $company->id)->firstOrFail();
 
-        $this->actingAs($user, 'web')
-            ->post(route('inventory.warehouse-locations.store'), [
-                'name' => 'Endereco A1',
-                'code' => 'A1',
-                'warehouse_id' => $warehouse->id,
-                'is_active' => '1',
-            ])
-            ->assertRedirect(route('inventory.warehouse-locations.index'));
-
-        $this->assertDatabaseHas('warehouse_locations', [
-            'company_id' => $company->id,
-            'warehouse_id' => $warehouse->id,
-            'code' => 'A1',
-        ]);
-
-        $this->actingAs($user, 'web')
-            ->delete(route('inventory.branches.destroy', $branch))
-            ->assertSessionHasErrors('branch');
-
-        $this->assertDatabaseHas('branches', ['id' => $branch->id]);
-
-        $departmentId = $this->createMasterData($user, 'departments', 'DEP-ENG', 'Engenharia');
-        $costCenterId = $this->createMasterData($user, 'cost-centers', 'CC-100', 'Centro 100');
         $unitId = $this->createMasterData($user, 'units', 'UN', 'Unidade');
         $categoryId = $this->createMasterData($user, 'categories', 'CAT-RAW', 'Materia Prima');
         $brandId = $this->createMasterData($user, 'brands', 'BR-ATLAS', 'Atlas');
-        $cfopId = $this->createMasterData($user, 'cfops', '5102', 'CFOP Padrao');
-        $taxId = $this->createMasterData($user, 'taxes', 'TRB-STD', 'Tributo Padrao', 17.5);
 
         $this->actingAs($user, 'web')
             ->post(route('products.store'), [
@@ -124,14 +86,11 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
             ->post(route('purchasing.suppliers.store'), [
                 'name' => 'Fornecedor Integrado',
                 'person_type' => 'PJ',
-                'tax_id' => '12.345.678/0001-95',
                 'email' => 'fornecedor@atlas.test',
                 'phone' => '11999999999',
                 'status' => 'ACTIVE',
                 'default_lead_time_days' => 2,
                 'payment_terms' => '30D',
-                'default_cfop_id' => $cfopId,
-                'tax_profile_id' => $taxId,
             ])
             ->assertRedirect(route('purchasing.suppliers.index'));
 
@@ -141,34 +100,17 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
             ->post(route('customers.store'), [
                 'name' => 'Cliente Integrado',
                 'person_type' => 'PJ',
-                'tax_id' => '12.345.678/0001-95',
                 'email' => 'cliente@atlas.test',
                 'phone' => '11988888888',
                 'status' => 'ACTIVE',
-                'default_cfop_id' => $cfopId,
-                'tax_profile_id' => $taxId,
             ])
             ->assertRedirect(route('customers.index'));
 
         $customer = Customer::query()->where('company_id', $company->id)->where('name', 'Cliente Integrado')->firstOrFail();
 
-        $this->assertDatabaseHas('suppliers', [
-            'id' => $supplier->id,
-            'default_cfop_id' => $cfopId,
-            'tax_profile_id' => $taxId,
-        ]);
-
-        $this->assertDatabaseHas('customers', [
-            'id' => $customer->id,
-            'default_cfop_id' => $cfopId,
-            'tax_profile_id' => $taxId,
-        ]);
-
         $this->actingAs($user, 'web')
             ->post(route('purchasing.requisitions.store'), [
                 'required_date' => now()->addDays(7)->toDateString(),
-                'department_id' => $departmentId,
-                'cost_center_id' => $costCenterId,
                 'status' => 'DRAFT',
                 'source_type' => 'manual',
                 'notes' => 'Requisicao integrada',
@@ -189,8 +131,6 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
             ->post(route('purchasing.orders.store'), [
                 'supplier_id' => $supplier->id,
                 'purchase_requisition_id' => $requisition->id,
-                'department_id' => $departmentId,
-                'cost_center_id' => $costCenterId,
                 'status' => 'DRAFT',
                 'order_date' => now()->toDateString(),
                 'expected_delivery_date' => now()->addDays(10)->toDateString(),
@@ -211,12 +151,9 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
         $this->actingAs($user, 'web')
             ->post(route('sales.store'), [
                 'customer_id' => $customer->id,
-                'department_id' => $departmentId,
-                'cost_center_id' => $costCenterId,
                 'sale_date' => now()->toDateString(),
                 'status' => 'DRAFT',
                 'discount_amount' => '0,00',
-                'tax_amount' => '0,00',
                 'items' => [[
                     'product_id' => $product->id,
                     'quantity' => 2,
@@ -227,23 +164,9 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
 
         $sale = Sale::query()->where('company_id', $company->id)->latest('id')->firstOrFail();
 
-        $this->assertDatabaseHas('purchase_requisitions', [
-            'id' => $requisition->id,
-            'department_id' => $departmentId,
-            'cost_center_id' => $costCenterId,
-        ]);
-
-        $this->assertDatabaseHas('purchase_orders', [
-            'id' => $order->id,
-            'department_id' => $departmentId,
-            'cost_center_id' => $costCenterId,
-        ]);
-
-        $this->assertDatabaseHas('sales', [
-            'id' => $sale->id,
-            'department_id' => $departmentId,
-            'cost_center_id' => $costCenterId,
-        ]);
+        $this->assertDatabaseHas('purchase_requisitions', ['id' => $requisition->id]);
+        $this->assertDatabaseHas('purchase_orders', ['id' => $order->id]);
+        $this->assertDatabaseHas('sales', ['id' => $sale->id]);
     }
 
     public function test_user_without_permissions_cannot_access_admin_data_crud(): void
@@ -253,7 +176,7 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
         $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
 
         $this->actingAs($user, 'web')
-            ->get(route('admin-data.index', ['domain' => 'departments']));
+            ->get(route('admin-data.index', ['domain' => 'units']));
     }
 
     /**

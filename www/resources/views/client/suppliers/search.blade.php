@@ -46,7 +46,6 @@
                         <th class="px-3 py-3">ID</th>
                         <th class="px-3 py-3"><a href="{{ $sortUrl('name') }}">{{ __('supplier.name') }} ↕</a></th>
                         <th class="px-3 py-3">{{ __('supplier.person_type') }}</th>
-                        <th class="px-3 py-3">{{ __('supplier.tax_id') }}</th>
                         <th class="px-3 py-3">{{ __('supplier.email') }}</th>
                         <th class="px-3 py-3">{{ __('supplier.phone') }}</th>
                         <th class="px-3 py-3"><a href="{{ $sortUrl('status') }}">{{ __('supplier.status') }} ↕</a></th>
@@ -64,7 +63,6 @@
                             <td class="px-3 py-4 text-[#5f6368]">{{ $supplier->id }}</td>
                             <td class="px-3 py-4">{{ $supplier->name }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $supplier->person_type === 'PF' ? __('supplier.person_type_pf') : __('supplier.person_type_pj') }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $supplier->tax_id ?? '—' }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $supplier->email ?? '—' }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $supplier->phone ?? '—' }}</td>
                             <td class="px-3 py-4">
@@ -79,7 +77,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-3 py-10 text-center text-[#5f6368]">{{ __('supplier.empty') }}</td>
+                            <td colspan="7" class="px-3 py-10 text-center text-[#5f6368]">{{ __('supplier.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

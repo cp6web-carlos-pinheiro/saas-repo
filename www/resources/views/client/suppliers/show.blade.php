@@ -24,7 +24,6 @@
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('supplier.person_type')">{{ $supplier->person_type === 'PF' ? __('supplier.person_type_pf') : __('supplier.person_type_pj') }}</x-ui.definition-item>
-            <x-ui.definition-item :label="__('supplier.tax_id')">{{ $supplier->tax_id ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('supplier.email')">{{ $supplier->email ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('supplier.phone')">{{ $supplier->phone ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item-status :label="__('supplier.status')" :value="$supplier->status === 'ACTIVE' ? __('supplier.active') : __('supplier.inactive')" :tone="$supplier->status === 'ACTIVE' ? 'success' : 'neutral'" />

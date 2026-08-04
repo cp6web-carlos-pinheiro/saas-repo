@@ -98,7 +98,6 @@
             />
             <x-ui.definition-item-money :label="__('sale.subtotal')" :amount-cents="$sale->subtotal_cents" />
             <x-ui.definition-item-money :label="__('sale.discount_amount')" :amount-cents="$sale->discount_cents" />
-            <x-ui.definition-item-money :label="__('sale.tax_amount')" :amount-cents="$sale->tax_cents" />
             <x-ui.definition-item-money :label="__('sale.amount')" :amount-cents="$sale->amount_cents" />
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('sale.notes')">{{ $sale->notes !== null && $sale->notes !== '' ? $sale->notes : '—' }}</x-ui.definition-item>
             <x-ui.definition-item class="sm:col-span-2 xl:col-span-1" :label="__('sale.cancel_reason')">{{ $sale->cancel_reason !== null && $sale->cancel_reason !== '' ? $sale->cancel_reason : '—' }}</x-ui.definition-item>

@@ -29,7 +29,6 @@ final class TenantSalesManagementTest extends TestCase
                 'sale_date' => '2026-08-03',
                 'status' => 'CONFIRMED',
                 'discount_amount' => '0,00',
-                'tax_amount' => '0,00',
                 'notes' => 'Pedido operacional.',
                 'items' => [[
                     'product_id' => $productA->id,
@@ -78,7 +77,6 @@ final class TenantSalesManagementTest extends TestCase
                 'status' => 'CONFIRMED',
                 'operational_status' => 'INVOICED',
                 'discount_amount' => '0,00',
-                'tax_amount' => '0,00',
                 'notes' => 'Tentativa de edição bloqueada.',
                 'items' => [[
                     'product_id' => $productA->id,
@@ -128,7 +126,6 @@ final class TenantSalesManagementTest extends TestCase
                 'sale_date' => '2026-08-03',
                 'status' => 'CONFIRMED',
                 'discount_amount' => '20,00',
-                'tax_amount' => '5,50',
                 'notes' => 'Primeira venda do cliente.',
                 'items' => [
                     [
@@ -152,8 +149,7 @@ final class TenantSalesManagementTest extends TestCase
             'operational_status' => 'PENDING',
             'subtotal_cents' => 35080,
             'discount_cents' => 2000,
-            'tax_cents' => 550,
-            'amount_cents' => 33630,
+            'amount_cents' => 33080,
         ]);
 
         $sale = Sale::query()->firstOrFail();
@@ -176,7 +172,7 @@ final class TenantSalesManagementTest extends TestCase
             ->assertOk()
             ->assertSee('#'.$sale->id)
             ->assertSee('Cliente Atlas')
-            ->assertSee('336,30')
+            ->assertSee('330,80')
             ->assertSee('PENDING', false);
     }
 
@@ -190,7 +186,6 @@ final class TenantSalesManagementTest extends TestCase
                 'sale_date' => '2026-08-03',
                 'status' => 'CONFIRMED',
                 'discount_amount' => '0,00',
-                'tax_amount' => '0,00',
                 'notes' => 'Pedido cancelável.',
                 'items' => [[
                     'product_id' => $productA->id,
@@ -209,7 +204,6 @@ final class TenantSalesManagementTest extends TestCase
                 'sale_date' => '2026-08-03',
                 'status' => 'CANCELLED',
                 'discount_amount' => '0,00',
-                'tax_amount' => '0,00',
                 'cancel_reason' => '',
                 'notes' => 'Pedido cancelável.',
                 'items' => [[
@@ -227,7 +221,6 @@ final class TenantSalesManagementTest extends TestCase
                 'sale_date' => '2026-08-03',
                 'status' => 'CANCELLED',
                 'discount_amount' => '0,00',
-                'tax_amount' => '0,00',
                 'cancel_reason' => 'Cliente desistiu da compra.',
                 'notes' => 'Pedido cancelável.',
                 'items' => [[
@@ -256,7 +249,6 @@ final class TenantSalesManagementTest extends TestCase
                 'sale_date' => '2026-08-03',
                 'status' => 'CONFIRMED',
                 'discount_amount' => '0,00',
-                'tax_amount' => '0,00',
                 'notes' => 'Pedido não cancelável após faturamento.',
                 'items' => [[
                     'product_id' => $productA->id,
@@ -284,7 +276,6 @@ final class TenantSalesManagementTest extends TestCase
                 'sale_date' => '2026-08-03',
                 'status' => 'CANCELLED',
                 'discount_amount' => '0,00',
-                'tax_amount' => '0,00',
                 'cancel_reason' => 'Tentativa tardia de cancelamento.',
                 'notes' => 'Pedido não cancelável após faturamento.',
                 'items' => [[
@@ -312,7 +303,6 @@ final class TenantSalesManagementTest extends TestCase
                 'sale_date' => '2026-08-03',
                 'status' => 'CONFIRMED',
                 'discount_amount' => '0,00',
-                'tax_amount' => '0,00',
                 'notes' => 'Pedido inconsistente.',
                 'items' => [[
                     'product_id' => $productA->id,

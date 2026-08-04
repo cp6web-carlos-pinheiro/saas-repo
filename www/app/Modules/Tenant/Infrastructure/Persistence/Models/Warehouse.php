@@ -7,7 +7,6 @@ namespace App\Modules\Tenant\Infrastructure\Persistence\Models;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class Warehouse extends TenantModel
 {
@@ -37,8 +36,4 @@ final class Warehouse extends TenantModel
         return $this->belongsTo(Plant::class);
     }
 
-    public function locations(): HasMany
-    {
-        return $this->hasMany(WarehouseLocation::class, 'warehouse_id');
-    }
 }

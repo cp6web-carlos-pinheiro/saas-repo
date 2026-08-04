@@ -17,7 +17,6 @@ return [
     'inactive' => 'Inactive',
     'all_statuses' => 'All statuses',
     'created_at' => 'Created at',
-    'tax_rate' => 'Tax rate (%)',
     'confirm_delete_title' => 'Delete record?',
     'confirm_delete_text' => 'You are about to delete :name. This action cannot be undone.',
     'confirm_delete_confirm' => 'Yes, delete',
@@ -27,11 +26,7 @@ return [
     'removed' => 'Record removed successfully.',
     'remove_blocked' => 'This record is linked to transactional data. Deletion blocked.',
 
-    'departments' => ['title' => 'Departments'],
-    'cost-centers' => ['title' => 'Cost Centers'],
     'units' => ['title' => 'Units'],
     'categories' => ['title' => 'Categories'],
     'brands' => ['title' => 'Brands'],
-    'cfops' => ['title' => 'CFOP'],
-    'taxes' => ['title' => 'Taxes'],
 ];

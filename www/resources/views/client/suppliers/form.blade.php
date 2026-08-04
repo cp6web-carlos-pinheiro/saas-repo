@@ -31,22 +31,14 @@
                 @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
-            <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('supplier.person_type') }}
-                    <x-ui.select id="supplier-person-type" name="person_type" class="mt-2" required data-search="off">
-                        <option value="PJ" @selected(old('person_type', $supplier?->person_type ?? 'PJ') === 'PJ')>{{ __('supplier.person_type_pj') }}</option>
-                        <option value="PF" @selected(old('person_type', $supplier?->person_type ?? 'PJ') === 'PF')>{{ __('supplier.person_type_pf') }}</option>
-                    </x-ui.select>
-                    @error('person_type')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
-
-                <label class="block text-sm font-medium">
-                    {{ __('supplier.tax_id') }}
-                    <x-ui.input name="tax_id" :value="old('tax_id', $supplier?->tax_id)" inputmode="numeric" data-tax-id-mask="true" data-person-type-source="supplier-person-type" @class(['mt-2', 'border-red-500' => $errors->has('tax_id'), 'border-[#dadce0]' => ! $errors->has('tax_id')]) />
-                    @error('tax_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
-            </div>
+            <label class="block text-sm font-medium">
+                {{ __('supplier.person_type') }}
+                <x-ui.select id="supplier-person-type" name="person_type" class="mt-2" required data-search="off">
+                    <option value="PJ" @selected(old('person_type', $supplier?->person_type ?? 'PJ') === 'PJ')>{{ __('supplier.person_type_pj') }}</option>
+                    <option value="PF" @selected(old('person_type', $supplier?->person_type ?? 'PJ') === 'PF')>{{ __('supplier.person_type_pf') }}</option>
+                </x-ui.select>
+                @error('person_type')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+            </label>
 
             <label class="block text-sm font-medium">
                 {{ __('supplier.email') }}
@@ -82,30 +74,6 @@
                 <x-ui.input name="payment_terms" :value="old('payment_terms', $supplier?->payment_terms)" @class(['mt-2', 'border-red-500' => $errors->has('payment_terms'), 'border-[#dadce0]' => ! $errors->has('payment_terms')]) />
                 @error('payment_terms')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
-
-            <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('supplier.default_cfop_id') }}
-                    <x-ui.select name="default_cfop_id" class="mt-2" data-search="on">
-                        <option value="">{{ __('supplier.select_default_cfop') }}</option>
-                        @foreach ($cfops as $id => $label)
-                            <option value="{{ $id }}" @selected((string) old('default_cfop_id', $supplier?->default_cfop_id) === (string) $id)>{{ $label }}</option>
-                        @endforeach
-                    </x-ui.select>
-                    @error('default_cfop_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
-
-                <label class="block text-sm font-medium">
-                    {{ __('supplier.tax_profile_id') }}
-                    <x-ui.select name="tax_profile_id" class="mt-2" data-search="on">
-                        <option value="">{{ __('supplier.select_tax_profile') }}</option>
-                        @foreach ($taxProfiles as $id => $label)
-                            <option value="{{ $id }}" @selected((string) old('tax_profile_id', $supplier?->tax_profile_id) === (string) $id)>{{ $label }}</option>
-                        @endforeach
-                    </x-ui.select>
-                    @error('tax_profile_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-                </label>
-            </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <x-ui.button :href="$editing ? route('purchasing.suppliers.show', $supplier) : route('purchasing.suppliers.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>

@@ -14,12 +14,17 @@ Abaixo esta a sequencia que eu adotaria.
 ## Status objetivo
 - Fases 1 a 4: Avancado (Fundacao implementada; Multitenancy, Autenticacao e RBAC operacionais no fluxo web tenant).
 - Fases 5 a 7: Avancado (Cadastros gerais ativos; Produto com CRUD, versoes e importacao/exportacao XLSX; Revisoes ativas no tenant com estrutura por produto).
-- Fase 8: Avancado (Compras com CRUDs operacionais de solicitacao, cotacao, pedido, recebimento e entrada fiscal; itens por linha, transicoes operacionais, bloqueio apos POSTED e estorno com categoria+motivo e auditoria).
+- Fase 8: Avancado (Compras com CRUDs operacionais de solicitacao, cotacao, pedido e recebimento; itens por linha, transicoes operacionais, bloqueio apos POSTED e estorno com categoria+motivo e auditoria).
 - Fase 9: Parcial avancado (Vendas com CRUD principal e cliente no tenant; menu de Clientes integrado como subitem em Vendas).
-- Fases 10 em diante: Planejado ou parcial inicial (MRP completo, financeiro, observabilidade e automacoes ainda em evolucao).
+- Fases 10 em diante: Planejado ou parcial inicial (MRP completo, observabilidade e automacoes ainda em evolucao).
+
+## Escopo consolidado
+- Em escopo: Fundacao SaaS, Identidade e Acesso, Gestao de Locatarios, Produto, Estruturas/BOM, Roteiros, Compras (sem fiscal), Vendas (sem fiscal), Estoque, Producao, MRP, Genealogia, Observabilidade.
+- Fora de escopo: CRM, RH, Qualidade, Manutencao, Financeiro.
+- Fora de escopo funcional transversal: tributos, NCM, CFOP, departamentos, centros de custo, filiais e localizacoes de armazem.
 
 ## Destaques da ultima atualizacao
-- Compras: estorno de recebimento e entrada fiscal exige categoria e motivo, com persistencia em metadata e trilha de auditoria.
+- Compras: estorno de recebimento exige categoria e motivo, com persistencia em metadata e trilha de auditoria.
 - Compras: formulários com linhas dinamicas padronizados e integracoes de lookup via AJAX.
 - Estoque: CRUD web de Armazens implementado e publicado no menu de Estoque.
 - Estoque: CRUD web de Plantas implementado e publicado no menu de Estoque.
@@ -79,10 +84,8 @@ Agora o sistema comeca a existir.
 
 Cadastro de:
 
-- Dados fiscais
 - Logo
 - Endereco
-- Moeda
 - Idioma
 - Timezone
 - Configuracoes
@@ -93,29 +96,9 @@ Cadastro de:
 
 Cadastro
 
-Convites
-
-Status
-
-Avatar
-
-Perfis
-
-Ultimo acesso
-
----
-
-## Filiais
-
 Branches
 
 ---
-
-## Departamentos
-
----
-
-## Centros de Custo
 
 ---
 
@@ -150,18 +133,6 @@ etc
 ---
 
 ## Marcas
-
----
-
-## NCM
-
----
-
-## CFOP
-
----
-
-## Tributos
 
 ---
 

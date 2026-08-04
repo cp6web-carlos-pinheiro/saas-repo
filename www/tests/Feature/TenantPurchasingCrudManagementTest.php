@@ -10,8 +10,6 @@ use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\StockLedgerMovement;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
-use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseFiscalEntry;
-use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseFiscalEntryPosting;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrder;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseQuotation;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseReceipt;
@@ -107,22 +105,8 @@ final class TenantPurchasingCrudManagementTest extends TestCase
             ])
             ->assertRedirect(route('purchasing.receipts.index'));
 
-        $this->actingAs($user, 'web')
-            ->post(route('purchasing.fiscal-entries.store'), [
-                'supplier_id' => $supplier->id,
-                'purchase_order_id' => $order->id,
-                'document_number' => 'NF-123',
-                'issue_date' => '2026-08-05',
-                'entry_date' => '2026-08-06',
-                'status' => 'POSTED',
-                'amount' => '200,50',
-                'notes' => 'Entrada fiscal lançada.',
-            ])
-            ->assertRedirect(route('purchasing.fiscal-entries.index'));
-
         $quotation = PurchaseQuotation::query()->firstOrFail();
         $receipt = PurchaseReceipt::query()->firstOrFail();
-        $entry = PurchaseFiscalEntry::query()->firstOrFail();
 
         $this->assertDatabaseHas('purchase_requisitions', [
             'company_id' => $company->id,
@@ -148,13 +132,6 @@ final class TenantPurchasingCrudManagementTest extends TestCase
             'company_id' => $company->id,
             'id' => $receipt->id,
             'status' => 'POSTED',
-        ]);
-
-        $this->assertDatabaseHas('purchase_fiscal_entries', [
-            'company_id' => $company->id,
-            'id' => $entry->id,
-            'status' => 'POSTED',
-            'amount_cents' => 20050,
         ]);
 
         $this->assertDatabaseHas('purchase_requisition_lines', [
@@ -185,10 +162,6 @@ final class TenantPurchasingCrudManagementTest extends TestCase
 
         $movement = StockLedgerMovement::query()->where('reference_type', 'purchase_receipt')->where('reference_id', $receipt->id)->first();
         $this->assertNotNull($movement);
-
-        $posting = PurchaseFiscalEntryPosting::query()->where('purchase_fiscal_entry_id', $entry->id)->first();
-        $this->assertNotNull($posting);
-        $this->assertSame('POSTED', $posting->status);
 
         $this->actingAs($user, 'web')
             ->put(route('purchasing.receipts.update', $receipt), [
@@ -237,60 +210,10 @@ final class TenantPurchasingCrudManagementTest extends TestCase
         $this->assertSame($receiptReverseReason, $receipt->metadata['reversal']['reason'] ?? null);
 
         $this->assertDatabaseHas('stock_ledger_movements', [
-            'reference_type' => 'purchase_receipt_reversal',
+            'reference_type' => 'stock_movement_reversal',
             'reference_id' => $receipt->id,
             'movement_type' => 'ISSUE',
         ]);
-
-        $this->actingAs($user, 'web')
-            ->put(route('purchasing.fiscal-entries.update', $entry), [
-                'supplier_id' => $supplier->id,
-                'purchase_order_id' => $order->id,
-                'document_number' => 'NF-123',
-                'issue_date' => '2026-08-05',
-                'entry_date' => '2026-08-06',
-                'status' => 'CANCELLED',
-                'amount' => '200,50',
-                'notes' => 'Tentativa de alteração após lançamento.',
-            ])
-            ->assertSessionHasErrors('status');
-
-        $this->actingAs($user, 'web')
-            ->delete(route('purchasing.fiscal-entries.destroy', $entry))
-            ->assertSessionHasErrors('status');
-
-        $this->actingAs($user, 'web')
-            ->post(route('purchasing.fiscal-entries.reverse', $entry))
-            ->assertSessionHasErrors('reverse_category')
-            ->assertSessionHasErrors('reverse_reason');
-
-        $entryReverseReason = 'Divergência de impostos validada pelo fiscal.';
-        $entryReverseCategory = 'fiscal';
-
-        $this->actingAs($user, 'web')
-            ->post(route('purchasing.fiscal-entries.reverse', $entry), [
-                'reverse_category' => $entryReverseCategory,
-                'reverse_reason' => $entryReverseReason,
-            ])
-            ->assertRedirect(route('purchasing.fiscal-entries.show', $entry));
-
-        $this->assertDatabaseHas('purchase_fiscal_entries', [
-            'id' => $entry->id,
-            'status' => 'CANCELLED',
-        ]);
-
-        $entry->refresh();
-        $this->assertSame($entryReverseCategory, $entry->metadata['reversal']['category'] ?? null);
-        $this->assertSame($entryReverseReason, $entry->metadata['reversal']['reason'] ?? null);
-
-        $this->assertDatabaseHas('purchase_fiscal_entry_postings', [
-            'purchase_fiscal_entry_id' => $entry->id,
-            'status' => 'REVERSED',
-        ]);
-
-        $posting = PurchaseFiscalEntryPosting::query()->where('purchase_fiscal_entry_id', $entry->id)->firstOrFail();
-        $this->assertSame($entryReverseCategory, $posting->payload['reversal']['category'] ?? null);
-        $this->assertSame($entryReverseReason, $posting->payload['reversal']['reason'] ?? null);
 
         $this->actingAs($user, 'web')
             ->getJson(route('purchasing.lookups.suppliers', ['q' => 'SUP', 'page' => 1]))
@@ -331,11 +254,6 @@ final class TenantPurchasingCrudManagementTest extends TestCase
             ->get(route('purchasing.receipts.index'))
             ->assertOk()
             ->assertSee($receipt->receipt_number);
-
-        $this->actingAs($user, 'web')
-            ->get(route('purchasing.fiscal-entries.index'))
-            ->assertOk()
-            ->assertSee($entry->entry_number);
     }
 
     /**
