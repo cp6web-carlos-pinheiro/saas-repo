@@ -16,7 +16,7 @@ Resumo executivo:
 - Engenharia de Plataforma: baseline obrigatorio implementado (CI com gates de qualidade e testes, padrao inicial de telemetria com request-id e canal dedicado).
 - Seguranca: baseline obrigatorio implementado (MFA por codigo via e-mail no login web, politica de senha centralizada, monitoramento de autenticacao em canal dedicado).
 - Produto/UX: baseline obrigatorio implementado (fortalecimento de acessibilidade em componentes compartilhados e foco visivel em navegacao).
-- MRP, financeiro, observabilidade e automacoes: em evolucao.
+- MRP, financeiro, observabilidade e automacoes: em evolucao, com MRP parcial avancado (motor, sugestoes e alertas de estoque minimo).
 
 Atalhos de status:
 - Visao geral da sequencia: [Dev Sequencia de Desenvolvimento.md](Dev%20Sequencia%20de%20Desenvolvimento.md)
@@ -28,7 +28,7 @@ Atalhos de status:
 Proximos focos recomendados:
 1. Fechar workflow de aprovacao e SLA em Compras.
 2. Concluir inventario/valorizacao e consultas analiticas no Estoque.
-3. Evoluir integracao financeiro-fiscal e relatorios gerenciais.
+3. Evoluir forecast, scheduler e automacoes de planejamento no MRP.
 
 ## Índice
 

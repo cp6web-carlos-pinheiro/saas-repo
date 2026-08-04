@@ -70,6 +70,7 @@ final class MrpPlanningService extends BaseService
         $explodedRequirements = array_merge(...$explodedRequirements);
         $grossRequirements = $this->aggregateRequirements(array_merge($demandAggregation, $explodedRequirements));
         $products = $this->loadProducts($grossRequirements);
+        $minimumStockAlerts = $this->buildMinimumStockAlerts($grossRequirements, $products);
         $stockDeduction = $this->deductStock($grossRequirements, $products, $priorityRule);
         $netRequirements = array_values(array_filter(
             $stockDeduction,
@@ -88,6 +89,7 @@ final class MrpPlanningService extends BaseService
             'bom_explosion' => [
                 'requirements' => $explodedRequirements,
             ],
+            'minimum_stock_alerts' => $minimumStockAlerts,
             'stock_deduction' => $stockDeduction,
             'net_requirements' => $netRequirements,
             'lead_time_offset' => $leadTimeOffsets,
@@ -101,6 +103,7 @@ final class MrpPlanningService extends BaseService
             'demand_lines' => count($demandAggregation),
             'gross_requirements' => count($grossRequirements),
             'net_requirements' => count($netRequirements),
+            'minimum_stock_alerts' => count($minimumStockAlerts),
             'planning_bucket' => $planningBucket,
             'priority_rule' => $priorityRule,
             'purchase_suggestions' => count($purchaseSuggestions),
@@ -315,6 +318,62 @@ final class MrpPlanningService extends BaseService
             ->keyBy('id');
     }
 
+    private function buildMinimumStockAlerts(array $requirements, Collection $products): array
+    {
+        $alerts = [];
+
+        foreach (collect($requirements)->groupBy(function (array $requirement): string {
+            return implode('|', [
+                (int) $requirement['product_id'],
+                isset($requirement['warehouse_id']) ? (string) (int) $requirement['warehouse_id'] : 'null',
+            ]);
+        }) as $group) {
+            $firstRequirement = $group->first();
+            $product = $products->get((int) $firstRequirement['product_id']);
+
+            if (! $product) {
+                continue;
+            }
+
+            $warehouseId = $firstRequirement['warehouse_id'] !== null ? (int) $firstRequirement['warehouse_id'] : null;
+            $freeStock = $this->resolveFreeStock((int) $firstRequirement['product_id'], $warehouseId);
+            $safetyStock = (float) $product->safety_stock;
+
+            if ($safetyStock <= 0 || $freeStock >= $safetyStock) {
+                continue;
+            }
+
+            $alerts[] = [
+                'alert_type' => 'MINIMUM_STOCK',
+                'product_id' => (int) $firstRequirement['product_id'],
+                'product_sku' => $product->sku,
+                'product_description' => $product->description,
+                'warehouse_id' => $warehouseId,
+                'available_stock' => $freeStock,
+                'safety_stock' => $safetyStock,
+                'reorder_quantity' => round($safetyStock - $freeStock, 6),
+                'source_requirement_keys' => $group->pluck('requirement_key')->values()->all(),
+            ];
+        }
+
+        return $alerts;
+    }
+
+    private function resolveFreeStock(int $productId, ?int $warehouseId): float
+    {
+        $query = InventoryBalance::query()->where('product_id', $productId);
+
+        if ($warehouseId !== null) {
+            $query->where('warehouse_id', $warehouseId);
+        }
+
+        $balanceRows = $query->get(['qty_available', 'qty_reserved']);
+
+        return round($balanceRows->sum(static function (InventoryBalance $balance): float {
+            return max(0.0, (float) $balance->qty_available - (float) $balance->qty_reserved);
+        }), 6);
+    }
+
     private function deductStock(array $requirements, Collection $products, string $priorityRule): array
     {
         $deducted = [];
@@ -369,17 +428,7 @@ final class MrpPlanningService extends BaseService
 
     private function resolvePlanningStock(int $productId, ?int $warehouseId, int $safetyStock): float
     {
-        $query = InventoryBalance::query()->where('product_id', $productId);
-
-        if ($warehouseId !== null) {
-            $query->where('warehouse_id', $warehouseId);
-        }
-
-        $balanceRows = $query->get(['qty_available', 'qty_reserved']);
-
-        $freeStock = round($balanceRows->sum(static function (InventoryBalance $balance): float {
-            return max(0.0, (float) $balance->qty_available - (float) $balance->qty_reserved);
-        }), 6);
+        $freeStock = $this->resolveFreeStock($productId, $warehouseId);
 
         return round(max(0.0, $freeStock - $safetyStock), 6);
     }
