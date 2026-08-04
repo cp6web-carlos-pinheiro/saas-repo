@@ -26,4 +26,5 @@ return [
     'created' => 'Armazém criado com sucesso.',
     'updated' => 'Armazém atualizado com sucesso.',
     'removed' => 'Armazém removido com sucesso.',
+    'remove_blocked' => 'O armazém possui localizações vinculadas e não pode ser removido.',
 ];

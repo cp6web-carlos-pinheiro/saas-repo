@@ -20,6 +20,8 @@ final class PurchaseOrder extends TenantModel
         'purchase_order_number',
         'supplier_id',
         'purchase_requisition_id',
+        'department_id',
+        'cost_center_id',
         'status',
         'order_date',
         'expected_delivery_date',

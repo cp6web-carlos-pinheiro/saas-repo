@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Customer\Infrastructure\Persistence\Models\Customer;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\MasterDataRecord;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
 use Illuminate\Database\Eloquent\Builder;
@@ -65,6 +66,8 @@ final class CustomerController extends Controller
         return view('client.customers.form', [
             'customer' => null,
             'company' => $company,
+            'cfops' => $this->masterDataOptions($company, 'cfops'),
+            'taxProfiles' => $this->masterDataOptions($company, 'taxes'),
         ]);
     }
 
@@ -91,6 +94,8 @@ final class CustomerController extends Controller
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
             'status' => $data['status'],
+            'default_cfop_id' => isset($data['default_cfop_id']) ? (int) $data['default_cfop_id'] : null,
+            'tax_profile_id' => isset($data['tax_profile_id']) ? (int) $data['tax_profile_id'] : null,
         ]);
 
         $audit->record(
@@ -113,7 +118,12 @@ final class CustomerController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
-        return view('client.customers.form', compact('customer', 'company'));
+        return view('client.customers.form', [
+            'customer' => $customer,
+            'company' => $company,
+            'cfops' => $this->masterDataOptions($company, 'cfops'),
+            'taxProfiles' => $this->masterDataOptions($company, 'taxes'),
+        ]);
     }
 
     public function update(Request $request, Customer $customer, AuditLogService $audit): RedirectResponse
@@ -130,6 +140,8 @@ final class CustomerController extends Controller
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
             'status' => $data['status'],
+            'default_cfop_id' => isset($data['default_cfop_id']) ? (int) $data['default_cfop_id'] : null,
+            'tax_profile_id' => isset($data['tax_profile_id']) ? (int) $data['tax_profile_id'] : null,
         ]);
         $customer->save();
 
@@ -223,7 +235,32 @@ final class CustomerController extends Controller
             'email' => ['nullable', 'email', 'max:180'],
             'phone' => ['nullable', 'string', 'max:50'],
             'status' => ['required', Rule::in(['ACTIVE', 'INACTIVE'])],
+            'default_cfop_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'cfops')),
+            ],
+            'tax_profile_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'taxes')),
+            ],
         ]);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function masterDataOptions(Company $company, string $domain): array
+    {
+        return MasterDataRecord::query()
+            ->where('company_id', $company->id)
+            ->where('domain', $domain)
+            ->where('is_active', true)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name'])
+            ->mapWithKeys(static fn (MasterDataRecord $record): array => [$record->id => sprintf('%s - %s', $record->code, $record->name)])
+            ->all();
     }
 
     private function generateCode(Company $company): string

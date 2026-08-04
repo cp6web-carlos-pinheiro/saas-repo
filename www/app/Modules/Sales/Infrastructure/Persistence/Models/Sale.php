@@ -20,6 +20,8 @@ final class Sale extends TenantModel
     protected $fillable = [
         'company_id',
         'customer_id',
+        'department_id',
+        'cost_center_id',
         'sale_date',
         'status',
         'confirmed_by',

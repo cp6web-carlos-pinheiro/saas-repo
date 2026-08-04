@@ -11,6 +11,7 @@ use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisitionLine;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\MasterDataRecord;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Services\SaaS\AuditLogService;
 use Illuminate\Database\Eloquent\Collection;
@@ -86,6 +87,8 @@ final class PurchaseRequisitionController extends Controller
         return view('client.purchasing.requisitions.form', [
             'requisition' => null,
             'company' => $company,
+            'departments' => $this->masterDataOptions($company, 'departments'),
+            'costCenters' => $this->masterDataOptions($company, 'cost-centers'),
             'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
             'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
             'suppliers' => $this->supplierOptionsByIds($company, $this->selectedSupplierIdsFromLineRows($lineRows)),
@@ -120,6 +123,8 @@ final class PurchaseRequisitionController extends Controller
                 'company_id' => $company->id,
                 'requisition_number' => $this->generateNumber($company),
                 'required_date' => $data['required_date'] ?? null,
+                'department_id' => isset($data['department_id']) ? (int) $data['department_id'] : null,
+                'cost_center_id' => isset($data['cost_center_id']) ? (int) $data['cost_center_id'] : null,
                 'status' => 'DRAFT',
                 'source_type' => $data['source_type'] ?? 'manual',
                 'requested_by' => $request->user()?->id,
@@ -158,6 +163,8 @@ final class PurchaseRequisitionController extends Controller
         return view('client.purchasing.requisitions.form', [
             'requisition' => $requisition,
             'company' => $company,
+            'departments' => $this->masterDataOptions($company, 'departments'),
+            'costCenters' => $this->masterDataOptions($company, 'cost-centers'),
             'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromLineRows($lineRows)),
             'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
             'suppliers' => $this->supplierOptionsByIds($company, $this->selectedSupplierIdsFromLineRows($lineRows)),
@@ -177,6 +184,8 @@ final class PurchaseRequisitionController extends Controller
 
             $requisition->fill([
                 'required_date' => $data['required_date'] ?? null,
+                'department_id' => isset($data['department_id']) ? (int) $data['department_id'] : null,
+                'cost_center_id' => isset($data['cost_center_id']) ? (int) $data['cost_center_id'] : null,
                 'source_type' => $data['source_type'] ?? 'manual',
                 'notes' => $data['notes'] ?? null,
             ]);
@@ -227,12 +236,24 @@ final class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * @return array{required_date?: string|null, status: string, source_type?: string|null, notes?: string|null, items: array<int, array{product_id: int, warehouse_id: int|null, supplier_id: int|null, quantity: float, need_by_date: string, order_date: string}>}
+     * @return array{required_date?: string|null, department_id?: int|string|null, cost_center_id?: int|string|null, status: string, source_type?: string|null, notes?: string|null, items: array<int, array{product_id: int, warehouse_id: int|null, supplier_id: int|null, quantity: float, need_by_date: string, order_date: string}>}
      */
     private function validateRequisition(Request $request): array
     {
+        $company = $this->activeCompanyFrom($request);
+
         $data = $request->validate([
             'required_date' => ['nullable', 'date'],
+            'department_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'departments')),
+            ],
+            'cost_center_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'cost-centers')),
+            ],
             'status' => ['required', Rule::in(['DRAFT', 'APPROVED', 'CANCELLED'])],
             'source_type' => ['nullable', 'string', 'max:80'],
             'notes' => ['nullable', 'string'],
@@ -459,5 +480,20 @@ final class PurchaseRequisitionController extends Controller
         } while (PurchaseRequisition::query()->where('company_id', $company->id)->where('requisition_number', $number)->exists());
 
         return $number;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function masterDataOptions(Company $company, string $domain): array
+    {
+        return MasterDataRecord::query()
+            ->where('company_id', $company->id)
+            ->where('domain', $domain)
+            ->where('is_active', true)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name'])
+            ->mapWithKeys(static fn (MasterDataRecord $record): array => [$record->id => sprintf('%s - %s', $record->code, $record->name)])
+            ->all();
     }
 }

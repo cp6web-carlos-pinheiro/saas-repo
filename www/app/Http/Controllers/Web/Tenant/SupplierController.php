@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\MasterDataRecord;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
 use Illuminate\Database\Eloquent\Builder;
@@ -65,6 +66,8 @@ final class SupplierController extends Controller
         return view('client.suppliers.form', [
             'supplier' => null,
             'company' => $company,
+            'cfops' => $this->masterDataOptions($company, 'cfops'),
+            'taxProfiles' => $this->masterDataOptions($company, 'taxes'),
         ]);
     }
 
@@ -93,6 +96,8 @@ final class SupplierController extends Controller
             'status' => $data['status'],
             'default_lead_time_days' => (int) ($data['default_lead_time_days'] ?? 0),
             'payment_terms' => $data['payment_terms'] ?? null,
+            'default_cfop_id' => isset($data['default_cfop_id']) ? (int) $data['default_cfop_id'] : null,
+            'tax_profile_id' => isset($data['tax_profile_id']) ? (int) $data['tax_profile_id'] : null,
         ]);
 
         $audit->record(
@@ -115,7 +120,12 @@ final class SupplierController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
-        return view('client.suppliers.form', compact('supplier', 'company'));
+        return view('client.suppliers.form', [
+            'supplier' => $supplier,
+            'company' => $company,
+            'cfops' => $this->masterDataOptions($company, 'cfops'),
+            'taxProfiles' => $this->masterDataOptions($company, 'taxes'),
+        ]);
     }
 
     public function update(Request $request, Supplier $supplier, AuditLogService $audit): RedirectResponse
@@ -134,6 +144,8 @@ final class SupplierController extends Controller
             'status' => $data['status'],
             'default_lead_time_days' => (int) ($data['default_lead_time_days'] ?? 0),
             'payment_terms' => $data['payment_terms'] ?? null,
+            'default_cfop_id' => isset($data['default_cfop_id']) ? (int) $data['default_cfop_id'] : null,
+            'tax_profile_id' => isset($data['tax_profile_id']) ? (int) $data['tax_profile_id'] : null,
         ]);
         $supplier->save();
 
@@ -229,7 +241,32 @@ final class SupplierController extends Controller
             'status' => ['required', Rule::in(['ACTIVE', 'INACTIVE'])],
             'default_lead_time_days' => ['nullable', 'integer', 'min:0'],
             'payment_terms' => ['nullable', 'string', 'max:80'],
+            'default_cfop_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'cfops')),
+            ],
+            'tax_profile_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'taxes')),
+            ],
         ]);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function masterDataOptions(Company $company, string $domain): array
+    {
+        return MasterDataRecord::query()
+            ->where('company_id', $company->id)
+            ->where('domain', $domain)
+            ->where('is_active', true)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name'])
+            ->mapWithKeys(static fn (MasterDataRecord $record): array => [$record->id => sprintf('%s - %s', $record->code, $record->name)])
+            ->all();
     }
 
     private function generateCode(Company $company): string

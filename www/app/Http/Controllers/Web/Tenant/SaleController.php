@@ -11,6 +11,7 @@ use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
 use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\MasterDataRecord;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
 use Illuminate\Database\Eloquent\Builder;
@@ -81,6 +82,8 @@ final class SaleController extends Controller
         return view('client.sales.form', [
             'sale' => null,
             'company' => $company,
+            'departments' => $this->masterDataOptions($company, 'departments'),
+            'costCenters' => $this->masterDataOptions($company, 'cost-centers'),
             'customers' => $this->customerOptions($company),
             'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromItemRows($itemRows)),
             'itemRows' => $itemRows,
@@ -156,6 +159,8 @@ final class SaleController extends Controller
             $sale = Sale::query()->create([
                 'company_id' => $company->id,
                 'customer_id' => $data['customer_id'],
+                'department_id' => isset($data['department_id']) ? (int) $data['department_id'] : null,
+                'cost_center_id' => isset($data['cost_center_id']) ? (int) $data['cost_center_id'] : null,
                 'sale_date' => $data['sale_date'],
                 'status' => $data['status'],
                 'operational_status' => 'PENDING',
@@ -205,6 +210,8 @@ final class SaleController extends Controller
         return view('client.sales.form', [
             'sale' => $sale,
             'company' => $company,
+            'departments' => $this->masterDataOptions($company, 'departments'),
+            'costCenters' => $this->masterDataOptions($company, 'cost-centers'),
             'customers' => $this->customerOptions($company),
             'products' => $this->productOptionsByIds($company, $this->selectedProductIdsFromItemRows($itemRows)),
             'itemRows' => $itemRows,
@@ -233,6 +240,8 @@ final class SaleController extends Controller
         DB::transaction(function () use ($sale, $data, $request): void {
             $sale->fill([
                 'customer_id' => $data['customer_id'],
+                'department_id' => isset($data['department_id']) ? (int) $data['department_id'] : null,
+                'cost_center_id' => isset($data['cost_center_id']) ? (int) $data['cost_center_id'] : null,
                 'sale_date' => $data['sale_date'],
                 'status' => $data['status'],
                 'subtotal_cents' => $data['subtotal_cents'],
@@ -405,6 +414,16 @@ final class SaleController extends Controller
                 'integer',
                 Rule::exists('customers', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)),
             ],
+            'department_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'departments')),
+            ],
+            'cost_center_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'cost-centers')),
+            ],
             'sale_date' => ['required', 'date'],
             'status' => ['required', Rule::in(['DRAFT', 'CONFIRMED', 'CANCELLED'])],
             'discount_amount' => ['nullable', 'string', 'max:30'],
@@ -495,6 +514,21 @@ final class SaleController extends Controller
             ->where('company_id', $company->id)
             ->orderBy('name')
             ->get(['id', 'name', 'status']);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function masterDataOptions(Company $company, string $domain): array
+    {
+        return MasterDataRecord::query()
+            ->where('company_id', $company->id)
+            ->where('domain', $domain)
+            ->where('is_active', true)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name'])
+            ->mapWithKeys(static fn (MasterDataRecord $record): array => [$record->id => sprintf('%s - %s', $record->code, $record->name)])
+            ->all();
     }
 
     private function productOptionsByIds(Company $company, array $ids): Collection

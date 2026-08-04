@@ -42,9 +42,53 @@
             </div>
 
             <div>
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="unit_id">{{ __('product.unit_id') }}</label>
+                <x-ui.select id="unit_id" name="unit_id" data-search="on">
+                    <option value="">{{ __('product.select_unit') }}</option>
+                    @foreach ($units as $id => $label)
+                        <option value="{{ $id }}" @selected((string) old('unit_id', $product->unit_id ?? '') === (string) $id)>{{ $label }}</option>
+                    @endforeach
+                </x-ui.select>
+                @error('unit_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div>
                 <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="uom">{{ __('product.uom') }}</label>
-                <x-ui.input id="uom" name="uom" :value="old('uom', $product->uom ?? '')" required maxlength="20" />
+                <x-ui.input id="uom" name="uom" :value="old('uom', $product->uom ?? '')" maxlength="20" />
                 @error('uom')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="category_id">{{ __('product.category_id') }}</label>
+                <x-ui.select id="category_id" name="category_id" data-search="on">
+                    <option value="">{{ __('product.select_category') }}</option>
+                    @foreach ($categories as $id => $label)
+                        <option value="{{ $id }}" @selected((string) old('category_id', $product->category_id ?? '') === (string) $id)>{{ $label }}</option>
+                    @endforeach
+                </x-ui.select>
+                @error('category_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="brand_id">{{ __('product.brand_id') }}</label>
+                <x-ui.select id="brand_id" name="brand_id" data-search="on">
+                    <option value="">{{ __('product.select_brand') }}</option>
+                    @foreach ($brands as $id => $label)
+                        <option value="{{ $id }}" @selected((string) old('brand_id', $product->brand_id ?? '') === (string) $id)>{{ $label }}</option>
+                    @endforeach
+                </x-ui.select>
+                @error('brand_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="ncm_id">{{ __('product.ncm_id') }}</label>
+                <x-ui.select id="ncm_id" name="ncm_id" data-search="on">
+                    <option value="">{{ __('product.select_ncm') }}</option>
+                    @foreach ($ncms as $id => $label)
+                        <option value="{{ $id }}" @selected((string) old('ncm_id', $product->ncm_id ?? '') === (string) $id)>{{ $label }}</option>
+                    @endforeach
+                </x-ui.select>
+                @error('ncm_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div>

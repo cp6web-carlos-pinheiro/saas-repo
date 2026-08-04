@@ -39,6 +39,17 @@
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <label class="block text-sm font-medium">
+                    {{ __('plant.branch') }}
+                    <x-ui.select name="branch_id" class="mt-2" data-search="on">
+                        <option value="">{{ __('plant.select_branch') }}</option>
+                        @foreach ($branches as $id => $label)
+                            <option value="{{ $id }}" @selected((string) old('branch_id', $plant?->branch_id) === (string) $id)>{{ $label }}</option>
+                        @endforeach
+                    </x-ui.select>
+                    @error('branch_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
+
+                <label class="block text-sm font-medium">
                     {{ __('plant.timezone') }}
                     <x-ui.input name="timezone" :value="old('timezone', $plant?->timezone ?? 'UTC')" class="mt-2" required maxlength="50" />
                     @error('timezone')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror

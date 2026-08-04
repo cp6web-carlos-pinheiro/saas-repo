@@ -10,6 +10,7 @@ use App\Modules\Product\Application\Services\ProductSpreadsheetService;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Product\Presentation\Http\Requests\ImportProductsRequest;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\MasterDataRecord;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
@@ -58,6 +59,10 @@ final class ProductController extends Controller
         return view('client.products.form', [
             'product' => null,
             'company' => $company,
+            'units' => $this->masterDataOptions($company, 'units'),
+            'categories' => $this->masterDataOptions($company, 'categories'),
+            'brands' => $this->masterDataOptions($company, 'brands'),
+            'ncms' => $this->masterDataOptions($company, 'ncms'),
         ]);
     }
 
@@ -75,12 +80,18 @@ final class ProductController extends Controller
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
         $data = $this->validateProduct($request, $company);
+        $resolvedUom = $this->resolveUom($company, $data);
+
         $product = Product::query()->create([
             'company_id' => $company->id,
             'sku' => $data['sku'],
             'description' => $data['description'],
             'product_type' => $data['product_type'],
-            'uom' => $data['uom'],
+            'uom' => $resolvedUom,
+            'unit_id' => isset($data['unit_id']) ? (int) $data['unit_id'] : null,
+            'category_id' => isset($data['category_id']) ? (int) $data['category_id'] : null,
+            'brand_id' => isset($data['brand_id']) ? (int) $data['brand_id'] : null,
+            'ncm_id' => isset($data['ncm_id']) ? (int) $data['ncm_id'] : null,
             'safety_stock' => (int) $data['safety_stock'],
             'lead_time_days' => (int) $data['lead_time_days'],
             'lot_control' => (bool) ($data['lot_control'] ?? false),
@@ -108,7 +119,14 @@ final class ProductController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
-        return view('client.products.form', compact('product', 'company'));
+        return view('client.products.form', [
+            'product' => $product,
+            'company' => $company,
+            'units' => $this->masterDataOptions($company, 'units'),
+            'categories' => $this->masterDataOptions($company, 'categories'),
+            'brands' => $this->masterDataOptions($company, 'brands'),
+            'ncms' => $this->masterDataOptions($company, 'ncms'),
+        ]);
     }
 
     public function update(Request $request, Product $product, AuditLogService $audit): RedirectResponse
@@ -117,12 +135,17 @@ final class ProductController extends Controller
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
 
         $data = $this->validateProduct($request, $company, $product);
+        $resolvedUom = $this->resolveUom($company, $data);
 
         $product->fill([
             'sku' => $data['sku'],
             'description' => $data['description'],
             'product_type' => $data['product_type'],
-            'uom' => $data['uom'],
+            'uom' => $resolvedUom,
+            'unit_id' => isset($data['unit_id']) ? (int) $data['unit_id'] : null,
+            'category_id' => isset($data['category_id']) ? (int) $data['category_id'] : null,
+            'brand_id' => isset($data['brand_id']) ? (int) $data['brand_id'] : null,
+            'ncm_id' => isset($data['ncm_id']) ? (int) $data['ncm_id'] : null,
             'safety_stock' => (int) $data['safety_stock'],
             'lead_time_days' => (int) $data['lead_time_days'],
             'lot_control' => (bool) ($data['lot_control'] ?? false),
@@ -286,12 +309,71 @@ final class ProductController extends Controller
             ],
             'description' => ['required', 'string', 'max:255'],
             'product_type' => ['required', 'string', 'in:FG,WIP,RAW,CONSUMABLE'],
-            'uom' => ['required', 'string', 'max:20'],
+            'uom' => ['nullable', 'string', 'max:20', 'required_without:unit_id'],
+            'unit_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')
+                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'units')->where('is_active', true)),
+            ],
+            'category_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')
+                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'categories')),
+            ],
+            'brand_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')
+                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'brands')),
+            ],
+            'ncm_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_data_records', 'id')
+                    ->where(static fn ($query) => $query->where('company_id', $company->id)->where('domain', 'ncms')),
+            ],
             'safety_stock' => ['required', 'integer', 'min:0'],
             'lead_time_days' => ['required', 'integer', 'min:0'],
             'lot_control' => ['required', 'boolean'],
             'serial_control' => ['required', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function masterDataOptions(Company $company, string $domain): array
+    {
+        return MasterDataRecord::query()
+            ->where('company_id', $company->id)
+            ->where('domain', $domain)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'code', 'name'])
+            ->mapWithKeys(static fn (MasterDataRecord $record): array => [$record->id => sprintf('%s - %s', $record->code, $record->name)])
+            ->all();
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function resolveUom(Company $company, array $data): string
+    {
+        if (isset($data['unit_id']) && (int) $data['unit_id'] > 0) {
+            $unitCode = MasterDataRecord::query()
+                ->where('company_id', $company->id)
+                ->where('domain', 'units')
+                ->whereKey((int) $data['unit_id'])
+                ->value('code');
+
+            if (is_string($unitCode) && $unitCode !== '') {
+                return mb_strtoupper($unitCode);
+            }
+        }
+
+        return mb_strtoupper((string) ($data['uom'] ?? 'UN'));
     }
 }

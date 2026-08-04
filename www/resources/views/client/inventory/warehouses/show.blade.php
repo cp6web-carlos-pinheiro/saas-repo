@@ -18,6 +18,10 @@
         </div>
     </div>
 
+    @if ($errors->any())
+        <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
+    @endif
+
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('warehouse.reference')">#{{ $warehouse->id }}</x-ui.definition-item>

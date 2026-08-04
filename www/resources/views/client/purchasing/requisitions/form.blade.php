@@ -46,6 +46,30 @@
                 </label>
             </div>
 
+            <div class="grid gap-5 sm:grid-cols-2">
+                <label class="block text-sm font-medium">
+                    {{ __('purchase_requisition.department_id') }}
+                    <x-ui.select name="department_id" class="mt-2" data-search="on">
+                        <option value="">{{ __('purchase_requisition.select_department') }}</option>
+                        @foreach ($departments as $id => $label)
+                            <option value="{{ $id }}" @selected((string) old('department_id', $requisition?->department_id) === (string) $id)>{{ $label }}</option>
+                        @endforeach
+                    </x-ui.select>
+                    @error('department_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
+
+                <label class="block text-sm font-medium">
+                    {{ __('purchase_requisition.cost_center_id') }}
+                    <x-ui.select name="cost_center_id" class="mt-2" data-search="on">
+                        <option value="">{{ __('purchase_requisition.select_cost_center') }}</option>
+                        @foreach ($costCenters as $id => $label)
+                            <option value="{{ $id }}" @selected((string) old('cost_center_id', $requisition?->cost_center_id) === (string) $id)>{{ $label }}</option>
+                        @endforeach
+                    </x-ui.select>
+                    @error('cost_center_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
+            </div>
+
             <label class="block text-sm font-medium">
                 {{ __('purchase_requisition.source_type') }}
                 <x-ui.input name="source_type" :value="old('source_type', $requisition?->source_type ?? 'manual')" class="mt-2" />

@@ -25,6 +25,8 @@ final class Supplier extends TenantModel
         'status',
         'default_lead_time_days',
         'payment_terms',
+        'default_cfop_id',
+        'tax_profile_id',
         'metadata',
     ];
 

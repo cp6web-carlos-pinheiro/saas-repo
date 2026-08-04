@@ -19,6 +19,8 @@ final class PurchaseRequisition extends TenantModel
         'requisition_number',
         'status',
         'required_date',
+        'department_id',
+        'cost_center_id',
         'source_type',
         'source_reference_id',
         'source_reference_type',

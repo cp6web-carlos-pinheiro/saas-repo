@@ -69,6 +69,30 @@
                 @error('status')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
+            <div class="grid gap-5 sm:grid-cols-2">
+                <label class="block text-sm font-medium">
+                    {{ __('customer.default_cfop_id') }}
+                    <x-ui.select name="default_cfop_id" class="mt-2" data-search="on">
+                        <option value="">{{ __('customer.select_default_cfop') }}</option>
+                        @foreach ($cfops as $id => $label)
+                            <option value="{{ $id }}" @selected((string) old('default_cfop_id', $customer?->default_cfop_id) === (string) $id)>{{ $label }}</option>
+                        @endforeach
+                    </x-ui.select>
+                    @error('default_cfop_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
+
+                <label class="block text-sm font-medium">
+                    {{ __('customer.tax_profile_id') }}
+                    <x-ui.select name="tax_profile_id" class="mt-2" data-search="on">
+                        <option value="">{{ __('customer.select_tax_profile') }}</option>
+                        @foreach ($taxProfiles as $id => $label)
+                            <option value="{{ $id }}" @selected((string) old('tax_profile_id', $customer?->tax_profile_id) === (string) $id)>{{ $label }}</option>
+                        @endforeach
+                    </x-ui.select>
+                    @error('tax_profile_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                </label>
+            </div>
+
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <x-ui.button :href="$editing ? route('customers.show', $customer) : route('customers.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
                 <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('customer.save') : __('customer.create') }}</x-ui.button>

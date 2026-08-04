@@ -23,6 +23,8 @@ final class ProductionOrder extends TenantModel
         'company_id',
         'product_id',
         'warehouse_id',
+        'department_id',
+        'cost_center_id',
         'bom_header_id',
         'bom_version_number',
         'routing_version_id',

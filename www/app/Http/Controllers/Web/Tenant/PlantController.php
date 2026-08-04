@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Web\Tenant\Concerns\HandlesTenantAuthorization;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Branch;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
 use App\Services\SaaS\AuditLogService;
@@ -43,6 +44,7 @@ final class PlantController extends Controller
         abort_unless(in_array($sort, ['name', 'code', 'timezone', 'is_active', 'created_at'], true), 404);
 
         $plants = Plant::query()
+            ->with('branch:id,name,code')
             ->where('company_id', $company->id)
             ->when($status !== '', static fn (Builder $query) => $query->where('is_active', $status === 'ACTIVE'))
             ->when($search !== '', static function (Builder $query) use ($search, $searchId): void {
@@ -71,6 +73,7 @@ final class PlantController extends Controller
         return view('client.inventory.plants.form', [
             'plant' => null,
             'company' => $company,
+            'branches' => $this->branchOptions($company),
         ]);
     }
 
@@ -80,6 +83,8 @@ final class PlantController extends Controller
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
         abort_unless((int) $plant->company_id === (int) $company->id, 404);
+
+        $plant->load('branch:id,name,code');
 
         return view('client.inventory.plants.show', compact('plant', 'company'));
     }
@@ -93,6 +98,7 @@ final class PlantController extends Controller
 
         $plant = Plant::query()->create([
             'company_id' => $company->id,
+            'branch_id' => isset($data['branch_id']) ? (int) $data['branch_id'] : null,
             'name' => (string) $data['name'],
             'code' => mb_strtoupper((string) $data['code']),
             'timezone' => (string) $data['timezone'],
@@ -121,7 +127,11 @@ final class PlantController extends Controller
 
         abort_unless((int) $plant->company_id === (int) $company->id, 404);
 
-        return view('client.inventory.plants.form', compact('plant', 'company'));
+        return view('client.inventory.plants.form', [
+            'plant' => $plant,
+            'company' => $company,
+            'branches' => $this->branchOptions($company),
+        ]);
     }
 
     public function update(Request $request, Plant $plant, AuditLogService $audit): RedirectResponse
@@ -134,6 +144,7 @@ final class PlantController extends Controller
         $data = $this->validatePlant($request, $company, $plant);
 
         $plant->fill([
+            'branch_id' => isset($data['branch_id']) ? (int) $data['branch_id'] : null,
             'name' => (string) $data['name'],
             'code' => mb_strtoupper((string) $data['code']),
             'timezone' => (string) $data['timezone'],
@@ -163,6 +174,10 @@ final class PlantController extends Controller
 
         abort_unless((int) $plant->company_id === (int) $company->id, 404);
 
+        if ($plant->warehouses()->exists()) {
+            return redirect()->route('inventory.plants.show', $plant)->withErrors(['plant' => __('plant.remove_blocked')]);
+        }
+
         $plantId = $plant->id;
         $plantName = $plant->name;
         $plant->delete();
@@ -184,7 +199,7 @@ final class PlantController extends Controller
     }
 
     /**
-     * @return array{name: string, code: string, timezone: string, is_active?: bool}
+     * @return array{name: string, code: string, timezone: string, branch_id?: int|string|null, is_active?: bool}
      */
     private function validatePlant(Request $request, Company $company, ?Plant $plant = null): array
     {
@@ -199,7 +214,25 @@ final class PlantController extends Controller
                     ->ignore($plant?->id),
             ],
             'timezone' => ['required', 'string', 'max:50'],
+            'branch_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('branches', 'id')->where(static fn ($query) => $query->where('company_id', $company->id)),
+            ],
             'is_active' => ['nullable', 'boolean'],
         ]);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function branchOptions(Company $company): array
+    {
+        return Branch::query()
+            ->where('company_id', $company->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'code'])
+            ->mapWithKeys(static fn (Branch $branch): array => [$branch->id => sprintf('%s - %s', $branch->code, $branch->name)])
+            ->all();
     }
 }

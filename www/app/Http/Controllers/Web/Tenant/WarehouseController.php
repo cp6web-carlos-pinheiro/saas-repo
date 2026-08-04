@@ -171,6 +171,10 @@ final class WarehouseController extends Controller
 
         abort_unless((int) $warehouse->company_id === (int) $company->id, 404);
 
+        if ($warehouse->locations()->exists()) {
+            return redirect()->route('inventory.warehouses.show', $warehouse)->withErrors(['warehouse' => __('warehouse.remove_blocked')]);
+        }
+
         $warehouseId = $warehouse->id;
         $warehouseName = $warehouse->name;
         $warehouse->delete();
