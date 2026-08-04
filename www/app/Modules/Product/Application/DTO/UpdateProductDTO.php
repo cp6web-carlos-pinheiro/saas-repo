@@ -11,7 +11,8 @@ final class UpdateProductDTO extends BaseDTO
     public function __construct(
         public readonly string $description,
         public readonly string $product_type,
-        public readonly string $uom,
+        public readonly ?string $uom,
+        public readonly ?int $unit_id,
         public readonly int $safety_stock,
         public readonly int $lead_time_days,
         public readonly bool $lot_control,

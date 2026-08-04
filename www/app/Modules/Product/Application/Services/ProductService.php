@@ -7,6 +7,7 @@ namespace App\Modules\Product\Application\Services;
 use App\Modules\Product\Application\DTO\CreateProductDTO;
 use App\Modules\Product\Application\DTO\UpdateProductDTO;
 use App\Modules\Product\Domain\Repositories\ProductRepository;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
 use App\Shared\Application\Transactions\TransactionManager;
@@ -39,7 +40,7 @@ final class ProductService extends BaseService
         $this->assertSkuAvailable($dto->sku);
 
         $product = $this->inTransaction(function () use ($dto) {
-            return $this->repository->create($dto->toArray());
+            return $this->repository->create($this->resolveUnitPayload($dto->toArray()));
         });
 
         $this->logger->info('product.created', [
@@ -55,7 +56,7 @@ final class ProductService extends BaseService
         $this->assertType($dto->product_type);
 
         $product = $this->inTransaction(function () use ($id, $dto) {
-            return $this->repository->update($id, $dto->toArray());
+            return $this->repository->update($id, $this->resolveUnitPayload($dto->toArray()));
         });
 
         $this->logger->info('product.updated', [
@@ -98,7 +99,7 @@ final class ProductService extends BaseService
                 $dto = CreateProductDTO::fromArray($item);
                 $this->assertType($dto->product_type);
                 $this->assertSkuAvailable($dto->sku);
-                $rows[] = $this->repository->create($dto->toArray())->toArray();
+                $rows[] = $this->repository->create($this->resolveUnitPayload($dto->toArray()))->toArray();
             }
 
             return $rows;
@@ -124,7 +125,7 @@ final class ProductService extends BaseService
                 $dto = UpdateProductDTO::fromArray($item);
                 $this->assertType($dto->product_type);
 
-                $rows[] = $this->repository->update($id, $dto->toArray())->toArray();
+                $rows[] = $this->repository->update($id, $this->resolveUnitPayload($dto->toArray()))->toArray();
             }
 
             return $rows;
@@ -152,5 +153,44 @@ final class ProductService extends BaseService
                 'sku' => [$sku],
             ]);
         }
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    private function resolveUnitPayload(array $payload): array
+    {
+        $unitId = isset($payload['unit_id']) ? (int) $payload['unit_id'] : 0;
+
+        if ($unitId > 0) {
+            $unit = Unit::query()
+                ->where('is_active', true)
+                ->find($unitId);
+
+            if ($unit === null) {
+                throw new DomainException('Unit is invalid or inactive', 422, [
+                    'unit_id' => [$unitId],
+                ]);
+            }
+
+            $payload['unit_id'] = $unit->id;
+            $payload['uom'] = mb_strtoupper((string) $unit->code);
+
+            return $payload;
+        }
+
+        $uom = mb_strtoupper(trim((string) ($payload['uom'] ?? '')));
+
+        if ($uom === '') {
+            throw new DomainException('unit_id is required', 422, [
+                'unit_id' => ['required'],
+            ]);
+        }
+
+        $payload['unit_id'] = null;
+        $payload['uom'] = $uom;
+
+        return $payload;
     }
 }

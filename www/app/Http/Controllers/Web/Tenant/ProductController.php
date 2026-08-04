@@ -319,9 +319,9 @@ final class ProductController extends Controller
             ],
             'description' => ['required', 'string', 'max:255'],
             'product_type' => ['required', 'string', 'in:FG,WIP,RAW,CONSUMABLE'],
-            'uom' => ['nullable', 'string', 'max:20', 'required_without:unit_id'],
+            'uom' => ['nullable', 'string', 'max:20'],
             'unit_id' => [
-                'nullable',
+                'required',
                 'integer',
                 Rule::exists('units', 'id')
                     ->where(static fn ($query) => $query->where('company_id', $company->id)->where('is_active', true)),

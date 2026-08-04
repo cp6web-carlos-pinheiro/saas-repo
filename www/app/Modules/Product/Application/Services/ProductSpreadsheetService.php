@@ -6,6 +6,7 @@ namespace App\Modules\Product\Application\Services;
 
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Shared\Presentation\Exceptions\DomainException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
@@ -123,6 +124,7 @@ final class ProductSpreadsheetService
                 'description' => $normalizedRow['description'],
                 'product_type' => $normalizedRow['product_type'],
                 'uom' => $normalizedRow['uom'],
+                'unit_id' => $this->resolveUnitId($company->id, $normalizedRow['uom']),
                 'safety_stock' => $normalizedRow['safety_stock'],
                 'lead_time_days' => $normalizedRow['lead_time_days'],
                 'lot_control' => $normalizedRow['lot_control'],
@@ -238,6 +240,23 @@ final class ProductSpreadsheetService
         }
 
         return (int) $value;
+    }
+
+    private function resolveUnitId(int $companyId, string $uom): ?int
+    {
+        $code = mb_strtoupper(trim($uom));
+
+        if ($code === '') {
+            return null;
+        }
+
+        $unitId = Unit::query()
+            ->where('company_id', $companyId)
+            ->where('is_active', true)
+            ->whereRaw('UPPER(code) = ?', [$code])
+            ->value('id');
+
+        return $unitId !== null ? (int) $unitId : null;
     }
 
     private function normalizeBoolean(string $value, int $rowNumber, string $field): bool

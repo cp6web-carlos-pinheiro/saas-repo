@@ -12,6 +12,7 @@ use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Product\Infrastructure\Persistence\Models\ProductVersion;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -24,12 +25,23 @@ final class TenantProductPhase03ManagementTest extends TestCase
     {
         ['company' => $company, 'user' => $user] = $this->contextWithRole('master');
 
+        $unit = Unit::query()->create([
+            'company_id' => $company->id,
+            'code' => 'UN',
+            'name' => 'Unidade',
+            'description' => null,
+            'is_active' => true,
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+            'metadata' => null,
+        ]);
+
         $this->actingAs($user, 'web')
             ->post(route('products.store'), [
                 'sku' => 'P-F03-001',
                 'description' => 'Produto Fase 03',
                 'product_type' => 'FG',
-                'uom' => 'UN',
+                'unit_id' => $unit->id,
                 'safety_stock' => 5,
                 'lead_time_days' => 3,
                 'lot_control' => '1',

@@ -54,9 +54,9 @@ final class GenealogyService extends BaseService
             'metadata' => $payload['lot_metadata'] ?? null,
         ]);
 
-        $producesRelation = $this->upsertRelation($productNode, $parentNode, 'PRODUCES_ORDER', (float) $output->quantity_completed, $order->product?->uom, $order->id, null, $payload['metadata'] ?? null);
-        $lotRelation = $this->upsertRelation($parentNode, $childNode, 'PRODUCES_LOT', (float) $output->quantity_completed, $order->product?->uom, $order->id, null, $payload['metadata'] ?? null);
-        $lotProductRelation = $this->upsertRelation($childNode, $productNode, 'IDENTIFIES_PRODUCT', (float) $output->quantity_completed, $order->product?->uom, $order->id, null, $payload['metadata'] ?? null);
+        $producesRelation = $this->upsertRelation($productNode, $parentNode, 'PRODUCES_ORDER', (float) $output->quantity_completed, $order->product?->uom, $order->product?->unit_id, $order->id, null, $payload['metadata'] ?? null);
+        $lotRelation = $this->upsertRelation($parentNode, $childNode, 'PRODUCES_LOT', (float) $output->quantity_completed, $order->product?->uom, $order->product?->unit_id, $order->id, null, $payload['metadata'] ?? null);
+        $lotProductRelation = $this->upsertRelation($childNode, $productNode, 'IDENTIFIES_PRODUCT', (float) $output->quantity_completed, $order->product?->uom, $order->product?->unit_id, $order->id, null, $payload['metadata'] ?? null);
 
         return [
             'product_node' => $productNode->toArray(),
@@ -95,8 +95,8 @@ final class GenealogyService extends BaseService
             'metadata' => $consumption->metadata,
         ]);
 
-        $consumesRelation = $this->upsertRelation($parentNode, $materialProductNode, 'CONSUMES', (float) $consumption->quantity_consumed, $consumption->product?->uom, $order->id, null, $consumption->metadata ?? null);
-        $materialNodeRelation = $this->upsertRelation($materialProductNode, $childNode, 'HAS_CONSUMPTION_RECORD', (float) $consumption->quantity_consumed, $consumption->product?->uom, $order->id, null, $consumption->metadata ?? null);
+        $consumesRelation = $this->upsertRelation($parentNode, $materialProductNode, 'CONSUMES', (float) $consumption->quantity_consumed, $consumption->product?->uom, $consumption->product?->unit_id, $order->id, null, $consumption->metadata ?? null);
+        $materialNodeRelation = $this->upsertRelation($materialProductNode, $childNode, 'HAS_CONSUMPTION_RECORD', (float) $consumption->quantity_consumed, $consumption->product?->uom, $consumption->product?->unit_id, $order->id, null, $consumption->metadata ?? null);
 
         return [
             'product_node' => $materialProductNode->toArray(),
@@ -139,8 +139,8 @@ final class GenealogyService extends BaseService
             'warehouse_id' => $warehouseId,
         ]);
 
-        $relation = $this->upsertRelation($lotNode, $serialNode, 'DERIVES', 1, null, null, null, null);
-        $productRelation = $this->upsertRelation($lotNode, $productNode, 'IDENTIFIES_PRODUCT', 1, null, null, null, null);
+        $relation = $this->upsertRelation($lotNode, $serialNode, 'DERIVES', 1, null, null, null, null, null);
+        $productRelation = $this->upsertRelation($lotNode, $productNode, 'IDENTIFIES_PRODUCT', 1, null, $serial->product?->unit_id, null, null, null);
 
         return [
             'product_node' => $productNode->toArray(),
@@ -221,6 +221,7 @@ final class GenealogyService extends BaseService
         string $relationType,
         ?float $quantity,
         ?string $uom,
+        ?int $unitId,
         ?int $productionOrderId,
         ?int $stockMovementId,
         mixed $metadata
@@ -234,6 +235,7 @@ final class GenealogyService extends BaseService
             [
                 'quantity' => $quantity,
                 'uom' => $uom,
+                'unit_id' => $unitId,
                 'production_order_id' => $productionOrderId,
                 'stock_movement_id' => $stockMovementId,
                 'metadata' => $metadata,
@@ -260,6 +262,7 @@ final class GenealogyService extends BaseService
                     r.relation_type,
                     r.quantity,
                     r.uom,
+                    r.unit_id,
                     r.production_order_id,
                     r.stock_movement_id,
                     0 AS depth,
@@ -281,6 +284,7 @@ final class GenealogyService extends BaseService
                     r.relation_type,
                     r.quantity,
                     r.uom,
+                    r.unit_id,
                     r.production_order_id,
                     r.stock_movement_id,
                     genealogy_walk.depth + 1 AS depth,
@@ -344,6 +348,7 @@ final class GenealogyService extends BaseService
                 'relation_type' => (string) $row->relation_type,
                 'quantity' => $row->quantity !== null ? (float) $row->quantity : null,
                 'uom' => $row->uom,
+                'unit_id' => $row->unit_id !== null ? (int) $row->unit_id : null,
                 'production_order_id' => $row->production_order_id !== null ? (int) $row->production_order_id : null,
                 'stock_movement_id' => $row->stock_movement_id !== null ? (int) $row->stock_movement_id : null,
                 'depth' => (int) $row->depth,
@@ -370,6 +375,7 @@ final class GenealogyService extends BaseService
             'relation_type' => $relation->relation_type,
             'quantity' => $relation->quantity,
             'uom' => $relation->uom,
+            'unit_id' => $relation->unit_id,
             'production_order_id' => $relation->production_order_id,
             'stock_movement_id' => $relation->stock_movement_id,
             'metadata' => $relation->metadata,

@@ -23,6 +23,7 @@ final class GenealogyRelation extends TenantModel
         'relation_type',
         'quantity',
         'uom',
+        'unit_id',
         'production_order_id',
         'stock_movement_id',
         'metadata',
@@ -30,6 +31,7 @@ final class GenealogyRelation extends TenantModel
 
     protected $casts = [
         'quantity' => 'float',
+        'unit_id' => 'integer',
         'metadata' => 'array',
     ];
 

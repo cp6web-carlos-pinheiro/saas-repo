@@ -18,7 +18,8 @@ final class UpdateProductRequest extends FormRequest
         return [
             'description' => ['required', 'string', 'max:255'],
             'product_type' => ['required', 'string', 'in:FG,WIP,RAW,CONSUMABLE'],
-            'uom' => ['required', 'string', 'max:20'],
+            'uom' => ['nullable', 'string', 'max:20'],
+            'unit_id' => ['required', 'integer', 'exists:units,id'],
             'safety_stock' => ['required', 'integer', 'min:0'],
             'lead_time_days' => ['required', 'integer', 'min:0'],
             'lot_control' => ['required', 'boolean'],

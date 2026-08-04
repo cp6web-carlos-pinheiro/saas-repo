@@ -53,19 +53,14 @@
 
             <div>
                 <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="unit_id">{{ __('product.unit_id') }}</label>
-                <x-ui.select id="unit_id" name="unit_id" data-search="on">
+                <x-ui.select id="unit_id" name="unit_id" data-search="on" required>
                     <option value="">{{ __('product.select_unit') }}</option>
                     @foreach ($units as $id => $label)
                         <option value="{{ $id }}" @selected((string) old('unit_id', $product->unit_id ?? '') === (string) $id)>{{ $label }}</option>
                     @endforeach
                 </x-ui.select>
+                <p class="mt-2 text-sm text-[#5f6368]">{{ __('product.uom') }} será preenchida automaticamente com base na unidade selecionada.</p>
                 @error('unit_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
-            </div>
-
-            <div>
-                <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="uom">{{ __('product.uom') }}</label>
-                <x-ui.input id="uom" name="uom" :value="old('uom', $product->uom ?? '')" maxlength="20" />
-                @error('uom')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div>
