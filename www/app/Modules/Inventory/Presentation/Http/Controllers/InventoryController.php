@@ -6,6 +6,8 @@ namespace App\Modules\Inventory\Presentation\Http\Controllers;
 
 use App\Modules\Inventory\Application\Services\InventoryService;
 use App\Modules\Inventory\Presentation\Http\Requests\AdjustInventoryBalanceRequest;
+use App\Modules\Inventory\Presentation\Http\Requests\ReleaseInventoryReservationRequest;
+use App\Modules\Inventory\Presentation\Http\Requests\StoreInventoryReservationRequest;
 use App\Modules\Inventory\Presentation\Http\Requests\StoreStockLedgerMovementRequest;
 use App\Modules\Inventory\Presentation\Http\Requests\UpsertInventoryBalanceRequest;
 use App\Shared\Presentation\Http\Responses\ApiResponse;
@@ -61,10 +63,47 @@ final class InventoryController
         return ApiResponse::paginated($result, 'Stock ledger movements list');
     }
 
+    public function reservations(Request $request): JsonResponse
+    {
+        $perPage = (int) $request->integer('per_page', 15);
+
+        $filters = array_filter([
+            'warehouse_id' => $request->integer('warehouse_id') ?: null,
+            'product_id' => $request->integer('product_id') ?: null,
+            'reservation_origin' => $request->string('reservation_origin')->toString() ?: null,
+            'status' => $request->string('status')->toString() ?: null,
+        ], static fn ($value) => $value !== null);
+
+        $result = $this->service->paginateReservations($filters, $perPage);
+
+        return ApiResponse::paginated($result, 'Inventory reservations list');
+    }
+
     public function storeMovement(StoreStockLedgerMovementRequest $request): JsonResponse
     {
         $result = $this->service->postMovement($request->validated(), $request->user()?->id);
 
         return ApiResponse::success($result, 'Stock ledger movement posted', 201);
+    }
+
+    public function storeReservation(StoreInventoryReservationRequest $request): JsonResponse
+    {
+        $result = $this->service->reserveStock($request->validated(), $request->user()?->id);
+
+        return ApiResponse::success($result, 'Inventory reservation created', 201);
+    }
+
+    public function releaseReservation(ReleaseInventoryReservationRequest $request, int $reservationId): JsonResponse
+    {
+        $result = $this->service->releaseReservation($reservationId, $request->validated(), $request->user()?->id);
+
+        return ApiResponse::success($result, 'Inventory reservation released');
+    }
+
+    public function releaseExpiredReservations(Request $request): JsonResponse
+    {
+        $releasedCount = $this->service->releaseExpiredReservations($request->user()?->id);
+
+        return ApiResponse::success(['released_count' => $releasedCount], 'Expired reservations released');
     }
 }

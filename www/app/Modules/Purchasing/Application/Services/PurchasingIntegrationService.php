@@ -109,20 +109,17 @@ final class PurchasingIntegrationService
                     continue;
                 }
 
-                $this->inventoryService->postMovement([
-                    'warehouse_id' => (int) $line->warehouse_id,
-                    'product_id' => (int) $line->product_id,
-                    'movement_type' => 'ISSUE',
-                    'quantity' => (float) $line->quantity_received,
-                    'lot_number' => $line->lot_number,
-                    'reference_type' => 'purchase_receipt_reversal',
-                    'reference_id' => $receipt->id,
-                    'notes' => $line->notes,
+                if ($line->stock_ledger_movement_id === null) {
+                    throw new DomainException('Receipt line has no stock ledger movement to reverse.', 422);
+                }
+
+                $this->inventoryService->reverseMovement([
+                    'movement_id' => $line->stock_ledger_movement_id,
+                    'reason' => $reason,
                     'metadata' => [
                         'purchase_receipt_id' => $receipt->id,
                         'purchase_receipt_line_id' => $line->id,
                         'purchase_order_id' => $receipt->purchase_order_id,
-                        'reversal_of_movement_id' => $line->stock_ledger_movement_id,
                         'reversal_category' => $category,
                         'reversal_reason' => $reason,
                     ],

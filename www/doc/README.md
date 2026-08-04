@@ -11,7 +11,7 @@ Resumo executivo:
 - Produtos e revisoes: avancado.
 - Compras: avancado (CRUDs operacionais com linhas, transicoes, bloqueios apos POSTED, estorno com categoria+motivo e auditoria).
 - Vendas: parcial avancado (CRUD principal e clientes no tenant; menu de clientes integrado em Vendas).
-- Estoque: parcial avancado (ledger, saldos/lotes/seriais, CRUD de armazens e plantas, integracao com recebimento de compras).
+- Estoque: parcial avancado (ledger, saldos/lotes/seriais, CRUD de armazens e plantas, integracao com recebimento de compras, transferencia/reversao operacional no ledger, reservas por origem/prioridade).
 - Engenharia de Plataforma: baseline obrigatorio implementado (CI com gates de qualidade e testes, padrao inicial de telemetria com request-id e canal dedicado).
 - Seguranca: baseline obrigatorio implementado (MFA por codigo via e-mail no login web, politica de senha centralizada, monitoramento de autenticacao em canal dedicado).
 - Produto/UX: baseline obrigatorio implementado (fortalecimento de acessibilidade em componentes compartilhados e foco visivel em navegacao).
@@ -26,7 +26,7 @@ Atalhos de status:
 
 Proximos focos recomendados:
 1. Fechar workflow de aprovacao e SLA em Compras.
-2. Concluir transferencias/inventario/valorizacao no Estoque.
+2. Concluir inventario/valorizacao e consultas analiticas no Estoque.
 3. Evoluir integracao financeiro-fiscal e relatorios gerenciais.
 
 ## Índice

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Inventory\Application\Services;
 
 use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryBalance;
+use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryReservation;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\StockLedgerAllocation;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\StockLedgerMovement;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
@@ -25,10 +26,21 @@ final class InventoryService extends BaseService
         'ISSUE' => ['source_bucket' => 'AVAILABLE', 'target_bucket' => null, 'balance' => ['qty_available' => -1]],
         'RESERVE' => ['source_bucket' => 'AVAILABLE', 'target_bucket' => 'RESERVED', 'balance' => ['qty_available' => -1, 'qty_reserved' => 1]],
         'RELEASE' => ['source_bucket' => 'RESERVED', 'target_bucket' => 'AVAILABLE', 'balance' => ['qty_reserved' => -1, 'qty_available' => 1]],
-        'TRANSFER_OUT' => ['source_bucket' => 'AVAILABLE', 'target_bucket' => 'IN_TRANSIT', 'balance' => ['qty_available' => -1, 'qty_in_transit' => 1]],
-        'TRANSFER_IN' => ['source_bucket' => 'IN_TRANSIT', 'target_bucket' => 'AVAILABLE', 'balance' => ['qty_in_transit' => -1, 'qty_available' => 1]],
+        'TRANSFER_OUT' => ['source_bucket' => 'AVAILABLE', 'target_bucket' => null, 'balance' => ['qty_available' => -1]],
+        'TRANSFER_IN' => ['source_bucket' => null, 'target_bucket' => 'AVAILABLE', 'balance' => ['qty_available' => 1]],
         'INSPECTION_HOLD' => ['source_bucket' => 'AVAILABLE', 'target_bucket' => 'INSPECTION', 'balance' => ['qty_available' => -1, 'qty_inspection' => 1]],
         'INSPECTION_RELEASE' => ['source_bucket' => 'INSPECTION', 'target_bucket' => 'AVAILABLE', 'balance' => ['qty_inspection' => -1, 'qty_available' => 1]],
+    ];
+
+    private const REVERSIBLE_MOVEMENT_TYPES = [
+        'RECEIPT' => 'ISSUE',
+        'ISSUE' => 'RECEIPT',
+        'RESERVE' => 'RELEASE',
+        'RELEASE' => 'RESERVE',
+        'TRANSFER_OUT' => 'TRANSFER_IN',
+        'TRANSFER_IN' => 'TRANSFER_OUT',
+        'INSPECTION_HOLD' => 'INSPECTION_RELEASE',
+        'INSPECTION_RELEASE' => 'INSPECTION_HOLD',
     ];
 
     public function __construct(
@@ -151,6 +163,33 @@ final class InventoryService extends BaseService
         return $query->paginate($perPage);
     }
 
+    public function paginateReservations(array $filters, int $perPage = 15): LengthAwarePaginator
+    {
+        $query = InventoryReservation::query()
+            ->with(['warehouse', 'product'])
+            ->orderBy('priority')
+            ->orderBy('reserved_at')
+            ->orderBy('id');
+
+        if (isset($filters['warehouse_id'])) {
+            $query->where('warehouse_id', (int) $filters['warehouse_id']);
+        }
+
+        if (isset($filters['product_id'])) {
+            $query->where('product_id', (int) $filters['product_id']);
+        }
+
+        if (isset($filters['reservation_origin'])) {
+            $query->where('reservation_origin', $filters['reservation_origin']);
+        }
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->paginate($perPage);
+    }
+
     public function postMovement(array $payload, ?int $createdBy = null): array
     {
         Warehouse::query()->findOrFail((int) $payload['warehouse_id']);
@@ -224,6 +263,337 @@ final class InventoryService extends BaseService
                 ->where('product_id', $payload['product_id'])
                 ->first()
                 ?->toArray(),
+        ];
+    }
+
+    public function reserveStock(array $payload, ?int $createdBy = null): array
+    {
+        Warehouse::query()->findOrFail((int) $payload['warehouse_id']);
+        Product::query()->findOrFail((int) $payload['product_id']);
+
+        $quantity = round((float) $payload['quantity'], 6);
+        $priority = (int) ($payload['priority'] ?? 100);
+        $reservationOrigin = strtoupper((string) $payload['reservation_origin']);
+
+        if ($quantity <= 0) {
+            throw new DomainException('Reservation quantity must be greater than zero', 422);
+        }
+
+        if (! in_array($reservationOrigin, ['SALE', 'PRODUCTION', 'MAINTENANCE'], true)) {
+            throw new DomainException('Unsupported reservation origin', 422);
+        }
+
+        if ($priority < 1) {
+            throw new DomainException('Reservation priority must be greater than zero', 422);
+        }
+
+        $movementAt = isset($payload['movement_at'])
+            ? Carbon::parse($payload['movement_at'])
+            : now();
+
+        $result = $this->inTransaction(function () use ($payload, $createdBy, $quantity, $priority, $reservationOrigin, $movementAt) {
+            $balance = InventoryBalance::query()
+                ->where('warehouse_id', $payload['warehouse_id'])
+                ->where('product_id', $payload['product_id'])
+                ->lockForUpdate()
+                ->first();
+
+            if (! $balance) {
+                $balance = InventoryBalance::query()->create([
+                    'warehouse_id' => $payload['warehouse_id'],
+                    'product_id' => $payload['product_id'],
+                    'qty_available' => 0,
+                    'qty_reserved' => 0,
+                    'qty_in_transit' => 0,
+                    'qty_inspection' => 0,
+                    'last_movement_at' => null,
+                ]);
+            }
+
+            if ((float) $balance->qty_available < $quantity) {
+                throw new DomainException('Insufficient available stock for reservation', 422);
+            }
+
+            $reservation = InventoryReservation::query()->create([
+                'company_id' => $balance->company_id,
+                'warehouse_id' => $balance->warehouse_id,
+                'product_id' => $balance->product_id,
+                'reservation_origin' => $reservationOrigin,
+                'priority' => $priority,
+                'quantity' => $quantity,
+                'status' => 'RESERVED',
+                'reference_type' => $payload['reference_type'] ?? null,
+                'reference_id' => $payload['reference_id'] ?? null,
+                'reserved_at' => $movementAt,
+                'expires_at' => isset($payload['expires_at']) ? Carbon::parse($payload['expires_at']) : null,
+                'created_by' => $createdBy,
+                'metadata' => array_merge((array) ($payload['metadata'] ?? []), [
+                    'reservation_origin' => $reservationOrigin,
+                    'reservation_priority' => $priority,
+                ]),
+            ]);
+
+            $movement = $this->postMovement([
+                'warehouse_id' => $payload['warehouse_id'],
+                'product_id' => $payload['product_id'],
+                'movement_type' => 'RESERVE',
+                'quantity' => $quantity,
+                'reference_type' => 'inventory_reservation',
+                'reference_id' => $reservation->id,
+                'notes' => $payload['notes'] ?? null,
+                'metadata' => array_merge((array) ($payload['metadata'] ?? []), [
+                    'reservation_id' => $reservation->id,
+                    'reservation_origin' => $reservationOrigin,
+                    'reservation_priority' => $priority,
+                ]),
+                'movement_at' => $movementAt->toDateTimeString(),
+            ], $createdBy);
+
+            return [
+                'reservation' => $reservation->refresh()->load(['warehouse', 'product']),
+                'movement' => $movement['movement'],
+                'balance' => $movement['balance'],
+            ];
+        });
+
+        return [
+            'reservation' => $result['reservation']->toArray(),
+            'movement' => $result['movement'],
+            'balance' => $result['balance'],
+        ];
+    }
+
+    public function releaseReservation(int $reservationId, array $payload, ?int $createdBy = null): array
+    {
+        $reservation = InventoryReservation::query()
+            ->with(['warehouse', 'product'])
+            ->whereKey($reservationId)
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        if ($reservation->status === 'RELEASED') {
+            return ['reservation' => $reservation->toArray()];
+        }
+
+        if ($reservation->status !== 'RESERVED') {
+            throw new DomainException('Reservation is not active', 422);
+        }
+
+        $movementAt = isset($payload['movement_at'])
+            ? Carbon::parse($payload['movement_at'])
+            : now();
+
+        $result = $this->inTransaction(function () use ($reservation, $payload, $createdBy, $movementAt): array {
+            $movement = $this->postMovement([
+                'warehouse_id' => $reservation->warehouse_id,
+                'product_id' => $reservation->product_id,
+                'movement_type' => 'RELEASE',
+                'quantity' => (float) $reservation->quantity,
+                'reference_type' => 'inventory_reservation_release',
+                'reference_id' => $reservation->id,
+                'notes' => $payload['notes'] ?? null,
+                'metadata' => array_merge((array) ($reservation->metadata ?? []), (array) ($payload['metadata'] ?? []), [
+                    'reservation_id' => $reservation->id,
+                    'reservation_origin' => $reservation->reservation_origin,
+                    'reservation_priority' => $reservation->priority,
+                    'release_reason' => $payload['reason'],
+                ]),
+                'movement_at' => $movementAt->toDateTimeString(),
+            ], $createdBy);
+
+            $reservation->status = 'RELEASED';
+            $reservation->released_at = $movementAt;
+            $reservation->released_by = $createdBy;
+            $reservation->release_reason = $payload['reason'];
+            $reservation->save();
+
+            return [
+                'reservation' => $reservation->refresh()->load(['warehouse', 'product']),
+                'movement' => $movement['movement'],
+                'balance' => $movement['balance'],
+            ];
+        });
+
+        return [
+            'reservation' => $result['reservation']->toArray(),
+            'movement' => $result['movement'],
+            'balance' => $result['balance'],
+        ];
+    }
+
+    public function releaseExpiredReservations(?int $createdBy = null): int
+    {
+        return (int) $this->inTransaction(function () use ($createdBy): int {
+            $expiredReservations = InventoryReservation::query()
+                ->where('status', 'RESERVED')
+                ->whereNotNull('expires_at')
+                ->where('expires_at', '<=', now())
+                ->orderBy('priority')
+                ->orderBy('reserved_at')
+                ->lockForUpdate()
+                ->get();
+
+            $releasedCount = 0;
+
+            foreach ($expiredReservations as $reservation) {
+                $this->releaseReservation((int) $reservation->id, [
+                    'reason' => 'expired',
+                    'movement_at' => now()->toDateTimeString(),
+                    'metadata' => ['auto_released' => true],
+                ], $createdBy);
+                $releasedCount++;
+            }
+
+            return $releasedCount;
+        });
+    }
+
+    public function transferStock(array $payload, ?int $createdBy = null): array
+    {
+        $sourceWarehouseId = (int) $payload['source_warehouse_id'];
+        $targetWarehouseId = (int) $payload['target_warehouse_id'];
+
+        if ($sourceWarehouseId === $targetWarehouseId) {
+            throw new DomainException('Transfer requires different source and target warehouses', 422);
+        }
+
+        Warehouse::query()->findOrFail($sourceWarehouseId);
+        Warehouse::query()->findOrFail($targetWarehouseId);
+        Product::query()->findOrFail((int) $payload['product_id']);
+
+        $quantity = round((float) $payload['quantity'], 6);
+
+        if ($quantity <= 0) {
+            throw new DomainException('Transfer quantity must be greater than zero', 422);
+        }
+
+        $movementAt = isset($payload['movement_at'])
+            ? Carbon::parse($payload['movement_at'])
+            : now();
+
+        return $this->inTransaction(function () use ($payload, $createdBy, $sourceWarehouseId, $targetWarehouseId, $quantity, $movementAt) {
+            $contextMetadata = array_merge(
+                (array) ($payload['metadata'] ?? []),
+                [
+                    'transfer_source_warehouse_id' => $sourceWarehouseId,
+                    'transfer_target_warehouse_id' => $targetWarehouseId,
+                ]
+            );
+
+            $outgoing = $this->postMovement([
+                'warehouse_id' => $sourceWarehouseId,
+                'product_id' => $payload['product_id'],
+                'movement_type' => 'TRANSFER_OUT',
+                'quantity' => $quantity,
+                'allocation_strategy' => $payload['allocation_strategy'] ?? null,
+                'lot_number' => $payload['lot_number'] ?? null,
+                'expires_at' => $payload['expires_at'] ?? null,
+                'reference_type' => $payload['reference_type'] ?? 'stock_transfer',
+                'reference_id' => $payload['reference_id'] ?? null,
+                'notes' => $payload['notes'] ?? null,
+                'metadata' => $contextMetadata,
+                'movement_at' => $movementAt->toDateTimeString(),
+            ], $createdBy);
+
+            $incoming = $this->postMovement([
+                'warehouse_id' => $targetWarehouseId,
+                'product_id' => $payload['product_id'],
+                'movement_type' => 'TRANSFER_IN',
+                'quantity' => $quantity,
+                'allocation_strategy' => $payload['allocation_strategy'] ?? null,
+                'lot_number' => $payload['lot_number'] ?? null,
+                'expires_at' => $payload['expires_at'] ?? null,
+                'reference_type' => $payload['reference_type'] ?? 'stock_transfer',
+                'reference_id' => $payload['reference_id'] ?? null,
+                'notes' => $payload['notes'] ?? null,
+                'metadata' => array_merge($contextMetadata, [
+                    'transfer_out_movement_id' => $outgoing['movement']['id'] ?? null,
+                ]),
+                'movement_at' => $movementAt->toDateTimeString(),
+            ], $createdBy);
+
+            return [
+                'source_movement' => $outgoing['movement'],
+                'target_movement' => $incoming['movement'],
+                'source_balance' => $outgoing['balance'],
+                'target_balance' => $incoming['balance'],
+            ];
+        });
+    }
+
+    public function reverseMovement(array $payload, ?int $createdBy = null): array
+    {
+        $movement = StockLedgerMovement::query()
+            ->with(['warehouse', 'product'])
+            ->whereKey((int) $payload['movement_id'])
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        $movementAt = isset($payload['movement_at'])
+            ? Carbon::parse($payload['movement_at'])
+            : $movement->movement_at ?? now();
+
+        if (in_array($movement->movement_type, ['TRANSFER_OUT', 'TRANSFER_IN'], true)) {
+            $transferSourceWarehouseId = (int) data_get($movement->metadata, 'transfer_source_warehouse_id');
+            $transferTargetWarehouseId = (int) data_get($movement->metadata, 'transfer_target_warehouse_id');
+
+            if ($transferSourceWarehouseId <= 0 || $transferTargetWarehouseId <= 0) {
+                throw new DomainException('Transfer movement is missing counter-warehouse metadata', 422);
+            }
+
+            $sourceWarehouseId = $movement->movement_type === 'TRANSFER_OUT'
+                ? $transferTargetWarehouseId
+                : (int) $movement->warehouse_id;
+            $targetWarehouseId = $movement->movement_type === 'TRANSFER_OUT'
+                ? (int) $movement->warehouse_id
+                : $transferSourceWarehouseId;
+
+            return $this->transferStock([
+                'source_warehouse_id' => $sourceWarehouseId,
+                'target_warehouse_id' => $targetWarehouseId,
+                'product_id' => $movement->product_id,
+                'quantity' => $movement->quantity,
+                'allocation_strategy' => $movement->allocation_strategy,
+                'lot_number' => $movement->lot_number,
+                'expires_at' => $movement->expires_at?->toDateString(),
+                'reference_type' => 'stock_movement_reversal',
+                'reference_id' => $movement->id,
+                'notes' => $payload['notes'] ?? $movement->notes,
+                'metadata' => array_merge((array) ($movement->metadata ?? []), (array) ($payload['metadata'] ?? []), [
+                    'reversal_of_movement_id' => $movement->id,
+                    'reversal_reason' => $payload['reason'] ?? null,
+                ]),
+                'movement_at' => $movementAt->toDateTimeString(),
+            ], $createdBy);
+        }
+
+        $reversalType = self::REVERSIBLE_MOVEMENT_TYPES[$movement->movement_type] ?? null;
+
+        if ($reversalType === null) {
+            throw new DomainException('Unsupported stock movement type reversal', 422);
+        }
+
+        $result = $this->postMovement([
+            'warehouse_id' => $movement->warehouse_id,
+            'product_id' => $movement->product_id,
+            'movement_type' => $reversalType,
+            'quantity' => $movement->quantity,
+            'allocation_strategy' => $movement->allocation_strategy,
+            'lot_number' => $movement->lot_number,
+            'expires_at' => $movement->expires_at?->toDateString(),
+            'reference_type' => 'stock_movement_reversal',
+            'reference_id' => $movement->id,
+            'notes' => $payload['notes'] ?? $movement->notes,
+            'metadata' => array_merge((array) ($movement->metadata ?? []), (array) ($payload['metadata'] ?? []), [
+                'reversal_of_movement_id' => $movement->id,
+                'reversal_reason' => $payload['reason'] ?? null,
+            ]),
+            'movement_at' => $movementAt->toDateTimeString(),
+        ], $createdBy);
+
+        return [
+            'reversal_movement' => $result['movement'],
+            'balance' => $result['balance'],
         ];
     }
 

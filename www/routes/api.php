@@ -182,6 +182,15 @@ Route::prefix('v1')->group(function (): void {
             Route::post('/inventory/ledger/movements', [InventoryController::class, 'storeMovement'])
                 ->middleware(CheckPermission::class.':inventory.update');
 
+            Route::get('/inventory/reservations', [InventoryController::class, 'reservations'])
+                ->middleware(CheckPermission::class.':inventory.read');
+            Route::post('/inventory/reservations', [InventoryController::class, 'storeReservation'])
+                ->middleware(CheckPermission::class.':inventory.update');
+            Route::post('/inventory/reservations/release-expired', [InventoryController::class, 'releaseExpiredReservations'])
+                ->middleware(CheckPermission::class.':inventory.update');
+            Route::post('/inventory/reservations/{reservationId}/release', [InventoryController::class, 'releaseReservation'])
+                ->middleware(CheckPermission::class.':inventory.update');
+
             Route::get('/inventory/lots', [LotSerialTrackingController::class, 'lots'])
                 ->middleware(CheckPermission::class.':inventory.lots.read');
             Route::post('/inventory/lots', [LotSerialTrackingController::class, 'storeLot'])

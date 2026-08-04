@@ -4,15 +4,15 @@
 Implementar o modulo de controle de materiais usado por toda a operacao.
 
 ## Status de implementacao
-Parcial. Existem saldo, movimentacao, ajuste, reserva, lotes e series, com historico operacional via ledger. Entrada, saida, transferencia e valorizacao ainda nao estao separados como fluxos completos de negocio.
+Parcial avancado. Existem saldo, movimentacao, ajuste, reserva por origem/prioridade, lotes e series, com historico operacional via ledger. Transferencia, reversao de movimentos e liberacao automatica de reservas expiradas agora sao tratadas como fluxos operacionais compostos; inventario formal e valorizacao ainda nao estao completos.
 
 ## Escopo
 - Entrada: parcial
 - Saida: parcial
-- Transferencia: parcial
+- Transferencia: implementado
 - Inventario: parcial
 - Ajuste: implementado
-- Reserva: parcial
+- Reserva: implementado
 - Movimentacao: implementado
 - Saldo: implementado
 - Valorizacao: nao iniciado
@@ -30,7 +30,7 @@ Parcial. Existem saldo, movimentacao, ajuste, reserva, lotes e series, com histo
 ## Pendencias por dependencia e area
 
 ### Por dependencia
-- Dependencia de processos: formalizar transferencia, inventario ciclico e reserva por origem.
+- Dependencia de processos: formalizar inventario ciclico e reserva por origem.
 - Dependencia financeira: definir modelo de valorizacao e fechamento de custo.
 - Dependencia de integracao: completar sincronizacao com vendas e producao para baixas e reversoes.
 

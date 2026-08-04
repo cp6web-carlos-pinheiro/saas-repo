@@ -3,12 +3,12 @@
 Este modulo administra saldos, movimentacoes, lotes, seriais e alocacoes de estoque para suportar operacao e planejamento.
 
 ## Ultima atualizacao
-- 2026-08-03
+- 2026-08-04
 
 ## Status objetivo
 - Status atual: Parcial avancado.
-- Cobertura atual: estrutura de saldos/movimentos/lotes/seriais ativa, CRUD web tenant de Armazens e Plantas implementado, e integracao de recebimento de compras com movimentacao de estoque.
-- Pendencia principal: concluir fluxos dedicados de transferencia, inventario ciclico, valorizacao, reservas avancadas e consultas analiticas de saldo/disponibilidade.
+- Cobertura atual: estrutura de saldos/movimentos/lotes/seriais ativa, CRUD web tenant de Armazens e Plantas implementado, integracao de recebimento de compras com movimentacao de estoque, fluxo operacional composto de transferencia/reversao no ledger, e reservas por origem/prioridade com liberacao automatica por expiracao.
+- Pendencia principal: concluir inventario ciclico, valorizacao e consultas analiticas de saldo/disponibilidade.
 
 ## Entregas implementadas
 - Estrutura de ledger operacional (`stock_ledger_movements` e `stock_ledger_allocations`).
@@ -16,11 +16,11 @@ Este modulo administra saldos, movimentacoes, lotes, seriais e alocacoes de esto
 - CRUD de Armazens no menu Estoque.
 - CRUD de Plantas no menu Estoque.
 - Integracao com Compras para entradas de recebimento e estornos controlados.
+- Transferencia operacional entre armazens com reversao de movimentos no ledger.
+- Reservas por origem/prioridade com liberacao automatica de reservas expiradas.
 
 ## Pendencias relevantes
-- Fluxo formal de transferencia entre armazens/plantas.
 - Inventario fisico com contagem cega e reconciliacao de divergencias.
-- Regras de reserva por demanda (venda/producao) com prioridades.
 - Camada de valorizacao de estoque (custo medio/FIFO conforme politica).
 
 ## Tabelas relacionadas
