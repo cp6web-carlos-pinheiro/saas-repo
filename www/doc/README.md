@@ -2,6 +2,30 @@
 
 Este diretório concentra documentos funcionais dos módulos do sistema Beyond MRP.
 
+## Painel de Status Atual
+
+Ultima atualizacao consolidada: 2026-08-03
+
+Resumo executivo:
+- Fundacao, multitenancy e RBAC: avancado.
+- Produtos e revisoes: avancado.
+- Compras: avancado (CRUDs operacionais com linhas, transicoes, bloqueios apos POSTED, estorno com categoria+motivo e auditoria).
+- Vendas: parcial avancado (CRUD principal e clientes no tenant; menu de clientes integrado em Vendas).
+- Estoque: parcial avancado (ledger, saldos/lotes/seriais, CRUD de armazens e plantas, integracao com recebimento de compras).
+- MRP, financeiro, observabilidade e automacoes: em evolucao.
+
+Atalhos de status:
+- Visao geral da sequencia: [Dev Sequencia de Desenvolvimento.md](Dev%20Sequencia%20de%20Desenvolvimento.md)
+- Status de Compras: [Modulo Compras.md](Modulo%20Compras.md)
+- Status de Estoque: [Modulo Estoque.md](Modulo%20Estoque.md)
+- Status de Produto: [Modulo Produto.md](Modulo%20Produto.md)
+- Status de MRP: [Modulo Planejamento de Materiais.md](Modulo%20Planejamento%20de%20Materiais.md)
+
+Proximos focos recomendados:
+1. Fechar workflow de aprovacao e SLA em Compras.
+2. Concluir transferencias/inventario/valorizacao no Estoque.
+3. Evoluir integracao financeiro-fiscal e relatorios gerenciais.
+
 ## Índice
 
 1. [Módulo Identidade e Acesso](Modulo%20Identidade%20e%20Acesso.md)

@@ -55,3 +55,25 @@ Definir a fundacao tecnica e visual que sera reutilizada por todo o sistema.
 - Multitenancy: companies, planos, assinaturas, dominios e periodo gratuito inicial de 14 dias ja estao presentes em boa parte da base, com resolucao tenant aplicada no fluxo web.
 - Autenticacao e seguranca: login, logout, recuperacao de senha, verificacao de email e sessoes estao implementados; two factor ainda nao aparece no codigo.
 - Permissoes RBAC: roles, permissions, role permission, user role e permissoes por modulo ja tem base de dados e regras de checagem; o fluxo tenant atual trabalha com atribuicao direta de perfil RBAC por usuario e governanca de continuidade administrativa.
+
+## Criterios para 100% implementado
+- Multitenancy completo: isolamento por tenant validado em web, API, jobs, eventos, cache e relatorios, com testes automatizados cobrindo vazamento entre empresas.
+- Ciclo de vida tenant completo: criacao, ativacao, suspensao, expiracao de trial, renovacao e encerramento com politicas claras de acesso.
+- Autenticacao completa: two-factor authentication, politicas de senha, bloqueio por tentativas, revogacao de sessoes e suporte a OAuth corporativo.
+- RBAC completo: perfis por modulo, trilha de alteracoes de permissoes, controles de aprovacao para alteracoes criticas e testes de autorizacao por endpoint.
+- Fundacao UI completa: design tokens, componentes e padroes de acessibilidade aplicados em 100% das telas transacionais.
+- Observabilidade base completa: logs estruturados, correlation id, health checks, metricas de aplicacao e alarmes operacionais minimos.
+- Qualidade de engenharia completa: cobertura de testes minima por camada (unitario, feature, integracao), pipeline CI com lint, testes e analise estatica.
+
+## Pendencias por dependencia e area
+
+### Por dependencia
+- Dependencia de seguranca: implementar two-factor authentication e politicas de endurecimento de sessao.
+- Dependencia de plataforma: consolidar observabilidade base (metricas, tracing, health checks e alertas).
+- Dependencia de arquitetura: fechar contratos web/API para multitenancy sem divergencia de comportamento.
+
+### Por area
+- Area de Engenharia de Plataforma: CI robusto, gates de qualidade e padrao de logs/telemetria.
+- Area de Seguranca: MFA, politica de senha e monitoramento de autenticacao.
+- Area de Produto/UX: padronizacao final de componentes e acessibilidade em 100% das telas.
+
