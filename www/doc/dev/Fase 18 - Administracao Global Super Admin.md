@@ -25,7 +25,7 @@ Parcial. O painel global ja administra empresas, planos e usuarios, mas feature 
 ## Criterios para 100% implementado
 - Operacao global completa: gestao de tenants, planos, assinaturas, cobrancas e saude por ambiente.
 - Observabilidade global completa: logs centralizados, metricas, traces e alertas por severidade.
-- Ferramentas operacionais completas: monitoramento de filas/jobs, cache, tarefas de manutencao e automacoes de suporte.
+- Ferramentas operacionais completas: monitoramento de filas/jobs, cache, tarefas operacionais da plataforma e automacoes de suporte.
 - Governanca de produto completa: feature flags por tenant/plano e rollout controlado.
 - Controle de suporte completo: impersonacao auditada, trilha de atendimento e base de incidentes.
 - Seguranca completa: segregacao de acesso admin, MFA obrigatorio e revisao periodica de privilegios.

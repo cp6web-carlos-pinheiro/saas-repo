@@ -4,7 +4,7 @@
 Estruturar os cadastros administrativos que sustentam os modulos transacionais.
 
 ## Status de implementacao
-Concluido para o escopo atual. Este documento foi atualizado para refletir a consolidacao de escopo sem financeiro/fiscal e sem dimensoes organizacionais removidas.
+Concluido para o escopo atual. Este documento foi atualizado para refletir a consolidacao vigente dos cadastros administrativos ativos.
 
 ## Escopo
 - Empresa: mantido (fora do incremento desta fase)

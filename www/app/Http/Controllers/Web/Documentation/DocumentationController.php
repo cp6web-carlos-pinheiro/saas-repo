@@ -16,7 +16,9 @@ final class DocumentationController extends Controller
         $files = $this->docFiles();
         abort_if($files === [], 404, 'Nenhum arquivo de documentacao encontrado.');
 
-        $default = in_array('README.md', $files, true) ? 'README.md' : $files[0];
+        $default = in_array('01 - README.md', $files, true)
+            ? '01 - README.md'
+            : (in_array('README.md', $files, true) ? 'README.md' : $files[0]);
 
         return redirect()->route('docs.show', ['file' => $default]);
     }
@@ -89,6 +91,14 @@ final class DocumentationController extends Controller
         $files = array_map(static fn (string $path): string => basename($path), $paths);
 
         usort($files, static function (string $a, string $b): int {
+            if ($a === '01 - README.md') {
+                return -1;
+            }
+
+            if ($b === '01 - README.md') {
+                return 1;
+            }
+
             if ($a === 'README.md') {
                 return -1;
             }

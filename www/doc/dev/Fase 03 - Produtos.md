@@ -4,7 +4,7 @@
 Iniciar o ERP com cadastro e engenharia de produtos.
 
 ## Status de implementacao
-Concluido no escopo da fase. O cadastro de produtos foi estendido com atributos tecnicos/comerciais/fiscais, unidades alternativas, imagens/anexos e ciclo de vida. A engenharia com revisoes e BOM foi consolidada com regras de vigencia/aprovacao, e o payload de versao passou a normalizar variacoes e kits com SKU derivado e validacoes.
+Concluido no escopo da fase. O cadastro de produtos foi estendido com atributos tecnicos/comerciais, unidades alternativas, imagens/anexos e ciclo de vida. A engenharia com revisoes e BOM foi consolidada com regras de vigencia/aprovacao, e o payload de versao passou a normalizar variacoes e kits com SKU derivado e validacoes.
 
 ## Escopo
 - Produtos: concluido no escopo da fase
@@ -15,7 +15,7 @@ Concluido no escopo da fase. O cadastro de produtos foi estendido com atributos 
 - Series: concluido no escopo da fase
 
 ## Entregas implementadas
-- Cadastro de produto estendido no modelo e tela com: ciclo de vida, atributos tecnicos/comerciais/fiscais, unidades alternativas, imagens e anexos (campos JSON para simplicidade).
+- Cadastro de produto estendido no modelo e tela com: ciclo de vida, atributos tecnicos/comerciais, unidades alternativas, imagens e anexos (campos JSON para simplicidade).
 - Versoes de produto com normalizacao de payload para:
 	- Matriz de variacoes (color/size/model) com geracao de SKU derivado.
 	- Kits com composicao, quantidade e modo de explosao.
@@ -29,7 +29,7 @@ Concluido no escopo da fase. O cadastro de produtos foi estendido com atributos 
 	- Suite feature da fase criada para validar cadastro estendido, variacoes/kits, vigencia de BOM e obrigatoriedade de rastreabilidade.
 
 ## Criterios para 100% implementado
-- Cadastro de produto completo: atributos tecnicos, comerciais e fiscais, multiplas unidades, imagens, anexos e status de ciclo de vida.
+- Cadastro de produto completo: atributos tecnicos e comerciais, multiplas unidades, imagens, anexos e status de ciclo de vida.
 - Engenharia de produto completa: BOM com versoes, vigencia, aprovacao e rastreabilidade de alteracao.
 - Variacoes completas: matriz de variantes (cor/tamanho/modelo) com SKU derivado e controle de disponibilidade.
 - Kits completos: composicao de kits, regras de explosao e impacto no estoque.

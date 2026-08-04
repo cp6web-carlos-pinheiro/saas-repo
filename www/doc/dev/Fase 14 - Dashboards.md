@@ -13,7 +13,7 @@ Parcial. Existem telas de dashboard e onboarding, mas ainda sem camada consolida
 - Widgets: nao iniciado
 
 ## Criterios para 100% implementado
-- KPIs completos por dominio: compras, vendas, estoque, producao, financeiro e qualidade.
+- KPIs completos por dominio: compras, vendas, estoque, producao, MRP e observabilidade.
 - Graficos operacionais completos: series temporais, comparativos, alertas e filtros por periodo/planta.
 - Indicadores executivos completos: metas, desvios, tendencias e drill-down por processo.
 - Widgets completos: painel configuravel por perfil de usuario com preferencia persistida.
@@ -23,7 +23,7 @@ Parcial. Existem telas de dashboard e onboarding, mas ainda sem camada consolida
 ## Pendencias por dependencia e area
 
 ### Por dependencia
-- Dependencia de dados: consolidar camadas metricas de compras, vendas, estoque, producao e financeiro.
+- Dependencia de dados: consolidar camadas metricas de compras, vendas, estoque, producao e MRP.
 - Dependencia de UX: definir padrao de widgets e configuracao por perfil.
 - Dependencia de performance: cache e estrategia de atualizacao incremental para grandes volumes.
 

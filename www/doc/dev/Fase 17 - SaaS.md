@@ -26,19 +26,18 @@ Parcial. Acesso gratuito inicial de 14 dias, onboarding, organizacao, assinatura
 - Ciclo de assinatura completo: trial, conversao, renovacao, upgrade, downgrade, cancelamento e reativacao.
 - Cobranca completa: gateways priorizados, faturas, retries, inadimplencia e bloqueio gradual de acesso.
 - Governanca de uso completo: medicao de consumo, limites por plano e alertas preventivos.
-- Billing ops completo: conciliacao financeira, webhook de provedores e suporte a estorno.
-- Compliance completo: termos, consentimentos, trilha de faturamento e retencao de dados financeiros.
+- Ops de assinatura completo: conciliacao operacional, webhook de provedores e suporte a estorno de assinatura.
+- Compliance completo: termos, consentimentos, trilha de assinatura e retencao de dados da plataforma.
 - Qualidade: testes de regras de plano, cobranca e transicoes de assinatura.
 
 ## Pendencias por dependencia e area
 
 ### Por dependencia
-- Dependencia de billing: integrar gateways de cobranca e webhooks de ciclo financeiro.
+- Dependencia de billing: integrar gateways de cobranca e webhooks de ciclo de assinatura.
 - Dependencia de produto: concluir limites por plano e medicao de uso.
 - Dependencia de operacao comercial: fechar fluxos de upgrade, downgrade, renovacao e recuperacao de inadimplencia.
 
 ### Por area
 - Area Comercial/SaaS: definir estrategias de plano, precificacao e politicas de churn.
-- Area Financeira: homologar faturamento, conciliacao e estornos.
 - Area de Engenharia: implementar automacoes de assinatura e governanca de consumo.
 

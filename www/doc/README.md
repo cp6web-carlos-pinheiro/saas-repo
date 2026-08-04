@@ -1,56 +1,49 @@
-# Documentação Funcional dos Módulos
+# Documentacao Funcional dos Modulos
 
-Este diretório concentra documentos funcionais dos módulos do sistema Beyond MRP.
+Este diretorio concentra os documentos funcionais do Beyond MRP no escopo ativo.
 
-## Painel de Status Atual
+## Status Atual
 
 Ultima atualizacao consolidada: 2026-08-04
 
 Resumo executivo:
-- Fundacao, multitenancy e RBAC: avancado.
-- Produtos e revisoes: avancado.
-- Compras: avancado (CRUDs operacionais com linhas, transicoes, bloqueios apos POSTED, estorno com categoria+motivo e auditoria, sem entrada fiscal/tributaria).
-- Vendas: parcial avancado (CRUD principal e clientes no tenant; menu de clientes integrado em Vendas).
-- Estoque: parcial avancado (ledger, saldos/lotes/seriais, CRUD de armazens e plantas, integracao com recebimento de compras, transferencia/reversao operacional no ledger, reservas por origem/prioridade).
-- Producao: parcial avancado (ordens, consumo, apontamento basico e entrada de produto acabado no estoque).
-- Engenharia de Plataforma: baseline obrigatorio implementado (CI com gates de qualidade e testes, padrao inicial de telemetria com request-id e canal dedicado).
-- Seguranca: baseline obrigatorio implementado (MFA por codigo via e-mail no login web, politica de senha centralizada, monitoramento de autenticacao em canal dedicado).
-- Produto/UX: baseline obrigatorio implementado (fortalecimento de acessibilidade em componentes compartilhados e foco visivel em navegacao).
-- MRP, observabilidade e automacoes: em evolucao, com MRP parcial avancado (motor, sugestoes, alertas de estoque minimo, previsao simples e scheduler finito por capacidade).
+- Fundacao SaaS, multitenancy, autenticacao e RBAC: avancado.
+- Produtos, revisoes/BOM e roteiros: avancado.
+- Compras: avancado (solicitacao, cotacao, pedido, recebimento, bloqueios operacionais e estorno auditavel).
+- Vendas: parcial avancado (cliente e pedido com fluxo operacional principal).
+- Estoque: parcial avancado (ledger, lotes/seriais, reservas, transferencias e reversoes).
+- Producao: parcial avancado (ordens, consumo, apontamento e entrada de acabado).
+- MRP e programacao: parcial avancado (motor base, sugestoes e scheduler finito inicial).
+- Genealogia e observabilidade: planejado/parcial inicial.
 
-Escopo removido do sistema (nao controlado):
-- Tributos, NCM, CFOP e quaisquer atributos fiscais/financeiros de produto, compra, venda, cliente e fornecedor.
-- Filiais, localizacoes de armazem, departamentos e centros de custo.
-- Modulos fora do foco MRP definido anteriormente (CRM, RH, Qualidade, Manutencao e Financeiro).
+Proximos focos:
+1. Concluir inventario formal e valorizacao no Estoque.
+2. Evoluir governanca operacional em Compras e Vendas.
+3. Expandir MRP, programacao e visibilidade operacional com dashboards.
 
-Atalhos de status:
+Atalhos:
 - Visao geral da sequencia: [Dev Sequencia de Desenvolvimento.md](Dev%20Sequencia%20de%20Desenvolvimento.md)
 - Status de Compras: [Modulo Compras.md](Modulo%20Compras.md)
 - Status de Estoque: [Modulo Estoque.md](Modulo%20Estoque.md)
 - Status de Produto: [Modulo Produto.md](Modulo%20Produto.md)
 - Status de MRP: [Modulo Planejamento de Materiais.md](Modulo%20Planejamento%20de%20Materiais.md)
 
-Proximos focos recomendados:
-1. Fechar workflow de aprovacao e SLA em Compras.
-2. Concluir inventario/valorizacao e consultas analiticas no Estoque.
-3. Evoluir forecast estruturado, scheduler por recurso e automacoes de planejamento no MRP.
+## Indice
 
-## Índice
-
-1. [Módulo Identidade e Acesso](Modulo%20Identidade%20e%20Acesso.md)
-2. [Módulo Gestão de Locatários](Modulo%20Gestao%20de%20Locatarios.md)
-3. [Módulo Produto](Modulo%20Produto.md)
-4. [Módulo Revisões](Modulo%20Lista%20de%20Materiais.md)
-5. [Módulo Roteiro de Produção](Modulo%20Roteiro%20de%20Producao.md)
-6. [Módulo Engenharia de Mudanças](Modulo%20Engenharia%20de%20Mudancas.md)
-7. [Módulo Ordem de Mudança de Engenharia](Modulo%20Ordem%20de%20Mudanca%20de%20Engenharia.md)
-8. [Módulo Estoque](Modulo%20Estoque.md)
-9. [Módulo Compras](Modulo%20Compras.md)
-10. [Módulo Planejamento de Materiais](Modulo%20Planejamento%20de%20Materiais.md)
-11. [Módulo Programação da Produção](Modulo%20Programacao%20da%20Producao.md)
-12. [Módulo Produção](Modulo%20Producao.md)
-13. [Módulo Execução da Manufatura](Modulo%20Execucao%20da%20Manufatura.md)
-14. [Módulo Genealogia](Modulo%20Genealogia.md)
-15. [Módulo Observabilidade](Modulo%20Observabilidade.md)
-16. [Dicionário do Banco de Dados](Dicionario%20do%20Banco%20de%20Dados.md)
+1. [Modulo Identidade e Acesso](Modulo%20Identidade%20e%20Acesso.md)
+2. [Modulo Gestao de Locatarios](Modulo%20Gestao%20de%20Locatarios.md)
+3. [Modulo Produto](Modulo%20Produto.md)
+4. [Modulo Lista de Materiais](Modulo%20Lista%20de%20Materiais.md)
+5. [Modulo Roteiro de Producao](Modulo%20Roteiro%20de%20Producao.md)
+6. [Modulo Engenharia de Mudancas](Modulo%20Engenharia%20de%20Mudancas.md)
+7. [Modulo Ordem de Mudanca de Engenharia](Modulo%20Ordem%20de%20Mudanca%20de%20Engenharia.md)
+8. [Modulo Estoque](Modulo%20Estoque.md)
+9. [Modulo Compras](Modulo%20Compras.md)
+10. [Modulo Planejamento de Materiais](Modulo%20Planejamento%20de%20Materiais.md)
+11. [Modulo Programacao da Producao](Modulo%20Programacao%20da%20Producao.md)
+12. [Modulo Producao](Modulo%20Producao.md)
+13. [Modulo Execucao da Manufatura](Modulo%20Execucao%20da%20Manufatura.md)
+14. [Modulo Genealogia](Modulo%20Genealogia.md)
+15. [Modulo Observabilidade](Modulo%20Observabilidade.md)
+16. [Dicionario do Banco de Dados](Dicionario%20do%20Banco%20de%20Dados.md)
 17. [Biblioteca de Componentes Blade (Dev)](dev/Biblioteca%20de%20Componentes%20Blade.md)
