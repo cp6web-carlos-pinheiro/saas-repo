@@ -280,22 +280,37 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/analytics', [ProductionAnalyticsController::class, 'index'])->name('analytics.index');
 
             Route::get('/routing', [ProductionRoutingController::class, 'index'])->name('routing.index');
+            Route::get('/routing/create', [ProductionRoutingController::class, 'create'])->name('routing.create');
             Route::post('/routing', [ProductionRoutingController::class, 'store'])->name('routing.store');
             Route::get('/routing/{version}', [ProductionRoutingController::class, 'show'])->whereNumber('version')->name('routing.show');
+            Route::get('/routing/{version}/edit', [ProductionRoutingController::class, 'edit'])->whereNumber('version')->name('routing.edit');
+            Route::put('/routing/{version}', [ProductionRoutingController::class, 'update'])->whereNumber('version')->name('routing.update');
             Route::post('/routing/{version}/operations', [ProductionRoutingController::class, 'storeOperation'])->whereNumber('version')->name('routing.operations.store');
             Route::post('/routing/{version}/approve', [ProductionRoutingController::class, 'approve'])->whereNumber('version')->name('routing.approve');
 
             Route::get('/work-centers', [ProductionWorkCenterController::class, 'index'])->name('work-centers.index');
+            Route::get('/work-centers/create', [ProductionWorkCenterController::class, 'create'])->name('work-centers.create');
             Route::post('/work-centers', [ProductionWorkCenterController::class, 'store'])->name('work-centers.store');
             Route::get('/work-centers/{workCenter}', [ProductionWorkCenterController::class, 'show'])->whereNumber('workCenter')->name('work-centers.show');
+            Route::get('/work-centers/{workCenter}/edit', [ProductionWorkCenterController::class, 'edit'])->whereNumber('workCenter')->name('work-centers.edit');
+            Route::put('/work-centers/{workCenter}', [ProductionWorkCenterController::class, 'update'])->whereNumber('workCenter')->name('work-centers.update');
             Route::post('/work-centers/{workCenter}/shifts', [ProductionWorkCenterController::class, 'storeShift'])->whereNumber('workCenter')->name('work-centers.shifts.store');
 
             Route::get('/calendar', [ProductionCalendarWebController::class, 'index'])->name('calendar.index');
+            Route::get('/calendar/create', [ProductionCalendarWebController::class, 'create'])->name('calendar.create');
+            Route::post('/calendar', [ProductionCalendarWebController::class, 'store'])->name('calendar.store');
+            Route::get('/calendar/{day}', [ProductionCalendarWebController::class, 'show'])->whereNumber('day')->name('calendar.show');
+            Route::get('/calendar/{day}/edit', [ProductionCalendarWebController::class, 'edit'])->whereNumber('day')->name('calendar.edit');
+            Route::put('/calendar/{day}', [ProductionCalendarWebController::class, 'update'])->whereNumber('day')->name('calendar.update');
             Route::post('/calendar/day', [ProductionCalendarWebController::class, 'upsertDay'])->name('calendar.days.upsert');
             Route::post('/calendar/generate', [ProductionCalendarWebController::class, 'generate'])->name('calendar.generate');
 
             Route::get('/scheduling', [ProductionSchedulingWebController::class, 'index'])->name('scheduling.index');
+            Route::get('/scheduling/create', [ProductionSchedulingWebController::class, 'create'])->name('scheduling.create');
             Route::post('/scheduling/run', [ProductionSchedulingWebController::class, 'run'])->name('scheduling.run');
+            Route::get('/scheduling/{run}', [ProductionSchedulingWebController::class, 'show'])->name('scheduling.show');
+            Route::get('/scheduling/{run}/edit', [ProductionSchedulingWebController::class, 'edit'])->name('scheduling.edit');
+            Route::put('/scheduling/{run}', [ProductionSchedulingWebController::class, 'update'])->name('scheduling.update');
         });
 
         Route::middleware([EnsureTrialIsActive::class, CheckPermission::class.':bom.explode'])->group(function (): void {

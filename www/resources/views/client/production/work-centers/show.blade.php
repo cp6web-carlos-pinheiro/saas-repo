@@ -7,7 +7,10 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ $workCenter->code }} - {{ $workCenter->name }}</h1>
-        <x-ui.button :href="route('production.work-centers.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <div class="flex flex-wrap gap-3">
+            <x-ui.button :href="route('production.work-centers.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+            <x-ui.button :href="route('production.work-centers.edit', $workCenter)" variant="material-edit" class="rounded-full">Editar</x-ui.button>
+        </div>
     </div>
 
     @if (session('status'))
