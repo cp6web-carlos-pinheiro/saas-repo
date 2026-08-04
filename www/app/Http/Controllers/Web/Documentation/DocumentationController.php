@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 final class DocumentationController extends Controller
 {
-    public function index(): RedirectResponse
+    public function indexGlobal(): RedirectResponse
     {
         $files = $this->docFiles();
         abort_if($files === [], 404, 'Nenhum arquivo de documentacao encontrado.');
@@ -20,20 +20,41 @@ final class DocumentationController extends Controller
             ? '01 - README.md'
             : (in_array('README.md', $files, true) ? 'README.md' : $files[0]);
 
-        return redirect()->route('docs.show', ['file' => $default]);
+        return redirect()->route('global-admin.docs.show', ['file' => $default]);
     }
 
-    public function show(string $file): View
+    public function showGlobal(string $file): View
     {
-        return $this->renderDocument($file, 'root');
+        return $this->renderDocument(
+            file: $file,
+            scope: 'root',
+            indexRouteName: 'global-admin.docs.index',
+            showRouteName: 'global-admin.docs.show',
+            showDevRouteName: 'global-admin.docs.dev.show',
+            backUrl: route('global-admin.home')
+        );
     }
 
-    public function showDev(string $file): View
+    public function showDevGlobal(string $file): View
     {
-        return $this->renderDocument($file, 'dev');
+        return $this->renderDocument(
+            file: $file,
+            scope: 'dev',
+            indexRouteName: 'global-admin.docs.index',
+            showRouteName: 'global-admin.docs.show',
+            showDevRouteName: 'global-admin.docs.dev.show',
+            backUrl: route('global-admin.home')
+        );
     }
 
-    private function renderDocument(string $file, string $scope): View
+    private function renderDocument(
+        string $file,
+        string $scope,
+        string $indexRouteName,
+        string $showRouteName,
+        string $showDevRouteName,
+        string $backUrl,
+    ): View
     {
         $files = $this->docFiles();
         $devFiles = $this->docFiles('dev');
@@ -48,7 +69,14 @@ final class DocumentationController extends Controller
         abort_unless(is_file($absolutePath), 404);
 
         $markdown = (string) file_get_contents($absolutePath);
-        $markdown = $this->rewriteLocalMarkdownLinks($markdown, $files, $devFiles, $scope);
+        $markdown = $this->rewriteLocalMarkdownLinks(
+            markdown: $markdown,
+            availableFiles: $files,
+            availableDevFiles: $devFiles,
+            currentScope: $scope,
+            showRouteName: $showRouteName,
+            showDevRouteName: $showDevRouteName,
+        );
 
         $html = Str::markdown($markdown, [
             'html_input' => 'strip',
@@ -76,6 +104,10 @@ final class DocumentationController extends Controller
             'currentScope' => $scope,
             'currentTitle' => pathinfo($resolved, PATHINFO_FILENAME),
             'contentHtml' => $html,
+            'indexRouteName' => $indexRouteName,
+            'showRouteName' => $showRouteName,
+            'showDevRouteName' => $showDevRouteName,
+            'backUrl' => $backUrl,
         ]);
     }
 
@@ -130,11 +162,25 @@ final class DocumentationController extends Controller
     /**
      * @param list<string> $availableFiles
      */
-    private function rewriteLocalMarkdownLinks(string $markdown, array $availableFiles, array $availableDevFiles, string $currentScope): string
+    private function rewriteLocalMarkdownLinks(
+        string $markdown,
+        array $availableFiles,
+        array $availableDevFiles,
+        string $currentScope,
+        string $showRouteName,
+        string $showDevRouteName,
+    ): string
     {
         return (string) preg_replace_callback(
             '/\[([^\]]+)\]\(([^)]+)\)/',
-            fn (array $matches): string => $this->rewriteSingleMarkdownLink($matches, $availableFiles, $availableDevFiles, $currentScope),
+            fn (array $matches): string => $this->rewriteSingleMarkdownLink(
+                matches: $matches,
+                availableFiles: $availableFiles,
+                availableDevFiles: $availableDevFiles,
+                currentScope: $currentScope,
+                showRouteName: $showRouteName,
+                showDevRouteName: $showDevRouteName,
+            ),
             $markdown
         ) ?? $markdown;
     }
@@ -143,7 +189,14 @@ final class DocumentationController extends Controller
      * @param list<string> $availableFiles
      * @param list<string> $availableDevFiles
      */
-    private function rewriteSingleMarkdownLink(array $matches, array $availableFiles, array $availableDevFiles, string $currentScope): string
+    private function rewriteSingleMarkdownLink(
+        array $matches,
+        array $availableFiles,
+        array $availableDevFiles,
+        string $currentScope,
+        string $showRouteName,
+        string $showDevRouteName,
+    ): string
     {
         $label = (string) ($matches[1] ?? '');
         $target = trim((string) ($matches[2] ?? ''));
@@ -164,7 +217,7 @@ final class DocumentationController extends Controller
             : in_array($resolvedTarget['file'], $availableFiles, true);
 
         if ($exists) {
-            $routeName = $resolvedTarget['scope'] === 'dev' ? 'docs.dev.show' : 'docs.show';
+            $routeName = $resolvedTarget['scope'] === 'dev' ? $showDevRouteName : $showRouteName;
             $url = route($routeName, ['file' => $resolvedTarget['file']]);
             $result = '['.$label.']('.$url.$resolvedTarget['fragment'].')';
         }

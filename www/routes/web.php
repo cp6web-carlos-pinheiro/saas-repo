@@ -94,13 +94,6 @@ Route::middleware('auth:web')->group(function (): void {
 
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     Route::post('/preferences/language', [LanguagePreferenceController::class, 'update'])->name('preferences.language.update');
-    Route::get('/docs', [DocumentationController::class, 'index'])->name('docs.index');
-    Route::get('/docs/{file}', [DocumentationController::class, 'show'])
-        ->where('file', '[^/]+')
-        ->name('docs.show');
-    Route::get('/docs/dev/{file}', [DocumentationController::class, 'showDev'])
-        ->where('file', '[^/]+')
-        ->name('docs.dev.show');
 
     Route::get('/sessions', [SessionManagementController::class, 'index'])->name('sessions.index');
     Route::delete('/sessions/{id}', [SessionManagementController::class, 'destroy'])->name('sessions.destroy');
@@ -385,6 +378,14 @@ Route::middleware('auth:web')->group(function (): void {
 
 Route::prefix('global-admin')->name('global-admin.')->middleware('auth:admin')->group(function (): void {
     Route::get('/', GlobalAdminHomeController::class)->name('home');
+    Route::get('/docs', [DocumentationController::class, 'indexGlobal'])->name('docs.index');
+    Route::get('/docs/{file}', [DocumentationController::class, 'showGlobal'])
+        ->where('file', '[^/]+')
+        ->name('docs.show');
+    Route::get('/docs/dev/{file}', [DocumentationController::class, 'showDevGlobal'])
+        ->where('file', '[^/]+')
+        ->name('docs.dev.show');
+
     Route::get('/customers', [GlobalCustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/create', [GlobalCustomerController::class, 'create'])->name('customers.create');
     Route::post('/customers', [GlobalCustomerController::class, 'store'])->name('customers.store');

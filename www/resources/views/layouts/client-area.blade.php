@@ -344,14 +344,6 @@
             </div>
         </form>
 
-        <a href="{{ route('docs.index') }}" class="ind-settings-nav-link" aria-label="{{ __('ui.open_documentation') }}">
-            <span>{{ __('ui.documentation') }}</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M7 4.75h8.4a2.85 2.85 0 0 1 2.85 2.85v11.65H8.6a2.85 2.85 0 0 0-2.85 2.85V7.6A2.85 2.85 0 0 1 8.6 4.75h.15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M8.25 7.75h6.5M8.25 10.75h6.5M8.25 13.75h4.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-        </a>
-
         <section class="ind-settings-section ind-subscription-card">
             <div class="ind-subscription-heading">
                 <div>

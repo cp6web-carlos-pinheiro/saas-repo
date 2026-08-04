@@ -3,10 +3,14 @@
 @section('title', $currentTitle.' | '.__('ui.documentation').' | '.__('ui.app_name'))
 
 @section('content')
+    @php($indexRouteName = $indexRouteName ?? 'global-admin.docs.index')
+    @php($showRouteName = $showRouteName ?? 'global-admin.docs.show')
+    @php($showDevRouteName = $showDevRouteName ?? 'global-admin.docs.dev.show')
+    @php($backUrl = $backUrl ?? route('global-admin.home'))
     <div class="docs-layout">
         <x-ui.sidebar variant="docs">
             <x-slot:header>
-                <a class="docs-back-link" href="{{ route('dashboard.industrial') }}">&larr; {{ __('ui.back_to_dashboard') }}</a>
+                <a class="docs-back-link" href="{{ $backUrl }}">&larr; {{ __('ui.back_to_dashboard') }}</a>
                 <h1>{{ __('ui.documentation') }}</h1>
                 <p>{{ __('ui.documentation_subtitle') }}</p>
             </x-slot:header>
@@ -16,7 +20,7 @@
                         <x-ui.menu-item
                             variant="docs"
                             :active="$currentScope === 'root' && $document['file'] === $currentFile"
-                            :href="route('docs.show', ['file' => $document['file']])"
+                            :href="route($showRouteName, ['file' => $document['file']])"
                         >
                             {{ $document['label'] }}
                         </x-ui.menu-item>
@@ -32,7 +36,7 @@
                                 <x-ui.menu-item
                                     variant="docs"
                                     :active="$currentScope === 'dev' && $document['file'] === $currentFile"
-                                    :href="route('docs.dev.show', ['file' => $document['file']])"
+                                    :href="route($showDevRouteName, ['file' => $document['file']])"
                                 >
                                     {{ $document['label'] }}
                                 </x-ui.menu-item>
@@ -44,8 +48,8 @@
 
         <main class="docs-content-wrap">
             <x-ui.breadcrumb :items="[
-                ['label' => __('ui.app_name'), 'href' => route('dashboard.industrial')],
-                ['label' => __('ui.documentation'), 'href' => route('docs.index')],
+                ['label' => __('ui.app_name'), 'href' => $backUrl],
+                ['label' => __('ui.documentation'), 'href' => route($indexRouteName)],
                 ['label' => $currentTitle],
             ]" />
 

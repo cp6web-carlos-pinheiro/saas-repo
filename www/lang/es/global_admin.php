@@ -36,6 +36,7 @@ return [
         'customers' => 'Clientes',
         'companies' => 'Empresas',
         'plans' => 'Planes',
+        'documentation' => 'Documentacion',
         'administrators' => 'Administradores',
     ],
     'module_coming_soon' => 'Este módulo estará disponible pronto.',
