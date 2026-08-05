@@ -37,5 +37,10 @@ php artisan key:generate
 # RODAR MIGRATIONS
 php artisan migrate
 
-# INSERIR DADOS INICIAIS E ADMIN admin@beyondgroup.com.br SENHA i14lij69M!@#
+# INSERIR DADOS INICIAIS
 php artisan db:seed
+
+# CREDENCIAIS DO ADMIN
+URL: http://127.0.0.1:8000/global-admin/login
+EMAIL: admin@beyondgroup.com.br 
+SENHA: i14lij69M!@#
