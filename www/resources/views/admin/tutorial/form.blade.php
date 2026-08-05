@@ -26,26 +26,35 @@
             </label>
 
             <label class="block text-sm font-medium">
-                {{ __('global_tutorial.page_title') }}
-                <x-ui.input name="title" :value="old('title', $tutorial?->title)" @class(['mt-2', 'border-red-500' => $errors->has('title'), 'border-[#dadce0]' => ! $errors->has('title')]) />
-                @error('title')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-            </label>
-
-            <label class="block text-sm font-medium">
                 {{ __('global_tutorial.content_html') }}
-                <x-ui.textarea name="content_html" rows="16" required @class(['mt-2 font-mono text-xs', 'border-red-500' => $errors->has('content_html'), 'border-[#dadce0]' => ! $errors->has('content_html')])>{{ old('content_html', $tutorial?->content_html) }}</x-ui.textarea>
+                <div @class(['ind-html-editor mt-2 min-h-[26rem]', 'border-red-500' => $errors->has('content_html'), 'border-[#dadce0]' => ! $errors->has('content_html')]) data-global-tutorial-html-editor>
+                    <div class="ind-html-editor-toolbar" role="toolbar" aria-label="{{ __('global_tutorial.content_html') }}">
+                        <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="P" title="Parágrafo">P</button>
+                        <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="H2" title="Título">H2</button>
+                        <button type="button" class="ind-html-editor-button" data-editor-command="bold" title="Negrito"><strong>B</strong></button>
+                        <button type="button" class="ind-html-editor-button" data-editor-command="italic" title="Itálico"><em>I</em></button>
+                        <button type="button" class="ind-html-editor-button" data-editor-command="underline" title="Sublinhado"><u>U</u></button>
+                        <button type="button" class="ind-html-editor-button" data-editor-command="insertUnorderedList" title="Lista">• Lista</button>
+                        <button type="button" class="ind-html-editor-button" data-editor-command="createLink" title="Link">Link</button>
+                        <button type="button" class="ind-html-editor-button" data-editor-command="removeFormat" title="Limpar formatação">Limpar</button>
+                    </div>
+
+                    <div
+                        class="ind-html-editor-surface"
+                        contenteditable="true"
+                        data-editor-surface
+                        aria-label="{{ __('global_tutorial.content_html') }}"
+                    >{!! old('content_html', $tutorial?->content_html ?? '') !!}</div>
+
+                    <x-ui.textarea
+                        name="content_html"
+                        rows="16"
+                        class="hidden"
+                        data-editor-source
+                    >{!! old('content_html', $tutorial?->content_html) !!}</x-ui.textarea>
+                </div>
                 @error('content_html')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
-
-            @php($previewHtml = old('content_html', $tutorial?->content_html ?? ''))
-            @if ($previewHtml !== '')
-                <div class="rounded-2xl border border-[#dadce0] bg-white p-4">
-                    <h2 class="text-sm font-semibold text-[#5f6368]">{{ __('global_tutorial.preview') }}</h2>
-                    <div class="mt-3 prose prose-slate max-w-none text-sm">
-                        {!! $previewHtml !!}
-                    </div>
-                </div>
-            @endif
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <x-ui.button :href="$editing ? route('global-admin.tutorials.show', $tutorial) : route('global-admin.tutorials.index')" variant="surface-muted" class="rounded-full" :full="true">
@@ -59,4 +68,60 @@
         </form>
     </x-ui.panel>
 </div>
+@endsection
+
+@section('scripts')
+    <script>
+        (() => {
+            const htmlEditor = document.querySelector('[data-global-tutorial-html-editor]');
+
+            if (! htmlEditor) {
+                return;
+            }
+
+            const surface = htmlEditor.querySelector('[data-editor-surface]');
+            const source = htmlEditor.querySelector('[data-editor-source]');
+            const toolbarButtons = htmlEditor.querySelectorAll('[data-editor-command]');
+            const editorForm = htmlEditor.closest('form');
+
+            const syncEditorToSource = () => {
+                if (surface instanceof HTMLElement && source instanceof HTMLTextAreaElement) {
+                    source.value = surface.innerHTML;
+                }
+            };
+
+            for (const button of toolbarButtons) {
+                button.addEventListener('click', () => {
+                    if (! (surface instanceof HTMLElement)) {
+                        return;
+                    }
+
+                    surface.focus();
+
+                    const command = button.getAttribute('data-editor-command');
+                    const value = button.getAttribute('data-editor-value');
+
+                    if (! command) {
+                        return;
+                    }
+
+                    if (command === 'createLink') {
+                        const link = window.prompt('Informe a URL do link', 'https://');
+
+                        if (link && link.trim() !== '') {
+                            document.execCommand('createLink', false, link.trim());
+                        }
+                    } else {
+                        document.execCommand(command, false, value ?? undefined);
+                    }
+
+                    syncEditorToSource();
+                });
+            }
+
+            surface?.addEventListener('input', syncEditorToSource);
+            syncEditorToSource();
+            editorForm?.addEventListener('submit', syncEditorToSource);
+        })();
+    </script>
 @endsection

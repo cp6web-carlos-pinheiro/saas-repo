@@ -331,41 +331,51 @@
         <div class="ind-settings-panel-header">
             <div>
                 <h2>{{ __('ui.tutorial_panel_title') }}</h2>
-                <p>{{ $currentPageTitle !== '' ? $currentPageTitle : __('ui.tutorial_current_page') }}</p>
             </div>
             <button id="tutorialClose" class="ind-settings-close" type="button">{{ __('ui.close') }}</button>
         </div>
 
-        @if ($pageTutorial !== null)
-            <article class="ind-tutorial-content">
-                {!! $pageTutorial->content_html !!}
-            </article>
-        @else
-            <x-ui.alert variant="warning">{{ __('ui.tutorial_empty') }}</x-ui.alert>
-        @endif
-
         @if ($canEditTutorial)
-            <section class="ind-settings-section ind-tutorial-editor">
-                <h3>{{ __('ui.tutorial_editor_title') }}</h3>
-                <p>{{ __('ui.tutorial_editor_description') }}</p>
 
                 <form method="POST" action="{{ route('page-tutorials.upsert') }}" class="space-y-3">
                     @csrf
                     <input type="hidden" name="route_name" value="{{ $tutorialRouteName }}" />
 
-                    <label class="block text-sm font-medium" for="tutorialTitle">{{ __('ui.tutorial_title') }}</label>
-                    <x-ui.input id="tutorialTitle" name="title" :value="old('title', $pageTutorial?->title ?? $currentPageTitle)" maxlength="190" />
+                    <div class="ind-html-editor" data-html-editor>
+                        <div class="ind-html-editor-toolbar" role="toolbar" aria-label="{{ __('ui.tutorial_content_html') }}">
+                            <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="P" title="Parágrafo">P</button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="H2" title="Título">H2</button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="bold" title="Negrito"><strong>B</strong></button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="italic" title="Itálico"><em>I</em></button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="underline" title="Sublinhado"><u>U</u></button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="insertUnorderedList" title="Lista">• Lista</button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="createLink" title="Link">Link</button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="removeFormat" title="Limpar formatação">Limpar</button>
+                        </div>
 
-                    <label class="block text-sm font-medium" for="tutorialContent">{{ __('ui.tutorial_content_html') }}</label>
-                    <x-ui.textarea id="tutorialContent" name="content_html" rows="12">{{ old('content_html', $pageTutorial?->content_html ?? '') }}</x-ui.textarea>
+                        <div
+                            id="tutorialContentEditor"
+                            class="ind-html-editor-surface"
+                            contenteditable="true"
+                            data-editor-surface
+                            aria-label="{{ __('ui.tutorial_content_html') }}"
+                        >{!! old('content_html', $pageTutorial?->content_html ?? '') !!}</div>
+
+                        <x-ui.textarea id="tutorialContent" name="content_html" rows="12" class="hidden" data-editor-source>{!! old('content_html', $pageTutorial?->content_html ?? '') !!}</x-ui.textarea>
+                    </div>
 
                     <div class="ind-settings-actions">
                         <button class="ind-settings-save" type="submit">{{ __('ui.save') }}</button>
                     </div>
                 </form>
-            </section>
-        @elseif ($pageTutorial === null)
-            <p class="ind-tutorial-hint">{{ __('ui.tutorial_admin_only_hint') }}</p>
+        @else
+            @if ($pageTutorial !== null)
+                <article class="ind-tutorial-content">
+                    {!! $pageTutorial->content_html !!}
+                </article>
+            @else
+                <x-ui.alert variant="warning">{{ __('ui.tutorial_empty') }}</x-ui.alert>
+            @endif
         @endif
     </aside>
 
@@ -581,6 +591,55 @@
         tutorialOverlay?.addEventListener('click', function () {
             setTutorialState(false);
         });
+
+        const htmlEditor = document.querySelector('[data-html-editor]');
+
+        if (htmlEditor) {
+            const surface = htmlEditor.querySelector('[data-editor-surface]');
+            const source = htmlEditor.querySelector('[data-editor-source]');
+            const toolbarButtons = htmlEditor.querySelectorAll('[data-editor-command]');
+            const editorForm = htmlEditor.closest('form');
+
+            const syncEditorToSource = () => {
+                if (surface instanceof HTMLElement && source instanceof HTMLTextAreaElement) {
+                    source.value = surface.innerHTML;
+                }
+            };
+
+            for (const button of toolbarButtons) {
+                button.addEventListener('click', function () {
+                    if (! (surface instanceof HTMLElement)) {
+                        return;
+                    }
+
+                    surface.focus();
+
+                    const command = button.getAttribute('data-editor-command');
+                    const value = button.getAttribute('data-editor-value');
+
+                    if (! command) {
+                        return;
+                    }
+
+                    if (command === 'createLink') {
+                        const link = window.prompt('Informe a URL do link', 'https://');
+
+                        if (link && link.trim() !== '') {
+                            document.execCommand('createLink', false, link.trim());
+                        }
+                    } else {
+                        document.execCommand(command, false, value ?? undefined);
+                    }
+
+                    syncEditorToSource();
+                });
+            }
+
+            surface?.addEventListener('input', syncEditorToSource);
+            syncEditorToSource();
+
+            editorForm?.addEventListener('submit', syncEditorToSource);
+        }
 
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape') {

@@ -28,7 +28,6 @@
           <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
             <th class="px-3 py-3">ID</th>
             <th class="px-3 py-3"><a href="{{ $sortUrl('route_name') }}">{{ __('global_tutorial.route_name') }} ↕</a></th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('title') }}">{{ __('global_tutorial.page_title') }} ↕</a></th>
             <th class="px-3 py-3"><a href="{{ $sortUrl('updated_at') }}">{{ __('global_tutorial.updated_at') }} ↕</a></th>
           </tr>
         </thead>
@@ -42,7 +41,6 @@
             >
               <td class="px-3 py-4 text-[#5f6368]">{{ $tutorial->id }}</td>
               <td class="px-3 py-4 font-mono text-xs md:text-sm">{{ $tutorial->route_name }}</td>
-              <td class="px-3 py-4">{{ $tutorial->title ?: '—' }}</td>
               <td class="px-3 py-4 text-[#5f6368]">{{ optional($tutorial->updated_at)->format('d/m/Y H:i') ?: '—' }}</td>
             </tr>
           @empty

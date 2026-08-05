@@ -16,7 +16,7 @@ return [
     'back_to_dashboard' => 'Back to dashboard',
     'settings' => 'Settings',
     'tutorial_help' => 'Page help',
-    'tutorial_panel_title' => 'Page tutorial',
+    'tutorial_panel_title' => 'Tutorial',
     'tutorial_current_page' => 'Current page',
     'tutorial_empty' => 'There is no tutorial content registered for this page yet.',
     'tutorial_editor_title' => 'Edit tutorial',

@@ -3,7 +3,7 @@
 return [
     'title' => 'Tutoriais Globais',
     'eyebrow' => 'Central de ajuda por página',
-    'search' => 'Buscar por rota, título ou conteúdo',
+    'search' => 'Buscar por rota ou conteúdo',
     'filter' => 'Buscar',
     'create' => 'Novo tutorial',
     'edit' => 'Editar tutorial',

@@ -32,7 +32,6 @@ final class PageTutorialController extends Controller
 
         $data = $request->validate([
             'route_name' => ['required', 'string', 'max:190'],
-            'title' => ['nullable', 'string', 'max:190'],
             'content_html' => ['required', 'string'],
         ]);
 
@@ -44,7 +43,6 @@ final class PageTutorialController extends Controller
             $tutorial->created_by_user_id = $user->id;
         }
 
-        $tutorial->title = $data['title'] !== null ? trim($data['title']) : null;
         $tutorial->content_html = $data['content_html'];
         $tutorial->updated_by_user_id = $user->id;
         $tutorial->save();

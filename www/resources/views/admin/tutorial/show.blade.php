@@ -13,8 +13,7 @@
         <div class="flex items-start justify-between gap-4">
             <div>
                 <p class="text-sm text-[#5f6368]">{{ __('global_tutorial.details') }}</p>
-                <h1 class="font-display text-3xl font-bold">{{ $tutorial->title ?: $tutorial->route_name }}</h1>
-                <p class="mt-1 font-mono text-xs text-[#5f6368]">{{ $tutorial->route_name }}</p>
+                <h1 class="font-display text-3xl font-bold">{{ $tutorial->route_name }}</h1>
             </div>
         </div>
 
@@ -22,14 +21,6 @@
             <div class="flex justify-between gap-4 py-3">
                 <dt class="text-[#5f6368]">ID</dt>
                 <dd class="font-medium">{{ $tutorial->id }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-3">
-                <dt class="text-[#5f6368]">{{ __('global_tutorial.route_name') }}</dt>
-                <dd class="font-medium font-mono text-xs md:text-sm">{{ $tutorial->route_name }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-3">
-                <dt class="text-[#5f6368]">{{ __('global_tutorial.page_title') }}</dt>
-                <dd class="font-medium">{{ $tutorial->title ?: '—' }}</dd>
             </div>
             <div class="flex justify-between gap-4 py-3">
                 <dt class="text-[#5f6368]">{{ __('global_tutorial.created_at') }}</dt>
@@ -42,7 +33,6 @@
         </dl>
 
         <div class="mt-8 rounded-2xl border border-[#dadce0] bg-white p-4">
-            <h2 class="text-sm font-semibold text-[#5f6368]">{{ __('global_tutorial.preview') }}</h2>
             <div class="prose prose-slate mt-3 max-w-none text-sm">
                 {!! $tutorial->content_html !!}
             </div>

@@ -16,7 +16,7 @@ return [
     'back_to_dashboard' => 'Voltar ao dashboard',
     'settings' => 'Configurações',
     'tutorial_help' => 'Ajuda da página',
-    'tutorial_panel_title' => 'Tutorial da página',
+    'tutorial_panel_title' => 'Tutorial',
     'tutorial_current_page' => 'Página atual',
     'tutorial_empty' => 'Ainda não existe tutorial cadastrado para esta página.',
     'tutorial_editor_title' => 'Editar tutorial',

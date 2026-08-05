@@ -1035,6 +1035,14 @@ body {
         gap: 1rem;
     }
 
+    .ind-tutorial-panel > form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        flex: 1;
+        min-height: 0;
+    }
+
     .ind-tutorial-content {
         border: 1px solid var(--g-line);
         border-radius: 16px;
@@ -1042,6 +1050,7 @@ body {
         padding: 1rem;
         color: var(--g-text);
         line-height: 1.5;
+
     }
 
     .ind-tutorial-content :first-child {
@@ -1061,6 +1070,57 @@ body {
         margin: 0;
         font-size: 1rem;
         font-weight: 600;
+    }
+
+    .ind-html-editor {
+        border: 1px solid var(--g-line);
+        border-radius: 12px;
+        background: #fff;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        height: 100%;
+    }
+
+    .ind-html-editor-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        padding: 0.5rem;
+        border-bottom: 1px solid var(--g-line);
+        background: var(--g-surface-muted);
+    }
+
+    .ind-html-editor-button {
+        border: 1px solid var(--g-line);
+        background: #fff;
+        color: var(--g-text);
+        border-radius: 8px;
+        font-size: 0.78rem;
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+    }
+
+    .ind-html-editor-button:hover {
+        background: #f7f9fa;
+    }
+
+    .ind-html-editor-surface {
+        min-height: 0;
+        max-height: none;
+        flex: 1;
+        overflow: auto;
+        padding: 0.85rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: var(--g-text);
+    }
+
+    .ind-html-editor-surface:focus {
+        outline: 2px solid color-mix(in oklab, var(--g-primary) 25%, transparent);
+        outline-offset: -2px;
     }
 
     .ind-tutorial-hint {
@@ -1118,6 +1178,15 @@ body {
         align-items: center;
         gap: 0.5rem;
         margin-top: 0.8rem;
+    }
+
+    .ind-tutorial-panel .ind-settings-actions {
+        position: sticky;
+        bottom: 0;
+        margin-top: auto;
+        padding-top: 0.75rem;
+        padding-bottom: 0.25rem;
+        background: linear-gradient(to top, var(--g-bg) 70%, transparent);
     }
 
     .ind-settings-save {
