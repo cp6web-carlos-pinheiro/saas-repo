@@ -34,16 +34,28 @@ R: Utilizar a ultima informação cadastrada.
 - Se eficiência pode superar 100% e como exibir outliers.
 R: A eficiencia não pode superar 100%.
 
+## Status da implementação
+
+Implementados os indicadores `ANA-002.v1` no `ManufacturingAnalyticsService`.
+
+- Previsto x real por operação, recurso, centro e operador.
+- Quantidades planejada, processada, boa, refugada e retrabalhada.
+- Eficiência limitada a 100%; sem tempo padrão, o realizado é usado como padrão.
+- Pausas ficam expostas separadamente e entram no denominador conforme a definição fornecida.
+- Dados atuais da operação representam a última informação consolidada; eventos permanecem disponíveis para drill-down.
+- Endpoints: `/api/v1/analytics/manufacturing/efficiency` e relatório `planned-vs-real`.
+
 ## Entregas
 
 - Services/queries de métricas.
-- Tela analítica com filtros, tabelas e exportação futura.
+- API analítica com filtros, tabelas e exportação CSV.
 - Drill-down do indicador até a operação/eventos.
 - Testes com cenários de apontamento parcial, refugo, pausa e troca de recurso.
 
 ## Critérios de aceite
 
-- Cada indicador tem fórmula documentada.
-- O usuário consegue filtrar e agrupar por operação, recurso e centro; o filtro por operador só aparece quando houver identificação suficiente nos apontamentos.
-- O resultado mostra quantidade e tempo usados no cálculo.
-- Dados sem padrão ou com inconsistência são sinalizados, não silenciosamente descartados.
+- [x] Fórmula e políticas de pausa/tempo ausente são retornadas no contrato.
+- [x] Agrupamento por operação, recurso, centro e operador está disponível.
+- [x] Resultado mostra quantidades e tempos usados.
+- [x] Operadores não identificados aparecem como `UNIDENTIFIED`.
+- [ ] Tela web e exportação XLSX/PDF continuam pendentes.

@@ -13,6 +13,8 @@ use App\Modules\Inventory\Presentation\Http\Controllers\InventoryController;
 use App\Modules\Inventory\Presentation\Http\Controllers\LotSerialTrackingController;
 use App\Modules\Production\Presentation\Http\Controllers\ProductionOrderController;
 use App\Modules\Production\Presentation\Http\Controllers\ProductionMesController;
+use App\Modules\Analysis\Presentation\Http\Controllers\ManufacturingAnalyticsController;
+use App\Modules\Analysis\Presentation\Http\Controllers\ManufacturingReportController;
 use App\Modules\Purchasing\Presentation\Http\Controllers\PurchaseOrderController;
 use App\Modules\Purchasing\Presentation\Http\Controllers\PurchaseRequisitionController;
 use App\Modules\Purchasing\Presentation\Http\Controllers\SupplierController;
@@ -153,6 +155,23 @@ Route::prefix('v1')->group(function (): void {
 
             Route::post('/bom/explode', BomExplosionController::class)
                 ->middleware(CheckPermission::class.':bom.explode');
+
+            Route::get('/analytics/manufacturing/overview', [ManufacturingAnalyticsController::class, 'overview'])
+                ->middleware(CheckPermission::class.':analytics.manufacturing.read');
+            Route::get('/analytics/manufacturing/efficiency', [ManufacturingAnalyticsController::class, 'efficiency'])
+                ->middleware(CheckPermission::class.':analytics.manufacturing.read');
+            Route::get('/analytics/manufacturing/oee', [ManufacturingAnalyticsController::class, 'oee'])
+                ->middleware(CheckPermission::class.':analytics.manufacturing.read');
+            Route::get('/analytics/manufacturing/standard-times', [ManufacturingAnalyticsController::class, 'standardTimes'])
+                ->middleware(CheckPermission::class.':analytics.manufacturing.read');
+            Route::post('/analytics/manufacturing/standard-times/recommend', [ManufacturingAnalyticsController::class, 'recommend'])
+                ->middleware(CheckPermission::class.':analytics.standard-times.recommend');
+            Route::post('/analytics/manufacturing/standard-times/recommendations/{id}/decide', [ManufacturingAnalyticsController::class, 'decide'])
+                ->middleware(CheckPermission::class.':analytics.standard-times.decide');
+            Route::get('/manufacturing-reports/{type}', [ManufacturingReportController::class, 'show'])
+                ->middleware(CheckPermission::class.':manufacturing-reports.read');
+            Route::get('/manufacturing-reports/{type}/export', [ManufacturingReportController::class, 'export'])
+                ->middleware(CheckPermission::class.':manufacturing-reports.export');
 
             Route::post('/mrp/plan', [MrpPlanningController::class, 'run'])
                 ->middleware(CheckPermission::class.':mrp.plan');

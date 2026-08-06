@@ -4,6 +4,17 @@
 
 Usar tempos realizados e resultados de produção para apoiar a revisão dos tempos padrão pela Engenharia de Processos.
 
+## Status da implementação
+
+Implementada a evidência estatística e o workflow de recomendação separado do cadastro aprovado.
+
+- Média, mediana, P90, mínimo, máximo, tamanho de amostra e outliers (>30% da média).
+- Tamanho mínimo de amostra configurável, padrão 5.
+- Recomendações são persistidas em `manufacturing_analytics_recommendations`.
+- Decisões aceitas: `ACCEPTED`, `REJECTED`, `INVESTIGATE` e `ECO_REQUIRED`.
+- Nenhuma recomendação altera automaticamente o tempo padrão; aplicação deve seguir ENG-002/ENG-003.
+- Endpoints de evidência, recomendação e decisão estão em `/api/v1/analytics/manufacturing/standard-times`.
+
 ## Escopo
 
 - Comparar tempo padrão, previsto ajustado e real por operação.
@@ -24,7 +35,8 @@ Usar tempos realizados e resultados de produção para apoiar a revisão dos tem
 
 ## Critérios de aceite
 
-- A Engenharia consegue ver evidência suficiente para revisar um tempo.
-- O sistema distingue recomendação de alteração efetiva.
-- Uma nova versão de tempo mantém o histórico anterior.
-- A OP histórica continua apontando para o tempo usado na época.
+- [x] Engenharia recebe evidência estatística e origem por operação.
+- [x] Recomendação é distinta da alteração efetiva.
+- [x] Decisão e motivo ficam persistidos.
+- [x] OP histórica mantém `standard_time_id/version` no fato.
+- [ ] Aceite automático criando nova versão via ECO ainda não foi conectado.

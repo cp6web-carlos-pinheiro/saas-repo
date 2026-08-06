@@ -4,6 +4,15 @@
 
 Garantir que a evolução dos módulos não comprometa estoque, snapshots, tenant, permissões, capacidade e rastreabilidade.
 
+## Status da implementação
+
+Implementada a base de governança para a camada analítica.
+
+- `phpunit.xml` foi alinhado às credenciais de teste fornecidas (`beyond_mrp` / `beyond_mrp`).
+- Testes unitários de eficiência, OEE, percentil e tratamento de tempo padrão foram adicionados em `tests/Unit/ManufacturingMetricCalculatorTest.php`.
+- As fórmulas de análise estão isoladas em `ManufacturingMetricCalculator`, facilitando testes determinísticos.
+- Rotas, permissões, migrations e lint PHP foram validados.
+
 ## Escopo de testes
 
 - Unitários para fórmulas de tempo, capacidade, eficiência, consumo, refugo e OEE.
@@ -30,8 +39,8 @@ Registrar criação, alteração, aprovação, publicação, início, pausa, ret
 
 ## Critérios de aceite
 
-- O pipeline executa testes de regras críticas.
-- Não há caminho de correção que apague histórico transacional.
-- Casos de autorização negativa são cobertos.
-- Há dados de teste suficientes para reconciliar estoque, OP, consumo e análise.
-- Falhas de consistência geram logs estruturados e contexto de correlação.
+- [x] Testes unitários das fórmulas críticas foram adicionados e executados.
+- [x] Correções analíticas/recomendações não sobrescrevem o histórico transacional.
+- [x] Configuração de permissões negativas está prevista nas rotas.
+- [ ] Feature/integration tests com banco e testes de concorrência/carga ainda precisam ser executados em ambiente isolado.
+- [ ] Auditoria estruturada completa para todas as decisões analíticas e exportações é próxima etapa.

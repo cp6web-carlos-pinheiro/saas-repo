@@ -4,7 +4,17 @@
 
 Criar uma camada de consultas/fatos consistente para análise de OP, operação, tempo, quantidade, consumo, qualidade, recurso e operador.
 
-## Problema atual
+## Status da implementação
+
+Implementada a fundação analítica live sobre os fatos transacionais de PCP/MES.
+
+- `ManufacturingAnalyticsService` define o contrato `ANA-001.v1` e normaliza fatos de operação, quantidade, tempo, recurso, centro e operador.
+- Filtros suportados: período, produto, OP, centro, recurso e operador.
+- O tenant é aplicado pelo `TenantModel` nas consultas.
+- O fato mantém IDs da OP/operação e versões de tempo padrão, permitindo drill-down transacional.
+- Endpoints: `/api/v1/analytics/manufacturing/overview` e relatórios equivalentes.
+
+## Problema anterior
 
 A tela de analytics consulta diretamente ordens e outputs e calcula indicadores simples em memória. Não existe contrato analítico comum, dimensão temporal consolidada, snapshot de parâmetros ou estratégia para grandes volumes.
 
@@ -18,16 +28,16 @@ A tela de analytics consulta diretamente ordens e outputs e calcula indicadores 
 - Planejar índices, agregações e cache.
 - Definir política de dados corrigidos e eventos anulados.
 
-## Entregas
+## Entregas realizadas
 
 - Contrato de métricas documentado.
-- Views/queries ou tabelas analíticas conforme volume.
-- Serviço de filtros e paginação.
+- Query/service analítico reutilizável; cache e tabelas de agregação ficam como evolução para volume maior.
+- Serviço de filtros e contrato de resposta comum.
 - Testes de reconciliação com dados transacionais.
 
 ## Critérios de aceite
 
-- Todos os indicadores usam as mesmas definições de quantidade e tempo.
-- Uma OP pode ser rastreada do fato até os registros transacionais.
-- Filtros não permitem vazamento entre tenants.
-- Totais analíticos reconciliam com OP, outputs e ledger.
+- [x] Indicadores usam fatos e definições comuns de quantidade/tempo.
+- [x] OP e operação são rastreáveis pelos IDs transacionais.
+- [x] Filtros passam pelas consultas tenant-aware.
+- [ ] Reconciliação automatizada completa com ledger e agregações de grande volume ainda precisa de testes de integração/carga.
