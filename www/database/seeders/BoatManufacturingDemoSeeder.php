@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use RuntimeException;
@@ -12,6 +13,8 @@ use RuntimeException;
 final class BoatManufacturingDemoSeeder extends Seeder
 {
     private const COMPANY_ID = 3;
+
+    private const DEMO_DATE = '2026-08-06';
 
     private int $userId;
 
@@ -101,6 +104,8 @@ final class BoatManufacturingDemoSeeder extends Seeder
             'seat' => ['SEAT-NAUTIC', 'Banco náutico estofado', 'RAW', $this->id['unit_un'], false, false, $this->id['category_material']],
             'electric' => ['ELEC-PANEL-12V', 'Painel elétrico marítimo 12 V', 'RAW', $this->id['unit_un'], false, true, $this->id['category_material']],
             'paint' => ['GELCOAT-WHITE-KG', 'Gelcoat naval branco', 'CONSUMABLE', $this->id['unit_kg'], true, false, $this->id['category_material']],
+            'reinforcement' => ['TRANSOM-REINF-300', 'Reforço estrutural de espelho de popa', 'RAW', $this->id['unit_un'], false, false, $this->id['category_material']],
+            'windshield' => ['WINDSHIELD-280', 'Para-brisa curvo OceanCraft 280', 'RAW', $this->id['unit_un'], false, false, $this->id['category_material']],
         ];
 
         foreach ($products as $key => [$sku, $description, $type, $unitId, $lot, $serial, $categoryId]) {
@@ -163,13 +168,35 @@ final class BoatManufacturingDemoSeeder extends Seeder
             'description' => 'Estrutura padrão da lancha OceanCraft 280 Sport',
             'approved_by' => $this->userId, 'approved_at' => now()->subMonths(3),
         ]);
-        $bomComponents = [['hull', 1, 1], ['deck', 2, 1], ['engine', 3, 1], ['seat', 4, 6], ['electric', 5, 1], ['paint', 6, 18]];
+        $bomComponents = [['hull', 1, 1], ['deck', 2, 1], ['engine', 3, 1], ['seat', 4, 6], ['electric', 5, 1], ['windshield', 6, 1]];
         foreach ($bomComponents as [$component, $line, $quantity]) {
             $this->upsertId('bom_items', ['bom_header_id' => $this->id['bom'], 'line_no' => $line], [
                 'company_id' => self::COMPANY_ID, 'component_product_id' => $this->id[$component],
                 'unit_id' => DB::table('products')->where('id', $this->id[$component])->value('unit_id'),
                 'quantity_per' => $quantity,
             ]);
+        }
+
+        $substructures = [
+            'bom_hull' => ['hull', 'Subestrutura: casco laminado 28 pés', [
+                ['resin', 1, 120], ['fiber', 2, 250], ['paint', 3, 18], ['reinforcement', 4, 1],
+            ]],
+            'bom_deck' => ['deck', 'Subestrutura: convés modular 28 pés', [
+                ['resin', 1, 35], ['fiber', 2, 85], ['electric', 3, 1], ['seat', 4, 6], ['windshield', 5, 1],
+            ]],
+        ];
+        foreach ($substructures as $bomKey => [$product, $description, $components]) {
+            $this->id[$bomKey] = $this->upsertId('bom_headers', ['company_id' => self::COMPANY_ID, 'product_id' => $this->id[$product], 'version_number' => 1], [
+                'status' => 'APPROVED', 'effective_from' => now()->subMonths(3)->toDateString(),
+                'description' => $description, 'approved_by' => $this->userId, 'approved_at' => now()->subMonths(3),
+            ]);
+            foreach ($components as [$component, $line, $quantity]) {
+                $this->upsertId('bom_items', ['bom_header_id' => $this->id[$bomKey], 'line_no' => $line], [
+                    'company_id' => self::COMPANY_ID, 'component_product_id' => $this->id[$component],
+                    'unit_id' => DB::table('products')->where('id', $this->id[$component])->value('unit_id'),
+                    'quantity_per' => $quantity,
+                ]);
+            }
         }
 
         $this->id['routing'] = $this->upsertId('routing_versions', ['company_id' => self::COMPANY_ID, 'product_id' => $this->id['boat'], 'version_number' => 1], [
@@ -249,6 +276,25 @@ final class BoatManufacturingDemoSeeder extends Seeder
             'supplier_sku' => 'MP-OUTBOARD-300', 'moq' => 1, 'lead_time_days' => 30,
             'unit_price' => 118000, 'is_preferred' => true, 'is_active' => true,
         ]);
+        $this->id['supplier_composites'] = $this->upsertId('suppliers', ['company_id' => self::COMPANY_ID, 'code' => 'SUP-COMPOSITES-01'], [
+            'name' => 'Compósitos do Atlântico', 'email' => 'comercial@compositos.demo', 'phone' => '+55 48 3333-1100',
+            'status' => 'ACTIVE', 'default_lead_time_days' => 12, 'payment_terms' => '28 dias',
+        ]);
+        $this->id['supplier_outfitting'] = $this->upsertId('suppliers', ['company_id' => self::COMPANY_ID, 'code' => 'SUP-NAUTIC-01'], [
+            'name' => 'Náutica Equipamentos Sul', 'email' => 'vendas@nauticaequipamentos.demo', 'phone' => '+55 48 3333-1200',
+            'status' => 'ACTIVE', 'default_lead_time_days' => 15, 'payment_terms' => '30 dias',
+        ]);
+        foreach ([
+            ['supplier_composites', 'resin', 'CA-RES-01', 26], ['supplier_composites', 'fiber', 'CA-FIB-600', 19],
+            ['supplier_composites', 'paint', 'CA-GEL-W', 42], ['supplier_composites', 'reinforcement', 'CA-REF-300', 1800],
+            ['supplier_outfitting', 'seat', 'NES-SEAT-01', 2400], ['supplier_outfitting', 'electric', 'NES-PANEL-12', 3200],
+            ['supplier_outfitting', 'windshield', 'NES-WIND-280', 7800],
+        ] as [$supplierKey, $product, $supplierSku, $price]) {
+            $this->upsertId('supplier_products', ['company_id' => self::COMPANY_ID, 'supplier_id' => $this->id[$supplierKey], 'product_id' => $this->id[$product]], [
+                'supplier_sku' => $supplierSku, 'moq' => 1, 'lead_time_days' => $supplierKey === 'supplier_composites' ? 12 : 15,
+                'unit_price' => $price, 'is_preferred' => true, 'is_active' => true,
+            ]);
+        }
 
         $this->id['requisition'] = $this->upsertId('purchase_requisitions', ['company_id' => self::COMPANY_ID, 'requisition_number' => 'REQ-BOAT-0001'], [
             'status' => 'APPROVED', 'required_date' => now()->addDays(20)->toDateString(), 'source_type' => 'MRP',
@@ -290,12 +336,42 @@ final class BoatManufacturingDemoSeeder extends Seeder
             'posted_by' => $this->userId, 'posted_at' => now()->subDays(2), 'notes' => 'Motor recebido e inspecionado.',
         ]);
 
+        foreach ([
+            ['REQ-BOAT-0002', 'PC-BOAT-0002', 'supplier_composites', [['resin', 500, 26], ['fiber', 900, 19], ['paint', 120, 42], ['reinforcement', 3, 1800]]],
+            ['REQ-BOAT-0003', 'PC-BOAT-0003', 'supplier_outfitting', [['seat', 24, 2400], ['electric', 4, 3200], ['windshield', 2, 7800]]],
+        ] as [$requisitionNumber, $purchaseOrderNumber, $supplierKey, $lines]) {
+            $requisitionId = $this->upsertId('purchase_requisitions', ['company_id' => self::COMPANY_ID, 'requisition_number' => $requisitionNumber], [
+                'status' => 'APPROVED', 'required_date' => now()->addDays(20)->toDateString(), 'source_type' => 'PRODUCTION',
+                'requested_by' => $this->userId, 'approved_by' => $this->userId, 'approved_at' => now()->subDays(10),
+                'notes' => 'Reposição de componentes para fabricação das lanchas OceanCraft 280.',
+            ]);
+            $purchaseOrderId = $this->upsertId('purchase_orders', ['company_id' => self::COMPANY_ID, 'purchase_order_number' => $purchaseOrderNumber], [
+                'supplier_id' => $this->id[$supplierKey], 'purchase_requisition_id' => $requisitionId, 'status' => 'APPROVED',
+                'order_date' => now()->subDays(10)->toDateString(), 'expected_delivery_date' => now()->addDays(10)->toDateString(),
+                'created_by' => $this->userId, 'approved_by' => $this->userId, 'approved_at' => now()->subDays(9),
+                'notes' => 'Compra demonstrativa de componentes da estrutura multinível.',
+            ]);
+            foreach ($lines as [$product, $quantity, $price]) {
+                $lineId = $this->upsertId('purchase_requisition_lines', ['company_id' => self::COMPANY_ID, 'purchase_requisition_id' => $requisitionId, 'product_id' => $this->id[$product]], [
+                    'warehouse_id' => $this->id['warehouse_raw'], 'supplier_id' => $this->id[$supplierKey],
+                    'suggested_quantity' => $quantity, 'requested_quantity' => $quantity, 'moq_applied' => 1, 'lead_time_days' => 15,
+                    'need_by_date' => now()->addDays(20)->toDateString(), 'order_date' => now()->subDays(10)->toDateString(), 'status' => 'CONVERTED',
+                ]);
+                $this->upsertId('purchase_order_lines', ['company_id' => self::COMPANY_ID, 'purchase_order_id' => $purchaseOrderId, 'product_id' => $this->id[$product]], [
+                    'purchase_requisition_line_id' => $lineId, 'warehouse_id' => $this->id['warehouse_raw'],
+                    'quantity_ordered' => $quantity, 'quantity_received' => 0, 'unit_price' => $price,
+                    'need_by_date' => now()->addDays(20)->toDateString(), 'promised_date' => now()->addDays(10)->toDateString(), 'status' => 'OPEN',
+                ]);
+            }
+        }
+
         $this->id['customer'] = $this->upsertId('customers', ['company_id' => self::COMPANY_ID, 'code' => 'CLI-MARINA-01'], [
             'name' => 'Marina Costa Azul', 'person_type' => 'PJ',
             'email' => 'compras@marinacostaazul.demo', 'phone' => '+55 48 3222-2000', 'status' => 'ACTIVE',
             'metadata' => $this->json(['segment' => 'marina', 'city' => 'Florianópolis']),
         ]);
-        $this->id['sale'] = $this->upsertId('sales', ['company_id' => self::COMPANY_ID, 'customer_id' => $this->id['customer'], 'sale_date' => now()->subDays(45)->toDateString()], [
+        $this->id['sale'] = $this->upsertId('sales', ['company_id' => self::COMPANY_ID, 'customer_id' => $this->id['customer'], 'notes' => 'Lancha personalizada com kit de navegação costeira.'], [
+            'sale_date' => now()->subDays(45)->toDateString(),
             'status' => 'CONFIRMED', 'confirmed_by' => $this->userId, 'confirmed_at' => now()->subDays(44),
             'operational_status' => 'DELIVERED', 'picking_by' => $this->userId, 'picking_at' => now()->subDays(5),
             'invoiced_by' => $this->userId, 'invoiced_at' => now()->subDays(4), 'shipped_by' => $this->userId,
@@ -306,6 +382,19 @@ final class BoatManufacturingDemoSeeder extends Seeder
         $this->upsertId('sale_lines', ['company_id' => self::COMPANY_ID, 'sale_id' => $this->id['sale'], 'product_id' => $this->id['boat']], [
             'quantity' => 1, 'unit_price' => 670000, 'metadata' => $this->json(['color' => 'branco e azul']),
         ]);
+        $this->id['components_sale'] = $this->upsertId('sales', ['company_id' => self::COMPANY_ID, 'customer_id' => $this->id['customer'], 'notes' => 'Venda demonstrativa de componentes náuticos para manutenção.'], [
+            'sale_date' => now()->subDays(12)->toDateString(), 'status' => 'CONFIRMED', 'confirmed_by' => $this->userId,
+            'confirmed_at' => now()->subDays(12), 'operational_status' => 'DELIVERED', 'picking_by' => $this->userId,
+            'picking_at' => now()->subDays(11), 'invoiced_by' => $this->userId, 'invoiced_at' => now()->subDays(11),
+            'shipped_by' => $this->userId, 'shipped_at' => now()->subDays(10), 'delivered_by' => $this->userId,
+            'delivered_at' => now()->subDays(10), 'subtotal_cents' => 2966800, 'discount_cents' => 0, 'amount_cents' => 2966800,
+            'notes' => 'Venda demonstrativa de componentes náuticos para manutenção.',
+        ]);
+        foreach ([['resin', 20, 36], ['fiber', 30, 28], ['paint', 5, 62], ['seat', 2, 3600], ['electric', 1, 4800], ['windshield', 1, 11200]] as [$product, $quantity, $price]) {
+            $this->upsertId('sale_lines', ['company_id' => self::COMPANY_ID, 'sale_id' => $this->id['components_sale'], 'product_id' => $this->id[$product]], [
+                'quantity' => $quantity, 'unit_price' => $price, 'metadata' => $this->json(['purpose' => 'manutenção náutica']),
+            ]);
+        }
     }
 
     private function seedInventory(): void
@@ -370,7 +459,7 @@ final class BoatManufacturingDemoSeeder extends Seeder
         foreach ($bomComponents as [$component, $line, $quantity]) {
             $this->upsertId('production_order_bom_item_snapshots', ['production_order_bom_snapshot_id' => $this->id['bom_snapshot'], 'level' => 1, 'parent_product_id' => $this->id['boat'], 'component_product_id' => $this->id[$component], 'line_no' => $line], [
                 'company_id' => self::COMPANY_ID, 'source_bom_header_id' => $this->id['bom'], 'source_bom_version_number' => 1,
-                'quantity_per' => $quantity, 'scrap_factor' => 0, 'quantity_required' => $quantity,
+                'quantity_per' => $quantity, 'quantity_required' => $quantity,
                 'quantity_accumulated' => $quantity, 'path' => $this->id['boat'].'>'.$this->id[$component], 'is_cycle' => false,
             ]);
         }
@@ -422,23 +511,26 @@ final class BoatManufacturingDemoSeeder extends Seeder
                     'reason_code' => $event === 'PAUSE' ? 'INTERVALO' : null, 'notes' => 'Evento demonstrativo de execução naval.',
                 ]);
             }
-            $this->upsertId('production_operation_outputs', ['company_id' => self::COMPANY_ID, 'production_order_operation_id' => $opId, 'reported_at' => $end], [
+            $outputKeys = [
+                'company_id' => self::COMPANY_ID,
+                'production_order_operation_id' => $opId,
+                'notes' => 'Apontamento aprovado do cenário demonstrativo.',
+            ];
+            $this->removeDuplicateDemoRows('production_operation_outputs', $outputKeys);
+            $this->upsertId('production_operation_outputs', $outputKeys, [
+                'reported_at' => $end,
+                'production_order_id' => $this->id['order'], 'work_center_id' => $this->id['wc_'.$center],
+                'setup_time_minutes' => $setup, 'process_time_minutes' => $runtime,
                 'quantity_good' => 1, 'quantity_scrapped' => $sequence === 4 ? 0.02 : 0,
                 'quantity_rework' => $sequence === 4 ? 0.02 : 0, 'lot_number' => 'BOAT-280-2026-001',
                 'inspection_status' => 'APPROVED', 'scrap_cause_code' => $sequence === 4 ? 'GELCOAT-BOLHA' : null,
                 'destination' => $sequence === 5 ? 'FINISHED_GOODS' : 'NEXT_OPERATION',
-                'operator_id' => $this->userId, 'production_resource_id' => $this->id['op_resource_'.$sequence],
+                'inspected_at' => $end, 'inspection_notes' => 'Inspeção da operação aprovada.',
+                'operator_id' => $this->userId, 'created_by' => $this->userId,
+                'production_resource_id' => $this->id['op_resource_'.$sequence],
                 'notes' => 'Apontamento aprovado do cenário demonstrativo.',
             ]);
         }
-
-        $this->id['order_output'] = $this->upsertId('production_order_outputs', ['company_id' => self::COMPANY_ID, 'production_order_id' => $this->id['order'], 'lot_number' => 'BOAT-280-2026-001'], [
-            'quantity_completed' => 1, 'quantity_scrapped' => 0, 'produced_at' => now()->subDays(3),
-            'created_by' => $this->userId, 'operation_no' => 50, 'work_center_id' => $this->id['wc_quality'],
-            'setup_time_minutes' => 30, 'process_time_minutes' => 180, 'inspection_status' => 'APPROVED',
-            'inspection_notes' => 'Teste de estanqueidade, elétrica e navegação aprovados.', 'inspected_at' => now()->subDays(3),
-            'metadata' => $this->json(['sea_trial' => 'approved']),
-        ]);
 
         $this->id['issue_movement'] = $this->upsertId('stock_ledger_movements', ['company_id' => self::COMPANY_ID, 'reference_type' => 'production_order', 'reference_id' => $this->id['order']], [
             'warehouse_id' => $this->id['warehouse_raw'], 'product_id' => $this->id['resin'], 'movement_type' => 'ISSUE',
@@ -502,7 +594,7 @@ final class BoatManufacturingDemoSeeder extends Seeder
     {
         foreach (range(0, 13) as $offset) {
             foreach (['wc_cut', 'wc_lamination', 'wc_assembly', 'wc_finish', 'wc_quality'] as $centerKey) {
-                $date = now()->addDays($offset);
+                $date = Carbon::parse(self::DEMO_DATE)->addDays($offset);
                 $this->upsertId('production_calendar_days', ['company_id' => self::COMPANY_ID, 'work_center_id' => $this->id[$centerKey], 'calendar_date' => $date->toDateString()], [
                     'is_working_day' => ! $date->isWeekend(), 'available_capacity' => $date->isWeekend() ? 0 : 8,
                     'notes' => $date->isWeekend() ? 'Fim de semana' : 'Calendário padrão do estaleiro',
@@ -585,6 +677,16 @@ final class BoatManufacturingDemoSeeder extends Seeder
         DB::table($table)->updateOrInsert($keys, $values);
 
         return (int) DB::table($table)->where($keys)->value('id');
+    }
+
+    /** @param array<string, mixed> $keys */
+    private function removeDuplicateDemoRows(string $table, array $keys): void
+    {
+        $ids = DB::table($table)->where($keys)->orderBy('id')->pluck('id');
+
+        if ($ids->count() > 1) {
+            DB::table($table)->whereIn('id', $ids->slice(1)->all())->delete();
+        }
     }
 
     /** @param array<string, mixed> $value */
