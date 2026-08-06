@@ -11,6 +11,7 @@ use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\CompanyUserAccessService;
+use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -26,6 +27,12 @@ final class AccountOnboardingFlowTest extends TestCase
     private const FIRST_MEMBER_EMAIL = 'carla@prime.com';
 
     private const SECOND_MEMBER_EMAIL = 'diego@nova.com';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(PlanSeeder::class);
+    }
 
     public function test_it_creates_the_account_and_sends_invites(): void
     {
@@ -167,6 +174,7 @@ final class AccountOnboardingFlowTest extends TestCase
             'email' => $email,
             'password' => self::TEST_SECRET,
             'password_confirmation' => self::TEST_SECRET,
+            'preferred_locale' => 'pt_BR',
             'terms' => '1',
         ])->assertRedirect(route('onboarding.wizard'));
 
