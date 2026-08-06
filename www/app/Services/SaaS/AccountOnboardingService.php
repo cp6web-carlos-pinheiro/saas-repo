@@ -412,9 +412,11 @@ final class AccountOnboardingService
     {
         $companyId = (int) ($user->current_company_id ?? 0);
 
-        return $companyId > 0 && $user->roles()
-            ->wherePivot('company_id', $companyId)
-            ->whereIn('slug', [self::MASTER_ROLE_SLUG, 'admin', 'account-master', 'organization-admin'])
+        return $companyId > 0 && DB::table('role_user')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->where('role_user.user_id', $user->id)
+            ->where('role_user.company_id', $companyId)
+            ->whereIn('roles.slug', [self::MASTER_ROLE_SLUG, 'admin', 'account-master', 'organization-admin'])
             ->exists();
     }
 

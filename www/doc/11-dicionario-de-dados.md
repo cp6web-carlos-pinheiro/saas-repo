@@ -4,7 +4,6 @@ Schema MySQL `beyond_mrp` efetivamente migrado. Cada tabela possui um domínio p
 
 - Tabelas: **86**.
 - Consolidação estrutural aplicada em `2026_08_09_000001`: `companies` é a única raiz de tenancy; `production_operation_outputs` é a única fonte de apontamentos; estruturas legadas removidas não fazem mais parte do schema corrente.
-- Colunas: **1185**.
 - “Nula” informa se aceita `NULL`; “—” indica ausência de default explícito.
 
 ## Índice por domínio
@@ -1489,7 +1488,11 @@ Documento funcional: [08-producao-mes-e-qualidade.md](08-producao-mes-e-qualidad
 | --- | --- | --- | --- | --- |
 | `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
 | `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
-| `production_order_operation_id` | `bigint unsigned` | Não | — | Referência a `production_order_operations.id`. |
+| `production_order_id` | `bigint unsigned` | Sim | — | Referência a `production_orders.id`. |
+| `production_order_operation_id` | `bigint unsigned` | Sim | — | Referência a `production_order_operations.id`. |
+| `work_center_id` | `bigint unsigned` | Sim | — | Referência a `work_centers.id`. |
+| `setup_time_minutes` | `decimal(10,2)` | Não | `0.00` | Tempo de preparação. |
+| `process_time_minutes` | `decimal(10,2)` | Não | `0.00` | Tempo de processamento. |
 | `event_type` | `varchar(20)` | Não | — | Tipo ou classificação de event type. |
 | `idempotency_key` | `varchar(120)` | Não | — | Chave funcional de idempotency key. |
 | `occurred_at` | `timestamp` | Não | — | Data e hora de occurred. |
@@ -1515,9 +1518,12 @@ Documento funcional: [08-producao-mes-e-qualidade.md](08-producao-mes-e-qualidad
 | `quantity_rework` | `decimal(18,6)` | Não | `0.000000` | Quantidade de rework. |
 | `lot_number` | `varchar(80)` | Sim | — | Número funcional de lot number. |
 | `inspection_status` | `varchar(20)` | Não | `PENDING` | Atributo funcional de inspection status. |
+| `inspected_at` | `timestamp` | Sim | — | Data da inspeção. |
+| `inspection_notes` | `text` | Sim | — | Observações da inspeção. |
 | `scrap_cause_code` | `varchar(80)` | Sim | — | Atributo funcional de scrap cause code. |
 | `destination` | `varchar(30)` | Sim | — | Atributo funcional de destination. |
 | `operator_id` | `bigint unsigned` | Sim | — | Referência a `users.id`. |
+| `created_by` | `bigint unsigned` | Sim | — | Referência a `users.id`. |
 | `production_resource_id` | `bigint unsigned` | Sim | — | Referência a `production_resources.id`. |
 | `reported_at` | `timestamp` | Não | — | Data e hora de reported. |
 | `notes` | `text` | Sim | — | Observações livres. |

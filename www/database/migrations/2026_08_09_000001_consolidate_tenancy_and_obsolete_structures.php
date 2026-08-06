@@ -149,19 +149,23 @@ return new class extends Migration
             }
         });
 
-        if ($uniqueWithUser) {
-            Schema::table($tableName, static function (Blueprint $table): void {
-                $table->unique(['company_id', 'user_id'], 'uq_onboarding_company_user');
-            });
+        if ($uniqueWithUser && ! Schema::hasIndex($tableName, 'uq_onboarding_company_user')) {
+            try {
+                Schema::table($tableName, static function (Blueprint $table): void {
+                    $table->unique(['company_id', 'user_id'], 'uq_onboarding_company_user');
+                });
+            } catch (Throwable) {
+                // SQLite can retain the rebuilt unique index under the new columns.
+            }
         }
 
-        if ($tableName === 'trials') {
+        if ($tableName === 'trials' && ! Schema::hasIndex($tableName, 'ix_trials_company_status')) {
             Schema::table($tableName, static function (Blueprint $table): void {
                 $table->index(['company_id', 'status'], 'ix_trials_company_status');
             });
         }
 
-        if ($tableName === 'account_invitations') {
+        if ($tableName === 'account_invitations' && ! Schema::hasIndex($tableName, 'ix_invitations_company_accepted')) {
             Schema::table($tableName, static function (Blueprint $table): void {
                 $table->index(['company_id', 'accepted_at'], 'ix_invitations_company_accepted');
             });
@@ -205,10 +209,22 @@ return new class extends Migration
             $table->unsignedBigInteger('production_order_operation_id')->nullable()->change();
         });
 
-        DB::table('production_operation_outputs as output')
-            ->join('production_order_operations as operation', 'operation.id', '=', 'output.production_order_operation_id')
-            ->whereNull('output.production_order_id')
-            ->update(['output.production_order_id' => DB::raw('operation.production_order_id')]);
+        $operationOutputs = DB::table('production_operation_outputs')
+            ->whereNull('production_order_id')
+            ->whereNotNull('production_order_operation_id')
+            ->get(['id', 'production_order_operation_id']);
+
+        foreach ($operationOutputs as $output) {
+            $productionOrderId = DB::table('production_order_operations')
+                ->where('id', (int) $output->production_order_operation_id)
+                ->value('production_order_id');
+
+            if ($productionOrderId !== null) {
+                DB::table('production_operation_outputs')
+                    ->where('id', (int) $output->id)
+                    ->update(['production_order_id' => (int) $productionOrderId]);
+            }
+        }
 
         $legacyOutputs = DB::table('production_order_outputs')->orderBy('id')->get();
 
