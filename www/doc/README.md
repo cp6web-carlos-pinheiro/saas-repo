@@ -14,7 +14,8 @@ Esta pasta é a fonte central da documentação funcional do sistema. O conteúd
 8. [Produção, MES e qualidade](08-producao-mes-e-qualidade.md)
 9. [Análise e relatórios](09-analise-e-relatorios.md)
 10. [APIs e operação técnica](10-apis-e-operacao-tecnica.md)
-11. [Dicionário de dados](11-dicionario-de-dados.md)
+
+O dicionário de dados está distribuído nesses documentos: cada domínio descreve suas próprias tabelas, colunas e relacionamentos.
 
 ## Convenções
 
@@ -23,6 +24,8 @@ Esta pasta é a fonte central da documentação funcional do sistema. O conteúd
 - Ações protegidas exigem permissões granulares do domínio.
 - Estados e códigos técnicos são apresentados em maiúsculas porque correspondem aos valores persistidos.
 - “Limitações atuais” descreve apenas fronteiras observadas na implementação, não um backlog comprometido.
+- O schema MySQL corrente possui 86 tabelas; outras seis estruturas removidas permanecem documentadas como histórico nos respectivos domínios.
+- A consolidação `2026_08_09_000001` tornou `companies` a única raiz de tenancy e `production_operation_outputs` a única fonte de apontamentos de produção.
 
 ## Atualização
 

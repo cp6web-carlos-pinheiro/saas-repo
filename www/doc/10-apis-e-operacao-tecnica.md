@@ -44,4 +44,79 @@ Documentar as capacidades transversais usadas para integrar, operar e diagnostic
 
 ## Dicionário de dados
 
-Consulte as [tabelas de APIs e operação técnica](11-dicionario-de-dados.md#apis-e-operacao-tecnica).
+As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas removidas preservadas como histórico. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
+
+### `cache`
+
+**Finalidade:** Registros funcionais de cache.
+
+| Coluna | Tipo | Nula | Padrão | Descrição |
+| --- | --- | --- | --- | --- |
+| `key` | `varchar(255)` | Não | — | Chave funcional de key. |
+| `value` | `mediumtext` | Não | — | Atributo funcional de value. |
+| `expiration` | `int` | Não | — | Atributo funcional de expiration. |
+
+### `cache_locks`
+
+**Finalidade:** Registros funcionais de cache locks.
+
+| Coluna | Tipo | Nula | Padrão | Descrição |
+| --- | --- | --- | --- | --- |
+| `key` | `varchar(255)` | Não | — | Chave funcional de key. |
+| `owner` | `varchar(255)` | Não | — | Atributo funcional de owner. |
+| `expiration` | `int` | Não | — | Atributo funcional de expiration. |
+
+### `failed_jobs`
+
+**Finalidade:** Jobs encerrados com falha.
+
+| Coluna | Tipo | Nula | Padrão | Descrição |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
+| `uuid` | `varchar(255)` | Não | — | Atributo funcional de uuid. |
+| `connection` | `text` | Não | — | Atributo funcional de connection. |
+| `queue` | `text` | Não | — | Atributo funcional de queue. |
+| `payload` | `longtext` | Não | — | Conteúdo adicional em JSON. |
+| `exception` | `longtext` | Não | — | Atributo funcional de exception. |
+| `failed_at` | `timestamp; DEFAULT_GENERATED` | Não | `CURRENT_TIMESTAMP` | Data e hora de failed. |
+
+### `job_batches`
+
+**Finalidade:** Registros funcionais de job batches.
+
+| Coluna | Tipo | Nula | Padrão | Descrição |
+| --- | --- | --- | --- | --- |
+| `id` | `varchar(255)` | Não | — | Identificador único. |
+| `name` | `varchar(255)` | Não | — | Nome. |
+| `total_jobs` | `int` | Não | — | Atributo funcional de total jobs. |
+| `pending_jobs` | `int` | Não | — | Atributo funcional de pending jobs. |
+| `failed_jobs` | `int` | Não | — | Atributo funcional de failed jobs. |
+| `failed_job_ids` | `longtext` | Não | — | Atributo funcional de failed job ids. |
+| `options` | `mediumtext` | Sim | — | Atributo funcional de options. |
+| `cancelled_at` | `int` | Sim | — | Data e hora de cancelled. |
+| `created_at` | `int` | Não | — | Data e hora de criação. |
+| `finished_at` | `int` | Sim | — | Data e hora de finished. |
+
+### `jobs`
+
+**Finalidade:** Jobs aguardando processamento.
+
+| Coluna | Tipo | Nula | Padrão | Descrição |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
+| `queue` | `varchar(255)` | Não | — | Atributo funcional de queue. |
+| `payload` | `longtext` | Não | — | Conteúdo adicional em JSON. |
+| `attempts` | `tinyint unsigned` | Não | — | Atributo funcional de attempts. |
+| `reserved_at` | `int unsigned` | Sim | — | Data e hora de reserved. |
+| `available_at` | `int unsigned` | Não | — | Data e hora de available. |
+| `created_at` | `int unsigned` | Não | — | Data e hora de criação. |
+
+### `migrations`
+
+**Finalidade:** Migrations aplicadas.
+
+| Coluna | Tipo | Nula | Padrão | Descrição |
+| --- | --- | --- | --- | --- |
+| `id` | `int unsigned; auto_increment` | Não | — | Identificador único. |
+| `migration` | `varchar(255)` | Não | — | Atributo funcional de migration. |
+| `batch` | `int` | Não | — | Atributo funcional de batch. |

@@ -48,4 +48,28 @@ Transformar os fatos de produção em indicadores operacionais reproduzíveis e 
 
 ## Dicionário de dados
 
-Consulte as [tabelas de Análise e relatórios](11-dicionario-de-dados.md#analise-e-relatorios).
+As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas removidas preservadas como histórico. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
+
+### `manufacturing_analytics_recommendations`
+
+**Finalidade:** Recomendações de revisão de tempos.
+
+| Coluna | Tipo | Nula | Padrão | Descrição |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
+| `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
+| `production_order_operation_id` | `bigint unsigned` | Sim | — | Referência a `production_order_operations.id`. |
+| `routing_operation_id` | `bigint unsigned` | Sim | — | Identificador relacionado a routing operation. |
+| `standard_time_id` | `bigint unsigned` | Sim | — | Identificador relacionado a standard time. |
+| `standard_time_version` | `int unsigned` | Sim | — | Versão de standard time version. |
+| `status` | `varchar(20)` | Não | `PENDING` | Estado atual no workflow. |
+| `current_time_minutes` | `decimal(10,2)` | Sim | — | Duração em minutos de current time. |
+| `suggested_time_minutes` | `decimal(10,2)` | Sim | — | Duração em minutos de suggested time. |
+| `sample_size` | `int unsigned` | Não | `0` | Atributo funcional de sample size. |
+| `statistics` | `json` | Sim | — | Dados estruturados de statistics em JSON. |
+| `filters` | `json` | Sim | — | Dados estruturados de filters em JSON. |
+| `decision_reason` | `text` | Sim | — | Atributo funcional de decision reason. |
+| `decided_by` | `bigint unsigned` | Sim | — | Referência a `users.id`. |
+| `decided_at` | `timestamp` | Sim | — | Data e hora de decided. |
+| `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
+| `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
