@@ -41,24 +41,6 @@
                         </x-ui.menu-item>
                     @endforeach
                 </x-ui.menu>
-
-                @if (! empty($devDocuments))
-                    <details class="docs-folder" {{ $currentScope === 'dev' ? 'open' : '' }}>
-                        <summary>Desenvolvimento</summary>
-
-                        <x-ui.menu variant="docs" class="docs-list-nested" aria-label="doc dev">
-                            @foreach ($devDocuments as $document)
-                                <x-ui.menu-item
-                                    variant="docs"
-                                    :active="$currentScope === 'dev' && $document['file'] === $currentFile"
-                                    :href="route($showDevRouteName, ['file' => $document['file']])"
-                                >
-                                    {{ $document['label'] }}
-                                </x-ui.menu-item>
-                            @endforeach
-                        </x-ui.menu>
-                    </details>
-                @endif
             </x-ui.panel>
         </aside>
     </div>

@@ -90,16 +90,8 @@ final class DocumentationController extends Controller
             ];
         }, $files);
 
-        $devDocuments = array_map(static function (string $docFile): array {
-            return [
-                'file' => $docFile,
-                'label' => pathinfo($docFile, PATHINFO_FILENAME),
-            ];
-        }, $devFiles);
-
         return view('docs.viewer', [
             'documents' => $documents,
-            'devDocuments' => $devDocuments,
             'currentFile' => $resolved,
             'currentScope' => $scope,
             'currentTitle' => pathinfo($resolved, PATHINFO_FILENAME),
