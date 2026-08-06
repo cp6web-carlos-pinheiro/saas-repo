@@ -636,7 +636,9 @@ body {
     }
 
     .docs-article th:last-child,
-    .docs-article td:last-child {
+    .docs-article th:first-child,
+    .docs-article td:last-child,
+    .docs-article td:first-child {
         overflow-wrap: anywhere;
         word-break: break-word;
     }
