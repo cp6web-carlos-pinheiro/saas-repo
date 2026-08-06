@@ -10,7 +10,9 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('production_order_operations', function (Blueprint $table): void {
-            $table->foreignId('actual_production_resource_id')->nullable()->constrained('production_resources')->nullOnDelete();
+            $table->foreignId('actual_production_resource_id')->nullable()
+                ->constrained('production_resources', 'id', 'fk_po_operation_actual_resource')
+                ->nullOnDelete();
             $table->foreignId('operator_id')->nullable()->constrained('users')->nullOnDelete();
             $table->decimal('quantity_processed', 18, 6)->default(0);
             $table->decimal('quantity_good', 18, 6)->default(0);
@@ -23,7 +25,9 @@ return new class extends Migration {
         });
 
         Schema::table('production_order_material_consumptions', function (Blueprint $table): void {
-            $table->foreignId('production_order_operation_id')->nullable()->constrained('production_order_operations')->nullOnDelete();
+            $table->foreignId('production_order_operation_id')->nullable()
+                ->constrained('production_order_operations', 'id', 'fk_po_consumption_operation')
+                ->nullOnDelete();
             $table->string('idempotency_key', 120)->nullable();
             $table->unsignedBigInteger('reversed_by_movement_id')->nullable();
             $table->index(['company_id', 'production_order_operation_id'], 'ix_mes_consumption_operation');
@@ -33,7 +37,9 @@ return new class extends Migration {
         Schema::create('production_operation_events', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('production_order_operation_id')->constrained('production_order_operations')->cascadeOnDelete();
+            $table->foreignId('production_order_operation_id')
+                ->constrained('production_order_operations', 'id', 'fk_operation_event_order_operation')
+                ->cascadeOnDelete();
             $table->string('event_type', 20);
             $table->string('idempotency_key', 120);
             $table->timestamp('occurred_at');
@@ -50,7 +56,9 @@ return new class extends Migration {
         Schema::create('production_operation_outputs', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('production_order_operation_id')->constrained('production_order_operations')->cascadeOnDelete();
+            $table->foreignId('production_order_operation_id')
+                ->constrained('production_order_operations', 'id', 'fk_operation_output_order_operation')
+                ->cascadeOnDelete();
             $table->decimal('quantity_good', 18, 6)->default(0);
             $table->decimal('quantity_scrapped', 18, 6)->default(0);
             $table->decimal('quantity_rework', 18, 6)->default(0);
@@ -87,8 +95,12 @@ return new class extends Migration {
         Schema::create('production_rework_orders', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('source_production_order_operation_id')->constrained('production_order_operations')->cascadeOnDelete();
-            $table->foreignId('rework_production_order_operation_id')->nullable()->constrained('production_order_operations')->nullOnDelete();
+            $table->foreignId('source_production_order_operation_id')
+                ->constrained('production_order_operations', 'id', 'fk_rework_source_operation')
+                ->cascadeOnDelete();
+            $table->foreignId('rework_production_order_operation_id')->nullable()
+                ->constrained('production_order_operations', 'id', 'fk_rework_target_operation')
+                ->nullOnDelete();
             $table->decimal('quantity', 18, 6);
             $table->string('status', 20)->default('OPEN');
             $table->string('reason_code', 80)->nullable();
@@ -101,7 +113,9 @@ return new class extends Migration {
         Schema::create('production_material_consumption_reversals', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('production_order_material_consumption_id')->constrained('production_order_material_consumptions')->cascadeOnDelete();
+            $table->foreignId('production_order_material_consumption_id')
+                ->constrained('production_order_material_consumptions', 'id', 'fk_consumption_reversal_consumption')
+                ->cascadeOnDelete();
             $table->foreignId('original_ledger_movement_id')->constrained('stock_ledger_movements')->cascadeOnDelete();
             $table->foreignId('reversal_ledger_movement_id')->constrained('stock_ledger_movements')->cascadeOnDelete();
             $table->decimal('quantity', 18, 6);
@@ -122,11 +136,11 @@ return new class extends Migration {
         Schema::table('production_order_material_consumptions', function (Blueprint $table): void {
             $table->dropUnique('uq_mes_consumption_idempotency');
             $table->dropIndex('ix_mes_consumption_operation');
-            $table->dropForeign(['production_order_operation_id']);
+            $table->dropForeign('fk_po_consumption_operation');
             $table->dropColumn(['production_order_operation_id', 'idempotency_key', 'reversed_by_movement_id']);
         });
         Schema::table('production_order_operations', function (Blueprint $table): void {
-            $table->dropForeign(['actual_production_resource_id']);
+            $table->dropForeign('fk_po_operation_actual_resource');
             $table->dropForeign(['operator_id']);
             $table->dropColumn(['actual_production_resource_id', 'operator_id', 'quantity_processed', 'quantity_good', 'quantity_scrapped', 'quantity_rework', 'actual_productive_minutes', 'actual_pause_minutes', 'actual_started_at', 'actual_completed_at']);
         });

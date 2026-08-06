@@ -58,8 +58,13 @@ final class MaterialConsumptionService extends BaseService
         if (! empty($payload['production_order_operation_id'])) {
             $operation = ProductionOrderOperation::query()->where('production_order_id', $order->id)->findOrFail((int) $payload['production_order_operation_id']);
         }
-        $bomItem = $order->snapshot?->bomSnapshot?->items?->first(fn ($item) => (int) $item->component_product_id === (int) $payload['product_id'] && (! isset($payload['reference_bom_component_id']) || (string) $item->id === (string) $payload['reference_bom_component_id']));
-        if (! $bomItem) throw new DomainException('Consumed product is not present in the frozen BOM snapshot', 422);
+        $bomItems = $order->snapshot?->bomSnapshot?->items?->filter(fn ($item) => (int) $item->component_product_id === (int) $payload['product_id']) ?? collect();
+        $bomItem = isset($payload['reference_bom_component_id'])
+            ? $bomItems->first(fn ($item) => (string) $item->id === (string) $payload['reference_bom_component_id'])
+            : $bomItems->first();
+        $plannedBomQuantity = $bomItems->sum('quantity_required');
+        if (! $bomItem && isset($payload['reference_bom_component_id'])) throw new DomainException('The selected BOM component does not belong to the consumed product', 422);
+        if (! $bomItem && empty($payload['allow_unplanned'])) throw new DomainException('Consumed product is not present in the frozen BOM snapshot; set allow_unplanned to register additional consumption', 422);
 
         $quantityConsumed = round((float) $payload['quantity_consumed'], 6);
         $quantityScrapped = round((float) ($payload['quantity_scrapped'] ?? 0), 6);
@@ -69,7 +74,7 @@ final class MaterialConsumptionService extends BaseService
             if ($previous) return $previous->refresh()->load(['product', 'warehouse'])->toArray();
         }
         $alreadyConsumed = (float) ProductionOrderMaterialConsumption::query()->where('production_order_id', $order->id)->where('product_id', $payload['product_id'])->whereNull('reversed_by_movement_id')->sum('quantity_consumed');
-        if ($alreadyConsumed + $quantityConsumed > (float) $bomItem->quantity_required + 0.000001 && empty($payload['allow_excess'])) throw new DomainException('Consumption exceeds the frozen BOM requirement', 422);
+        if ($alreadyConsumed + $quantityConsumed > (float) $plannedBomQuantity + 0.000001 && empty($payload['allow_excess'])) throw new DomainException('Consumption exceeds the frozen BOM requirement', 422);
         $consumedAt = isset($payload['consumed_at'])
             ? Carbon::parse($payload['consumed_at'])
             : now();
@@ -110,7 +115,11 @@ final class MaterialConsumptionService extends BaseService
                 'operator_id' => $operatorId,
                 'idempotency_key' => $idempotencyKey,
                 'notes' => $payload['notes'] ?? null,
-                'metadata' => $payload['metadata'] ?? null,
+                'metadata' => array_merge((array) ($payload['metadata'] ?? []), [
+                    'is_unplanned' => $bomItem === null,
+                    'bom_component_id' => $bomItem?->id,
+                    'planned_quantity' => $bomItem ? $plannedBomQuantity : null,
+                ]),
             ]);
 
             return $consumption;

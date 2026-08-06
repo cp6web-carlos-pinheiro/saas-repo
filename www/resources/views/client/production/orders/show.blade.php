@@ -98,46 +98,68 @@
 
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-6">
             <h2 class="font-display text-xl font-bold">Registrar consumo</h2>
-            <p class="mt-1 text-sm text-[#5f6368]">Baixa de matéria-prima e registro de perdas no consumo.</p>
+            <p class="mt-1 text-sm text-[#5f6368]">Ajuste a quantidade prevista ou registre explicitamente um consumo adicional.</p>
 
-            <form class="mt-4 space-y-4" method="POST" action="{{ route('production.orders.consumptions.store', $order) }}">
+            <div class="mt-4 space-y-3">
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-[#5f6368]">Produtos previstos na BOM</h3>
+                @forelse ($plannedMaterials as $plannedMaterial)
+                    @php($component = $plannedMaterial['component'])
+                    <form class="rounded-xl border border-[#dadce0] p-3" method="POST" action="{{ route('production.orders.consumptions.store', $order) }}">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $component->component_product_id }}">
+                        <input type="hidden" name="reference_bom_component_id" value="{{ $component->id }}">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <div class="font-medium">{{ $component->componentProduct->sku }} - {{ $component->componentProduct->description }}</div>
+                                <div class="text-xs text-[#5f6368]">Previsto: {{ number_format($plannedMaterial['planned_quantity'], 3, ',', '.') }} · Consumido: {{ number_format($plannedMaterial['consumed_quantity'], 3, ',', '.') }} · Saldo: {{ number_format($plannedMaterial['remaining_quantity'], 3, ',', '.') }}</div>
+                            </div>
+                            <div class="flex items-end gap-2">
+                                <label class="text-xs text-[#5f6368]">Confirmar quantidade
+                                    <x-ui.input class="mt-1 w-32" type="number" step="0.001" min="0.001" name="quantity_consumed" value="{{ $plannedMaterial['remaining_quantity'] > 0 ? $plannedMaterial['remaining_quantity'] : '' }}" required />
+                                </label>
+                                <label class="text-xs text-[#5f6368]">Armazém
+                                    <x-ui.select class="mt-1 w-40" name="warehouse_id" required data-search="off">
+                                        <option value="">Selecione</option>
+                                        @foreach ($warehouses as $warehouse)
+                                            <option value="{{ $warehouse->id }}">{{ $warehouse->code }}</option>
+                                        @endforeach
+                                    </x-ui.select>
+                                </label>
+                                <x-ui.button type="submit" variant="brand-primary" class="rounded-full">Confirmar</x-ui.button>
+                            </div>
+                        </div>
+                    </form>
+                @empty
+                    <div class="text-sm text-[#5f6368]">Nenhum componente previsto foi encontrado na BOM congelada.</div>
+                @endforelse
+            </div>
+
+            <form class="mt-6 space-y-4 border-t border-[#dadce0] pt-5" method="POST" action="{{ route('production.orders.consumptions.store', $order) }}">
                 @csrf
-                <label class="block text-sm font-medium">Produto consumido
-                    <x-ui.select class="mt-2" name="product_id" required data-search="on" data-placeholder="Selecione um produto" data-ajax-url="{{ route('production.products.search') }}" data-minimum-input-length="1">
+                <input type="hidden" name="allow_unplanned" value="1">
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-[#5f6368]">Adicionar consumo adicional</h3>
+                <label class="block text-sm font-medium">Produto não previsto
+                    <x-ui.select class="mt-2" name="product_id" required data-search="on" data-placeholder="Selecione um produto" data-ajax-url="{{ route('production.products.search', ['all' => 1]) }}" data-minimum-input-length="1">
                         <option value="">Selecione um produto</option>
-                        @if ($selectedConsumptionProduct)
-                            <option value="{{ $selectedConsumptionProduct->id }}" selected>{{ $selectedConsumptionProduct->sku }} - {{ $selectedConsumptionProduct->description }}</option>
-                        @endif
                     </x-ui.select>
                 </label>
-
-                <label class="block text-sm font-medium">Armazem de consumo
-                    <x-ui.select class="mt-2" name="warehouse_id" required data-search="on">
-                        <option value="">Selecione um armazem</option>
-                        @foreach ($warehouses as $warehouse)
-                            <option value="{{ $warehouse->id }}">{{ $warehouse->code }} - {{ $warehouse->name }}</option>
-                        @endforeach
-                    </x-ui.select>
-                </label>
-
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <label class="block text-sm font-medium">Qtd consumida
+                <div class="grid gap-4 sm:grid-cols-3">
+                    <label class="block text-sm font-medium">Armazém
+                        <x-ui.select class="mt-2" name="warehouse_id" required data-search="off">
+                            <option value="">Selecione</option>
+                            @foreach ($warehouses as $warehouse)
+                                <option value="{{ $warehouse->id }}">{{ $warehouse->code }} - {{ $warehouse->name }}</option>
+                            @endforeach
+                        </x-ui.select>
+                    </label>
+                    <label class="block text-sm font-medium">Quantidade
                         <x-ui.input class="mt-2" type="number" step="0.001" min="0.001" name="quantity_consumed" required />
                     </label>
-                    <label class="block text-sm font-medium">Qtd refugada no consumo
-                        <x-ui.input class="mt-2" type="number" step="0.001" min="0" name="quantity_scrapped" value="0" />
+                    <label class="block text-sm font-medium">Lote
+                        <x-ui.input class="mt-2" name="lot_number" maxlength="120" />
                     </label>
                 </div>
-
-                <label class="block text-sm font-medium">Lote consumido
-                    <x-ui.input class="mt-2" name="lot_number" maxlength="120" />
-                </label>
-
-                <label class="block text-sm font-medium">Observações
-                    <x-ui.textarea class="mt-2" name="notes" rows="3"></x-ui.textarea>
-                </label>
-
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full">Registrar consumo</x-ui.button>
+                <x-ui.button type="submit" variant="surface-muted" class="rounded-full">Registrar adicional</x-ui.button>
             </form>
         </x-ui.panel>
     </div>
@@ -173,11 +195,19 @@
 
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-6">
             <h2 class="font-display text-xl font-bold">Ultimos consumos</h2>
+            @if ($additionalConsumptions->isNotEmpty())
+                <div class="mt-3 rounded-xl border border-[#fbbc04] bg-[#fff8e1] p-3 text-sm">
+                    <div class="font-semibold text-[#8a5a00]">Consumos adicionais desta OP</div>
+                    @foreach ($additionalConsumptions as $additional)
+                        <div class="mt-1 text-[#5f6368]">{{ $additional['product']?->sku }} - {{ $additional['product']?->description }}: {{ number_format($additional['consumed_quantity'], 3, ',', '.') }}</div>
+                    @endforeach
+                </div>
+            @endif
             <div class="mt-4 space-y-2 text-sm">
                 @forelse ($order->materialConsumptions as $consumption)
                     <div class="rounded-xl border border-[#dadce0] p-3">
                         <div><strong>{{ $consumption->product?->sku }}</strong> - {{ $consumption->product?->description }}</div>
-                        <div class="text-[#5f6368]">Armazem: {{ $consumption->warehouse?->code }} · Consumo: {{ number_format((float) $consumption->quantity_consumed, 3, ',', '.') }} · Refugo: {{ number_format((float) $consumption->quantity_scrapped, 3, ',', '.') }}</div>
+                        <div class="text-[#5f6368]">Armazem: {{ $consumption->warehouse?->code }} · Consumo: {{ number_format((float) $consumption->quantity_consumed, 3, ',', '.') }} · Refugo: {{ number_format((float) $consumption->quantity_scrapped, 3, ',', '.') }} @if (data_get($consumption->metadata, 'is_unplanned')) · <span class="font-semibold text-[#8a5a00]">Adicional</span> @endif</div>
                     </div>
                 @empty
                     <div class="text-[#5f6368]">Nenhum consumo registrado.</div>

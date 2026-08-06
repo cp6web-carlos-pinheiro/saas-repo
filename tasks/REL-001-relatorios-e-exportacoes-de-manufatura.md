@@ -21,7 +21,7 @@ Implementada a primeira camada de relatórios e exportação CSV.
 
 - Endpoint JSON: `GET /api/v1/manufacturing-reports/{type}`.
 - Exportação: `GET /api/v1/manufacturing-reports/{type}/export`.
-- Tipos suportados: overview, efficiency/planned-vs-real, oee e standard-times.
+- Tipos suportados: overview, efficiency/planned-vs-real, oee, consumption e standard-times.
 - Os relatórios reutilizam o mesmo `ManufacturingAnalyticsService`, evitando divergência de fórmula entre tela e exportação.
 - Permissões de leitura e exportação foram adicionadas.
 

@@ -14,7 +14,11 @@ return new class extends Migration {
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
             $table->foreignId('production_order_id')->constrained('production_orders')->cascadeOnDelete();
             $table->foreignId('production_order_routing_operation_snapshot_id')->nullable()
-                ->constrained('production_order_routing_operation_snapshots')
+                ->constrained(
+                    'production_order_routing_operation_snapshots',
+                    'id',
+                    'fk_po_operation_routing_snapshot'
+                )
                 ->nullOnDelete();
             $table->unsignedBigInteger('routing_operation_id')->nullable();
             $table->unsignedBigInteger('standard_time_id')->nullable();

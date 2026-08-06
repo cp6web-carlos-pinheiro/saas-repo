@@ -13,6 +13,7 @@ Implementada a fundação analítica live sobre os fatos transacionais de PCP/ME
 - O tenant é aplicado pelo `TenantModel` nas consultas.
 - O fato mantém IDs da OP/operação e versões de tempo padrão, permitindo drill-down transacional.
 - Endpoints: `/api/v1/analytics/manufacturing/overview` e relatórios equivalentes.
+- O bloco `material_consumption` separa `additional_quantity` dos consumos previstos por produto.
 
 ## Problema anterior
 

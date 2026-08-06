@@ -174,7 +174,28 @@ final class ProductionOrderController extends Controller
             'materialConsumptions' => static fn ($query) => $query->orderByDesc('id')->limit(50),
             'materialConsumptions.product:id,sku,description',
             'materialConsumptions.warehouse:id,code,name',
+            'snapshot.bomSnapshot.items.componentProduct:id,sku,description',
         ]);
+
+        $consumedByProduct = $order->materialConsumptions
+            ->filter(static fn ($consumption) => ! $consumption->reversed_by_movement_id)
+            ->groupBy('product_id')
+            ->map(static fn ($items) => round($items->sum('quantity_consumed'), 6));
+        $plannedMaterials = collect($order->snapshot?->bomSnapshot?->items ?? [])
+            ->filter(static fn ($item) => $item->componentProduct)
+            ->groupBy('component_product_id')
+            ->map(static function ($items) use ($consumedByProduct): array {
+                $item = $items->first();
+                $planned = (float) $items->sum('quantity_required');
+                $consumed = (float) ($consumedByProduct[(int) $item->component_product_id] ?? 0);
+                return ['component' => $item, 'planned_quantity' => $planned, 'consumed_quantity' => $consumed, 'remaining_quantity' => max(0, round($planned - $consumed, 6))];
+            })->values();
+
+        $additionalConsumptions = $order->materialConsumptions
+            ->filter(static fn ($consumption) => (bool) data_get($consumption->metadata, 'is_unplanned'))
+            ->groupBy('product_id')
+            ->map(static fn ($items) => ['product' => $items->first()->product, 'consumed_quantity' => round($items->sum('quantity_consumed'), 6)])
+            ->values();
 
         $selectedConsumptionProductId = (int) ($request->old('product_id') ?? 0);
         $selectedConsumptionProduct = $selectedConsumptionProductId > 0
@@ -182,7 +203,7 @@ final class ProductionOrderController extends Controller
             : null;
         $warehouses = Warehouse::query()->where('is_active', true)->orderBy('name')->get(['id', 'code', 'name']);
 
-        return view('client.production.orders.show', compact('order', 'selectedConsumptionProduct', 'warehouses', 'company'));
+        return view('client.production.orders.show', compact('order', 'selectedConsumptionProduct', 'warehouses', 'company', 'plannedMaterials', 'additionalConsumptions'));
     }
 
     public function searchProducts(Request $request): JsonResponse
@@ -205,9 +226,12 @@ final class ProductionOrderController extends Controller
 
         $query = Product::query()
             ->where('is_active', true)
-            ->whereHas('bomHeaders', fn (Builder $builder) => $this->applyEligibleBomFilter($builder, $referenceDate))
             ->select(['id', 'sku', 'description'])
             ->orderBy('sku');
+
+        if (! $request->boolean('all')) {
+            $query->whereHas('bomHeaders', fn (Builder $builder) => $this->applyEligibleBomFilter($builder, $referenceDate));
+        }
 
         if ($term !== '') {
             $query->where(function (Builder $inner) use ($term): void {
@@ -307,9 +331,13 @@ final class ProductionOrderController extends Controller
             'warehouse_id' => ['required', 'integer', 'exists:warehouses,id'],
             'quantity_consumed' => ['required', 'numeric', 'gt:0'],
             'quantity_scrapped' => ['nullable', 'numeric', 'min:0'],
+            'reference_bom_component_id' => ['nullable', 'integer'],
+            'allow_unplanned' => ['nullable', 'boolean'],
             'lot_number' => ['nullable', 'string', 'max:120'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $data['allow_unplanned'] = (bool) ($data['allow_unplanned'] ?? false);
 
         $this->consumptionService->record((int) $order->id, $data, $request->user()?->id);
 

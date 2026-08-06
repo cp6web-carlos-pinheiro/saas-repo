@@ -9,7 +9,9 @@ return new class extends Migration {
         Schema::create('manufacturing_analytics_recommendations', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('production_order_operation_id')->nullable()->constrained('production_order_operations')->nullOnDelete();
+            $table->foreignId('production_order_operation_id')->nullable()
+                ->constrained('production_order_operations', 'id', 'fk_analytics_recommendation_operation')
+                ->nullOnDelete();
             $table->unsignedBigInteger('routing_operation_id')->nullable();
             $table->unsignedBigInteger('standard_time_id')->nullable();
             $table->unsignedInteger('standard_time_version')->nullable();

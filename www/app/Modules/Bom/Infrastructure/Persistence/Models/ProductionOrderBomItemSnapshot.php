@@ -44,4 +44,9 @@ final class ProductionOrderBomItemSnapshot extends TenantModel
     {
         return $this->belongsTo(ProductionOrderBomSnapshotModel::class, 'production_order_bom_snapshot_id');
     }
+
+    public function componentProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'component_product_id');
+    }
 }

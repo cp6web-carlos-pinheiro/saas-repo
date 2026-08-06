@@ -5,6 +5,11 @@
 @section('content')
     @php
         $moduleLabels = [
+            'engineering' => __('ui.domain_engineering'),
+            'planning' => __('ui.domain_planning'),
+            'shop_floor' => __('ui.domain_shop_floor'),
+            'analysis' => __('ui.domain_analysis'),
+            'administration' => __('ui.domain_administration'),
             'products' => __('ui.module_products'),
             'inventory' => __('ui.module_inventory'),
             'purchasing' => __('ui.module_purchasing'),
@@ -18,6 +23,11 @@
         ];
 
         $moduleIcons = [
+            'engineering' => 'products',
+            'planning' => 'production_mrp',
+            'shop_floor' => 'production_mrp',
+            'analysis' => 'reports',
+            'administration' => 'users',
             'production_mrp' => 'production_mrp',
             'inventory' => 'inventory',
             'purchasing' => 'purchasing',
@@ -36,6 +46,29 @@
         ];
 
         $moduleSubitems = [
+            'engineering' => [
+                ['label' => __('ui.product_register'), 'href' => route('products.index'), 'active' => request()->routeIs('products.*')],
+                ['label' => __('ui.bom_structures'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
+                ['label' => __('ui.bom_revisions'), 'href' => route('bom.material-lists.index'), 'active' => request()->routeIs('bom.material-lists.*')],
+                ['label' => __('ui.module_routing'), 'href' => route('production.routing.index'), 'active' => request()->routeIs('production.routing.*')],
+                ['label' => __('ui.work_centers'), 'href' => route('production.work-centers.index'), 'active' => request()->routeIs('production.work-centers.*')],
+            ],
+            'planning' => [
+                ['label' => __('ui.production_orders'), 'href' => route('production.orders.index'), 'active' => request()->routeIs('production.orders.*')],
+                ['label' => __('ui.module_scheduling'), 'href' => route('production.scheduling.index'), 'active' => request()->routeIs('production.scheduling.*')],
+                ['label' => __('ui.production_calendar'), 'href' => route('production.calendar.index'), 'active' => request()->routeIs('production.calendar.*')],
+            ],
+            'shop_floor' => [
+                ['label' => __('ui.production_orders'), 'href' => route('production.orders.index'), 'active' => request()->routeIs('production.orders.*')],
+                ['label' => __('ui.production_postings'), 'href' => route('production.analytics.index'), 'active' => request()->routeIs('production.analytics.*')],
+            ],
+            'analysis' => [
+                ['label' => __('ui.production_postings'), 'href' => route('production.analytics.index'), 'active' => request()->routeIs('production.analytics.*')],
+            ],
+            'administration' => [
+                ['label' => __('ui.manage_accesses'), 'href' => route('company-access.users.index'), 'active' => request()->routeIs('company-access.users.*')],
+                ['label' => __('ui.rbac_roles'), 'href' => route('company-access.rbac.roles.index'), 'active' => request()->routeIs('company-access.rbac.roles.*')],
+            ],
             'products' => [
                 ['label' => __('ui.product_register'), 'href' => route('products.index'), 'active' => request()->routeIs('products.index') || request()->routeIs('products.create') || request()->routeIs('products.show') || request()->routeIs('products.edit')],
                 ['label' => __('ui.product_versions'), 'href' => route('products.versions'), 'active' => request()->routeIs('products.versions') || request()->routeIs('products.versions.*')],
@@ -77,6 +110,10 @@
         ];
 
         $modulePriority = [
+            'engineering',
+            'planning',
+            'shop_floor',
+            'analysis',
             'production_mrp',
             'inventory',
             'purchasing',
@@ -87,6 +124,7 @@
             'reports',
             'audit',
             'users',
+            'administration',
         ];
 
         $user = auth()->user();
@@ -110,6 +148,21 @@
                     : null;
                 $availableModules = app(\App\Services\SaaS\CompanyUserAccessService::class)->accessibleModules($user, $company);
                 $availableModules = array_values(array_diff($availableModules, ['suppliers', 'customers']));
+                $accessibleModuleSet = array_fill_keys($availableModules, true);
+                $domainRequirements = [
+                    'engineering' => ['production_mrp', 'products'],
+                    'planning' => ['production_mrp'],
+                    'shop_floor' => ['production_mrp'],
+                    'analysis' => ['production_mrp'],
+                    'inventory' => ['inventory'],
+                    'purchasing' => ['purchasing'],
+                    'sales' => ['sales'],
+                    'administration' => ['users'],
+                ];
+                $availableModules = collect($domainRequirements)
+                    ->filter(static fn (array $requirements): bool => collect($requirements)->contains(static fn (string $requirement): bool => isset($accessibleModuleSet[$requirement])))
+                    ->keys()
+                    ->all();
                 $canManageAccesses = app(\App\Services\SaaS\CompanyUserAccessService::class)->canManageCompanyAccess($user, $company);
 
             }
