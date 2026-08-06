@@ -116,7 +116,7 @@ return [
     'domain_administration' => 'Administración',
     'sales_register' => 'Registro de Ventas',
     'sales_customers' => 'Clientes',
-    'product_register' => 'Registro',
+    'product_register' => 'Productos',
     'product_versions' => 'Versiones',
     'module_production' => 'Producción',
     'production_orders' => 'Órdenes de Producción',

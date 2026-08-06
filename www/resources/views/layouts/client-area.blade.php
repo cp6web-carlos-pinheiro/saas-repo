@@ -10,16 +10,9 @@
             'shop_floor' => __('ui.domain_shop_floor'),
             'analysis' => __('ui.domain_analysis'),
             'administration' => __('ui.domain_administration'),
-            'products' => __('ui.module_products'),
             'inventory' => __('ui.module_inventory'),
             'purchasing' => __('ui.module_purchasing'),
             'sales' => __('ui.module_sales'),
-            'production_mrp' => __('ui.module_production_mrp'),
-            'reports' => __('ui.module_reports'),
-            'audit' => __('ui.module_audit'),
-            'users' => __('ui.module_users'),
-            'suppliers' => __('ui.module_suppliers'),
-            'customers' => __('ui.module_customers'),
         ];
 
         $moduleIcons = [
@@ -28,39 +21,26 @@
             'shop_floor' => 'production_mrp',
             'analysis' => 'reports',
             'administration' => 'users',
-            'production_mrp' => 'production_mrp',
             'inventory' => 'inventory',
             'purchasing' => 'purchasing',
             'sales' => 'sales',
-            'products' => 'products',
-            'suppliers' => 'suppliers',
-            'customers' => 'customers',
-            'reports' => 'reports',
-            'audit' => 'audit',
-            'users' => 'users',
-        ];
-
-        $moduleLinks = [
-            'suppliers' => route('purchasing.suppliers.index'),
-            'customers' => route('customers.index'),
         ];
 
         $moduleSubitems = [
             'engineering' => [
-                ['label' => __('ui.product_register'), 'href' => route('products.index'), 'active' => request()->routeIs('products.*')],
+                ['label' => __('ui.product_register'), 'href' => route('products.index'), 'active' => request()->routeIs('products.index') || request()->routeIs('products.create') || request()->routeIs('products.show') || request()->routeIs('products.edit')],
+                ['label' => __('ui.product_versions'), 'href' => route('products.versions'), 'active' => request()->routeIs('products.versions') || request()->routeIs('products.versions.*')],
                 ['label' => __('ui.bom_structures'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
                 ['label' => __('ui.bom_revisions'), 'href' => route('bom.material-lists.index'), 'active' => request()->routeIs('bom.material-lists.*')],
                 ['label' => __('ui.module_routing'), 'href' => route('production.routing.index'), 'active' => request()->routeIs('production.routing.*')],
                 ['label' => __('ui.work_centers'), 'href' => route('production.work-centers.index'), 'active' => request()->routeIs('production.work-centers.*')],
             ],
             'planning' => [
-                ['label' => __('ui.production_orders'), 'href' => route('production.orders.index'), 'active' => request()->routeIs('production.orders.*')],
                 ['label' => __('ui.module_scheduling'), 'href' => route('production.scheduling.index'), 'active' => request()->routeIs('production.scheduling.*')],
                 ['label' => __('ui.production_calendar'), 'href' => route('production.calendar.index'), 'active' => request()->routeIs('production.calendar.*')],
             ],
             'shop_floor' => [
                 ['label' => __('ui.production_orders'), 'href' => route('production.orders.index'), 'active' => request()->routeIs('production.orders.*')],
-                ['label' => __('ui.production_postings'), 'href' => route('production.analytics.index'), 'active' => request()->routeIs('production.analytics.*')],
             ],
             'analysis' => [
                 ['label' => __('ui.production_postings'), 'href' => route('production.analytics.index'), 'active' => request()->routeIs('production.analytics.*')],
@@ -69,23 +49,9 @@
                 ['label' => __('ui.manage_accesses'), 'href' => route('company-access.users.index'), 'active' => request()->routeIs('company-access.users.*')],
                 ['label' => __('ui.rbac_roles'), 'href' => route('company-access.rbac.roles.index'), 'active' => request()->routeIs('company-access.rbac.roles.*')],
             ],
-            'products' => [
-                ['label' => __('ui.product_register'), 'href' => route('products.index'), 'active' => request()->routeIs('products.index') || request()->routeIs('products.create') || request()->routeIs('products.show') || request()->routeIs('products.edit')],
-                ['label' => __('ui.product_versions'), 'href' => route('products.versions'), 'active' => request()->routeIs('products.versions') || request()->routeIs('products.versions.*')],
-            ],
             'sales' => [
                 ['label' => __('ui.sales_register'), 'href' => route('sales.index'), 'active' => request()->routeIs('sales.*')],
                 ['label' => __('ui.sales_customers'), 'href' => route('customers.index'), 'active' => request()->routeIs('customers.*')],
-            ],
-            'production_mrp' => [
-                ['label' => __('ui.bom_structures'), 'href' => route('bom.structures.index'), 'active' => request()->routeIs('bom.structures.*')],
-                ['label' => __('ui.bom_revisions'), 'href' => route('bom.material-lists.index'), 'active' => request()->routeIs('bom.material-lists.*')],
-                ['label' => __('ui.production_orders'), 'href' => route('production.orders.index'), 'active' => request()->routeIs('production.orders.*')],
-                ['label' => __('ui.production_postings'), 'href' => route('production.analytics.index'), 'active' => request()->routeIs('production.analytics.*')],
-                ['label' => __('ui.module_routing'), 'href' => route('production.routing.index'), 'active' => request()->routeIs('production.routing.*')],
-                ['label' => __('ui.work_centers'), 'href' => route('production.work-centers.index'), 'active' => request()->routeIs('production.work-centers.*')],
-                ['label' => __('ui.production_calendar'), 'href' => route('production.calendar.index'), 'active' => request()->routeIs('production.calendar.*')],
-                ['label' => __('ui.module_scheduling'), 'href' => route('production.scheduling.index'), 'active' => request()->routeIs('production.scheduling.*')],
             ],
             'purchasing' => [
                 ['label' => __('ui.purchasing_suppliers'), 'href' => route('purchasing.suppliers.index'), 'active' => request()->routeIs('purchasing.suppliers.*')],
@@ -103,10 +69,6 @@
                 ['label' => __('ui.inventory_movements'), 'href' => null, 'active' => false],
                 ['label' => __('ui.inventory_count'), 'href' => null, 'active' => false],
             ],
-            'users' => [
-                ['label' => __('ui.manage_accesses'), 'href' => route('company-access.users.index'), 'active' => request()->routeIs('company-access.users.*')],
-                ['label' => __('ui.rbac_roles'), 'href' => route('company-access.rbac.roles.index'), 'active' => request()->routeIs('company-access.rbac.roles.*')],
-            ],
         ];
 
         $modulePriority = [
@@ -114,16 +76,9 @@
             'planning',
             'shop_floor',
             'analysis',
-            'production_mrp',
             'inventory',
             'purchasing',
             'sales',
-            'products',
-            'suppliers',
-            'customers',
-            'reports',
-            'audit',
-            'users',
             'administration',
         ];
 
@@ -291,7 +246,7 @@
                             @else
                                 <x-ui.menu-item
                                     variant="industrial"
-                                    :href="$moduleLinks[$module] ?? '#'"
+                                    href="#"
                                     data-client-sidebar-link
                                     :active="$moduleActive"
                                     class="ind-module-parent"

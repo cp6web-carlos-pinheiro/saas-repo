@@ -50,6 +50,7 @@
         </div>
     </x-ui.panel>
 
+    @if ($order->status !== 'COMPLETED')
     <div class="mt-6 grid gap-6 xl:grid-cols-2">
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-6">
             <h2 class="font-display text-xl font-bold">Registrar apontamento</h2>
@@ -163,6 +164,7 @@
             </form>
         </x-ui.panel>
     </div>
+    @endif
 
     <div class="mt-6 grid gap-6 xl:grid-cols-2">
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-6">

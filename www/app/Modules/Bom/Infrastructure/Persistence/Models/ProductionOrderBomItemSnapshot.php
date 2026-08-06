@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Bom\Infrastructure\Persistence\Models;
 
 use App\Modules\Bom\Infrastructure\Persistence\Models\ProductionOrderBomSnapshot as ProductionOrderBomSnapshotModel;
+use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
