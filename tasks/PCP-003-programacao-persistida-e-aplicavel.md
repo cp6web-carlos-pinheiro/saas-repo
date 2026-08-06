@@ -4,33 +4,39 @@
 
 Transformar o resultado temporário do scheduler em um plano de produção persistido, versionado, auditável e aplicável às OPs.
 
-## Problema atual
+## Status da implementação
 
-A execução web guarda o resultado por aproximadamente 30 minutos em cache. Não existe histórico de versões, aprovação, publicação, comparação entre cenários ou atualização persistida de datas/recursos.
+Implementado o primeiro fluxo persistido e aplicável.
+
+- `production_schedules` guarda cabeçalho, versão, parâmetros, status, usuário e datas de aprovação/publicação.
+- `production_schedule_lines` guarda uma linha por operação, centro/recurso, janela, segmentos, capacidade e lead time.
+- `ProductionScheduleService` cria draft a partir do scheduler, publica de forma transacional, aplica datas/recurso às operações e compara duas versões.
+- Endpoints: `GET/POST /api/v1/production-schedules`, `GET /{id}`, `POST /{id}/publish`, `POST /{id}/cancel` e `GET /{id}/compare/{otherId}`.
 
 ## Escopo funcional
 
-1. Criar entidades de plano, versão, linhas de operação e cenários.
+1. Criar entidades de plano, versão e linhas de operação.
 2. Persistir parâmetros usados: data de referência, direção, regra, modo, calendário e versão dos dados.
 3. Permitir salvar cenário sem publicar.
 4. Comparar cenários e identificar alterações.
 5. Aprovar/publicar uma versão.
 6. Aplicar a programação aprovada às operações das OPs.
-7. Reprogramar com motivo e preservar a versão anterior.
+7. Reprogramar criando novo draft; o histórico de drafts/publicações anteriores é preservado.
 8. Cancelar ou substituir uma versão publicada com autorização.
 
-## Regras
+## Regras implementadas
 
-- Uma empresa/planta pode ter uma única programação publicada para uma janela, salvo regra explícita de cenários.
-- OP concluída/cancelada não pode ser alterada pela aplicação automática.
-- OP em execução só pode ter etapas futuras reprogramadas.
-- Aplicação deve ser idempotente e transacional.
-- Toda alteração deve registrar usuário, data e motivo.
+- Publicação repetida é idempotente.
+- Uma programação cancelada não pode ser publicada; uma publicada não pode ser cancelada diretamente, devendo ser substituída.
+- Operações concluídas/canceladas são protegidas contra aplicação.
+- Aplicação das linhas é transacional e registra usuário, timestamps e motivo.
+- A unicidade de linha por schedule/operação impede duplicação no mesmo plano.
 
 ## Critérios de aceite
 
-- Um plano continua disponível após expiração do cache.
-- É possível consultar o que mudou entre duas versões.
-- Publicar aplica datas e recursos às operações elegíveis.
-- Falha parcial não deixa OPs com programação inconsistente.
-- Existem testes para concorrência e autorização.
+- [x] Um plano continua disponível após expiração do cache.
+- [x] É possível comparar linhas entre duas versões.
+- [x] Publicar aplica datas e recurso às operações elegíveis.
+- [x] A aplicação usa transação e é idempotente.
+- [ ] Regra de uma única publicação por planta/janela, aprovação formal separada e concorrência pessimista ainda precisam ser endurecidas.
+- [ ] Testes de integração aguardam banco de teste configurado.

@@ -7,6 +7,7 @@ namespace App\Modules\Production\Application\Services;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOperation;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperationStandardTime;
+use App\Modules\Scheduling\Infrastructure\Persistence\Models\ProductionResource;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
 use App\Shared\Application\Transactions\TransactionManager;
@@ -43,7 +44,7 @@ final class ProductionOrderOperationPlanningService extends BaseService
             $quantity = (float) $order->quantity_planned;
             $operations = $order->snapshot->routingOperations->sortBy('sequence')->values();
 
-            return $operations->map(function ($operation) use ($order, $quantity): array {
+            return $operations->map(function ($operation) use ($order, $quantity, $userId): array {
                 $standard = $operation->standard_time_id
                     ? RoutingOperationStandardTime::query()->find($operation->standard_time_id)
                     : null;
@@ -57,6 +58,7 @@ final class ProductionOrderOperationPlanningService extends BaseService
                 }
                 $queue = $outsourced ? 0.0 : (float) ($standard?->queue_time_minutes ?? $operation->queue_time_minutes);
                 $move = $outsourced ? 0.0 : (float) ($standard?->move_time_minutes ?? $operation->move_time_minutes);
+                $resourceId = $outsourced ? null : ProductionResource::query()->where('work_center_id', $operation->work_center_id)->where('status', 'ACTIVE')->orderBy('id')->value('id');
                 $productive = $this->roundMinutes($setup + $runtime);
                 $lead = $this->roundMinutes($queue + $move);
 
@@ -64,7 +66,7 @@ final class ProductionOrderOperationPlanningService extends BaseService
                     'company_id' => $order->company_id,
                     'production_order_id' => $order->id,
                     'production_order_routing_operation_snapshot_id' => $operation->id,
-                    'routing_operation_id' => $operation->routing_version_id,
+                    'routing_operation_id' => null,
                     'standard_time_id' => $operation->standard_time_id,
                     'standard_time_version' => $operation->standard_time_version,
                     'operation_no' => $operation->operation_no,
@@ -72,6 +74,7 @@ final class ProductionOrderOperationPlanningService extends BaseService
                     'operation_name' => $operation->operation_name,
                     'sequence' => $operation->sequence,
                     'work_center_id' => $operation->work_center_id,
+                    'production_resource_id' => $resourceId,
                     'status' => $outsourced ? 'OUTSOURCED' : 'PLANNED',
                     'quantity_planned' => $quantity,
                     'setup_scope' => $setupScope,

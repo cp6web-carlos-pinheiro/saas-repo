@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Modules\MRP\Presentation\Http\Controllers\MRPHealthController;
 use App\Modules\MRP\Presentation\Http\Controllers\MrpRecalculationController;
 use App\Modules\MRP\Presentation\Http\Controllers\MrpPlanningController;
+use App\Modules\MRP\Presentation\Http\Controllers\MrpSuggestionController;
 use App\Modules\Genealogy\Presentation\Http\Controllers\GenealogyController;
 use App\Modules\Eco\Presentation\Http\Controllers\EngineeringChangeOrderController;
 use App\Modules\Bom\Presentation\Http\Controllers\BomExplosionController;
@@ -19,6 +20,7 @@ use App\Modules\Scheduling\Presentation\Http\Controllers\ProductionCalendarContr
 use App\Modules\Scheduling\Presentation\Http\Controllers\ProductionSchedulingController;
 use App\Modules\Scheduling\Presentation\Http\Controllers\WorkCenterController;
 use App\Modules\Scheduling\Presentation\Http\Controllers\ProductionResourceController;
+use App\Modules\Scheduling\Presentation\Http\Controllers\ProductionScheduleController;
 use App\Modules\Routing\Presentation\Http\Controllers\RoutingStandardTimeController;
 use App\Modules\Product\Presentation\Http\Controllers\ProductController;
 use App\Modules\Product\Presentation\Http\Controllers\ProductVersionController;
@@ -135,6 +137,18 @@ Route::prefix('v1')->group(function (): void {
 
             Route::post('/scheduling/production-orders', [ProductionSchedulingController::class, 'run'])
                 ->middleware(CheckPermission::class.':production-scheduling.run');
+            Route::get('/production-schedules', [ProductionScheduleController::class, 'index'])
+                ->middleware(CheckPermission::class.':production-schedules.read');
+            Route::post('/production-schedules', [ProductionScheduleController::class, 'store'])
+                ->middleware(CheckPermission::class.':production-schedules.create');
+            Route::get('/production-schedules/{id}', [ProductionScheduleController::class, 'show'])
+                ->middleware(CheckPermission::class.':production-schedules.read');
+            Route::post('/production-schedules/{id}/publish', [ProductionScheduleController::class, 'publish'])
+                ->middleware(CheckPermission::class.':production-schedules.publish');
+            Route::post('/production-schedules/{id}/cancel', [ProductionScheduleController::class, 'cancel'])
+                ->middleware(CheckPermission::class.':production-schedules.cancel');
+            Route::get('/production-schedules/{id}/compare/{otherId}', [ProductionScheduleController::class, 'compare'])
+                ->middleware(CheckPermission::class.':production-schedules.compare');
 
             Route::post('/bom/explode', BomExplosionController::class)
                 ->middleware(CheckPermission::class.':bom.explode');
@@ -143,6 +157,18 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware(CheckPermission::class.':mrp.plan');
             Route::post('/mrp/recalculate', [MrpRecalculationController::class, 'run'])
                 ->middleware(CheckPermission::class.':mrp.plan');
+            Route::get('/mrp/runs', [MrpSuggestionController::class, 'runs'])
+                ->middleware(CheckPermission::class.':mrp-runs.read');
+            Route::get('/mrp/suggestions', [MrpSuggestionController::class, 'index'])
+                ->middleware(CheckPermission::class.':mrp-suggestions.read');
+            Route::get('/mrp/suggestions/{id}', [MrpSuggestionController::class, 'show'])
+                ->middleware(CheckPermission::class.':mrp-suggestions.read');
+            Route::post('/mrp/suggestions/{id}/approve', [MrpSuggestionController::class, 'approve'])
+                ->middleware(CheckPermission::class.':mrp-suggestions.approve');
+            Route::post('/mrp/suggestions/{id}/reject', [MrpSuggestionController::class, 'reject'])
+                ->middleware(CheckPermission::class.':mrp-suggestions.reject');
+            Route::post('/mrp/suggestions/{id}/convert', [MrpSuggestionController::class, 'convert'])
+                ->middleware(CheckPermission::class.':mrp-suggestions.convert');
 
             Route::get('/genealogy/trace', [GenealogyController::class, 'trace'])
                 ->middleware(CheckPermission::class.':genealogy.trace');

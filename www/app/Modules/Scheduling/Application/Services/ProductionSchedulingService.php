@@ -9,6 +9,7 @@ use App\Modules\Production\Application\Services\ProductionOrderOperationPlanning
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\ProductionCalendarDay;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenterShift;
+use App\Modules\Scheduling\Infrastructure\Persistence\Models\ProductionResource;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
 use App\Shared\Application\Transactions\TransactionManager;
@@ -51,6 +52,7 @@ final class ProductionSchedulingService extends BaseService
             $orderedOrders = $this->sequenceOrders($orders, $sequencingRule);
             $scheduleState = [
                 'work_center_usage' => [],
+                'resource_usage' => [],
                 'work_center_cursor' => [],
             ];
             $scheduledOrders = [];
@@ -168,6 +170,7 @@ final class ProductionSchedulingService extends BaseService
     private function scheduleOperationForward(object $operation, Carbon $cursor, string $mode, array &$scheduleState): array
     {
         $workCenterId = (int) $operation->work_center_id;
+        $resourceId = isset($operation->production_resource_id) ? (int) $operation->production_resource_id : null;
         $durationMinutes = $this->calculateOperationDurationMinutes($operation);
 
         if ($mode === 'infinite') {
@@ -184,8 +187,9 @@ final class ProductionSchedulingService extends BaseService
 
         while ($remainingMinutes > 0) {
             $dayKey = $current->toDateString();
-            $capacity = $this->resolveDailyCapacityMinutes($workCenterId, $current);
-            $used = (int) ($scheduleState['work_center_usage'][$workCenterId][$dayKey] ?? 0);
+            $capacity = $this->resolveDailyCapacityMinutes($workCenterId, $current, $resourceId);
+            $usageKey = $resourceId ? 'resource_usage' : 'work_center_usage';
+            $used = (int) ($scheduleState[$usageKey][$resourceId ?: $workCenterId][$dayKey] ?? 0);
             $available = max(0, $capacity - $used);
 
             if ($available <= 0) {
@@ -204,7 +208,11 @@ final class ProductionSchedulingService extends BaseService
                 'work_center_id' => $workCenterId,
             ];
 
-            $scheduleState['work_center_usage'][$workCenterId][$dayKey] = $used + $chunk;
+            if ($resourceId) {
+                $scheduleState['resource_usage'][$resourceId][$dayKey] = $used + $chunk;
+            } else {
+                $scheduleState['work_center_usage'][$workCenterId][$dayKey] = $used + $chunk;
+            }
             $remainingMinutes -= $chunk;
             $current = $segmentEnd;
 
@@ -231,6 +239,7 @@ final class ProductionSchedulingService extends BaseService
     private function scheduleOperationBackward(object $operation, Carbon $cursor, string $mode, array &$scheduleState): array
     {
         $workCenterId = (int) $operation->work_center_id;
+        $resourceId = isset($operation->production_resource_id) ? (int) $operation->production_resource_id : null;
         $durationMinutes = $this->calculateOperationDurationMinutes($operation);
 
         if ($mode === 'infinite') {
@@ -247,8 +256,9 @@ final class ProductionSchedulingService extends BaseService
 
         while ($remainingMinutes > 0) {
             $dayKey = $current->toDateString();
-            $capacity = $this->resolveDailyCapacityMinutes($workCenterId, $current);
-            $used = (int) ($scheduleState['work_center_usage'][$workCenterId][$dayKey] ?? 0);
+            $capacity = $this->resolveDailyCapacityMinutes($workCenterId, $current, $resourceId);
+            $usageKey = $resourceId ? 'resource_usage' : 'work_center_usage';
+            $used = (int) ($scheduleState[$usageKey][$resourceId ?: $workCenterId][$dayKey] ?? 0);
             $available = max(0, $capacity - $used);
 
             if ($available <= 0) {
@@ -267,7 +277,11 @@ final class ProductionSchedulingService extends BaseService
                 'work_center_id' => $workCenterId,
             ];
 
-            $scheduleState['work_center_usage'][$workCenterId][$dayKey] = $used + $chunk;
+            if ($resourceId) {
+                $scheduleState['resource_usage'][$resourceId][$dayKey] = $used + $chunk;
+            } else {
+                $scheduleState['work_center_usage'][$workCenterId][$dayKey] = $used + $chunk;
+            }
             $remainingMinutes -= $chunk;
             $current = $segmentStart;
 
@@ -310,6 +324,12 @@ final class ProductionSchedulingService extends BaseService
         string $direction,
         array $segments = []
     ): array {
+        $leadTimeMinutes = max(0, (int) round((float) ($operation->lead_time_minutes ?? (($operation->queue_time_minutes ?? 0) + ($operation->move_time_minutes ?? 0)))));
+        if ($direction === 'backward') {
+            $startAt = $startAt->copy()->subMinutes($leadTimeMinutes);
+        } else {
+            $endAt = $endAt->copy()->addMinutes($leadTimeMinutes);
+        }
         return [
             'operation_no' => (int) $operation->operation_no,
             'production_order_operation_id' => isset($operation->id) && $operation instanceof \App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOperation ? (int) $operation->id : null,
@@ -317,18 +337,19 @@ final class ProductionSchedulingService extends BaseService
             'operation_name' => (string) $operation->operation_name,
             'sequence' => (int) $operation->sequence,
             'work_center_id' => $workCenterId,
+            'production_resource_id' => $operation->production_resource_id ?? null,
             'mode' => $mode,
             'direction' => $direction,
-            'duration_minutes' => $durationMinutes,
+            'duration_minutes' => $durationMinutes + $leadTimeMinutes,
             'capacity_time_minutes' => $durationMinutes,
-            'lead_time_minutes' => (float) (($operation->lead_time_minutes ?? 0)),
+            'lead_time_minutes' => $leadTimeMinutes,
             'start_at' => $startAt->toDateTimeString(),
             'end_at' => $endAt->toDateTimeString(),
             'segments' => $segments,
         ];
     }
 
-    private function resolveDailyCapacityMinutes(int $workCenterId, Carbon $date): int
+    private function resolveDailyCapacityMinutes(int $workCenterId, Carbon $date, ?int $resourceId = null): int
     {
         $calendarDay = ProductionCalendarDay::query()
             ->where('work_center_id', $workCenterId)
@@ -339,11 +360,17 @@ final class ProductionSchedulingService extends BaseService
             return 0;
         }
 
-        if ($calendarDay && $calendarDay->available_capacity !== null) {
+        if ($calendarDay && $calendarDay->available_capacity !== null && ! $resourceId) {
             return max(0, (int) round((float) $calendarDay->available_capacity * 60));
         }
 
         $workCenter = WorkCenter::query()->findOrFail($workCenterId);
+        if ($resourceId) {
+            $resource = ProductionResource::query()->where('id', $resourceId)->where('work_center_id', $workCenterId)->where('status', 'ACTIVE')->first();
+            if (! $resource) return 0;
+            $resourceCapacity = (float) ($resource->capacity_per_day ?: $workCenter->capacity_per_day);
+            return max(0, (int) round($resourceCapacity * ((float) $resource->efficiency_factor / 100) * 60));
+        }
         $shiftCapacityHours = (float) WorkCenterShift::query()
             ->where('work_center_id', $workCenterId)
             ->where('is_active', true)

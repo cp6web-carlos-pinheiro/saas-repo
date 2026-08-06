@@ -24,10 +24,15 @@ Implementar os indicadores de desempenho solicitados por operação, operador, m
 ## Regras a definir
 
 - Se pausas planejadas entram no denominador.
+R: Sim, as pausas planejadas entram no denominador mas devem estar evidenciadas.
 - Como dividir tempo e quantidade entre múltiplos operadores, caso essa dimensão seja habilitada no futuro.
+R: Utilizar o tempo médio e quantidade media caso essa dimensão seja habilitada no futuro
 - Como tratar operações sem tempo padrão.
+R: Tratar o tempo realizado como sendo o tempo padrão
 - Como tratar apontamentos corrigidos ou cancelados.
+R: Utilizar a ultima informação cadastrada.
 - Se eficiência pode superar 100% e como exibir outliers.
+R: A eficiencia não pode superar 100%.
 
 ## Entregas
 
