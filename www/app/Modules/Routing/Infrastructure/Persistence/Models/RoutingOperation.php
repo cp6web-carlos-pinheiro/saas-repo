@@ -9,6 +9,7 @@ use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersion as Rout
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class RoutingOperation extends TenantModel
 {
@@ -47,5 +48,11 @@ final class RoutingOperation extends TenantModel
     public function workCenter(): BelongsTo
     {
         return $this->belongsTo(WorkCenter::class, 'work_center_id');
+    }
+
+    public function standardTimes(): HasMany
+    {
+        return $this->hasMany(RoutingOperationStandardTime::class, 'routing_operation_id')
+            ->orderByDesc('version_number');
     }
 }

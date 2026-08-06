@@ -8,7 +8,7 @@ use App\Modules\Bom\Infrastructure\Persistence\Models\ProductionOrderBomSnapshot
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderRoutingOperationSnapshot;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderSnapshot;
-use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperation;
+use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperationSnapshot;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersionSnapshot;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
@@ -63,8 +63,8 @@ final class FreezeProductionOrderSnapshotService extends BaseService
                 throw new DomainException('Routing version has not been approved/snapshotted. Cannot freeze production snapshot.', 422);
             }
 
-            $routingOperations = RoutingOperation::query()
-                ->where('routing_version_id', $order->routing_version_id)
+            $routingOperations = RoutingOperationSnapshot::query()
+                ->where('routing_version_snapshot_id', $routingVersionSnapshot->id)
                 ->orderBy('sequence')
                 ->get();
         }
@@ -101,11 +101,13 @@ final class FreezeProductionOrderSnapshotService extends BaseService
             ]);
 
             if ($routingOperations->isNotEmpty()) {
-                $operationRows = $routingOperations->map(static function (RoutingOperation $op) use ($snapshot): array {
+                $operationRows = $routingOperations->map(static function (RoutingOperationSnapshot $op) use ($snapshot): array {
                     return [
                         'company_id' => $snapshot->company_id,
                         'production_order_snapshot_id' => $snapshot->id,
                         'routing_version_id' => $op->routing_version_id,
+                        'standard_time_id' => $op->standard_time_id,
+                        'standard_time_version' => $op->standard_time_version,
                         'work_center_id' => $op->work_center_id,
                         'operation_no' => $op->operation_no,
                         'operation_code' => $op->operation_code,
@@ -174,6 +176,8 @@ final class FreezeProductionOrderSnapshotService extends BaseService
                 'operation_code' => $op->operation_code,
                 'operation_name' => $op->operation_name,
                 'work_center_id' => $op->work_center_id,
+                'standard_time_id' => $op->standard_time_id,
+                'standard_time_version' => $op->standard_time_version,
                 'setup_time_minutes' => $op->setup_time_minutes,
                 'runtime_minutes' => $op->runtime_minutes,
                 'queue_time_minutes' => $op->queue_time_minutes,

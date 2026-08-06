@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Routing\Application\Services;
 
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperation;
+use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperationStandardTime;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperationSnapshot;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersionSnapshot;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersion;
@@ -158,9 +159,21 @@ final class RoutingService extends BaseService
             throw new DomainException('Approved routing versions cannot overlap in effective dating', 422);
         }
 
+        $standardTimesByOperation = RoutingOperationStandardTime::query()
+            ->whereIn('routing_operation_id', $routingVersion->operations->pluck('id'))
+            ->where('status', 'APPROVED')
+            ->whereDate('effective_from', '<=', $effectiveFrom)
+            ->where(static function ($query) use ($effectiveFrom): void {
+                $query->whereNull('effective_to')->orWhereDate('effective_to', '>=', $effectiveFrom);
+            })
+            ->orderByDesc('effective_from')
+            ->get()
+            ->unique('routing_operation_id')
+            ->keyBy('routing_operation_id');
+
         $approvedAt = now();
 
-        $snapshot = $this->inTransaction(function () use ($routingVersion, $payload, $userId, $effectiveFrom, $effectiveTo, $approvedAt) {
+        $snapshot = $this->inTransaction(function () use ($routingVersion, $payload, $userId, $effectiveFrom, $effectiveTo, $approvedAt, $standardTimesByOperation) {
             $updated = RoutingVersion::query()->whereKey($routingVersion->id)->firstOrFail();
             $updated->fill([
                 'status' => 'APPROVED',
@@ -181,18 +194,30 @@ final class RoutingService extends BaseService
                 'description' => $updated->description,
                 'approved_by' => $userId,
                 'approved_at' => $approvedAt->toDateTimeString(),
-                'operations' => $updated->operations->map(static function (RoutingOperation $operation): array {
+                'operations' => $updated->operations->map(static function (RoutingOperation $operation) use ($standardTimesByOperation): array {
+                    $standard = $standardTimesByOperation->get($operation->id);
+                    $setupTime = $operation->is_outsourced
+                        ? 0
+                        : ($standard?->setup_scope === 'ROUTING' && (int) $operation->sequence !== 1
+                            ? 0
+                            : ($standard?->setup_time_minutes ?? $operation->setup_time_minutes));
+                    $runtimeTime = $operation->is_outsourced ? 0 : ($standard?->runtime_minutes ?? $operation->runtime_minutes);
+                    $queueTime = $operation->is_outsourced ? 0 : ($standard?->queue_time_minutes ?? $operation->queue_time_minutes);
+                    $moveTime = $operation->is_outsourced ? 0 : ($standard?->move_time_minutes ?? $operation->move_time_minutes);
+
                     return [
                         'routing_version_id' => $operation->routing_version_id,
+                        'standard_time_id' => $standard?->id,
+                        'standard_time_version' => $standard?->version_number,
                         'work_center_id' => $operation->work_center_id,
                         'operation_no' => $operation->operation_no,
                         'operation_code' => $operation->operation_code,
                         'operation_name' => $operation->operation_name,
                         'sequence' => $operation->sequence,
-                        'setup_time_minutes' => $operation->setup_time_minutes,
-                        'runtime_minutes' => $operation->runtime_minutes,
-                        'queue_time_minutes' => $operation->queue_time_minutes,
-                        'move_time_minutes' => $operation->move_time_minutes,
+                        'setup_time_minutes' => $setupTime,
+                        'runtime_minutes' => $runtimeTime,
+                        'queue_time_minutes' => $queueTime,
+                        'move_time_minutes' => $moveTime,
                         'is_outsourced' => $operation->is_outsourced,
                     ];
                 })->values()->all(),
@@ -214,20 +239,32 @@ final class RoutingService extends BaseService
                 'created_by' => $userId,
             ]);
 
-            $operationRows = $updated->operations->map(static function (RoutingOperation $operation) use ($snapshot): array {
+            $operationRows = $updated->operations->map(static function (RoutingOperation $operation) use ($snapshot, $standardTimesByOperation): array {
+                $standard = $standardTimesByOperation->get($operation->id);
+                $setupTime = $operation->is_outsourced
+                    ? 0
+                    : ($standard?->setup_scope === 'ROUTING' && (int) $operation->sequence !== 1
+                        ? 0
+                        : ($standard?->setup_time_minutes ?? $operation->setup_time_minutes));
+                $runtimeTime = $operation->is_outsourced ? 0 : ($standard?->runtime_minutes ?? $operation->runtime_minutes);
+                $queueTime = $operation->is_outsourced ? 0 : ($standard?->queue_time_minutes ?? $operation->queue_time_minutes);
+                $moveTime = $operation->is_outsourced ? 0 : ($standard?->move_time_minutes ?? $operation->move_time_minutes);
+
                 return [
                     'company_id' => $operation->company_id,
                     'routing_version_snapshot_id' => $snapshot->id,
                     'routing_version_id' => $operation->routing_version_id,
+                    'standard_time_id' => $standard?->id,
+                    'standard_time_version' => $standard?->version_number,
                     'work_center_id' => $operation->work_center_id,
                     'operation_no' => $operation->operation_no,
                     'operation_code' => $operation->operation_code,
                     'operation_name' => $operation->operation_name,
                     'sequence' => $operation->sequence,
-                    'setup_time_minutes' => $operation->setup_time_minutes,
-                    'runtime_minutes' => $operation->runtime_minutes,
-                    'queue_time_minutes' => $operation->queue_time_minutes,
-                    'move_time_minutes' => $operation->move_time_minutes,
+                    'setup_time_minutes' => $setupTime,
+                    'runtime_minutes' => $runtimeTime,
+                    'queue_time_minutes' => $queueTime,
+                    'move_time_minutes' => $moveTime,
                     'is_outsourced' => $operation->is_outsourced,
                     'created_at' => now(),
                     'updated_at' => now(),

@@ -26,6 +26,7 @@ final class ProductionOrderService extends BaseService
     public function __construct(
         private readonly FreezeBomSnapshotService $bomSnapshotService,
         private readonly FreezeProductionOrderSnapshotService $snapshotService,
+        private readonly ProductionOrderOperationPlanningService $operationPlanningService,
         private readonly InventoryService $inventoryService,
         TransactionManager $transaction,
         CacheManager $cache,
@@ -45,7 +46,7 @@ final class ProductionOrderService extends BaseService
     public function show(int $productionOrderId): array
     {
         $order = ProductionOrder::query()
-            ->with(['product', 'warehouse', 'outputs', 'snapshot.routingOperations', 'snapshot.bomSnapshot'])
+            ->with(['product', 'warehouse', 'outputs', 'operations', 'snapshot.routingOperations', 'snapshot.bomSnapshot'])
             ->findOrFail($productionOrderId);
 
         return $order->toArray();
@@ -202,8 +203,9 @@ final class ProductionOrderService extends BaseService
 
         // Freeze full production snapshot atomically at release
         $this->snapshotService->freeze($released->id, $userId);
+        $this->operationPlanningService->materialize($released->id, false, $userId);
 
-        return $released->fresh()->load(['product', 'warehouse', 'outputs', 'snapshot.routingOperations'])->toArray();
+        return $released->fresh()->load(['product', 'warehouse', 'outputs', 'operations', 'snapshot.routingOperations'])->toArray();
     }
 
     private function createOrder(array $payload, string $sourceType, ?int $sourceReferenceId, ?string $sourceReferenceType, ?int $userId): array

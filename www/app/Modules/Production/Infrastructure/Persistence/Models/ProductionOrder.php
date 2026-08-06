@@ -82,4 +82,9 @@ final class ProductionOrder extends TenantModel
     {
         return $this->hasMany(ProductionOrderMaterialConsumption::class, 'production_order_id');
     }
+
+    public function operations(): HasMany
+    {
+        return $this->hasMany(ProductionOrderOperation::class, 'production_order_id')->orderBy('sequence');
+    }
 }

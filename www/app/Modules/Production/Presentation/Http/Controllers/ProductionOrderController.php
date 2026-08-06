@@ -7,6 +7,7 @@ namespace App\Modules\Production\Presentation\Http\Controllers;
 use App\Modules\Production\Application\Services\FreezeProductionOrderSnapshotService;
 use App\Modules\Production\Application\Services\MaterialConsumptionService;
 use App\Modules\Production\Application\Services\ProductionOrderService;
+use App\Modules\Production\Application\Services\ProductionOrderOperationPlanningService;
 use App\Modules\Production\Presentation\Http\Requests\StoreManualProductionOrderRequest;
 use App\Modules\Production\Presentation\Http\Requests\StoreProductionOrderMaterialConsumptionRequest;
 use App\Modules\Production\Presentation\Http\Requests\StoreMrpProductionOrderRequest;
@@ -21,6 +22,7 @@ final class ProductionOrderController
         private readonly ProductionOrderService $service,
         private readonly FreezeProductionOrderSnapshotService $snapshotService,
         private readonly MaterialConsumptionService $consumptionService
+        , private readonly ProductionOrderOperationPlanningService $operationPlanningService
     ) {
     }
 
@@ -64,6 +66,19 @@ final class ProductionOrderController
     public function snapshot(int $id): JsonResponse
     {
         return ApiResponse::success($this->snapshotService->getSnapshot($id), 'Production order snapshot');
+    }
+
+    public function operations(int $id): JsonResponse
+    {
+        return ApiResponse::success($this->operationPlanningService->materialize($id), 'Production order planned operations');
+    }
+
+    public function materializeOperations(Request $request, int $id): JsonResponse
+    {
+        return ApiResponse::success(
+            $this->operationPlanningService->materialize($id, $request->boolean('force'), $request->user()?->id),
+            'Production order operations materialized'
+        );
     }
 
     public function consumptions(Request $request, int $id): JsonResponse

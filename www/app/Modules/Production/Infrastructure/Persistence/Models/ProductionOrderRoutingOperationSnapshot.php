@@ -20,6 +20,8 @@ final class ProductionOrderRoutingOperationSnapshot extends TenantModel
         'company_id',
         'production_order_snapshot_id',
         'routing_version_id',
+        'standard_time_id',
+        'standard_time_version',
         'work_center_id',
         'operation_no',
         'operation_code',
@@ -37,6 +39,8 @@ final class ProductionOrderRoutingOperationSnapshot extends TenantModel
         'runtime_minutes' => 'float',
         'queue_time_minutes' => 'float',
         'move_time_minutes' => 'float',
+        'standard_time_id' => 'integer',
+        'standard_time_version' => 'integer',
         'is_outsourced' => 'bool',
     ];
 

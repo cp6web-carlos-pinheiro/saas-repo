@@ -22,7 +22,7 @@ final class StoreEngineeringChangeOrderRequest extends FormRequest
             'effective_to' => ['nullable', 'date', 'after_or_equal:effective_from'],
             'metadata' => ['nullable', 'array'],
             'lines' => ['required', 'array', 'min:1'],
-            'lines.*.target_domain' => ['required', 'string', 'in:PRODUCT,BOM,ROUTING'],
+            'lines.*.target_domain' => ['required', 'string', 'in:PRODUCT,BOM,ROUTING,STANDARD_TIME'],
             'lines.*.target_entity_id' => ['required', 'integer', 'min:1'],
             'lines.*.change_type' => ['nullable', 'string', 'max:40'],
             'lines.*.from_version_number' => ['nullable', 'integer', 'min:1'],

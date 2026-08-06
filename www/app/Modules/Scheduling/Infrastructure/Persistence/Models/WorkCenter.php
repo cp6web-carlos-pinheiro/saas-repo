@@ -49,4 +49,15 @@ final class WorkCenter extends TenantModel
     {
         return $this->hasMany(ProductionCalendarDay::class);
     }
+
+    public function productionResources(): HasMany
+    {
+        return $this->hasMany(ProductionResource::class, 'work_center_id');
+    }
+
+    public function hourRates(): HasMany
+    {
+        return $this->hasMany(WorkCenterHourRate::class, 'work_center_id')
+            ->orderByDesc('effective_from');
+    }
 }

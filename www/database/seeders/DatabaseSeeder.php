@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             PlanSeeder::class,
             SchedulingPermissionsSeeder::class,
+            EngineeringResourcesPermissionsSeeder::class,
             BomPermissionsSeeder::class,
             MrpPermissionsSeeder::class,
             GenealogyPermissionsSeeder::class,

@@ -4,7 +4,7 @@
 Gerar visoes analiticas e operacionais para distribuicao e auditoria.
 
 ## Status de implementacao
-Nao iniciado. Nao encontrei camada de relatorios exportaveis, agendamento ou construtor de filtros dedicado.
+Nao iniciado como modulo de relatorios. A tela web de indicadores de producao fornece uma visao HTML simples para um periodo, mas nao existe camada de relatorios exportaveis, agendamento, snapshots analiticos ou filtros multidimensionais.
 
 ## Escopo
 - PDF: nao iniciado
@@ -32,4 +32,3 @@ Nao iniciado. Nao encontrei camada de relatorios exportaveis, agendamento ou con
 - Area de Gestao/Operacoes: definir relatorios obrigatorios por processo.
 - Area de BI: homologar regras de calculo e consistencia de resultados.
 - Area de Engenharia: implementar motor de relatorios e exportacoes escalavel.
-

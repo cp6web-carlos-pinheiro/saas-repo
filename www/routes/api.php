@@ -18,6 +18,8 @@ use App\Modules\Routing\Presentation\Http\Controllers\RoutingController;
 use App\Modules\Scheduling\Presentation\Http\Controllers\ProductionCalendarController;
 use App\Modules\Scheduling\Presentation\Http\Controllers\ProductionSchedulingController;
 use App\Modules\Scheduling\Presentation\Http\Controllers\WorkCenterController;
+use App\Modules\Scheduling\Presentation\Http\Controllers\ProductionResourceController;
+use App\Modules\Routing\Presentation\Http\Controllers\RoutingStandardTimeController;
 use App\Modules\Product\Presentation\Http\Controllers\ProductController;
 use App\Modules\Product\Presentation\Http\Controllers\ProductVersionController;
 use App\Modules\Identity\Presentation\Http\Controllers\AuthController;
@@ -107,6 +109,23 @@ Route::prefix('v1')->group(function (): void {
             Route::post('/work-centers/{id}/shifts', [WorkCenterController::class, 'addShift'])
                 ->middleware(CheckPermission::class.':work-centers.shifts.create');
 
+            Route::get('/production-resources', [ProductionResourceController::class, 'index'])
+                ->middleware(CheckPermission::class.':production-resources.read');
+            Route::post('/production-resources', [ProductionResourceController::class, 'store'])
+                ->middleware(CheckPermission::class.':production-resources.create');
+            Route::get('/production-resources/{id}', [ProductionResourceController::class, 'show'])
+                ->middleware(CheckPermission::class.':production-resources.read');
+            Route::put('/production-resources/{id}', [ProductionResourceController::class, 'update'])
+                ->middleware(CheckPermission::class.':production-resources.update');
+            Route::delete('/production-resources/{id}', [ProductionResourceController::class, 'destroy'])
+                ->middleware(CheckPermission::class.':production-resources.delete');
+            Route::get('/work-centers/{workCenterId}/hour-rates', [ProductionResourceController::class, 'rates'])
+                ->middleware(CheckPermission::class.':work-center-hour-rates.read');
+            Route::post('/work-centers/{workCenterId}/hour-rates', [ProductionResourceController::class, 'storeRate'])
+                ->middleware(CheckPermission::class.':work-center-hour-rates.create');
+            Route::get('/work-centers/{workCenterId}/hour-rates/effective', [ProductionResourceController::class, 'effectiveRate'])
+                ->middleware(CheckPermission::class.':work-center-hour-rates.read');
+
             Route::get('/work-centers/{workCenterId}/calendar', [ProductionCalendarController::class, 'index'])
                 ->middleware(CheckPermission::class.':production-calendar.read');
             Route::put('/work-centers/{workCenterId}/calendar/day', [ProductionCalendarController::class, 'upsert'])
@@ -171,6 +190,21 @@ Route::prefix('v1')->group(function (): void {
             Route::delete('/routing-versions/{routingVersionId}/operations/{operationId}', [RoutingController::class, 'destroyOperation'])
                 ->middleware(CheckPermission::class.':routing-operations.delete');
 
+            Route::get('/routing-operations/{routingOperationId}/standard-times', [RoutingStandardTimeController::class, 'index'])
+                ->middleware(CheckPermission::class.':routing-standard-times.read');
+            Route::post('/routing-operations/{routingOperationId}/standard-times', [RoutingStandardTimeController::class, 'store'])
+                ->middleware(CheckPermission::class.':routing-standard-times.create');
+            Route::put('/routing-standard-times/{id}', [RoutingStandardTimeController::class, 'update'])
+                ->middleware(CheckPermission::class.':routing-standard-times.update');
+            Route::post('/routing-standard-times/{id}/approve', [RoutingStandardTimeController::class, 'approve'])
+                ->middleware(CheckPermission::class.':routing-standard-times.approve');
+            Route::post('/routing-standard-times/{id}/obsolete', [RoutingStandardTimeController::class, 'obsolete'])
+                ->middleware(CheckPermission::class.':routing-standard-times.obsolete');
+            Route::get('/routing-operations/{routingOperationId}/standard-times/effective', [RoutingStandardTimeController::class, 'effective'])
+                ->middleware(CheckPermission::class.':routing-standard-times.read');
+            Route::post('/routing-operations/{routingOperationId}/standard-times/calculate', [RoutingStandardTimeController::class, 'calculate'])
+                ->middleware(CheckPermission::class.':routing-standard-times.read');
+
             Route::get('/inventory/balances', [InventoryController::class, 'index'])
                 ->middleware(CheckPermission::class.':inventory.read');
             Route::put('/inventory/balances', [InventoryController::class, 'upsert'])
@@ -221,6 +255,10 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware(CheckPermission::class.':production-orders.complete');
             Route::get('/production-orders/{id}/snapshot', [ProductionOrderController::class, 'snapshot'])
                 ->middleware(CheckPermission::class.':production-orders.read');
+            Route::get('/production-orders/{id}/operations', [ProductionOrderController::class, 'operations'])
+                ->middleware(CheckPermission::class.':production-order-operations.read');
+            Route::post('/production-orders/{id}/operations/materialize', [ProductionOrderController::class, 'materializeOperations'])
+                ->middleware(CheckPermission::class.':production-order-operations.plan');
             Route::get('/production-orders/{id}/consumptions', [ProductionOrderController::class, 'consumptions'])
                 ->middleware(CheckPermission::class.':production-orders.consumption.read');
             Route::post('/production-orders/{id}/consumptions', [ProductionOrderController::class, 'recordConsumption'])

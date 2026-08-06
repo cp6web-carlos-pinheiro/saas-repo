@@ -8,8 +8,10 @@ use App\Modules\Bom\Infrastructure\Persistence\Models\BomHeader;
 use App\Modules\Eco\Infrastructure\Persistence\Models\EngineeringChangeOrder;
 use App\Modules\Eco\Infrastructure\Persistence\Models\EngineeringChangeOrderLine;
 use App\Modules\Product\Infrastructure\Persistence\Models\ProductVersion;
+use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersion;
+use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperationStandardTime;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
 use App\Shared\Application\Transactions\TransactionManager;
@@ -19,7 +21,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class EngineeringChangeOrderService extends BaseService
 {
-    private const VALID_TARGET_DOMAIN = ['PRODUCT', 'BOM', 'ROUTING'];
+    private const VALID_TARGET_DOMAIN = ['PRODUCT', 'BOM', 'ROUTING', 'STANDARD_TIME'];
 
     public function __construct(
         TransactionManager $transaction,
@@ -228,6 +230,7 @@ final class EngineeringChangeOrderService extends BaseService
                 'PRODUCT' => $this->analyzeProductLineImpact($line, $openStatuses, $effectiveFrom, $effectiveTo),
                 'BOM' => $this->analyzeBomLineImpact($line, $openStatuses, $effectiveFrom, $effectiveTo),
                 'ROUTING' => $this->analyzeRoutingLineImpact($line, $openStatuses, $effectiveFrom, $effectiveTo),
+                'STANDARD_TIME' => $this->analyzeStandardTimeLineImpact($line, $openStatuses, $effectiveFrom, $effectiveTo),
                 default => [
                     'line_id' => (int) $line->id,
                     'target_domain' => $line->target_domain,
@@ -263,6 +266,7 @@ final class EngineeringChangeOrderService extends BaseService
         foreach ($lines as $line) {
             $this->assertTargetDomain((string) $line['target_domain']);
             $this->assertEffectiveDating($line['effective_from'] ?? null, $line['effective_to'] ?? null);
+            $this->assertTargetEntity((string) $line['target_domain'], (int) $line['target_entity_id']);
 
             EngineeringChangeOrderLine::query()->create([
                 'engineering_change_order_id' => $eco->id,
@@ -285,6 +289,24 @@ final class EngineeringChangeOrderService extends BaseService
         if (! in_array(strtoupper($targetDomain), self::VALID_TARGET_DOMAIN, true)) {
             throw new DomainException('Invalid ECO target domain', 422, [
                 'target_domain' => self::VALID_TARGET_DOMAIN,
+            ]);
+        }
+    }
+
+    private function assertTargetEntity(string $targetDomain, int $targetEntityId): void
+    {
+        $exists = match (strtoupper($targetDomain)) {
+            'PRODUCT' => Product::query()->whereKey($targetEntityId)->exists(),
+            'BOM' => BomHeader::query()->whereKey($targetEntityId)->exists(),
+            'ROUTING' => RoutingVersion::query()->whereKey($targetEntityId)->exists(),
+            'STANDARD_TIME' => RoutingOperationStandardTime::query()->whereKey($targetEntityId)->exists(),
+            default => false,
+        };
+
+        if (! $exists) {
+            throw new DomainException('ECO target entity was not found in the active tenant', 422, [
+                'target_domain' => strtoupper($targetDomain),
+                'target_entity_id' => $targetEntityId,
             ]);
         }
     }
@@ -439,6 +461,49 @@ final class EngineeringChangeOrderService extends BaseService
             'affected_open_production_orders' => count($affectedOrders),
             'affected_open_production_order_ids' => $affectedOrders,
             'overlapping_approved_versions' => (int) $overlappingApprovedRouting,
+        ];
+    }
+
+    private function analyzeStandardTimeLineImpact(EngineeringChangeOrderLine $line, array $openStatuses, ?string $effectiveFrom, ?string $effectiveTo): array
+    {
+        $standardTime = RoutingOperationStandardTime::query()
+            ->with('routingOperation')
+            ->find((int) $line->target_entity_id);
+
+        if (! $standardTime || ! $standardTime->routingOperation) {
+            return [
+                'line_id' => (int) $line->id,
+                'target_domain' => 'STANDARD_TIME',
+                'target_entity_id' => (int) $line->target_entity_id,
+                'affected_open_production_orders' => 0,
+                'affected_open_production_order_ids' => [],
+                'impact' => 'target_not_found',
+            ];
+        }
+
+        $routingVersionId = (int) $standardTime->routingOperation->routing_version_id;
+        $ordersQuery = ProductionOrder::query()
+            ->where('routing_version_id', $routingVersionId)
+            ->whereIn('status', $openStatuses);
+
+        if ($effectiveFrom !== null) {
+            $ordersQuery->where(static function ($query) use ($effectiveFrom): void {
+                $query->whereNull('scheduled_end_date')
+                    ->orWhereDate('scheduled_end_date', '>=', $effectiveFrom);
+            });
+        }
+
+        $affectedOrders = $ordersQuery->limit(10)->pluck('id')->map(static fn ($id): int => (int) $id)->all();
+
+        return [
+            'line_id' => (int) $line->id,
+            'target_domain' => 'STANDARD_TIME',
+            'target_entity_id' => (int) $line->target_entity_id,
+            'routing_operation_id' => (int) $standardTime->routing_operation_id,
+            'routing_version_id' => $routingVersionId,
+            'affected_open_production_orders' => count($affectedOrders),
+            'affected_open_production_order_ids' => $affectedOrders,
+            'current_version_number' => (int) $standardTime->version_number,
         ];
     }
 }

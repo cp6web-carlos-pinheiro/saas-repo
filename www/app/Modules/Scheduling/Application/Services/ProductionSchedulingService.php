@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Scheduling\Application\Services;
 
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
+use App\Modules\Production\Application\Services\ProductionOrderOperationPlanningService;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\ProductionCalendarDay;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenterShift;
@@ -21,7 +22,8 @@ final class ProductionSchedulingService extends BaseService
     public function __construct(
         TransactionManager $transaction,
         CacheManager $cache,
-        AppLogger $logger
+        AppLogger $logger,
+        private readonly ProductionOrderOperationPlanningService $operationPlanningService
     ) {
         parent::__construct($transaction, $cache, $logger);
     }
@@ -84,6 +86,7 @@ final class ProductionSchedulingService extends BaseService
             if (! $order->snapshot || $order->snapshot->routingOperations->isEmpty()) {
                 throw new DomainException(sprintf('Production order %d does not have a frozen routing snapshot', $order->id), 422);
             }
+            $this->operationPlanningService->materialize((int) $order->id);
         }
 
         return $orders;
@@ -112,7 +115,9 @@ final class ProductionSchedulingService extends BaseService
         string $direction,
         array &$scheduleState
     ): array {
-        $operations = $order->snapshot->routingOperations->sortBy('sequence')->values();
+        $operations = $order->operations->isNotEmpty()
+            ? $order->operations->sortBy('sequence')->values()
+            : $order->snapshot->routingOperations->sortBy('sequence')->values();
 
         $anchorStart = Carbon::parse($order->scheduled_start_date ?? $referenceDate)->startOfDay();
         $anchorEnd = Carbon::parse($order->scheduled_end_date ?? $referenceDate)->endOfDay();
@@ -290,10 +295,8 @@ final class ProductionSchedulingService extends BaseService
     private function calculateOperationDurationMinutes(object $operation): int
     {
         return max(1, (int) ceil(
-            (float) $operation->setup_time_minutes
-            + (float) $operation->runtime_minutes
-            + (float) $operation->queue_time_minutes
-            + (float) $operation->move_time_minutes
+            (float) ($operation->productive_time_minutes ?? 0)
+            ?: (float) ($operation->setup_time_minutes ?? 0) + (float) ($operation->runtime_time_minutes ?? $operation->runtime_minutes ?? 0)
         ));
     }
 
@@ -309,6 +312,7 @@ final class ProductionSchedulingService extends BaseService
     ): array {
         return [
             'operation_no' => (int) $operation->operation_no,
+            'production_order_operation_id' => isset($operation->id) && $operation instanceof \App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOperation ? (int) $operation->id : null,
             'operation_code' => (string) $operation->operation_code,
             'operation_name' => (string) $operation->operation_name,
             'sequence' => (int) $operation->sequence,
@@ -316,6 +320,8 @@ final class ProductionSchedulingService extends BaseService
             'mode' => $mode,
             'direction' => $direction,
             'duration_minutes' => $durationMinutes,
+            'capacity_time_minutes' => $durationMinutes,
+            'lead_time_minutes' => (float) (($operation->lead_time_minutes ?? 0)),
             'start_at' => $startAt->toDateTimeString(),
             'end_at' => $endAt->toDateTimeString(),
             'segments' => $segments,
