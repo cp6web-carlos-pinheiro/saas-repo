@@ -116,8 +116,12 @@ return new class extends Migration {
             $table->foreignId('production_order_material_consumption_id')
                 ->constrained('production_order_material_consumptions', 'id', 'fk_consumption_reversal_consumption')
                 ->cascadeOnDelete();
-            $table->foreignId('original_ledger_movement_id')->constrained('stock_ledger_movements')->cascadeOnDelete();
-            $table->foreignId('reversal_ledger_movement_id')->constrained('stock_ledger_movements')->cascadeOnDelete();
+            $table->foreignId('original_ledger_movement_id')
+                ->constrained('stock_ledger_movements', 'id', 'fk_consumption_reversal_original_ledger')
+                ->cascadeOnDelete();
+            $table->foreignId('reversal_ledger_movement_id')
+                ->constrained('stock_ledger_movements', 'id', 'fk_consumption_reversal_ledger')
+                ->cascadeOnDelete();
             $table->decimal('quantity', 18, 6);
             $table->string('reason', 255);
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
