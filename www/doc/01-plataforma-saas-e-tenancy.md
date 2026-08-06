@@ -33,7 +33,7 @@ Os models transacionais tenant-aware herdam de `TenantModel`. O contexto da empr
 
 ## Dicionário de dados
 
-As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas removidas preservadas como histórico. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
+As tabelas abaixo documentam o schema corrente do domínio. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
 
 ### `account_invitations`
 
@@ -93,24 +93,6 @@ As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas re
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 | `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
 
-### `organizations` (removida)
-
-**Finalidade:** Estrutura legada consolidada em `companies` pela migration `2026_08_09_000001`.
-
-| Coluna | Tipo | Nula | Padrão | Descrição |
-| --- | --- | --- | --- | --- |
-| `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
-| `company_id` | `bigint unsigned` | Sim | — | Referência a `companies.id`. |
-| `name` | `varchar(180)` | Não | — | Nome. |
-| `slug` | `varchar(180)` | Não | — | Atributo funcional de slug. |
-| `domain` | `varchar(180)` | Sim | — | Atributo funcional de domain. |
-| `segment` | `varchar(120)` | Sim | — | Atributo funcional de segment. |
-| `operation_size` | `varchar(80)` | Sim | — | Atributo funcional de operation size. |
-| `timezone` | `varchar(80)` | Não | `UTC` | Atributo funcional de timezone. |
-| `preferences` | `json` | Sim | — | Dados estruturados de preferences em JSON. |
-| `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
-| `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
-
 ### `plans`
 
 **Finalidade:** Planos comerciais.
@@ -151,20 +133,6 @@ As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas re
 | `starts_at` | `datetime` | Sim | — | Data e hora de starts. |
 | `ends_at` | `datetime` | Sim | — | Data e hora de ends. |
 | `canceled_at` | `datetime` | Sim | — | Data e hora de canceled. |
-| `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
-| `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
-
-### `tenants` (removida)
-
-**Finalidade:** Estrutura legada consolidada em `companies` pela migration `2026_08_09_000001`.
-
-| Coluna | Tipo | Nula | Padrão | Descrição |
-| --- | --- | --- | --- | --- |
-| `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
-| `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
-| `name` | `varchar(180)` | Não | — | Nome. |
-| `slug` | `varchar(180)` | Não | — | Atributo funcional de slug. |
-| `is_active` | `tinyint(1)` | Não | `1` | Indica se está ativo. |
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 | `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
 

@@ -36,7 +36,7 @@ Administrar clientes, pedidos de venda e seu avanço comercial e operacional.
 
 ## Dicionário de dados
 
-As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas removidas preservadas como histórico. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
+As tabelas abaixo documentam o schema corrente do domínio. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
 
 ### `customers`
 

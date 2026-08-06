@@ -24,7 +24,7 @@ O dicionário de dados está distribuído nesses documentos: cada domínio descr
 - Ações protegidas exigem permissões granulares do domínio.
 - Estados e códigos técnicos são apresentados em maiúsculas porque correspondem aos valores persistidos.
 - “Limitações atuais” descreve apenas fronteiras observadas na implementação, não um backlog comprometido.
-- O schema MySQL corrente possui 86 tabelas; outras seis estruturas removidas permanecem documentadas como histórico nos respectivos domínios.
+- O schema MySQL corrente possui 86 tabelas documentadas nos respectivos domínios.
 - A consolidação `2026_08_09_000001` tornou `companies` a única raiz de tenancy e `production_operation_outputs` a única fonte de apontamentos de produção.
 
 ## Atualização

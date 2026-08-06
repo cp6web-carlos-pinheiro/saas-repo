@@ -48,7 +48,7 @@ Transformar os fatos de produção em indicadores operacionais reproduzíveis e 
 
 ## Dicionário de dados
 
-As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas removidas preservadas como histórico. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
+As tabelas abaixo documentam o schema corrente do domínio. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
 
 ### `manufacturing_analytics_recommendations`
 

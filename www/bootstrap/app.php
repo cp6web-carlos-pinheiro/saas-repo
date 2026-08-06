@@ -23,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup('api', ApplyLocalePreference::class);
         $middleware->append(SecurityHeaders::class);
         $middleware->redirectUsersTo(function ($request): string {
+            if ($request->is('global-admin') || $request->is('global-admin/*')) {
+                return route('global-admin.home');
+            }
+
             $user = $request->user();
 
             if ($user && (int) $user->current_company_id > 0) {

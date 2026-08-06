@@ -40,7 +40,7 @@ Controlar autenticação, sessões, segurança e autorização dos usuários, al
 
 ## Dicionário de dados
 
-As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas removidas preservadas como histórico. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
+As tabelas abaixo documentam o schema corrente do domínio. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
 
 ### `admins`
 
@@ -102,25 +102,6 @@ As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas re
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 | `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
 
-### `master_data_records` (removida)
-
-**Finalidade:** Estrutura legada substituída por tabelas específicas de unidades, categorias e marcas.
-
-| Coluna | Tipo | Nula | Padrão | Descrição |
-| --- | --- | --- | --- | --- |
-| `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
-| `company_id` | `bigint unsigned` | Não | — | Empresa proprietária do registro. |
-| `domain` | `varchar(40)` | Não | — | Atributo funcional de domain. |
-| `code` | `varchar(60)` | Não | — | Código funcional. |
-| `name` | `varchar(180)` | Não | — | Nome. |
-| `description` | `text` | Sim | — | Descrição funcional. |
-| `is_active` | `tinyint(1)` | Não | `1` | Indica se está ativo. |
-| `created_by` | `bigint unsigned` | Sim | — | Atributo funcional de created by. |
-| `updated_by` | `bigint unsigned` | Sim | — | Atributo funcional de updated by. |
-| `metadata` | `json` | Sim | — | Metadados adicionais em JSON. |
-| `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
-| `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
-
 ### `page_tutorials`
 
 **Finalidade:** Registros funcionais de page tutorials.
@@ -146,19 +127,6 @@ As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas re
 | `token` | `varchar(255)` | Não | — | Token de autenticação ou confirmação. |
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 
-### `password_resets` (removida)
-
-**Finalidade:** Estrutura legada substituída por `password_reset_tokens`.
-
-| Coluna | Tipo | Nula | Padrão | Descrição |
-| --- | --- | --- | --- | --- |
-| `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
-| `email` | `varchar(190)` | Não | — | Endereço de e-mail. |
-| `token` | `varchar(128)` | Não | — | Token de autenticação ou confirmação. |
-| `expires_at` | `datetime` | Não | — | Data e hora de expires. |
-| `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
-| `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
-
 ### `permission_role`
 
 **Finalidade:** Registros funcionais de permission role.
@@ -168,22 +136,6 @@ As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas re
 | `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
 | `permission_id` | `bigint unsigned` | Não | — | Referência a `permissions.id`. |
 | `role_id` | `bigint unsigned` | Não | — | Referência a `roles.id`. |
-| `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
-| `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
-
-### `permission_user_overrides` (removida)
-
-**Finalidade:** Estrutura legada removida; a autorização vigente usa papéis e permissões.
-
-| Coluna | Tipo | Nula | Padrão | Descrição |
-| --- | --- | --- | --- | --- |
-| `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
-| `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
-| `user_id` | `bigint unsigned` | Não | — | Referência a `users.id`. |
-| `permission_id` | `bigint unsigned` | Não | — | Referência a `permissions.id`. |
-| `is_allowed` | `tinyint(1)` | Não | — | Indicador booleano de is allowed. |
-| `reason` | `varchar(255)` | Sim | — | Motivo da ação. |
-| `created_by_user_id` | `bigint unsigned` | Sim | — | Referência a `users.id`. |
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 | `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
 

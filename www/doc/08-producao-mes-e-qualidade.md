@@ -53,7 +53,7 @@ Administrar a ordem de produção desde sua criação até a execução das oper
 
 ## Dicionário de dados
 
-As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas removidas preservadas como histórico. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
+As tabelas abaixo documentam o schema corrente do domínio. “Nula” informa se a coluna aceita `NULL`; “—” indica ausência de valor padrão explícito.
 
 ### `production_material_consumption_reversals`
 
@@ -238,31 +238,6 @@ As tabelas abaixo documentam o schema corrente e, quando indicado, estruturas re
 | `actual_pause_minutes` | `decimal(10,2)` | Não | `0.00` | Duração em minutos de actual pause. |
 | `actual_started_at` | `datetime` | Sim | — | Data e hora de actual started. |
 | `actual_completed_at` | `datetime` | Sim | — | Data e hora de actual completed. |
-
-### `production_order_outputs` (removida)
-
-**Finalidade:** Estrutura legada consolidada em `production_operation_outputs`.
-
-| Coluna | Tipo | Nula | Padrão | Descrição |
-| --- | --- | --- | --- | --- |
-| `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
-| `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
-| `production_order_id` | `bigint unsigned` | Não | — | Referência a `production_orders.id`. |
-| `quantity_completed` | `decimal(18,6)` | Não | — | Quantidade de completed. |
-| `quantity_scrapped` | `decimal(18,6)` | Não | `0.000000` | Quantidade de scrapped. |
-| `operation_no` | `int unsigned` | Sim | — | Atributo funcional de operation no. |
-| `lot_number` | `varchar(80)` | Sim | — | Número funcional de lot number. |
-| `produced_at` | `timestamp` | Não | — | Data e hora de produced. |
-| `created_by` | `bigint unsigned` | Sim | — | Referência a `users.id`. |
-| `metadata` | `json` | Sim | — | Metadados adicionais em JSON. |
-| `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
-| `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
-| `work_center_id` | `bigint unsigned` | Sim | — | Referência a `work_centers.id`. |
-| `setup_time_minutes` | `decimal(10,2)` | Não | `0.00` | Duração em minutos de setup time. |
-| `process_time_minutes` | `decimal(10,2)` | Não | `0.00` | Duração em minutos de process time. |
-| `inspection_status` | `varchar(20)` | Não | `APPROVED` | Atributo funcional de inspection status. |
-| `inspected_at` | `timestamp` | Sim | — | Data e hora de inspected. |
-| `inspection_notes` | `text` | Sim | — | Atributo funcional de inspection notes. |
 
 ### `production_order_routing_operation_snapshots`
 
