@@ -66,8 +66,8 @@
                 ['label' => __('ui.admin_units'), 'href' => route('admin-data.units.index'), 'active' => request()->routeIs('admin-data.units.*')],
                 ['label' => __('ui.admin_categories'), 'href' => route('admin-data.categories.index'), 'active' => request()->routeIs('admin-data.categories.*')],
                 ['label' => __('ui.admin_brands'), 'href' => route('admin-data.brands.index'), 'active' => request()->routeIs('admin-data.brands.*')],
-                ['label' => __('ui.inventory_movements'), 'href' => null, 'active' => false],
-                ['label' => __('ui.inventory_count'), 'href' => null, 'active' => false],
+                ['label' => __('ui.inventory_movements'), 'href' => route('inventory.movements.index'), 'active' => request()->routeIs('inventory.movements.*')],
+                ['label' => __('ui.inventory_count'), 'href' => route('inventory.balances.index'), 'active' => request()->routeIs('inventory.balances.*')],
             ],
         ];
 

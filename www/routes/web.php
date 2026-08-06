@@ -21,35 +21,36 @@ use App\Http\Controllers\Web\Documentation\DocumentationController;
 use App\Http\Controllers\Web\Onboarding\AccountInvitationController;
 use App\Http\Controllers\Web\Onboarding\OnboardingController;
 use App\Http\Controllers\Web\Onboarding\PaymentController;
-use App\Http\Controllers\Web\Tenant\CompanyAccessUserController;
-use App\Http\Controllers\Web\Tenant\RbacConsoleController;
 use App\Http\Controllers\Web\Tenant\AdminData\BrandsController;
 use App\Http\Controllers\Web\Tenant\AdminData\CategoriesController;
 use App\Http\Controllers\Web\Tenant\AdminData\UnitsController;
 use App\Http\Controllers\Web\Tenant\BomMaterialListController;
 use App\Http\Controllers\Web\Tenant\BomStructureController;
+use App\Http\Controllers\Web\Tenant\CompanyAccessUserController;
 use App\Http\Controllers\Web\Tenant\CustomerController;
+use App\Http\Controllers\Web\Tenant\InventoryWebController;
+use App\Http\Controllers\Web\Tenant\PageTutorialController;
 use App\Http\Controllers\Web\Tenant\PlantController;
 use App\Http\Controllers\Web\Tenant\ProductController;
-use App\Http\Controllers\Web\Tenant\ProductVersionController;
 use App\Http\Controllers\Web\Tenant\ProductionAnalyticsController;
 use App\Http\Controllers\Web\Tenant\ProductionCalendarWebController;
 use App\Http\Controllers\Web\Tenant\ProductionOrderController;
 use App\Http\Controllers\Web\Tenant\ProductionRoutingController;
 use App\Http\Controllers\Web\Tenant\ProductionSchedulingWebController;
 use App\Http\Controllers\Web\Tenant\ProductionWorkCenterController;
-use App\Http\Controllers\Web\Tenant\PurchasingLookupController;
-use App\Http\Controllers\Web\Tenant\PageTutorialController;
+use App\Http\Controllers\Web\Tenant\ProductVersionController;
 use App\Http\Controllers\Web\Tenant\PurchaseOrderController;
 use App\Http\Controllers\Web\Tenant\PurchaseQuotationController;
 use App\Http\Controllers\Web\Tenant\PurchaseReceiptController;
 use App\Http\Controllers\Web\Tenant\PurchaseRequisitionController;
+use App\Http\Controllers\Web\Tenant\PurchasingLookupController;
+use App\Http\Controllers\Web\Tenant\RbacConsoleController;
 use App\Http\Controllers\Web\Tenant\SaleController;
 use App\Http\Controllers\Web\Tenant\SupplierController;
 use App\Http\Controllers\Web\Tenant\WarehouseController;
 use App\Http\Middleware\EnsureTrialIsActive;
-use App\Modules\Identity\Presentation\Http\Middleware\CheckPermission;
 use App\Http\Middleware\ResolveWebTenant;
+use App\Modules\Identity\Presentation\Http\Middleware\CheckPermission;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -220,6 +221,13 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/{warehouse}/edit', [WarehouseController::class, 'edit'])->name('edit');
             Route::put('/{warehouse}', [WarehouseController::class, 'update'])->name('update');
             Route::delete('/{warehouse}', [WarehouseController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('inventory')->name('inventory.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
+            Route::get('/balances', [InventoryWebController::class, 'balances'])->name('balances.index');
+            Route::get('/movements', [InventoryWebController::class, 'movements'])->name('movements.index');
+            Route::get('/movements/create', [InventoryWebController::class, 'createMovement'])->name('movements.create');
+            Route::post('/movements', [InventoryWebController::class, 'storeMovement'])->name('movements.store');
         });
 
         Route::prefix('admin-data')->name('admin-data.')->middleware(EnsureTrialIsActive::class)->group(function (): void {

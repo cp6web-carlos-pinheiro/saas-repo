@@ -1,0 +1,52 @@
+@extends('layouts.client-area')
+
+@section('title', __('ui.module_inventory').' | '.__('inventory_web.balances'))
+@section('client-page-title', __('inventory_web.balances'))
+
+@section('client-content')
+<div class="w-full p-5 md:p-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="font-display text-3xl font-bold">{{ __('inventory_web.balances') }}</h1>
+            <p class="mt-1 text-sm text-[#5f6368]">{{ __('inventory_web.balances_description') }}</p>
+        </div>
+        <x-ui.button :href="route('inventory.movements.create')" variant="brand-primary" class="rounded-full">{{ __('inventory_web.new_movement') }}</x-ui.button>
+    </div>
+
+    @if (session('status'))
+        <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
+    @endif
+
+    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+        <form method="GET" class="grid gap-3 md:grid-cols-3">
+            <x-ui.select name="warehouse_id" select2="false">
+                <option value="">{{ __('inventory_web.all_warehouses') }}</option>
+                @foreach ($warehouses as $warehouse)
+                    <option value="{{ $warehouse->id }}" @selected($warehouseId === $warehouse->id)>{{ $warehouse->code }} — {{ $warehouse->name }}</option>
+                @endforeach
+            </x-ui.select>
+            <x-ui.select name="product_id" select2="false">
+                <option value="">{{ __('inventory_web.all_products') }}</option>
+                @foreach ($products as $product)
+                    <option value="{{ $product->id }}" @selected($productId === $product->id)>{{ $product->sku }} — {{ $product->description }}</option>
+                @endforeach
+            </x-ui.select>
+            <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('inventory_web.filter') }}</x-ui.button>
+        </form>
+
+        <div class="mt-6 overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead><tr class="border-b border-[#dadce0] text-left text-[#5f6368]"><th class="px-3 py-3">{{ __('inventory_web.warehouse') }}</th><th class="px-3 py-3">{{ __('inventory_web.product') }}</th><th class="px-3 py-3 text-right">{{ __('inventory_web.available') }}</th><th class="px-3 py-3 text-right">{{ __('inventory_web.reserved') }}</th><th class="px-3 py-3 text-right">{{ __('inventory_web.inspection') }}</th><th class="px-3 py-3 text-right">{{ __('inventory_web.in_transit') }}</th><th class="px-3 py-3">{{ __('inventory_web.last_movement') }}</th></tr></thead>
+                <tbody>
+                    @forelse ($balances as $balance)
+                        <tr class="border-b border-[#f1f3f4]"><td class="px-3 py-4">{{ $balance->warehouse?->code }} — {{ $balance->warehouse?->name }}</td><td class="px-3 py-4">{{ $balance->product?->sku }} — {{ $balance->product?->description }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_available, 3, ',', '.') }} {{ $balance->product?->unit?->code }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_reserved, 3, ',', '.') }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_inspection, 3, ',', '.') }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_in_transit, 3, ',', '.') }}</td><td class="px-3 py-4 text-[#5f6368]">{{ $balance->last_movement_at?->format('d/m/Y H:i') ?? '—' }}</td></tr>
+                    @empty
+                        <tr><td colspan="7" class="px-3 py-10 text-center text-[#5f6368]">{{ __('inventory_web.empty_balances') }}</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-6">{{ $balances->links() }}</div>
+    </x-ui.panel>
+</div>
+@endsection
