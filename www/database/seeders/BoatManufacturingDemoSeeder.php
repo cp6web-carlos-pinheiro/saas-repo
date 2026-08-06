@@ -411,11 +411,19 @@ final class BoatManufacturingDemoSeeder extends Seeder
             'reference_type' => 'purchase_receipt', 'reference_id' => $this->id['receipt'], 'notes' => 'Recebimento do motor 300 HP.',
             'movement_at' => now()->subDays(2), 'created_by' => $this->userId,
         ]);
+        foreach ([['fiber', 830], ['seat', 24], ['electric', 4], ['paint', 90], ['reinforcement', 3], ['windshield', 2], ['hull', 2], ['deck', 2]] as [$product, $quantity]) {
+            $this->upsertId('stock_ledger_movements', ['company_id' => self::COMPANY_ID, 'reference_type' => 'boat_demo_initial_stock', 'reference_id' => $this->id[$product]], [
+                'warehouse_id' => $this->id['warehouse_raw'], 'product_id' => $this->id[$product], 'movement_type' => 'RECEIPT',
+                'target_bucket' => 'AVAILABLE', 'quantity' => $quantity, 'allocation_strategy' => 'FIFO',
+                'reference_type' => 'boat_demo_initial_stock', 'reference_id' => $this->id[$product],
+                'notes' => 'Estoque inicial para produção de embarcações.', 'movement_at' => now()->subDays(30), 'created_by' => $this->userId,
+            ]);
+        }
         $this->upsertId('purchase_receipt_lines', ['company_id' => self::COMPANY_ID, 'purchase_receipt_id' => $this->id['receipt'], 'product_id' => $this->id['engine']], [
             'purchase_order_line_id' => $this->id['purchase_order_line'], 'warehouse_id' => $this->id['warehouse_raw'],
             'quantity_received' => 1, 'stock_ledger_movement_id' => $this->id['engine_receipt_movement'], 'notes' => 'Serial conferido no recebimento.',
         ]);
-        foreach ([['resin', 420, 20], ['fiber', 800, 50], ['engine', 1, 0], ['seat', 24, 6], ['electric', 4, 1], ['paint', 90, 5], ['boat', 1, 0]] as [$product, $available, $reserved]) {
+        foreach ([['resin', 420, 20], ['fiber', 800, 50], ['engine', 1, 0], ['seat', 24, 6], ['electric', 4, 1], ['paint', 90, 5], ['reinforcement', 3, 0], ['windshield', 2, 0], ['hull', 2, 0], ['deck', 2, 0], ['boat', 1, 0]] as [$product, $available, $reserved]) {
             $warehouse = $product === 'boat' ? $this->id['warehouse_fg'] : $this->id['warehouse_raw'];
             $this->upsertId('inventory_balances', ['company_id' => self::COMPANY_ID, 'warehouse_id' => $warehouse, 'product_id' => $this->id[$product]], [
                 'qty_available' => $available, 'qty_reserved' => $reserved, 'qty_in_transit' => 0, 'qty_inspection' => 0,
@@ -455,7 +463,7 @@ final class BoatManufacturingDemoSeeder extends Seeder
             'source_bom_header_id' => $this->id['bom'], 'source_bom_version_number' => 1, 'snapshot_hash' => $hash,
             'has_cycle' => false, 'frozen_at' => now()->subDays(21), 'created_by' => $this->userId,
         ]);
-        $bomComponents = [['hull', 1, 1], ['deck', 2, 1], ['engine', 3, 1], ['seat', 4, 6], ['electric', 5, 1], ['paint', 6, 18]];
+        $bomComponents = [['hull', 1, 1], ['deck', 2, 1], ['engine', 3, 1], ['seat', 4, 6], ['electric', 5, 1], ['windshield', 6, 1]];
         foreach ($bomComponents as [$component, $line, $quantity]) {
             $this->upsertId('production_order_bom_item_snapshots', ['production_order_bom_snapshot_id' => $this->id['bom_snapshot'], 'level' => 1, 'parent_product_id' => $this->id['boat'], 'component_product_id' => $this->id[$component], 'line_no' => $line], [
                 'company_id' => self::COMPANY_ID, 'source_bom_header_id' => $this->id['bom'], 'source_bom_version_number' => 1,
@@ -588,6 +596,33 @@ final class BoatManufacturingDemoSeeder extends Seeder
         $this->upsertId('genealogy_relations', ['company_id' => self::COMPANY_ID, 'parent_node_id' => $materialNode, 'child_node_id' => $boatNode, 'relation_type' => 'CONSUMES'], [
             'quantity' => 78, 'uom' => 'KG', 'production_order_id' => $this->id['order'], 'stock_movement_id' => $this->id['issue_movement'],
         ]);
+
+        $this->seedProductionOrdersInEveryStatus();
+    }
+
+    private function seedProductionOrdersInEveryStatus(): void
+    {
+        $orders = [
+            ['DRAFT', 'OP-BOAT-DRAFT-0001', 1, 0, null, null, null],
+            ['RELEASED', 'OP-BOAT-RELEASED-0001', 1, 0, now()->subDay(), null, null],
+            ['IN_PROGRESS', 'OP-BOAT-INPROGRESS-0001', 1, 0.25, now()->subDays(4), now()->subDays(3), null],
+            ['PARTIALLY_COMPLETED', 'OP-BOAT-PARTIAL-0001', 2, 1, now()->subDays(12), now()->subDays(11), null],
+            ['CANCELLED', 'OP-BOAT-CANCELLED-0001', 1, 0, null, null, null],
+        ];
+
+        foreach ($orders as [$status, $number, $planned, $produced, $releasedAt, $startedAt, $completedAt]) {
+            $this->upsertId('production_orders', ['company_id' => self::COMPANY_ID, 'order_number' => $number], [
+                'product_id' => $this->id['boat'], 'warehouse_id' => $this->id['warehouse_fg'],
+                'bom_header_id' => $this->id['bom'], 'bom_version_number' => 1, 'routing_version_id' => $this->id['routing'],
+                'routing_version_number' => 1, 'source_type' => 'MANUAL', 'source_reference_type' => 'boat_demo_status',
+                'status' => $status, 'quantity_planned' => $planned, 'quantity_produced' => $produced, 'quantity_scrapped' => 0,
+                'scheduled_start_date' => now()->addDays(3)->toDateString(), 'scheduled_end_date' => now()->addDays(18)->toDateString(),
+                'released_at' => $releasedAt, 'started_at' => $startedAt, 'completed_at' => $completedAt,
+                'created_by' => $this->userId, 'released_by' => $releasedAt ? $this->userId : null,
+                'completed_by' => $completedAt ? $this->userId : null,
+                'metadata' => $this->json(['scenario' => 'boat-demo', 'status_example' => $status]),
+            ]);
+        }
     }
 
     private function seedPlanningAndAnalytics(): void
