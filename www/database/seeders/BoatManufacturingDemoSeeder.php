@@ -95,7 +95,7 @@ final class BoatManufacturingDemoSeeder extends Seeder
     private function seedEngineering(): void
     {
         $products = [
-            'boat' => ['BOAT-280-SPORT', 'Lancha OceanCraft 280 Sport', 'FG', $this->id['unit_un'], true, true, $this->id['category_boat']],
+            'boat' => ['FL290XL', 'Florida 290 XL', 'FG', $this->id['unit_un'], true, true, $this->id['category_boat']],
             'hull' => ['HULL-280-WIP', 'Casco laminado 28 pés', 'WIP', $this->id['unit_un'], true, false, $this->id['category_material']],
             'deck' => ['DECK-280-WIP', 'Convés modular 28 pés', 'WIP', $this->id['unit_un'], true, false, $this->id['category_material']],
             'engine' => ['ENGINE-300-HP', 'Motor de popa 300 HP', 'RAW', $this->id['unit_un'], false, true, $this->id['category_material']],
@@ -199,6 +199,8 @@ final class BoatManufacturingDemoSeeder extends Seeder
             }
         }
 
+        $this->seedBoatStructuresFromSource();
+
         $this->id['routing'] = $this->upsertId('routing_versions', ['company_id' => self::COMPANY_ID, 'product_id' => $this->id['boat'], 'version_number' => 1], [
             'status' => 'APPROVED', 'effective_from' => now()->subMonths(3)->toDateString(),
             'description' => 'Roteiro padrão de construção da OceanCraft 280',
@@ -263,6 +265,155 @@ final class BoatManufacturingDemoSeeder extends Seeder
             'effective_from' => now()->subMonth()->toDateString(), 'impact_level' => 'MEDIUM',
             'change_summary' => 'Reforço estrutural homologado no conjunto do casco.',
         ]);
+    }
+
+    private function seedBoatStructuresFromSource(): void
+    {
+        $sourcePath = $this->boatSourcePath();
+        $rows = file($sourcePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+        if ($rows === false || count($rows) < 2) {
+            throw new RuntimeException('Boat product structure source is empty or cannot be read.');
+        }
+
+        /** @var array<string, array{model: string, process: string, subprocess: string, materials: array<string, array<string, mixed>>}> $structures */
+        $structures = [];
+        /** @var array<string, int> $materialIds */
+        $materialIds = [];
+
+        foreach (array_slice($rows, 1) as $line) {
+            [$model, $process, $subprocess, $code, $material, $quantity, $unit, $cmv] = array_pad(explode("\t", $line), 8, '');
+            $model = trim($model);
+            $process = trim($process);
+            $subprocess = trim($subprocess);
+            $material = trim($material);
+
+            if ($model === '' || $process === '' || $subprocess === '' || $material === '') {
+                continue;
+            }
+
+            $unitCode = $this->normalizeSourceUnit($unit);
+            $unitId = $this->sourceUnitId($unitCode);
+            $materialKey = trim($code).'|'.$material.'|'.$unitCode;
+            $materialSku = 'MAT-'.substr(hash('sha1', $materialKey), 0, 14);
+
+            if (! isset($materialIds[$materialKey])) {
+                $materialIds[$materialKey] = $this->upsertId('products', ['company_id' => self::COMPANY_ID, 'sku' => $materialSku], [
+                    'description' => $material, 'product_type' => 'RAW', 'unit_id' => $unitId,
+                    'category_id' => $this->id['category_material'], 'safety_stock' => 0, 'lead_time_days' => 15,
+                    'lot_control' => in_array($unitCode, ['KG', 'M2'], true), 'serial_control' => false, 'is_active' => true,
+                    'lifecycle_status' => 'ACTIVE',
+                    'technical_attributes' => $this->json([
+                        'source_model' => $model, 'source_code' => trim($code) ?: null,
+                        'source_unit' => $unitCode, 'cmv' => $this->sourceDecimal($cmv),
+                    ]),
+                ]);
+            }
+
+            $structureKey = $model.'|'.$process.'|'.$subprocess;
+            $structures[$structureKey] ??= [
+                'model' => $model, 'process' => $process, 'subprocess' => $subprocess, 'materials' => [],
+            ];
+            $structures[$structureKey]['materials'][$materialKey] ??= [
+                'product_id' => $materialIds[$materialKey], 'unit_id' => $unitId, 'quantity' => 0.0,
+            ];
+            $structures[$structureKey]['materials'][$materialKey]['quantity'] += $this->sourceDecimal($quantity);
+        }
+
+        /** @var array<string, list<array{product_id: int, process: string, subprocess: string}>> $modelSubassemblies */
+        $modelSubassemblies = [];
+        foreach ($structures as $structure) {
+            $model = $structure['model'];
+            $subassemblySku = 'SUB-'.$model.'-'.substr(hash('sha1', $structure['process'].'|'.$structure['subprocess']), 0, 12);
+            $subassemblyId = $this->upsertId('products', ['company_id' => self::COMPANY_ID, 'sku' => $subassemblySku], [
+                'description' => $model.' — '.$structure['process'].' — '.$structure['subprocess'], 'product_type' => 'WIP',
+                'unit_id' => $this->id['unit_un'], 'category_id' => $this->id['category_material'], 'safety_stock' => 0,
+                'lead_time_days' => 3, 'lot_control' => false, 'serial_control' => false, 'is_active' => true,
+                'lifecycle_status' => 'ACTIVE', 'technical_attributes' => $this->json(['source_model' => $model, 'process' => $structure['process'], 'subprocess' => $structure['subprocess']]),
+            ]);
+            $subassemblyBomId = $this->upsertId('bom_headers', ['company_id' => self::COMPANY_ID, 'product_id' => $subassemblyId, 'version_number' => 1], [
+                'status' => 'APPROVED', 'effective_from' => self::DEMO_DATE,
+                'description' => 'Estrutura importada: '.$structure['process'].' / '.$structure['subprocess'],
+                'approved_by' => $this->userId, 'approved_at' => now(),
+            ]);
+            DB::table('bom_items')->where('bom_header_id', $subassemblyBomId)->delete();
+            $lineNo = 1;
+            foreach ($structure['materials'] as $material) {
+                $this->upsertId('bom_items', ['bom_header_id' => $subassemblyBomId, 'line_no' => $lineNo++], [
+                    'company_id' => self::COMPANY_ID, 'component_product_id' => $material['product_id'],
+                    'unit_id' => $material['unit_id'], 'quantity_per' => round($material['quantity'], 6),
+                ]);
+            }
+            $modelSubassemblies[$model][] = [
+                'product_id' => $subassemblyId, 'process' => $structure['process'], 'subprocess' => $structure['subprocess'],
+            ];
+        }
+
+        foreach ($modelSubassemblies as $model => $subassemblies) {
+            $modelId = $this->upsertId('products', ['company_id' => self::COMPANY_ID, 'sku' => $model], [
+                'description' => 'Embarcação Florida '.str_replace('FL', '', $model), 'product_type' => 'FG',
+                'unit_id' => $this->id['unit_un'], 'category_id' => $this->id['category_boat'], 'brand_id' => $this->id['brand'],
+                'safety_stock' => 0, 'lead_time_days' => 30, 'lot_control' => true, 'serial_control' => true,
+                'is_active' => true, 'lifecycle_status' => 'ACTIVE', 'technical_attributes' => $this->json(['source_model' => $model]),
+            ]);
+            $modelBomId = $this->upsertId('bom_headers', ['company_id' => self::COMPANY_ID, 'product_id' => $modelId, 'version_number' => 1], [
+                'status' => 'APPROVED', 'effective_from' => self::DEMO_DATE,
+                'description' => 'Estrutura principal importada da embarcação '.$model,
+                'approved_by' => $this->userId, 'approved_at' => now(),
+            ]);
+            DB::table('bom_items')->where('bom_header_id', $modelBomId)->delete();
+            foreach (array_values($subassemblies) as $index => $subassembly) {
+                $this->upsertId('bom_items', ['bom_header_id' => $modelBomId, 'line_no' => $index + 1], [
+                    'company_id' => self::COMPANY_ID, 'component_product_id' => $subassembly['product_id'],
+                    'unit_id' => $this->id['unit_un'], 'quantity_per' => 1,
+                ]);
+            }
+
+            if ($model === 'FL290XL') {
+                $this->id['boat'] = $modelId;
+                $this->id['bom'] = $modelBomId;
+            }
+        }
+    }
+
+    private function boatSourcePath(): string
+    {
+        $paths = array_filter([
+            getenv('BOAT_BOM_SOURCE') ?: null,
+            database_path('seeders/data/boat_bom.tsv'),
+            '/Users/thiagostipp/.codex/attachments/0d7f375b-0884-4b0d-9c9d-f86601dcb061/pasted-text.txt',
+        ]);
+
+        foreach ($paths as $path) {
+            if (is_readable($path)) {
+                return $path;
+            }
+        }
+
+        throw new RuntimeException('Boat BOM source was not found. Define BOAT_BOM_SOURCE or add database/seeders/data/boat_bom.tsv.');
+    }
+
+    private function normalizeSourceUnit(string $unit): string
+    {
+        return match (mb_strtoupper(trim($unit))) {
+            'KG' => 'KG', 'M2', 'M²' => 'M2', 'M' => 'M', 'MM' => 'MM', 'KIT' => 'KIT', default => 'UN',
+        };
+    }
+
+    private function sourceUnitId(string $code): int
+    {
+        return $this->id['source_unit_'.$code] ??= $this->upsertId('units', ['company_id' => self::COMPANY_ID, 'code' => $code], [
+            'name' => match ($code) {
+                'M' => 'Metro', 'MM' => 'Milímetro', 'KIT' => 'Kit', default => $code
+            }, 'is_active' => true,
+        ]);
+    }
+
+    private function sourceDecimal(string $value): float
+    {
+        $normalized = str_replace(['.', ','], ['', '.'], trim($value));
+
+        return is_numeric($normalized) ? (float) $normalized : 0.0;
     }
 
     private function seedCommercial(): void
