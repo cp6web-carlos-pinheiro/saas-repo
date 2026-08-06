@@ -41,3 +41,7 @@ Documentar as capacidades transversais usadas para integrar, operar e diagnostic
 
 - Webhooks externos padronizados, limites de uso por cliente e SLO por endpoint não estão implementados como plataforma completa.
 - A documentação formal OpenAPI não é gerada automaticamente pelo projeto.
+
+## Dicionário de dados
+
+Consulte as [tabelas de APIs e operação técnica](11-dicionario-de-dados.md#apis-e-operacao-tecnica).

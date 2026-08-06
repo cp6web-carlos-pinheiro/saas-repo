@@ -30,3 +30,7 @@ Os models transacionais tenant-aware herdam de `TenantModel`. O contexto da empr
 
 - O ciclo comercial não implementa todos os cenários de cobrança recorrente, inadimplência, upgrade e downgrade automatizados.
 - Não há medição completa de consumo e limites por plano.
+
+## Dicionário de dados
+
+Consulte as [tabelas da Plataforma SaaS e tenancy](11-dicionario-de-dados.md#plataforma-saas-e-tenancy).

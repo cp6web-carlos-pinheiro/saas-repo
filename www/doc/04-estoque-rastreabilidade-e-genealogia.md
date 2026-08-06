@@ -46,3 +46,7 @@ Controlar saldos, movimentos, reservas, lotes, números de série e a rastreabil
 - `stock_ledger_movements`, `stock_ledger_allocations`.
 - `inventory_lots`, `inventory_serials`.
 - `genealogy_nodes`, `genealogy_relations`.
+
+## Dicionário de dados
+
+Consulte as [tabelas de Estoque, rastreabilidade e genealogia](11-dicionario-de-dados.md#estoque-rastreabilidade-e-genealogia).

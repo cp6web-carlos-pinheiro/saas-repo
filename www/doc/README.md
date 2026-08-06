@@ -14,6 +14,7 @@ Esta pasta é a fonte central da documentação funcional do sistema. O conteúd
 8. [Produção, MES e qualidade](08-producao-mes-e-qualidade.md)
 9. [Análise e relatórios](09-analise-e-relatorios.md)
 10. [APIs e operação técnica](10-apis-e-operacao-tecnica.md)
+11. [Dicionário de dados](11-dicionario-de-dados.md)
 
 ## Convenções
 

@@ -48,3 +48,7 @@ Definir o produto fabricado, sua estrutura de materiais, roteiro, centros, recur
 - `work_centers`, `work_center_shifts`, `production_resources` e `work_center_hour_rates`.
 - `routing_operation_standard_times`.
 - `engineering_change_orders` e `engineering_change_order_lines`.
+
+## Dicionário de dados
+
+Consulte as [tabelas de Engenharia de produto e processo](11-dicionario-de-dados.md#engenharia-de-produto-e-processo).

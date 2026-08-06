@@ -50,3 +50,7 @@ Administrar a ordem de produção desde sua criação até a execução das oper
 - `production_order_operations`, `production_operation_events` e `production_operation_outputs`.
 - `production_order_outputs`, `production_order_material_consumptions` e reversões.
 - `production_quality_records` e `production_rework_orders`.
+
+## Dicionário de dados
+
+Consulte as [tabelas de Produção, MES e qualidade](11-dicionario-de-dados.md#producao-mes-e-qualidade).

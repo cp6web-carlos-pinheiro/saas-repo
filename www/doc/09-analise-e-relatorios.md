@@ -45,3 +45,7 @@ Transformar os fatos de produção em indicadores operacionais reproduzíveis e 
 
 - Não há exportação XLSX/PDF nem agendamento de relatórios.
 - Cache e agregações persistidas para grande volume ainda não substituem as consultas sobre fatos transacionais.
+
+## Dicionário de dados
+
+Consulte as [tabelas de Análise e relatórios](11-dicionario-de-dados.md#analise-e-relatorios).

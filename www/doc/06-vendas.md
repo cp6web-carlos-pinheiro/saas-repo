@@ -33,3 +33,7 @@ Administrar clientes, pedidos de venda e seu avanço comercial e operacional.
 ## Entidades principais
 
 - `customers`, `sales` e `sale_lines`.
+
+## Dicionário de dados
+
+Consulte as [tabelas de Vendas](11-dicionario-de-dados.md#vendas).

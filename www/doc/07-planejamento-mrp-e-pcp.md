@@ -48,3 +48,7 @@ Calcular necessidades de materiais, governar sugestões de suprimento e programa
 
 - Forecast estatístico e simulação avançada de cenários não formam um módulo funcional próprio.
 - A qualidade do plano depende de BOM, lead times, estoques, calendários e tempos padrão mantidos corretamente.
+
+## Dicionário de dados
+
+Consulte as [tabelas de Planejamento, MRP e PCP](11-dicionario-de-dados.md#planejamento-mrp-e-pcp).

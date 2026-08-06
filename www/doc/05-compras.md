@@ -41,3 +41,7 @@ Administrar fornecedores e o fluxo desde a requisição até o recebimento, inte
 - `purchase_quotations` e respectivas linhas.
 - `purchase_orders` e `purchase_order_lines`.
 - `purchase_receipts` e respectivas linhas.
+
+## Dicionário de dados
+
+Consulte as [tabelas de Compras](11-dicionario-de-dados.md#compras).

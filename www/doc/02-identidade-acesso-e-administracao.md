@@ -38,3 +38,7 @@ Controlar autenticação, sessões, segurança e autorização dos usuários, al
 
 - A autorização funcional não depende apenas de esconder opções na interface; os controllers e middlewares validam a permissão.
 - Cadastros referenciados por transações podem ter exclusão bloqueada e devem ser inativados quando aplicável.
+
+## Dicionário de dados
+
+Consulte as [tabelas de Identidade, acesso e administração](11-dicionario-de-dados.md#identidade-acesso-e-administracao).
