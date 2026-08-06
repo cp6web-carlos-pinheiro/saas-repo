@@ -2,12 +2,12 @@
 
 ## Objetivo
 
-Administrar o ciclo inicial de uma conta SaaS, sua organização, empresa ativa, assinatura e separação de dados entre clientes.
+Administrar o ciclo inicial de uma conta SaaS, sua empresa, assinatura e separação de dados entre clientes.
 
 ## Funcionalidades implementadas
 
 - Cadastro, login, recuperação de senha, verificação de e-mail e login social.
-- Onboarding de organização e empresa, com perfil inicial e associação do primeiro usuário.
+- Onboarding da empresa, com perfil inicial e associação do primeiro usuário.
 - Período de avaliação de 14 dias e middleware que controla o acesso quando o trial não está ativo.
 - Convites de conta com token e fluxo de aceitação.
 - Catálogo de planos, valor em centavos, assinatura, alteração e cancelamento.
@@ -22,7 +22,7 @@ Os models transacionais tenant-aware herdam de `TenantModel`. O contexto da empr
 
 ## Entidades principais
 
-- `organizations`, `companies`, `subscriptions`, `plans` e `trials`.
+- `companies`, `subscriptions`, `plans` e `trials`.
 - `onboarding_profiles`, `account_invitations` e `email_verifications`.
 - `users`, `admins`, `company_user` e `social_accounts`.
 

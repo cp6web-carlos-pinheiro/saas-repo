@@ -2,7 +2,8 @@
 
 Schema MySQL `beyond_mrp` efetivamente migrado. Cada tabela possui um domínio principal; relacionamentos entre domínios aparecem nas referências das colunas.
 
-- Tabelas: **92**.
+- Tabelas: **86**.
+- Consolidação estrutural aplicada em `2026_08_09_000001`: `companies` é a única raiz de tenancy; `production_operation_outputs` é a única fonte de apontamentos; estruturas legadas removidas não fazem mais parte do schema corrente.
 - Colunas: **1185**.
 - “Nula” informa se aceita `NULL`; “—” indica ausência de default explícito.
 
@@ -31,7 +32,6 @@ Documento funcional: [01-plataforma-saas-e-tenancy.md](01-plataforma-saas-e-tena
 | --- | --- | --- | --- | --- |
 | `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
 | `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
-| `organization_id` | `bigint unsigned` | Não | — | Referência a `organizations.id`. |
 | `invited_by_user_id` | `bigint unsigned` | Não | — | Referência a `users.id`. |
 | `accepted_by_user_id` | `bigint unsigned` | Sim | — | Referência a `users.id`. |
 | `email` | `varchar(190)` | Não | — | Endereço de e-mail. |
@@ -55,6 +55,12 @@ Documento funcional: [01-plataforma-saas-e-tenancy.md](01-plataforma-saas-e-tena
 | `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
 | `name` | `varchar(150)` | Não | — | Nome. |
 | `code` | `varchar(50)` | Não | — | Código funcional. |
+| `slug` | `varchar(180)` | Sim | — | Identificador público único da empresa. |
+| `domain` | `varchar(180)` | Sim | — | Domínio corporativo. |
+| `segment` | `varchar(120)` | Sim | — | Segmento de atuação. |
+| `operation_size` | `varchar(80)` | Sim | — | Porte da operação. |
+| `timezone` | `varchar(80)` | Não | `UTC` | Fuso horário da empresa. |
+| `preferences` | `json` | Sim | — | Preferências SaaS e de onboarding. |
 | `is_active` | `tinyint(1)` | Não | `1` | Indica se está ativo. |
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 | `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
@@ -66,11 +72,8 @@ Documento funcional: [01-plataforma-saas-e-tenancy.md](01-plataforma-saas-e-tena
 | Coluna | Tipo | Nula | Padrão | Descrição |
 | --- | --- | --- | --- | --- |
 | `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
-| `organization_id` | `bigint unsigned` | Não | — | Referência a `organizations.id`. |
+| `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
 | `user_id` | `bigint unsigned` | Não | — | Referência a `users.id`. |
-| `segment` | `varchar(120)` | Sim | — | Atributo funcional de segment. |
-| `operation_size` | `varchar(80)` | Sim | — | Atributo funcional de operation size. |
-| `timezone` | `varchar(80)` | Sim | — | Atributo funcional de timezone. |
 | `import_data` | `tinyint(1)` | Não | `0` | Atributo funcional de import data. |
 | `connect_integrations` | `tinyint(1)` | Não | `0` | Atributo funcional de connect integrations. |
 | `invite_team` | `tinyint(1)` | Não | `0` | Atributo funcional de invite team. |
@@ -79,9 +82,9 @@ Documento funcional: [01-plataforma-saas-e-tenancy.md](01-plataforma-saas-e-tena
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 | `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
 
-### `organizations`
+### `organizations` (removida)
 
-**Finalidade:** Organizações SaaS.
+**Finalidade:** Estrutura legada consolidada em `companies` pela migration `2026_08_09_000001`.
 
 | Coluna | Tipo | Nula | Padrão | Descrição |
 | --- | --- | --- | --- | --- |
@@ -127,7 +130,7 @@ Documento funcional: [01-plataforma-saas-e-tenancy.md](01-plataforma-saas-e-tena
 | Coluna | Tipo | Nula | Padrão | Descrição |
 | --- | --- | --- | --- | --- |
 | `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
-| `organization_id` | `bigint unsigned` | Não | — | Referência a `organizations.id`. |
+| `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
 | `trial_id` | `bigint unsigned` | Sim | — | Referência a `trials.id`. |
 | `provider` | `varchar(40)` | Não | `stripe` | Atributo funcional de provider. |
 | `provider_customer_id` | `varchar(120)` | Sim | — | Identificador relacionado a provider customer. |
@@ -140,14 +143,14 @@ Documento funcional: [01-plataforma-saas-e-tenancy.md](01-plataforma-saas-e-tena
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 | `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
 
-### `tenants`
+### `tenants` (removida)
 
-**Finalidade:** Registros funcionais de tenants.
+**Finalidade:** Estrutura legada consolidada em `companies` pela migration `2026_08_09_000001`.
 
 | Coluna | Tipo | Nula | Padrão | Descrição |
 | --- | --- | --- | --- | --- |
 | `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
-| `organization_id` | `bigint unsigned` | Não | — | Referência a `organizations.id`. |
+| `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
 | `name` | `varchar(180)` | Não | — | Nome. |
 | `slug` | `varchar(180)` | Não | — | Atributo funcional de slug. |
 | `is_active` | `tinyint(1)` | Não | `1` | Indica se está ativo. |
@@ -162,7 +165,7 @@ Documento funcional: [01-plataforma-saas-e-tenancy.md](01-plataforma-saas-e-tena
 | --- | --- | --- | --- | --- |
 | `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
 | `user_id` | `bigint unsigned` | Não | — | Referência a `users.id`. |
-| `organization_id` | `bigint unsigned` | Não | — | Referência a `organizations.id`. |
+| `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
 | `trial_start_date` | `datetime` | Não | — | Data de trial start. |
 | `trial_end_date` | `datetime` | Não | — | Data de trial end. |
 | `grace_ends_at` | `datetime` | Sim | — | Data e hora de grace ends. |
@@ -202,7 +205,7 @@ Documento funcional: [02-identidade-acesso-e-administracao.md](02-identidade-ace
 | --- | --- | --- | --- | --- |
 | `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
 | `user_id` | `bigint unsigned` | Sim | — | Referência a `users.id`. |
-| `organization_id` | `bigint unsigned` | Sim | — | Referência a `organizations.id`. |
+| `company_id` | `bigint unsigned` | Sim | — | Referência a `companies.id`. |
 | `event` | `varchar(120)` | Não | — | Atributo funcional de event. |
 | `severity` | `varchar(20)` | Não | `info` | Atributo funcional de severity. |
 | `ip_address` | `varchar(45)` | Sim | — | Atributo funcional de ip address. |
@@ -221,7 +224,6 @@ Documento funcional: [02-identidade-acesso-e-administracao.md](02-identidade-ace
 | `id` | `bigint unsigned; auto_increment` | Não | — | Identificador único. |
 | `company_id` | `bigint unsigned` | Não | — | Referência a `companies.id`. |
 | `user_id` | `bigint unsigned` | Não | — | Referência a `users.id`. |
-| `is_default` | `tinyint(1)` | Não | `0` | Indicador booleano de is default. |
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 | `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
 
@@ -240,9 +242,9 @@ Documento funcional: [02-identidade-acesso-e-administracao.md](02-identidade-ace
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 | `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
 
-### `master_data_records`
+### `master_data_records` (removida)
 
-**Finalidade:** Registros funcionais de master data records.
+**Finalidade:** Estrutura legada substituída por tabelas específicas de unidades, categorias e marcas.
 
 | Coluna | Tipo | Nula | Padrão | Descrição |
 | --- | --- | --- | --- | --- |
@@ -284,9 +286,9 @@ Documento funcional: [02-identidade-acesso-e-administracao.md](02-identidade-ace
 | `token` | `varchar(255)` | Não | — | Token de autenticação ou confirmação. |
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 
-### `password_resets`
+### `password_resets` (removida)
 
-**Finalidade:** Registros funcionais de password resets.
+**Finalidade:** Estrutura legada substituída por `password_reset_tokens`.
 
 | Coluna | Tipo | Nula | Padrão | Descrição |
 | --- | --- | --- | --- | --- |
@@ -309,9 +311,9 @@ Documento funcional: [02-identidade-acesso-e-administracao.md](02-identidade-ace
 | `created_at` | `timestamp` | Sim | — | Data e hora de criação. |
 | `updated_at` | `timestamp` | Sim | — | Data e hora da atualização. |
 
-### `permission_user_overrides`
+### `permission_user_overrides` (removida)
 
-**Finalidade:** Registros funcionais de permission user overrides.
+**Finalidade:** Estrutura legada removida; a autorização vigente usa papéis e permissões.
 
 | Coluna | Tipo | Nula | Padrão | Descrição |
 | --- | --- | --- | --- | --- |
@@ -658,7 +660,6 @@ Documento funcional: [03-engenharia-de-produto-e-processo.md](03-engenharia-de-p
 | `sku` | `varchar(80)` | Não | — | Atributo funcional de sku. |
 | `description` | `varchar(255)` | Não | — | Descrição funcional. |
 | `product_type` | `varchar(20)` | Não | — | Tipo ou classificação de product type. |
-| `uom` | `varchar(20)` | Não | — | Atributo funcional de uom. |
 | `safety_stock` | `int unsigned` | Não | `0` | Atributo funcional de safety stock. |
 | `lead_time_days` | `int unsigned` | Não | `0` | Atributo funcional de lead time days. |
 | `lot_control` | `tinyint(1)` | Não | `0` | Atributo funcional de lot control. |
@@ -1640,9 +1641,9 @@ Documento funcional: [08-producao-mes-e-qualidade.md](08-producao-mes-e-qualidad
 | `actual_started_at` | `datetime` | Sim | — | Data e hora de actual started. |
 | `actual_completed_at` | `datetime` | Sim | — | Data e hora de actual completed. |
 
-### `production_order_outputs`
+### `production_order_outputs` (removida)
 
-**Finalidade:** Apontamentos consolidados da ordem.
+**Finalidade:** Estrutura legada consolidada em `production_operation_outputs`.
 
 | Coluna | Tipo | Nula | Padrão | Descrição |
 | --- | --- | --- | --- | --- |
@@ -1896,5 +1897,3 @@ Documento funcional: [10-apis-e-operacao-tecnica.md](10-apis-e-operacao-tecnica.
 | `id` | `int unsigned; auto_increment` | Não | — | Identificador único. |
 | `migration` | `varchar(255)` | Não | — | Atributo funcional de migration. |
 | `batch` | `int` | Não | — | Atributo funcional de batch. |
-
-

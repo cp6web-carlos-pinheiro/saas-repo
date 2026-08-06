@@ -48,7 +48,7 @@ Administrar a ordem de produção desde sua criação até a execução das oper
 
 - `production_orders`, `production_order_snapshots` e snapshots de BOM/roteiro.
 - `production_order_operations`, `production_operation_events` e `production_operation_outputs`.
-- `production_order_outputs`, `production_order_material_consumptions` e reversões.
+- `production_order_material_consumptions` e reversões.
 - `production_quality_records` e `production_rework_orders`.
 
 ## Dicionário de dados

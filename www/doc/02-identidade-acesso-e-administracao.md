@@ -19,7 +19,6 @@ Controlar autenticação, sessões, segurança e autorização dos usuários, al
 - Console web para usuários, acessos e perfis RBAC da empresa.
 - Identificação do administrador da empresa e proteção contra remoção do último administrador ativo.
 - Registro de auditoria para ações administrativas e transições relevantes.
-- Sobrescritas individuais de permissão por usuário quando configuradas.
 
 ## Cadastros administrativos
 
@@ -30,7 +29,7 @@ Controlar autenticação, sessões, segurança e autorização dos usuários, al
 
 ## Entidades principais
 
-- `users`, `roles`, `permissions`, `role_user`, `permission_role` e `permission_user_overrides`.
+- `users`, `roles`, `permissions`, `role_user` e `permission_role`.
 - `audit_logs`, `sessions` e estruturas de autenticação.
 - `units`, `categories`, `brands`, `plants` e `warehouses`.
 

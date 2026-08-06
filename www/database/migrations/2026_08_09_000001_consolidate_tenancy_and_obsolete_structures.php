@@ -139,7 +139,13 @@ return new class extends Migration
         Schema::table($tableName, function (Blueprint $table) use ($nullable, $companyAlreadyExists): void {
             if (! $companyAlreadyExists) {
                 $table->unsignedBigInteger('company_id')->nullable($nullable)->change();
-                $table->foreign('company_id')->references('id')->on('companies')->cascadeOnDelete();
+                $foreign = $table->foreign('company_id')->references('id')->on('companies');
+
+                if ($nullable) {
+                    $foreign->nullOnDelete();
+                } else {
+                    $foreign->cascadeOnDelete();
+                }
             }
         });
 
