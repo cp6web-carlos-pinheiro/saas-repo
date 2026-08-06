@@ -387,10 +387,10 @@ final class BoatManufacturingDemoSeeder extends Seeder
             'confirmed_at' => now()->subDays(12), 'operational_status' => 'DELIVERED', 'picking_by' => $this->userId,
             'picking_at' => now()->subDays(11), 'invoiced_by' => $this->userId, 'invoiced_at' => now()->subDays(11),
             'shipped_by' => $this->userId, 'shipped_at' => now()->subDays(10), 'delivered_by' => $this->userId,
-            'delivered_at' => now()->subDays(10), 'subtotal_cents' => 2966800, 'discount_cents' => 0, 'amount_cents' => 2966800,
+            'delivered_at' => now()->subDays(10), 'subtotal_cents' => 40277000, 'discount_cents' => 0, 'amount_cents' => 40277000,
             'notes' => 'Venda demonstrativa de componentes náuticos para manutenção.',
         ]);
-        foreach ([['resin', 20, 36], ['fiber', 30, 28], ['paint', 5, 62], ['seat', 2, 3600], ['electric', 1, 4800], ['windshield', 1, 11200]] as [$product, $quantity, $price]) {
+        foreach ([['hull', 1, 140000], ['deck', 1, 90000], ['engine', 1, 145000], ['resin', 20, 36], ['fiber', 30, 28], ['paint', 5, 62], ['reinforcement', 1, 2700], ['seat', 2, 3600], ['electric', 1, 4800], ['windshield', 1, 11200]] as [$product, $quantity, $price]) {
             $this->upsertId('sale_lines', ['company_id' => self::COMPANY_ID, 'sale_id' => $this->id['components_sale'], 'product_id' => $this->id[$product]], [
                 'quantity' => $quantity, 'unit_price' => $price, 'metadata' => $this->json(['purpose' => 'manutenção náutica']),
             ]);
