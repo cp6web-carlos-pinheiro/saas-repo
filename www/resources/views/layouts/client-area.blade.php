@@ -94,9 +94,9 @@
             $company = \App\Modules\Tenant\Infrastructure\Persistence\Models\Company::query()->find((int) $user->current_company_id);
 
             if ($company !== null) {
-                $organization = \App\Models\SaaS\Organization::query()->where('company_id', $company->id)->first();
-                $subscription = $organization
-                    ? \App\Models\SaaS\Subscription::query()->where('organization_id', $organization->id)->latest('id')->first()
+                $organization = $company;
+                $subscription = $company
+                    ? \App\Models\SaaS\Subscription::query()->where('company_id', $company->id)->latest('id')->first()
                     : null;
                 $subscriptionPlan = $subscription
                     ? app(\App\Services\SaaS\AccountOnboardingService::class)->planForCode($subscription->plan_code)

@@ -70,7 +70,7 @@ final class ProductionOrder extends TenantModel
 
     public function outputs(): HasMany
     {
-        return $this->hasMany(ProductionOrderOutput::class, 'production_order_id');
+        return $this->hasMany(ProductionOperationOutput::class, 'production_order_id');
     }
 
     public function snapshot(): HasOne

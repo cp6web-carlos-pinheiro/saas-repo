@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Models\SaaS\Organization;
 use App\Models\SaaS\Trial;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
@@ -96,7 +95,7 @@ final class TenantInventoryWarehouseCrudManagementTest extends TestCase
             'is_active' => true,
         ]);
 
-        $user->companies()->attach($company->id, ['is_default' => true]);
+        $user->companies()->attach($company->id);
 
         $role = Role::query()->withoutGlobalScope('tenant')->create([
             'company_id' => $company->id,
@@ -106,16 +105,9 @@ final class TenantInventoryWarehouseCrudManagementTest extends TestCase
 
         $user->roles()->attach($role->id, ['company_id' => $company->id]);
 
-        $organization = Organization::query()->create([
-            'company_id' => $company->id,
-            'name' => 'Atlas Components',
-            'slug' => 'atlas-components',
-            'timezone' => 'UTC',
-        ]);
-
         Trial::query()->create([
             'user_id' => $user->id,
-            'organization_id' => $organization->id,
+            'company_id' => $company->id,
             'trial_start_date' => now()->subDay(),
             'trial_end_date' => now()->addDays(10),
             'status' => 'active',

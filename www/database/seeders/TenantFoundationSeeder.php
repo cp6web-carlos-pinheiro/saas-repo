@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\SaaS\Organization;
 use App\Models\SaaS\Plan;
 use App\Models\SaaS\Subscription;
-use App\Models\SaaS\Tenant;
 use App\Models\SaaS\Trial;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
@@ -21,6 +19,9 @@ final class TenantFoundationSeeder extends Seeder
             ['code' => 'BEYOND_MAIN'],
             [
                 'name' => 'Beyond Main Company',
+                'slug' => 'beyond-main',
+                'timezone' => 'UTC',
+                'preferences' => ['selected_plan' => 'free_trial'],
                 'is_active' => true,
             ]
         );
@@ -35,40 +36,19 @@ final class TenantFoundationSeeder extends Seeder
             ]
         );
 
-        $user->companies()->syncWithoutDetaching([
-            $company->id => ['is_default' => true],
-        ]);
+        $user->companies()->syncWithoutDetaching([$company->id]);
 
         if ((int) $user->current_company_id !== (int) $company->id) {
             $user->current_company_id = $company->id;
             $user->save();
         }
 
-        $organization = Organization::query()->updateOrCreate(
-            ['company_id' => $company->id],
-            [
-                'name' => $company->name,
-                'slug' => 'beyond-main',
-                'timezone' => 'UTC',
-                'preferences' => ['selected_plan' => 'free_trial'],
-            ]
-        );
-
-        Tenant::query()->updateOrCreate(
-            ['organization_id' => $organization->id],
-            [
-                'name' => $organization->name,
-                'slug' => $organization->slug,
-                'is_active' => true,
-            ]
-        );
-
         $plan = Plan::query()->where('code', 'free_trial')->firstOrFail();
         $startsAt = now();
         $endsAt = $startsAt->copy()->addDays($plan->trial_days ?? 14);
 
         $trial = Trial::query()->firstOrCreate(
-            ['user_id' => $user->id, 'organization_id' => $organization->id],
+            ['user_id' => $user->id, 'company_id' => $company->id],
             [
                 'trial_start_date' => $startsAt,
                 'trial_end_date' => $endsAt,
@@ -80,7 +60,7 @@ final class TenantFoundationSeeder extends Seeder
         );
 
         Subscription::query()->updateOrCreate(
-            ['organization_id' => $organization->id],
+            ['company_id' => $company->id],
             [
                 'trial_id' => $trial->id,
                 'provider' => 'manual',

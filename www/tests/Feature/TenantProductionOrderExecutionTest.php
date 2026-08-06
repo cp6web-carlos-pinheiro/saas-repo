@@ -69,10 +69,9 @@ final class TenantProductionOrderExecutionTest extends TestCase
 
         $this->assertSame(4.0, (float) $balance->qty_available);
 
-        $this->assertDatabaseHas('production_order_outputs', [
+        $this->assertDatabaseHas('production_operation_outputs', [
             'company_id' => $company->id,
             'production_order_id' => $order->id,
-            'operation_no' => 10,
             'inspection_status' => 'APPROVED',
         ]);
 

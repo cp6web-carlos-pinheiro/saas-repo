@@ -52,7 +52,6 @@
                                 <th class="px-3 py-3">{{ __('global_customer.access_profile') }}</th>
                                 <th class="px-3 py-3">{{ __('global_customer.modules') }}</th>
                                 <th class="px-3 py-3">{{ __('global_customer.current_company') }}</th>
-                                <th class="px-3 py-3">{{ __('global_customer.default_company') }}</th>
                                 <th class="px-3 py-3">{{ __('global_customer.actions') }}</th>
                             </tr>
                         </thead>
@@ -83,7 +82,6 @@
                                         </div>
                                     </td>
                                     <td class="px-3 py-3 text-[#5f6368]">{{ $entry['is_current'] ? __('global_customer.yes') : __('global_customer.no') }}</td>
-                                    <td class="px-3 py-3 text-[#5f6368]">{{ $entry['is_default'] ? __('global_customer.yes') : __('global_customer.no') }}</td>
                                     <td class="px-3 py-3">
                                         <x-ui.button :href="route('global-admin.customers.edit', ['customer' => $customer->id, 'company_id' => $company->id])" variant="surface-muted" size="sm" class="rounded-full">
                                             {{ __('global_customer.edit_company_access') }}

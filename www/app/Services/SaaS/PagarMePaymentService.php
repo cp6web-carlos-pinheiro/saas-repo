@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Services\SaaS;
 
 use App\Models\SaaS\Plan;
-use App\Models\SaaS\Organization;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -22,7 +22,7 @@ final class PagarMePaymentService
      * @param  array{card_token:string,last_four:string}  $card
      * @return array{order_id:?string,charge_id:?string,customer_id:?string,last_four:string}
      */
-    public function charge(User $user, Organization $organization, string $planCode, array $card): array
+    public function charge(User $user, Company $company, string $planCode, array $card): array
     {
         if ($this->usesSimulatedGateway()) {
             return [
@@ -65,7 +65,7 @@ final class PagarMePaymentService
                         ],
                     ]],
                     'metadata' => [
-                        'organization_id' => (string) $organization->id,
+                        'company_id' => (string) $company->id,
                         'plan_code' => $planCode,
                     ],
                 ]);

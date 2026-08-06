@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Models\SaaS\Organization;
 use App\Models\SaaS\Trial;
 use App\Modules\Customer\Infrastructure\Persistence\Models\Customer;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
@@ -81,7 +80,6 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
             'unit_id' => $unitId,
             'category_id' => $categoryId,
             'brand_id' => $brandId,
-            'uom' => 'UN',
         ]);
 
         $this->actingAs($user, 'web')
@@ -212,7 +210,6 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
             'company_id' => $company->id,
             'sku' => 'P-GLOBAL-UOM-001',
             'unit_id' => $globalUnit->id,
-            'uom' => 'KG',
         ]);
     }
 
@@ -269,7 +266,7 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
             'is_active' => true,
         ]);
 
-        $user->companies()->attach($company->id, ['is_default' => true]);
+        $user->companies()->attach($company->id);
 
         $role = Role::query()->withoutGlobalScope('tenant')->create([
             'company_id' => $company->id,
@@ -279,16 +276,9 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
 
         $user->roles()->attach($role->id, ['company_id' => $company->id]);
 
-        $organization = Organization::query()->create([
-            'company_id' => $company->id,
-            'name' => 'Atlas Components',
-            'slug' => 'atlas-components',
-            'timezone' => 'UTC',
-        ]);
-
         Trial::query()->create([
             'user_id' => $user->id,
-            'organization_id' => $organization->id,
+            'company_id' => $company->id,
             'trial_start_date' => now()->subDay(),
             'trial_end_date' => now()->addDays(10),
             'status' => 'active',

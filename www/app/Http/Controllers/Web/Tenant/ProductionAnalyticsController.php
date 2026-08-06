@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Web\Tenant;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Web\Tenant\Concerns\HandlesTenantAuthorization;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOutput;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -30,9 +30,9 @@ final class ProductionAnalyticsController extends Controller
             ->where('created_at', '>=', $from)
             ->get(['id', 'status', 'quantity_planned', 'quantity_produced', 'quantity_scrapped']);
 
-        $outputs = ProductionOrderOutput::query()
+        $outputs = ProductionOperationOutput::query()
             ->where('created_at', '>=', $from)
-            ->get(['inspection_status', 'quantity_completed', 'quantity_scrapped', 'setup_time_minutes', 'process_time_minutes', 'produced_at']);
+            ->get(['inspection_status', 'quantity_good', 'quantity_scrapped', 'setup_time_minutes', 'process_time_minutes', 'reported_at']);
 
         $planned = (float) $orders->sum('quantity_planned');
         $produced = (float) $orders->sum('quantity_produced');
@@ -57,19 +57,19 @@ final class ProductionAnalyticsController extends Controller
             'completed' => $orders->where('status', 'COMPLETED')->count(),
         ];
 
-        $scrapByDay = ProductionOrderOutput::query()
-            ->selectRaw("DATE(produced_at) as day, SUM(quantity_scrapped) as total_scrap")
-            ->where('produced_at', '>=', $from)
+        $scrapByDay = ProductionOperationOutput::query()
+            ->selectRaw("DATE(reported_at) as day, SUM(quantity_scrapped) as total_scrap")
+            ->where('reported_at', '>=', $from)
             ->groupBy('day')
             ->orderBy('day')
             ->get();
 
-        $operationEfficiency = ProductionOrderOutput::query()
-            ->selectRaw('operation_no, SUM(quantity_completed) as good_qty, SUM(quantity_scrapped) as scrap_qty, SUM(process_time_minutes) as process_minutes')
-            ->where('created_at', '>=', $from)
-            ->whereNotNull('operation_no')
-            ->groupBy('operation_no')
-            ->orderBy('operation_no')
+        $operationEfficiency = ProductionOperationOutput::query()
+            ->join('production_order_operations as operation', 'operation.id', '=', 'production_operation_outputs.production_order_operation_id')
+            ->selectRaw('operation.operation_no, SUM(production_operation_outputs.quantity_good) as good_qty, SUM(production_operation_outputs.quantity_scrapped) as scrap_qty, SUM(production_operation_outputs.process_time_minutes) as process_minutes')
+            ->where('production_operation_outputs.created_at', '>=', $from)
+            ->groupBy('operation.operation_no')
+            ->orderBy('operation.operation_no')
             ->get();
 
         return view('client.production.analytics.index', [

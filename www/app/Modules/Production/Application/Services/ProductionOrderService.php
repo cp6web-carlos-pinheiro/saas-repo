@@ -8,7 +8,7 @@ use App\Modules\Bom\Application\Services\FreezeBomSnapshotService;
 use App\Modules\Inventory\Application\Services\InventoryService;
 use App\Modules\Production\Application\Services\FreezeProductionOrderSnapshotService;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOutput;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersion;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersionSnapshot;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
@@ -80,12 +80,15 @@ final class ProductionOrderService extends BaseService
         $quantityScrapped = round((float) ($payload['quantity_scrapped'] ?? 0), 6);
 
         $result = $this->inTransaction(function () use ($order, $payload, $quantityCompleted, $quantityScrapped, $userId) {
-            $output = ProductionOrderOutput::query()->create([
+            $operation = isset($payload['operation_no'])
+                ? $order->operations()->where('operation_no', (int) $payload['operation_no'])->first()
+                : null;
+            $output = ProductionOperationOutput::query()->create([
                 'company_id' => $order->company_id,
                 'production_order_id' => $order->id,
-                'quantity_completed' => $quantityCompleted,
+                'production_order_operation_id' => $operation?->id,
+                'quantity_good' => $quantityCompleted,
                 'quantity_scrapped' => $quantityScrapped,
-                'operation_no' => $payload['operation_no'] ?? null,
                 'work_center_id' => $payload['work_center_id'] ?? null,
                 'setup_time_minutes' => round((float) ($payload['setup_time_minutes'] ?? 0), 6),
                 'process_time_minutes' => round((float) ($payload['process_time_minutes'] ?? 0), 6),
@@ -93,8 +96,9 @@ final class ProductionOrderService extends BaseService
                 'inspected_at' => isset($payload['inspected_at']) ? now()->parse($payload['inspected_at']) : null,
                 'inspection_notes' => $payload['inspection_notes'] ?? null,
                 'lot_number' => $payload['lot_number'] ?? null,
-                'produced_at' => isset($payload['produced_at']) ? now()->parse($payload['produced_at']) : now(),
+                'reported_at' => isset($payload['produced_at']) ? now()->parse($payload['produced_at']) : now(),
                 'created_by' => $userId,
+                'operator_id' => $userId,
                 'metadata' => $payload['metadata'] ?? null,
             ]);
 
@@ -146,12 +150,11 @@ final class ProductionOrderService extends BaseService
                 $missingQuantity = round((float) $order->quantity_planned - (float) $order->quantity_produced, 6);
 
                 if ($missingQuantity > 0) {
-                    $output = ProductionOrderOutput::query()->create([
+                    $output = ProductionOperationOutput::query()->create([
                         'company_id' => $order->company_id,
                         'production_order_id' => $order->id,
-                        'quantity_completed' => $missingQuantity,
+                        'quantity_good' => $missingQuantity,
                         'quantity_scrapped' => 0,
-                        'operation_no' => null,
                         'work_center_id' => null,
                         'setup_time_minutes' => 0,
                         'process_time_minutes' => 0,
@@ -159,8 +162,9 @@ final class ProductionOrderService extends BaseService
                         'inspected_at' => now(),
                         'inspection_notes' => null,
                         'lot_number' => null,
-                        'produced_at' => now(),
+                        'reported_at' => now(),
                         'created_by' => $userId,
+                        'operator_id' => $userId,
                         'metadata' => ['auto_completion' => true],
                     ]);
 
@@ -283,9 +287,27 @@ final class ProductionOrderService extends BaseService
         return $order->fresh()->load(['product', 'warehouse', 'outputs'])->toArray();
     }
 
-    private function postFinishedGoodsReceipt(ProductionOrder $order, ProductionOrderOutput $output, ?int $userId): void
+    public function registerFinishedOperationOutput(ProductionOperationOutput $output, ?int $userId = null): void
     {
-        if ($order->warehouse_id === null || (float) $output->quantity_completed <= 0) {
+        $order = $output->productionOrder()->firstOrFail();
+
+        $this->inTransaction(function () use ($order, $output, $userId): void {
+            $this->postFinishedGoodsReceipt($order, $output, $userId);
+            $order->quantity_produced = round((float) $order->quantity_produced + (float) $output->quantity_good, 6);
+            $order->quantity_scrapped = round((float) $order->quantity_scrapped + (float) $output->quantity_scrapped, 6);
+            $order->status = $order->quantity_produced >= $order->quantity_planned ? 'COMPLETED' : 'PARTIALLY_COMPLETED';
+            $order->started_at ??= now();
+            if ($order->status === 'COMPLETED') {
+                $order->completed_at ??= now();
+                $order->completed_by = $userId;
+            }
+            $order->save();
+        });
+    }
+
+    private function postFinishedGoodsReceipt(ProductionOrder $order, ProductionOperationOutput $output, ?int $userId): void
+    {
+        if ($order->warehouse_id === null || (float) $output->quantity_good <= 0) {
             return;
         }
 
@@ -293,13 +315,13 @@ final class ProductionOrderService extends BaseService
             'warehouse_id' => $order->warehouse_id,
             'product_id' => $order->product_id,
             'movement_type' => 'RECEIPT',
-            'quantity' => (float) $output->quantity_completed,
+            'quantity' => (float) $output->quantity_good,
             'lot_number' => $output->lot_number,
             'reference_type' => 'production_order',
             'reference_id' => $order->id,
             'notes' => $output->inspection_notes,
             'metadata' => [
-                'production_order_output_id' => $output->id,
+                'production_operation_output_id' => $output->id,
                 'quantity_scrapped' => (float) $output->quantity_scrapped,
                 'operation_no' => $output->operation_no,
                 'work_center_id' => $output->work_center_id,

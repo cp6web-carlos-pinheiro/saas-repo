@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\SaaS;
 
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,11 +17,8 @@ final class OnboardingProfile extends Model
     protected $table = 'onboarding_profiles';
 
     protected $fillable = [
-        'organization_id',
+        'company_id',
         'user_id',
-        'segment',
-        'operation_size',
-        'timezone',
         'import_data',
         'connect_integrations',
         'invite_team',
@@ -35,9 +33,9 @@ final class OnboardingProfile extends Model
         'completed_at' => 'datetime',
     ];
 
-    public function organization(): BelongsTo
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(Organization::class);
+        return $this->belongsTo(Company::class);
     }
 
     public function user(): BelongsTo

@@ -10,7 +10,7 @@ use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryLot;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\InventorySerial;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderMaterialConsumption;
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOutput;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
 use App\Shared\Application\Transactions\TransactionManager;
@@ -32,7 +32,7 @@ final class GenealogyService extends BaseService
     public function linkLotProductionOutput(int $productionOrderId, string $lotNumber, array $payload = []): array
     {
         $order = ProductionOrder::query()->findOrFail($productionOrderId);
-        $output = ProductionOrderOutput::query()
+        $output = ProductionOperationOutput::query()
             ->where('production_order_id', $productionOrderId)
             ->where('lot_number', $lotNumber)
             ->firstOrFail();
@@ -54,9 +54,9 @@ final class GenealogyService extends BaseService
             'metadata' => $payload['lot_metadata'] ?? null,
         ]);
 
-        $producesRelation = $this->upsertRelation($productNode, $parentNode, 'PRODUCES_ORDER', (float) $output->quantity_completed, $order->product?->uom, $order->product?->unit_id, $order->id, null, $payload['metadata'] ?? null);
-        $lotRelation = $this->upsertRelation($parentNode, $childNode, 'PRODUCES_LOT', (float) $output->quantity_completed, $order->product?->uom, $order->product?->unit_id, $order->id, null, $payload['metadata'] ?? null);
-        $lotProductRelation = $this->upsertRelation($childNode, $productNode, 'IDENTIFIES_PRODUCT', (float) $output->quantity_completed, $order->product?->uom, $order->product?->unit_id, $order->id, null, $payload['metadata'] ?? null);
+        $producesRelation = $this->upsertRelation($productNode, $parentNode, 'PRODUCES_ORDER', (float) $output->quantity_good, $order->product?->uom, $order->product?->unit_id, $order->id, null, $payload['metadata'] ?? null);
+        $lotRelation = $this->upsertRelation($parentNode, $childNode, 'PRODUCES_LOT', (float) $output->quantity_good, $order->product?->uom, $order->product?->unit_id, $order->id, null, $payload['metadata'] ?? null);
+        $lotProductRelation = $this->upsertRelation($childNode, $productNode, 'IDENTIFIES_PRODUCT', (float) $output->quantity_good, $order->product?->uom, $order->product?->unit_id, $order->id, null, $payload['metadata'] ?? null);
 
         return [
             'product_node' => $productNode->toArray(),

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\SaaS;
 
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +19,7 @@ final class Trial extends Model
 
     protected $fillable = [
         'user_id',
-        'organization_id',
+        'company_id',
         'trial_start_date',
         'trial_end_date',
         'grace_ends_at',
@@ -42,9 +43,9 @@ final class Trial extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function organization(): BelongsTo
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(Organization::class);
+        return $this->belongsTo(Company::class);
     }
 
     public function daysRemaining(): int

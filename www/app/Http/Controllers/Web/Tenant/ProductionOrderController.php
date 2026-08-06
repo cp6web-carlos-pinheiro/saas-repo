@@ -9,7 +9,7 @@ use App\Http\Controllers\Web\Tenant\Concerns\HandlesTenantAuthorization;
 use App\Modules\Production\Application\Services\MaterialConsumptionService;
 use App\Modules\Production\Application\Services\ProductionOrderService;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOutput;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Shared\Presentation\Exceptions\DomainException;
@@ -344,7 +344,7 @@ final class ProductionOrderController extends Controller
         return redirect()->route('production.orders.show', $order)->with('status', 'Consumo registrado com sucesso.');
     }
 
-    public function updateInspection(Request $request, ProductionOrder $order, ProductionOrderOutput $output): RedirectResponse
+    public function updateInspection(Request $request, ProductionOrder $order, ProductionOperationOutput $output): RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::PARTIAL_PERMISSION, $company->id);

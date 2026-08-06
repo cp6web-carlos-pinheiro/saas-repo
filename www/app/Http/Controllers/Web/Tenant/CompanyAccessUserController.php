@@ -211,7 +211,7 @@ final class CompanyAccessUserController extends Controller
             $customer->companies()->detach($company->id);
 
             if ((int) ($customer->current_company_id ?? 0) === (int) $company->id) {
-                $nextCompanyId = $customer->companies()->orderBy('company_user.is_default', 'desc')->value('companies.id');
+                $nextCompanyId = $customer->companies()->orderBy('companies.name')->value('companies.id');
                 $customer->forceFill(['current_company_id' => $nextCompanyId])->save();
             }
 

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Models\SaaS\Organization;
 use App\Models\SaaS\Subscription;
 use App\Models\SaaS\Trial;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,17 +22,17 @@ final class EnsureTrialIsActive
         if (! $user) {
             $redirect = redirect()->route('login');
         } else {
-            $organization = Organization::query()->where('company_id', $user->current_company_id)->first();
+            $company = Company::query()->find($user->current_company_id);
 
-            if (! $organization) {
+            if (! $company) {
                 $redirect = redirect()->route('onboarding.wizard');
             } else {
                 $subscription = Subscription::query()
-                    ->where('organization_id', $organization->id)
+                    ->where('company_id', $company->id)
                     ->latest('id')
                     ->first();
                 $trial = Trial::query()
-                    ->where('organization_id', $organization->id)
+                    ->where('company_id', $company->id)
                     ->latest('id')
                     ->first();
 

@@ -82,9 +82,7 @@ final class CompanyUserAccessService
 
         $role->permissions()->sync($permissionIds);
 
-        $user->companies()->syncWithoutDetaching([
-            $company->id => ['is_default' => $user->current_company_id === null || $user->current_company_id === $company->id],
-        ]);
+        $user->companies()->syncWithoutDetaching([$company->id]);
 
         $user->forceFill(['current_company_id' => $company->id])->save();
 
@@ -120,9 +118,7 @@ final class CompanyUserAccessService
 
     public function assignExistingRole(User $user, Company $company, Role $role): void
     {
-        $user->companies()->syncWithoutDetaching([
-            $company->id => ['is_default' => $user->current_company_id === null || $user->current_company_id === $company->id],
-        ]);
+        $user->companies()->syncWithoutDetaching([$company->id]);
 
         $user->forceFill(['current_company_id' => $company->id])->save();
 

@@ -9,6 +9,7 @@ use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Validation\ValidationException;
 
 final class Product extends TenantModel
@@ -22,7 +23,6 @@ final class Product extends TenantModel
         'sku',
         'description',
         'product_type',
-        'uom',
         'unit_id',
         'category_id',
         'brand_id',
@@ -76,8 +76,17 @@ final class Product extends TenantModel
                 ]);
             }
 
-            $product->setAttribute('uom', mb_strtoupper((string) $unit->code));
         });
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
+    public function getUomAttribute(): ?string
+    {
+        return $this->unit?->code;
     }
 
     public function versions(): HasMany

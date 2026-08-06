@@ -18,7 +18,6 @@ final class AccountInvitation extends Model
 
     protected $fillable = [
         'company_id',
-        'organization_id',
         'invited_by_user_id',
         'accepted_by_user_id',
         'email',
@@ -43,11 +42,6 @@ final class AccountInvitation extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
-    }
-
-    public function organization(): BelongsTo
-    {
-        return $this->belongsTo(Organization::class);
     }
 
     public function invitedBy(): BelongsTo

@@ -320,7 +320,8 @@ final class BomMaterialListController extends Controller
             ->where('company_id', $companyId)
             ->whereIn('id', $ids)
             ->orderBy('sku')
-            ->get(['id', 'sku', 'description', 'uom']);
+            ->with('unit:id,code')
+            ->get(['id', 'sku', 'description', 'unit_id']);
     }
 
     private function oldItemsForm(Request $request, array $fallback): array

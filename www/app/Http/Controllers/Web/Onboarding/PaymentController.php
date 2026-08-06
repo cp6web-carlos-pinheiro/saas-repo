@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Onboarding;
 
 use App\Http\Controllers\Controller;
-use App\Models\SaaS\Organization;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AccountOnboardingService;
 use App\Services\SaaS\PagarMePaymentService;
 use App\Services\SaaS\PaymentFailedException;
@@ -53,14 +53,14 @@ final class PaymentController extends Controller
             'last_four' => ['required', 'string', 'digits:4'],
         ]);
 
-        $organization = Organization::query()->where('company_id', (int) $user->current_company_id)->first();
+        $company = Company::query()->find((int) $user->current_company_id);
 
-        if ($organization === null) {
+        if ($company === null) {
             return response()->json(['message' => __('payment.organization_not_found')], 422);
         }
 
         try {
-            $payment = $payments->charge($user, $organization, $planCode, $validated);
+            $payment = $payments->charge($user, $company, $planCode, $validated);
             $subscription = $onboarding->createPlanSubscription($user, ['plan_code' => $planCode], $request);
             $onboarding->recordPaymentProvider($subscription, $payment);
 

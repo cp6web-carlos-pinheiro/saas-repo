@@ -17,8 +17,12 @@ use Carbon\Carbon;
 
 final class ProductionOperationExecutionService extends BaseService
 {
-    public function __construct(TransactionManager $transaction, CacheManager $cache, AppLogger $logger)
-    { parent::__construct($transaction, $cache, $logger); }
+    public function __construct(
+        private readonly ProductionOrderService $productionOrderService,
+        TransactionManager $transaction,
+        CacheManager $cache,
+        AppLogger $logger,
+    ) { parent::__construct($transaction, $cache, $logger); }
 
     public function show(int $operationId): array
     { return ProductionOrderOperation::query()->with(['events','outputs','qualityRecords'])->findOrFail($operationId)->toArray(); }
@@ -73,7 +77,7 @@ final class ProductionOperationExecutionService extends BaseService
         $current = (float) $operation->quantity_processed;
         if ($current + $good + $scrap + $rework > (float) $operation->quantity_planned + 0.000001 && empty($payload['allow_excess'])) throw new DomainException('Reported quantity exceeds planned quantity', 422);
         $output = $this->inTransaction(function () use ($operation, $payload, $userId, $good, $scrap, $rework) {
-            $row = ProductionOperationOutput::query()->create(['company_id'=>$operation->company_id,'production_order_operation_id'=>$operation->id,'quantity_good'=>$good,'quantity_scrapped'=>$scrap,'quantity_rework'=>$rework,'lot_number'=>$payload['lot_number'] ?? null,'inspection_status'=>$payload['inspection_status'] ?? 'PENDING','scrap_cause_code'=>$payload['scrap_cause_code'] ?? null,'destination'=>$payload['destination'] ?? null,'operator_id'=>$payload['operator_id'] ?? $userId,'production_resource_id'=>$operation->actual_production_resource_id ?: $operation->production_resource_id,'reported_at'=>now(),'notes'=>$payload['notes'] ?? null,'metadata'=>$payload['metadata'] ?? null]);
+            $row = ProductionOperationOutput::query()->create(['company_id'=>$operation->company_id,'production_order_id'=>$operation->production_order_id,'production_order_operation_id'=>$operation->id,'work_center_id'=>$operation->work_center_id,'quantity_good'=>$good,'quantity_scrapped'=>$scrap,'quantity_rework'=>$rework,'lot_number'=>$payload['lot_number'] ?? null,'inspection_status'=>$payload['inspection_status'] ?? 'PENDING','scrap_cause_code'=>$payload['scrap_cause_code'] ?? null,'destination'=>$payload['destination'] ?? null,'operator_id'=>$payload['operator_id'] ?? $userId,'created_by'=>$userId,'production_resource_id'=>$operation->actual_production_resource_id ?: $operation->production_resource_id,'reported_at'=>now(),'notes'=>$payload['notes'] ?? null,'metadata'=>$payload['metadata'] ?? null]);
             $operation->quantity_processed = round((float)$operation->quantity_processed + $good + $scrap + $rework, 6);
             $operation->quantity_good = round((float)$operation->quantity_good + $good, 6);
             $operation->quantity_scrapped = round((float)$operation->quantity_scrapped + $scrap, 6);
@@ -81,6 +85,8 @@ final class ProductionOperationExecutionService extends BaseService
             $operation->save();
             return $row;
         });
+        $hasLaterOperation = ProductionOrderOperation::query()->where('production_order_id', $operation->production_order_id)->where('sequence', '>', $operation->sequence)->exists();
+        if (! $hasLaterOperation) $this->productionOrderService->registerFinishedOperationOutput($output, $userId);
         return $output->toArray();
     }
 

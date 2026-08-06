@@ -62,7 +62,6 @@ final class GlobalCustomerController extends Controller
                 'company' => $company,
                 'access' => $access->accessFor($customer, $company),
                 'is_current' => (int) $customer->current_company_id === (int) $company->id,
-                'is_default' => (bool) ($company->pivot?->is_default ?? false),
             ]);
 
         return view('admin.customer.show', compact('customer', 'companyAccesses'));

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 final class AuditLogService
 {
-    public function record(string $event, string $severity = 'info', array $context = [], ?int $userId = null, ?int $organizationId = null, ?string $ipAddress = null, ?string $userAgent = null): void
+    public function record(string $event, string $severity = 'info', array $context = [], ?int $userId = null, ?int $companyId = null, ?string $ipAddress = null, ?string $userAgent = null): void
     {
         if ($userId !== null && ! DB::table('users')->where('id', $userId)->exists()) {
             $userId = null;
@@ -20,7 +20,7 @@ final class AuditLogService
             'severity' => $severity,
             'context' => $context,
             'user_id' => $userId,
-            'organization_id' => $organizationId,
+            'company_id' => $companyId,
             'ip_address' => $ipAddress,
             'user_agent' => $userAgent,
             'occurred_at' => now(),

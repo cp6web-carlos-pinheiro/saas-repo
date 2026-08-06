@@ -132,7 +132,7 @@ final class SaleController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
-        $sale->load(['customer:id,name', 'lines.product:id,sku,description,uom']);
+        $sale->load(['customer:id,name', 'lines.product:id,sku,description,unit_id', 'lines.product.unit:id,code']);
         $sale->load([
             'confirmedBy:id,name',
             'canceledBy:id,name',
@@ -503,7 +503,8 @@ final class SaleController extends Controller
             ->where('company_id', $company->id)
             ->whereIn('id', $ids)
             ->orderBy('sku')
-            ->get(['id', 'sku', 'description', 'uom', 'is_active']);
+            ->with('unit:id,code')
+            ->get(['id', 'sku', 'description', 'unit_id', 'is_active']);
     }
 
     private function oldItemRows(Request $request, array $fallback): array
@@ -531,7 +532,7 @@ final class SaleController extends Controller
 
     private function itemRowsForForm(Sale $sale): array
     {
-        $sale->loadMissing('lines.product:id,sku,description,uom');
+        $sale->loadMissing(['lines.product:id,sku,description,unit_id', 'lines.product.unit:id,code']);
 
         $rows = $sale->lines
             ->map(static fn (SaleLine $line): array => [

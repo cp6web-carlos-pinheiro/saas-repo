@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\SaaS\Organization;
 use App\Models\SaaS\Subscription;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
@@ -26,15 +25,14 @@ final class IndustrialDashboardController extends Controller
 
         if ($user !== null && (int) ($user->current_company_id ?? 0) > 0) {
             $companyId = (int) $user->current_company_id;
-            $organization = Organization::query()->where('company_id', $companyId)->first();
-            $subscription = $organization
-                ? Subscription::query()->where('organization_id', $organization->id)->latest('id')->first()
+            $company = Company::query()->find($companyId);
+            $organization = $company;
+            $subscription = $company
+                ? Subscription::query()->where('company_id', $company->id)->latest('id')->first()
                 : null;
             $subscriptionPlan = $subscription ? $service->planForCode($subscription->plan_code) : null;
 
             if ($user instanceof User) {
-                $company = Company::query()->find($companyId);
-
                 if ($company !== null) {
                     $canManageAccesses = $access->canManageCompanyAccess($user, $company);
                 }

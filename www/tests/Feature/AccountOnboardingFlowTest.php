@@ -36,6 +36,7 @@ final class AccountOnboardingFlowTest extends TestCase
             'email' => 'marina@alpha.com',
             'password' => self::TEST_SECRET,
             'password_confirmation' => self::TEST_SECRET,
+            'preferred_locale' => 'pt_BR',
             'terms' => '1',
         ])->assertRedirect(route('onboarding.wizard'));
 
@@ -134,7 +135,7 @@ final class AccountOnboardingFlowTest extends TestCase
         ]);
 
         $user->companies()->syncWithoutDetaching([
-            $company->id => ['is_default' => true],
+            $company->id,
         ]);
         $user->forceFill(['current_company_id' => $company->id])->save();
 

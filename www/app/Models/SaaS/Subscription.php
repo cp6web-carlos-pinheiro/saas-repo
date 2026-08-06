@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\SaaS;
 
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,7 @@ final class Subscription extends Model
     protected $table = 'subscriptions';
 
     protected $fillable = [
-        'organization_id',
+        'company_id',
         'trial_id',
         'provider',
         'provider_customer_id',
@@ -33,9 +34,9 @@ final class Subscription extends Model
         'canceled_at' => 'datetime',
     ];
 
-    public function organization(): BelongsTo
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(Organization::class);
+        return $this->belongsTo(Company::class);
     }
 
     public function trial(): BelongsTo

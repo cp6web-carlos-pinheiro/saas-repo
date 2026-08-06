@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Identity\Presentation\Http\Controllers;
 
 use App\Models\SaaS\EmailVerification;
-use App\Models\SaaS\Organization;
 use App\Models\SaaS\SocialAccount;
 use App\Models\SaaS\Trial;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
-use App\Services\SaaS\TrialOnboardingService;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Services\SaaS\AccountOnboardingService;
 use App\Support\Security\PasswordPolicy;
 use App\Shared\Presentation\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -23,7 +23,7 @@ use Laravel\Socialite\Facades\Socialite;
 
 final class SaaSOnboardingApiController
 {
-    public function register(Request $request, TrialOnboardingService $service): JsonResponse
+    public function register(Request $request, AccountOnboardingService $service): JsonResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
@@ -33,7 +33,7 @@ final class SaaSOnboardingApiController
             'terms' => ['accepted'],
         ]);
 
-        $result = $service->register($validated, $request);
+        $result = $service->registerTrial($validated, $request);
         /** @var User $user */
         $user = $result['user'];
 
@@ -42,7 +42,7 @@ final class SaaSOnboardingApiController
         return ApiResponse::success([
             'token' => $token,
             'user' => $user,
-            'organization' => $result['organization'],
+            'company' => $result['company'],
             'trial' => $result['trial'],
         ], 'Trial iniciado com sucesso', 201);
     }
@@ -153,7 +153,7 @@ final class SaaSOnboardingApiController
         ], 'Token de verificacao reemitido');
     }
 
-    public function socialLogin(Request $request, TrialOnboardingService $service): JsonResponse
+    public function socialLogin(Request $request, AccountOnboardingService $service): JsonResponse
     {
         $validated = $request->validate([
             'provider' => ['required', 'in:google,microsoft'],
@@ -181,7 +181,7 @@ final class SaaSOnboardingApiController
         if (! $user) {
             $name = (string) ($oauthUser->getName() ?: 'Novo Usuario');
             $companyHint = Str::title(Str::before($email, '@')).' Company';
-            $result = $service->registerFromSocial($name, $companyHint, $email, $request);
+            $result = $service->registerTrialFromSocial($name, $companyHint, $email, $request);
             $user = $result['user'];
             $user->forceFill(['email_verified_at' => now()])->save();
         }
@@ -206,7 +206,7 @@ final class SaaSOnboardingApiController
         ], 'Autenticado via social login');
     }
 
-    public function onboarding(Request $request, TrialOnboardingService $service): JsonResponse
+    public function onboarding(Request $request, AccountOnboardingService $service): JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
@@ -230,14 +230,14 @@ final class SaaSOnboardingApiController
         /** @var User $user */
         $user = $request->user();
 
-        $organization = Organization::query()->where('company_id', $user->current_company_id)->first();
+        $company = Company::query()->find($user->current_company_id);
 
-        if (! $organization) {
-            return ApiResponse::error('Organizacao nao encontrada', 404);
+        if (! $company) {
+            return ApiResponse::error('Empresa nao encontrada', 404);
         }
 
         $trial = Trial::query()
-            ->where('organization_id', $organization->id)
+            ->where('company_id', $company->id)
             ->where('user_id', $user->id)
             ->latest('id')
             ->first();
@@ -252,7 +252,7 @@ final class SaaSOnboardingApiController
             'trial_start_date' => $trial->trial_start_date,
             'trial_end_date' => $trial->trial_end_date,
             'days_remaining' => $trial->daysRemaining(),
-            'organization_id' => $organization->id,
+            'company_id' => $company->id,
         ]);
     }
 
@@ -261,20 +261,19 @@ final class SaaSOnboardingApiController
         /** @var User $user */
         $user = $request->user();
 
-        $organization = Organization::query()->where('company_id', $user->current_company_id)->first();
+        $company = Company::query()->find($user->current_company_id);
 
-        if (! $organization) {
-            return ApiResponse::error('Organizacao nao encontrada', 404);
+        if (! $company) {
+            return ApiResponse::error('Empresa nao encontrada', 404);
         }
 
         return ApiResponse::success([
-            'organization' => $organization,
-            'tenant' => $organization->tenants()->first(),
-            'users' => $organization->company?->users()->paginate(15),
+            'company' => $company,
+            'users' => $company->users()->paginate(15),
         ], 'Tenant management context');
     }
 
-    public function createTenantUser(Request $request, TrialOnboardingService $service): JsonResponse
+    public function createTenantUser(Request $request, AccountOnboardingService $service): JsonResponse
     {
         /** @var User $actor */
         $actor = $request->user();

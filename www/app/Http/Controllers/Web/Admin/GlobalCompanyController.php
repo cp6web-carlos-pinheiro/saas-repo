@@ -26,10 +26,9 @@ final class GlobalCompanyController extends Controller
         $companies = Company::query()
             ->withCount('users')
             ->with([
-                'organization:id,company_id',
-                'organization.latestSubscription' => static fn ($query) => $query->select([
+                'latestSubscription' => static fn ($query) => $query->select([
                     'subscriptions.id',
-                    'subscriptions.organization_id',
+                    'subscriptions.company_id',
                     'subscriptions.plan_code',
                     'subscriptions.status',
                 ]),
@@ -44,7 +43,7 @@ final class GlobalCompanyController extends Controller
 
         $companies->setCollection(
             $companies->getCollection()->map(function (Company $company) use ($service): Company {
-                $subscription = $company->organization?->latestSubscription;
+                $subscription = $company->latestSubscription;
                 $hasActivePlan = $subscription !== null && in_array((string) $subscription->status, ['active', 'trialing'], true);
                 $plan = $hasActivePlan ? $service->planForCode((string) $subscription->plan_code) : null;
 
@@ -66,10 +65,9 @@ final class GlobalCompanyController extends Controller
     {
         $company->load([
             'users' => static fn ($query) => $query->orderBy('name'),
-            'organization:id,company_id',
-            'organization.latestSubscription' => static fn ($query) => $query->select([
+            'latestSubscription' => static fn ($query) => $query->select([
                 'subscriptions.id',
-                'subscriptions.organization_id',
+                'subscriptions.company_id',
                 'subscriptions.plan_code',
                 'subscriptions.status',
                 'subscriptions.provider',
@@ -79,7 +77,7 @@ final class GlobalCompanyController extends Controller
             ]),
         ]);
 
-        $subscription = $company->organization?->latestSubscription;
+        $subscription = $company->latestSubscription;
         $selectedPlan = $subscription ? $service->planForCode((string) $subscription->plan_code) : null;
         $selectedPlanStatus = match ((string) ($subscription->status ?? '')) {
             'active' => __('global_company.subscription_status_active'),

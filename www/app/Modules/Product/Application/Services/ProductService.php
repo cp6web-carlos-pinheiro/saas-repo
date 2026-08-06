@@ -180,8 +180,6 @@ final class ProductService extends BaseService
         }
 
         $payload['unit_id'] = $unit->id;
-        $payload['uom'] = mb_strtoupper((string) $unit->code);
-
         return $payload;
     }
 }

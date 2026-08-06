@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Billing;
 
 use App\Http\Controllers\Controller;
-use App\Models\SaaS\Organization;
 use App\Models\SaaS\Subscription;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AccountOnboardingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,17 +23,17 @@ final class SubscriptionController extends Controller
             return redirect()->route('login');
         }
 
-        $organization = Organization::query()->where('company_id', (int) $user->current_company_id)->first();
+        $company = Company::query()->find((int) $user->current_company_id);
 
-        if ($organization === null) {
+        if ($company === null) {
             return redirect()->route('onboarding.wizard');
         }
 
-        $subscription = Subscription::query()->where('organization_id', $organization->id)->latest('id')->first();
-        $usedFreeTrial = $organization->trials()->exists();
+        $subscription = Subscription::query()->where('company_id', $company->id)->latest('id')->first();
+        $usedFreeTrial = $company->trials()->exists();
 
         return view('billing.subscription', [
-            'organization' => $organization,
+            'organization' => $company,
             'subscription' => $subscription,
             'currentPlan' => $subscription ? $service->planForCode($subscription->plan_code) : null,
             'plans' => $service->planCatalog(),

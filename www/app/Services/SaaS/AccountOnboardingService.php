@@ -8,10 +8,8 @@ use App\Mail\AccountInvitationMail;
 use App\Models\SaaS\AccountInvitation;
 use App\Models\SaaS\EmailVerification;
 use App\Models\SaaS\OnboardingProfile;
-use App\Models\SaaS\Organization;
 use App\Models\SaaS\Plan;
 use App\Models\SaaS\Subscription;
-use App\Models\SaaS\Tenant;
 use App\Models\SaaS\Trial;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Permission;
@@ -124,12 +122,6 @@ final class AccountOnboardingService
             $company = Company::query()->create([
                 'name' => $data['company_name'],
                 'code' => $this->uniqueCode($data['company_name']),
-                'is_active' => true,
-            ]);
-
-            $organization = Organization::query()->create([
-                'company_id' => $company->id,
-                'name' => $data['company_name'],
                 'slug' => $this->uniqueSlug($data['company_name']),
                 'domain' => $data['company_domain'] !== '' ? mb_strtolower(trim((string) $data['company_domain'])) : null,
                 'segment' => $data['segment'] !== '' ? $data['segment'] : null,
@@ -138,12 +130,6 @@ final class AccountOnboardingService
                 'preferences' => [
                     'onboarding_stage' => 'company',
                 ],
-            ]);
-
-            Tenant::query()->create([
-                'organization_id' => $organization->id,
-                'name' => $company->name,
-                'slug' => $organization->slug,
                 'is_active' => true,
             ]);
 
@@ -151,9 +137,7 @@ final class AccountOnboardingService
                 'current_company_id' => $company->id,
             ])->save();
 
-            $company->users()->syncWithoutDetaching([
-                $user->id => ['is_default' => true],
-            ]);
+            $company->users()->syncWithoutDetaching([$user->id]);
 
             $masterRole = $this->ensureMasterRole($company->id);
             $user->roles()->syncWithoutDetaching([
@@ -161,18 +145,15 @@ final class AccountOnboardingService
             ]);
 
             OnboardingProfile::query()->updateOrCreate(
-                ['organization_id' => $organization->id, 'user_id' => $user->id],
-                [
-                    'timezone' => $organization->timezone,
-                    'progress' => 25,
-                ]
+                ['company_id' => $company->id, 'user_id' => $user->id],
+                ['progress' => 25]
             );
 
             $this->audit->record(
                 event: 'account.company.created',
-                context: ['company_id' => $company->id, 'organization_id' => $organization->id],
+                context: ['company_id' => $company->id],
                 userId: $user->id,
-                organizationId: $organization->id,
+                companyId: $company->id,
                 ipAddress: $request->ip(),
                 userAgent: $request->userAgent(),
             );
@@ -212,7 +193,7 @@ final class AccountOnboardingService
             ]);
         }
 
-        $organization = Organization::query()->where('company_id', $companyId)->firstOrFail();
+        $company = Company::query()->findOrFail($companyId);
 
         $planCode = (string) $data['plan_code'];
         $planModel = Plan::query()->active()->where('code', $planCode)->first();
@@ -223,10 +204,10 @@ final class AccountOnboardingService
             ]);
         }
 
-        return DB::transaction(function () use ($user, $request, $organization, $planCode, $planModel): Subscription {
+        return DB::transaction(function () use ($user, $request, $company, $planCode, $planModel): Subscription {
             $plan = $this->serializePlan($planModel);
 
-            if (($plan['allow_once'] ?? false) === true && Trial::query()->where('organization_id', $organization->id)->exists()) {
+            if (($plan['allow_once'] ?? false) === true && Trial::query()->where('company_id', $company->id)->exists()) {
                 throw ValidationException::withMessages([
                     'plan_code' => __('messages.free_trial_already_used'),
                 ]);
@@ -236,7 +217,7 @@ final class AccountOnboardingService
             $endsAt = $this->dueDateForPlan($planCode, $startsAt);
 
             $subscription = Subscription::query()->updateOrCreate(
-                ['organization_id' => $organization->id],
+                ['company_id' => $company->id],
                 [
                     'trial_id' => null,
                     'provider' => 'manual',
@@ -253,7 +234,7 @@ final class AccountOnboardingService
             if (isset($plan['trial_days']) && $endsAt !== null) {
                 $trial = Trial::query()->updateOrCreate(
                     [
-                        'organization_id' => $organization->id,
+                        'company_id' => $company->id,
                         'user_id' => $user->id,
                     ],
                     [
@@ -273,32 +254,234 @@ final class AccountOnboardingService
                 ])->save();
             }
 
-            $organization->update([
-                'preferences' => array_merge($organization->preferences ?? [], [
+            $company->update([
+                'preferences' => array_merge($company->preferences ?? [], [
                     'selected_plan' => $planCode,
                     'plan_selected_at' => now()->toISOString(),
                 ]),
             ]);
 
             OnboardingProfile::query()->updateOrCreate(
-                ['organization_id' => $organization->id, 'user_id' => $user->id],
-                [
-                    'timezone' => $organization->timezone,
-                    'progress' => 75,
-                ]
+                ['company_id' => $company->id, 'user_id' => $user->id],
+                ['progress' => 75]
             );
 
             $this->audit->record(
                 event: 'account.plan.selected',
                 context: ['plan_code' => $planCode, 'subscription_id' => $subscription->id, 'trial_id' => $trial?->id],
                 userId: $user->id,
-                organizationId: $organization->id,
+                companyId: $company->id,
                 ipAddress: $request->ip(),
                 userAgent: $request->userAgent(),
             );
 
             return $subscription;
         });
+    }
+
+    /**
+     * Creates the complete trial account used by the public API flow.
+     *
+     * @return array{user: User, company: Company, trial: Trial, emailVerificationToken: string}
+     */
+    public function registerTrial(array $data, Request $request): array
+    {
+        $email = mb_strtolower(trim((string) $data['email']));
+        $domain = Str::after($email, '@');
+
+        $this->guardAgainstTrialAbuse($email, $domain);
+
+        return DB::transaction(function () use ($data, $request, $email, $domain): array {
+            $company = Company::query()->create([
+                'name' => $data['company'],
+                'code' => $this->uniqueCode($data['company']),
+                'slug' => $this->uniqueSlug($data['company']),
+                'domain' => $domain,
+                'timezone' => 'UTC',
+                'preferences' => ['source' => 'trial-signup'],
+                'is_active' => true,
+            ]);
+
+            $user = User::query()->create([
+                'name' => $data['name'],
+                'email' => $email,
+                'password' => Hash::make((string) $data['password']),
+                'current_company_id' => $company->id,
+                'is_active' => true,
+            ]);
+
+            $company->users()->attach($user->id);
+            $masterRole = $this->ensureMasterRole($company->id);
+            $user->roles()->attach($masterRole->id, ['company_id' => $company->id]);
+
+            $trial = Trial::query()->create([
+                'user_id' => $user->id,
+                'company_id' => $company->id,
+                'trial_start_date' => now(),
+                'trial_end_date' => now()->addDays(14),
+                'grace_ends_at' => now()->addDays(17),
+                'status' => 'active',
+                'is_expired' => false,
+                'email_domain' => $domain,
+                'registration_ip' => $request->ip(),
+            ]);
+
+            Subscription::query()->create([
+                'company_id' => $company->id,
+                'trial_id' => $trial->id,
+                'provider' => 'stripe',
+                'plan_code' => 'trial',
+                'status' => 'trialing',
+                'starts_at' => now(),
+                'ends_at' => $trial->trial_end_date,
+            ]);
+
+            OnboardingProfile::query()->create([
+                'company_id' => $company->id,
+                'user_id' => $user->id,
+                'progress' => 10,
+            ]);
+
+            $token = Str::random(64);
+            EmailVerification::query()->create([
+                'user_id' => $user->id,
+                'token' => hash('sha256', $token),
+                'expires_at' => now()->addDay(),
+                'requested_ip' => $request->ip(),
+            ]);
+
+            $this->audit->record(
+                event: 'trial.started',
+                context: ['trial_id' => $trial->id, 'company_id' => $company->id],
+                userId: $user->id,
+                companyId: $company->id,
+                ipAddress: $request->ip(),
+                userAgent: $request->userAgent(),
+            );
+
+            return [
+                'user' => $user,
+                'company' => $company,
+                'trial' => $trial,
+                'emailVerificationToken' => $token,
+            ];
+        });
+    }
+
+    public function registerTrialFromSocial(string $name, string $company, string $email, Request $request): array
+    {
+        return $this->registerTrial([
+            'name' => $name,
+            'company' => $company,
+            'email' => $email,
+            'password' => Str::random(32),
+        ], $request);
+    }
+
+    public function completeOnboarding(User $user, array $data): OnboardingProfile
+    {
+        $company = Company::query()->findOrFail((int) $user->current_company_id);
+        $profile = OnboardingProfile::query()->firstOrNew([
+            'company_id' => $company->id,
+            'user_id' => $user->id,
+        ]);
+
+        $profile->fill([
+            'import_data' => (bool) ($data['import_data'] ?? false),
+            'connect_integrations' => (bool) ($data['connect_integrations'] ?? false),
+            'invite_team' => (bool) ($data['invite_team'] ?? false),
+            'progress' => 100,
+            'completed_at' => now(),
+        ])->save();
+
+        $company->update([
+            'segment' => $data['segment'] ?? null,
+            'operation_size' => $data['operation_size'] ?? null,
+            'timezone' => $data['timezone'] ?? 'UTC',
+            'preferences' => array_merge($company->preferences ?? [], [
+                'import_data' => $profile->import_data,
+                'connect_integrations' => $profile->connect_integrations,
+                'invite_team' => $profile->invite_team,
+            ]),
+        ]);
+
+        return $profile;
+    }
+
+    public function isMasterUser(User $user): bool
+    {
+        $companyId = (int) ($user->current_company_id ?? 0);
+
+        return $companyId > 0 && $user->roles()
+            ->wherePivot('company_id', $companyId)
+            ->whereIn('slug', [self::MASTER_ROLE_SLUG, 'admin', 'account-master', 'organization-admin'])
+            ->exists();
+    }
+
+    public function registerTeamMember(User $actor, array $data, Request $request): User
+    {
+        $companyId = (int) ($actor->current_company_id ?? 0);
+
+        if ($companyId <= 0 || ! $this->isMasterUser($actor)) {
+            throw ValidationException::withMessages([
+                'authorization' => __('messages.only_master_user_can_register_members'),
+            ]);
+        }
+
+        $email = mb_strtolower(trim((string) $data['email']));
+
+        return DB::transaction(function () use ($actor, $companyId, $data, $email, $request): User {
+            $company = Company::query()->findOrFail($companyId);
+            $role = ($data['role'] ?? 'member') === 'master'
+                ? $this->ensureMasterRole($companyId)
+                : $this->ensureMemberRole($companyId);
+            $user = User::query()->where('email', $email)->first();
+
+            if ($user !== null && $user->companies()->whereKey($companyId)->exists()) {
+                throw ValidationException::withMessages(['email' => __('messages.user_already_belongs_to_account')]);
+            }
+
+            if ($user === null) {
+                $user = User::query()->create([
+                    'name' => $data['name'],
+                    'email' => $email,
+                    'password' => Hash::make((string) $data['password']),
+                    'current_company_id' => $companyId,
+                    'is_active' => (bool) ($data['activate'] ?? true),
+                ]);
+            } elseif ($user->current_company_id === null) {
+                $user->forceFill(['current_company_id' => $companyId])->save();
+            }
+
+            $company->users()->syncWithoutDetaching([$user->id]);
+            $user->roles()->syncWithoutDetaching([$role->id => ['company_id' => $companyId]]);
+            OnboardingProfile::query()->firstOrCreate(
+                ['company_id' => $companyId, 'user_id' => $user->id],
+                ['progress' => 0],
+            );
+
+            $this->audit->record(
+                event: 'tenant.user.created',
+                context: ['created_user_id' => $user->id, 'role' => $role->slug, 'created_by' => $actor->id],
+                userId: $actor->id,
+                companyId: $companyId,
+                ipAddress: $request->ip(),
+                userAgent: $request->userAgent(),
+            );
+
+            return $user->fresh();
+        });
+    }
+
+    private function guardAgainstTrialAbuse(string $email, string $domain): void
+    {
+        if (User::query()->where('email', $email)->exists()) {
+            throw ValidationException::withMessages(['email' => 'Ja existe um cadastro com este e-mail.']);
+        }
+
+        if (Trial::query()->where('email_domain', $domain)->where('created_at', '>=', now()->subDays(30))->count() >= 5) {
+            throw ValidationException::withMessages(['email' => 'Limite de trial por dominio excedido. Fale com o comercial.']);
+        }
     }
 
     /**
@@ -342,7 +525,7 @@ final class AccountOnboardingService
             ]);
         }
 
-        $organization = Organization::query()->where('company_id', $companyId)->firstOrFail();
+        $company = Company::query()->findOrFail($companyId);
 
         $normalizedEmails = collect($emails)
             ->map(static fn ($email) => mb_strtolower(trim((string) $email)))
@@ -356,7 +539,7 @@ final class AccountOnboardingService
 
         $invitations = collect();
 
-        DB::transaction(function () use ($normalizedEmails, $user, $organization, $companyId, $request, &$invitations): void {
+        DB::transaction(function () use ($normalizedEmails, $user, $company, $companyId, $request, &$invitations): void {
             foreach ($normalizedEmails as $email) {
                 if ($email === mb_strtolower((string) $user->email)) {
                     continue;
@@ -375,7 +558,6 @@ final class AccountOnboardingService
 
                 $invitation = AccountInvitation::query()->create([
                     'company_id' => $companyId,
-                    'organization_id' => $organization->id,
                     'invited_by_user_id' => $user->id,
                     'email' => $email,
                     'role_slug' => self::MEMBER_ROLE_SLUG,
@@ -402,7 +584,7 @@ final class AccountOnboardingService
                 event: 'account.invites.sent',
                 context: ['count' => $invitations->count()],
                 userId: $user->id,
-                organizationId: $organization->id,
+                companyId: $company->id,
                 ipAddress: $request->ip(),
                 userAgent: $request->userAgent(),
             );
@@ -437,9 +619,7 @@ final class AccountOnboardingService
             $company = Company::query()->findOrFail($invitation->company_id);
             $role = $this->ensureMemberRole($company->id);
 
-            $company->users()->syncWithoutDetaching([
-                $user->id => ['is_default' => $user->current_company_id === null],
-            ]);
+            $company->users()->syncWithoutDetaching([$user->id]);
 
             $user->roles()->syncWithoutDetaching([
                 $role->id => ['company_id' => $company->id],
@@ -458,7 +638,7 @@ final class AccountOnboardingService
                 event: 'account.invite.accepted',
                 context: ['invitation_id' => $invitation->id],
                 userId: $user->id,
-                organizationId: $invitation->organization_id,
+                companyId: $invitation->company_id,
                 ipAddress: $request->ip(),
                 userAgent: $request->userAgent(),
             );
@@ -482,7 +662,7 @@ final class AccountOnboardingService
         $slug = $base !== '' ? $base : 'organization';
         $count = 1;
 
-        while (Organization::query()->where('slug', $slug)->exists()) {
+        while (Company::query()->where('slug', $slug)->exists()) {
             $count++;
             $slug = $base.'-'.$count;
         }
