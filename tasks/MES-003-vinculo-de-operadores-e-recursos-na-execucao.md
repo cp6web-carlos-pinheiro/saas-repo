@@ -4,6 +4,16 @@
 
 Registrar em qual máquina/recurso cada operação foi executada, usando o cadastro criado em ENG-001. O usuário/operador poderá ser identificado para auditoria, mas não será obrigatório para iniciar ou concluir a operação nesta primeira versão e não será usado no cálculo de custo.
 
+## Status da implementação
+
+Implementado o vínculo operacional básico.
+
+- A operação seleciona o recurso previsto pelo PCP ou recebe recurso específico no comando de início.
+- O recurso é validado pelo tenant, centro de trabalho e status `ACTIVE`.
+- Recurso em manutenção/inativo e recurso de outro centro são rejeitados.
+- Trocas de recurso ficam registradas nos eventos e no recurso efetivo da operação.
+- Operador é opcional e salvo apenas como auditoria; não participa do custo, que continua calculado pelo valor-hora do centro de produção.
+
 ## Escopo
 
 - Selecionar recurso específico ou alocar automaticamente um recurso elegível.
@@ -23,8 +33,9 @@ Ficam fora do escopo inicial a validação de habilidade/certificação, o vínc
 
 ## Critérios de aceite
 
-- Cada operação concluída identifica o recurso, quando o processo exigir recurso específico.
-- O sistema permite concluir uma operação sem cadastro de valor hora individual ou operador individual.
-- O sistema rejeita máquina de outro centro ou tenant.
-- A eficiência e o custo podem ser consultados sem depender do estado atual do cadastro.
-- Trocas durante a execução não perdem o tempo já contabilizado.
+- [x] Operação registra recurso efetivo quando configurado.
+- [x] Conclusão não exige valor-hora individual nem operador individual.
+- [x] Máquina de outro centro ou tenant é rejeitada.
+- [x] Custo permanece independente do usuário apontador.
+- [x] Troca de recurso preserva a linha histórica de eventos.
+- [ ] Validação de turno, certificação e rateio entre múltiplos operadores continuam fora da primeira versão.

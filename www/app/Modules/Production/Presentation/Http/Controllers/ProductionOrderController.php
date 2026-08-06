@@ -99,4 +99,9 @@ final class ProductionOrderController
     {
         return ApiResponse::success($this->consumptionService->aggregateByProduct($id), 'Material consumption summary');
     }
+
+    public function reverseConsumption(Request $request, int $consumptionId): JsonResponse
+    {
+        return ApiResponse::success($this->consumptionService->reverse($consumptionId, (string) $request->input('reason'), $request->user()?->id), 'Material consumption reversed');
+    }
 }

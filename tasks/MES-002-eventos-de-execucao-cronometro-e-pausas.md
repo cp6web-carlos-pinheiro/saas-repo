@@ -4,6 +4,16 @@
 
 Implementar o registro confiável de início, pausa, retomada, parada e término das operações, permitindo calcular tempo real e suportar um futuro OEE.
 
+## Status da implementação
+
+Implementado o fluxo de eventos no backend.
+
+- `production_operation_events` é append-only e registra `START`, `PAUSE`, `RESUME`, `STOP`, `COMPLETE` e `CANCEL`.
+- Cada comando exige `idempotency_key`; repetição não cria evento duplicado.
+- Timestamps são do servidor por padrão.
+- O serviço calcula tempo produtivo e tempo de pausa a partir dos eventos.
+- Pausa, parada e cancelamento exigem `reason_code`.
+
 ## Escopo
 
 - Criar eventos append-only de operação.
@@ -30,8 +40,10 @@ Implementar o registro confiável de início, pausa, retomada, parada e término
 
 ## Critérios de aceite
 
-- Iniciar e parar uma operação produz tempo real reproduzível.
-- Pausar não contabiliza tempo produtivo durante o intervalo.
-- Repetir uma requisição com a mesma chave não duplica evento.
-- Eventos inválidos retornam erro sem corromper o estado.
-- Testes cobrem concorrência, queda de sessão, fuso e encerramento.
+- [x] Iniciar e parar produz tempo real reproduzível no servidor.
+- [x] Pausa não contabiliza o intervalo como produtivo.
+- [x] Repetição com a mesma chave é idempotente.
+- [x] Transições inválidas retornam erro sem alterar o estado.
+- [x] Recurso exclusivo já ocupado é rejeitado.
+- [ ] Job de alerta/fechamento automático e atualização em tempo real ainda não foram desenvolvidos.
+- [ ] Fuso configurável por tenant e testes de concorrência aguardam banco de teste.

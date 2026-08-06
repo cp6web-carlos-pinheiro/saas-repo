@@ -4,7 +4,18 @@
 
 Garantir que o consumo real seja relacionado à BOM congelada, que desvios sejam identificados e que correções ocorram por estorno auditável.
 
-## Contexto atual
+## Status da implementação
+
+Implementada a validação básica e o estorno controlado.
+
+- O consumo exige que o produto exista na BOM congelada da OP.
+- O componente pode ser identificado pelo item da BOM e o consumo pode ser vinculado à operação executável.
+- O acumulado consumido é comparado com `quantity_required`; excesso é bloqueado por padrão e exige `allow_excess`.
+- `idempotency_key` evita duplicação de consumo.
+- O estorno chama `InventoryService::reverseMovement`, cria registro próprio e mantém o consumo original.
+- O resumo desconsidera consumos estornados no total líquido.
+
+## Contexto anterior
 
 `MaterialConsumptionService` registra consumo e publica movimento `ISSUE`, com lote opcional e referência textual ao componente. Ainda não há reconciliação automática completa com a quantidade prevista da BOM nem fluxo explícito de estorno.
 
@@ -28,7 +39,8 @@ Garantir que o consumo real seja relacionado à BOM congelada, que desvios sejam
 
 ## Critérios de aceite
 
-- O sistema apresenta consumo real x previsto por componente.
-- Excesso gera bloqueio ou exceção conforme política.
-- Estorno reconcilia estoque e não remove histórico.
-- Lotes/seriais permanecem rastreáveis após consumo e estorno.
+- [x] O backend valida o componente contra a BOM snapshot e guarda o vínculo operacional.
+- [x] Excesso gera bloqueio ou exceção explícita.
+- [x] Estorno reconcilia o estoque por movimento inverso e preserva histórico.
+- [x] Lote permanece no consumo e no movimento de estoque.
+- [ ] Endpoint dedicado de consumo previsto x real por componente, conversão de unidade e validação obrigatória de serial ainda precisam ser desenvolvidos.

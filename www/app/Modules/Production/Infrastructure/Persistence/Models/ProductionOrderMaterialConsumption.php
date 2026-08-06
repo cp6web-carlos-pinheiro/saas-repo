@@ -30,6 +30,7 @@ final class ProductionOrderMaterialConsumption extends TenantModel
         'operator_id',
         'notes',
         'metadata',
+        'production_order_operation_id', 'idempotency_key', 'reversed_by_movement_id',
     ];
 
     protected $casts = [

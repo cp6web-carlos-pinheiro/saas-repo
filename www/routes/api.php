@@ -12,6 +12,7 @@ use App\Modules\Bom\Presentation\Http\Controllers\BomExplosionController;
 use App\Modules\Inventory\Presentation\Http\Controllers\InventoryController;
 use App\Modules\Inventory\Presentation\Http\Controllers\LotSerialTrackingController;
 use App\Modules\Production\Presentation\Http\Controllers\ProductionOrderController;
+use App\Modules\Production\Presentation\Http\Controllers\ProductionMesController;
 use App\Modules\Purchasing\Presentation\Http\Controllers\PurchaseOrderController;
 use App\Modules\Purchasing\Presentation\Http\Controllers\PurchaseRequisitionController;
 use App\Modules\Purchasing\Presentation\Http\Controllers\SupplierController;
@@ -291,6 +292,31 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware(CheckPermission::class.':production-orders.consumption.create');
             Route::get('/production-orders/{id}/consumptions/summary', [ProductionOrderController::class, 'consumptionSummary'])
                 ->middleware(CheckPermission::class.':production-orders.consumption.read');
+            Route::post('/material-consumptions/{consumptionId}/reverse', [ProductionOrderController::class, 'reverseConsumption'])
+                ->middleware(CheckPermission::class.':production-orders.consumption.reverse');
+
+            Route::get('/production-operations/{id}/mes', [ProductionMesController::class, 'show'])
+                ->middleware(CheckPermission::class.':mes-operations.read');
+            Route::post('/production-operations/{id}/start', [ProductionMesController::class, 'start'])
+                ->middleware(CheckPermission::class.':mes-operations.execute');
+            Route::post('/production-operations/{id}/pause', [ProductionMesController::class, 'pause'])
+                ->middleware(CheckPermission::class.':mes-operations.execute');
+            Route::post('/production-operations/{id}/resume', [ProductionMesController::class, 'resume'])
+                ->middleware(CheckPermission::class.':mes-operations.execute');
+            Route::post('/production-operations/{id}/stop', [ProductionMesController::class, 'stop'])
+                ->middleware(CheckPermission::class.':mes-operations.execute');
+            Route::post('/production-operations/{id}/complete', [ProductionMesController::class, 'complete'])
+                ->middleware(CheckPermission::class.':mes-operations.execute');
+            Route::post('/production-operations/{id}/cancel', [ProductionMesController::class, 'cancel'])
+                ->middleware(CheckPermission::class.':mes-operations.correct');
+            Route::post('/production-operations/{id}/outputs', [ProductionMesController::class, 'output'])
+                ->middleware(CheckPermission::class.':mes-operations.report');
+            Route::post('/production-operations/{id}/quality', [ProductionMesController::class, 'quality'])
+                ->middleware(CheckPermission::class.':mes-quality.report');
+            Route::post('/production-operations/{id}/rework', [ProductionMesController::class, 'rework'])
+                ->middleware(CheckPermission::class.':mes-quality.rework');
+            Route::post('/production-rework/{id}/complete', [ProductionMesController::class, 'completeRework'])
+                ->middleware(CheckPermission::class.':mes-quality.rework');
 
             Route::get('/purchasing/suppliers', [SupplierController::class, 'index'])
                 ->middleware(CheckPermission::class.':purchasing.suppliers.read');

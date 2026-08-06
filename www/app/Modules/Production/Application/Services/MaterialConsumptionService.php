@@ -7,6 +7,8 @@ namespace App\Modules\Production\Application\Services;
 use App\Modules\Inventory\Application\Services\InventoryService;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderMaterialConsumption;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOperation;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionMaterialConsumptionReversal;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Shared\Application\Cache\CacheManager;
@@ -40,7 +42,7 @@ final class MaterialConsumptionService extends BaseService
 
     public function record(int $productionOrderId, array $payload, ?int $operatorId = null): array
     {
-        $order = ProductionOrder::query()->findOrFail($productionOrderId);
+        $order = ProductionOrder::query()->with('snapshot.bomSnapshot.items')->findOrFail($productionOrderId);
 
         if (in_array($order->status, ['DRAFT', 'COMPLETED', 'CANCELLED'], true)) {
             throw new DomainException(
@@ -52,13 +54,27 @@ final class MaterialConsumptionService extends BaseService
         Product::query()->findOrFail((int) $payload['product_id']);
         Warehouse::query()->findOrFail((int) $payload['warehouse_id']);
 
+        $operation = null;
+        if (! empty($payload['production_order_operation_id'])) {
+            $operation = ProductionOrderOperation::query()->where('production_order_id', $order->id)->findOrFail((int) $payload['production_order_operation_id']);
+        }
+        $bomItem = $order->snapshot?->bomSnapshot?->items?->first(fn ($item) => (int) $item->component_product_id === (int) $payload['product_id'] && (! isset($payload['reference_bom_component_id']) || (string) $item->id === (string) $payload['reference_bom_component_id']));
+        if (! $bomItem) throw new DomainException('Consumed product is not present in the frozen BOM snapshot', 422);
+
         $quantityConsumed = round((float) $payload['quantity_consumed'], 6);
         $quantityScrapped = round((float) ($payload['quantity_scrapped'] ?? 0), 6);
+        $idempotencyKey = $payload['idempotency_key'] ?? null;
+        if ($idempotencyKey) {
+            $previous = ProductionOrderMaterialConsumption::query()->where('idempotency_key', $idempotencyKey)->first();
+            if ($previous) return $previous->refresh()->load(['product', 'warehouse'])->toArray();
+        }
+        $alreadyConsumed = (float) ProductionOrderMaterialConsumption::query()->where('production_order_id', $order->id)->where('product_id', $payload['product_id'])->whereNull('reversed_by_movement_id')->sum('quantity_consumed');
+        if ($alreadyConsumed + $quantityConsumed > (float) $bomItem->quantity_required + 0.000001 && empty($payload['allow_excess'])) throw new DomainException('Consumption exceeds the frozen BOM requirement', 422);
         $consumedAt = isset($payload['consumed_at'])
             ? Carbon::parse($payload['consumed_at'])
             : now();
 
-        $result = $this->inTransaction(function () use ($order, $payload, $quantityConsumed, $quantityScrapped, $consumedAt, $operatorId) {
+        $result = $this->inTransaction(function () use ($order, $operation, $payload, $quantityConsumed, $quantityScrapped, $consumedAt, $operatorId, $idempotencyKey) {
             // Post ISSUE movement to the stock ledger so balance is updated
             $ledgerResult = $this->inventoryService->postMovement([
                 'warehouse_id' => $payload['warehouse_id'],
@@ -82,6 +98,7 @@ final class MaterialConsumptionService extends BaseService
             $consumption = ProductionOrderMaterialConsumption::query()->create([
                 'company_id' => $order->company_id,
                 'production_order_id' => $order->id,
+                'production_order_operation_id' => $operation?->id,
                 'product_id' => $payload['product_id'],
                 'warehouse_id' => $payload['warehouse_id'],
                 'lot_number' => $payload['lot_number'] ?? null,
@@ -91,6 +108,7 @@ final class MaterialConsumptionService extends BaseService
                 'reference_bom_component_id' => $payload['reference_bom_component_id'] ?? null,
                 'consumed_at' => $consumedAt,
                 'operator_id' => $operatorId,
+                'idempotency_key' => $idempotencyKey,
                 'notes' => $payload['notes'] ?? null,
                 'metadata' => $payload['metadata'] ?? null,
             ]);
@@ -107,6 +125,23 @@ final class MaterialConsumptionService extends BaseService
         ]);
 
         return $result->refresh()->load(['product', 'warehouse'])->toArray();
+    }
+
+    public function reverse(int $consumptionId, string $reason, ?int $userId = null): array
+    {
+        if (trim($reason) === '') throw new DomainException('A reason is required to reverse material consumption', 422);
+        $consumption = ProductionOrderMaterialConsumption::query()->findOrFail($consumptionId);
+        $existing = ProductionMaterialConsumptionReversal::query()->where('production_order_material_consumption_id', $consumption->id)->first();
+        if ($existing) return $existing->load('consumption')->toArray();
+        if ($consumption->reversed_by_movement_id) throw new DomainException('Consumption has already been reversed', 422);
+        $result = $this->inTransaction(function () use ($consumption, $reason, $userId) {
+            $reversal = $this->inventoryService->reverseMovement(['movement_id' => $consumption->ledger_movement_id, 'reason' => $reason], $userId);
+            $movementId = (int) ($reversal['reversal_movement']['id'] ?? 0);
+            $consumption->reversed_by_movement_id = $movementId;
+            $consumption->save();
+            return ProductionMaterialConsumptionReversal::query()->create(['company_id'=>$consumption->company_id,'production_order_material_consumption_id'=>$consumption->id,'original_ledger_movement_id'=>$consumption->ledger_movement_id,'reversal_ledger_movement_id'=>$movementId,'quantity'=>$consumption->quantity_consumed,'reason'=>$reason,'created_by'=>$userId]);
+        });
+        return $result->load('consumption')->toArray();
     }
 
     public function aggregateByProduct(int $productionOrderId): array
@@ -131,7 +166,7 @@ final class MaterialConsumptionService extends BaseService
                 ];
             }
 
-            $aggregated[$productId]['total_consumed'] = round($aggregated[$productId]['total_consumed'] + (float) $item->quantity_consumed, 6);
+            if (! $item->reversed_by_movement_id) $aggregated[$productId]['total_consumed'] = round($aggregated[$productId]['total_consumed'] + (float) $item->quantity_consumed, 6);
             $aggregated[$productId]['total_scrapped'] = round($aggregated[$productId]['total_scrapped'] + (float) $item->quantity_scrapped, 6);
 
             if ($item->lot_number !== null) {

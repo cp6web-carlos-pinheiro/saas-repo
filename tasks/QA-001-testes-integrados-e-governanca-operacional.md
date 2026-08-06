@@ -15,6 +15,15 @@ Garantir que a evolução dos módulos não comprometa estoque, snapshots, tenan
 - Regressão de snapshots históricos.
 - Carga para consultas analíticas e exportações.
 
+## Utilizar as credenciais de acesso ao banco de dados MySQL abaixo para rodar os testes
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=beyond_mrp
+DB_USERNAME=beyond_mrp
+DB_PASSWORD=i14lij69i14lij69
+
 ## Auditoria obrigatória
 
 Registrar criação, alteração, aprovação, publicação, início, pausa, retomada, conclusão, correção, estorno, refugo, retrabalho, reprogramação e alteração de tempo padrão.
