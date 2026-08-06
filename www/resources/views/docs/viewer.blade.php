@@ -20,7 +20,7 @@
                     <x-ui.button :href="$backUrl" variant="surface-muted" class="rounded-full">{{ __('ui.back_to_dashboard') }}</x-ui.button>
                 </div>
 
-                <article class="docs-article markdown-body border-0 p-0">
+                <article class="docs-article markdown-body border-0 p-0 text-sm">
                     {!! $contentHtml !!}
                 </article>
             </x-ui.panel>

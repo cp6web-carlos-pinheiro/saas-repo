@@ -635,6 +635,12 @@ body {
         text-align: left;
     }
 
+    .docs-article th:last-child,
+    .docs-article td:last-child {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
     .ind-page {
         background:
             radial-gradient(circle at 100% 0%, #FFEFCF 0%, rgba(255, 239, 207, 0) 34%), /* Sucesso (Laranja) */
