@@ -150,6 +150,115 @@ const select2Language = {
 	searching: () => uiTranslations.selectSearching ?? '',
 };
 
+const initializeClientSideTableSorting = () => {
+	const locale = document.documentElement.lang || undefined;
+	const collator = new Intl.Collator(locale, { numeric: true, sensitivity: 'base' });
+
+	const comparableValue = (text) => {
+		const value = text.trim();
+		const dateMatch = value.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
+
+		if (dateMatch) {
+			return Number(`${dateMatch[3]}${dateMatch[2]}${dateMatch[1]}${dateMatch[4] ?? '00'}${dateMatch[5] ?? '00'}`);
+		}
+
+		const durationMatch = value.match(/^(\d+):(\d{2})$/);
+
+		if (durationMatch) {
+			return (Number(durationMatch[1]) * 60) + Number(durationMatch[2]);
+		}
+
+		const numericText = value
+			.replace(/R\$\s*/g, '')
+			.replace(/\s*%$/, '')
+			.replace(/\./g, '')
+			.replace(',', '.');
+
+		if (/^-?\d+(?:\.\d+)?$/.test(numericText)) {
+			return Number(numericText);
+		}
+
+		return value;
+	};
+
+	for (const table of document.querySelectorAll('table')) {
+		const headerRow = table.tHead?.rows[table.tHead.rows.length - 1];
+		const body = table.tBodies[0];
+
+		if (!headerRow || !body) {
+			continue;
+		}
+
+		const dataRows = Array.from(body.rows).filter((row) => row.cells.length === headerRow.cells.length && !row.querySelector('td[colspan]'));
+
+		if (dataRows.length < 2) {
+			continue;
+		}
+
+		Array.from(headerRow.cells).forEach((header, columnIndex) => {
+			const label = header.textContent.trim();
+			const sampleCell = dataRows[0]?.cells[columnIndex];
+
+			if (label === '' || header.querySelector('a, button') || sampleCell?.querySelector('a, button, form')) {
+				return;
+			}
+
+			const icon = document.createElement('span');
+			icon.className = 'ml-1';
+			icon.setAttribute('aria-hidden', 'true');
+			icon.textContent = '↕';
+			header.append(icon);
+			header.classList.add('cursor-pointer', 'select-none', 'hover:text-[#1a73e8]');
+			header.setAttribute('role', 'button');
+			header.setAttribute('tabindex', '0');
+			header.setAttribute('aria-sort', 'none');
+			header.setAttribute('title', String(uiTranslations.sortBy ?? '').replace(':column', label));
+
+			const sortRows = () => {
+				const ascending = header.getAttribute('aria-sort') !== 'ascending';
+
+				for (const otherHeader of headerRow.cells) {
+					if (otherHeader !== header && otherHeader.dataset.clientSortable === 'true') {
+						otherHeader.setAttribute('aria-sort', 'none');
+						otherHeader.querySelector('[data-sort-icon]')?.replaceChildren('↕');
+					}
+				}
+
+				const rows = Array.from(body.rows).filter((row) => row.cells.length === headerRow.cells.length && !row.querySelector('td[colspan]'));
+				rows.sort((left, right) => {
+					const leftValue = comparableValue(left.cells[columnIndex]?.textContent ?? '');
+					const rightValue = comparableValue(right.cells[columnIndex]?.textContent ?? '');
+					const comparison = typeof leftValue === 'number' && typeof rightValue === 'number'
+						? leftValue - rightValue
+						: collator.compare(String(leftValue), String(rightValue));
+
+					return ascending ? comparison : -comparison;
+				});
+
+				for (const row of rows) {
+					body.append(row);
+				}
+
+				header.setAttribute('aria-sort', ascending ? 'ascending' : 'descending');
+				header.setAttribute('aria-label', `${label}. ${ascending ? uiTranslations.sortedAscending : uiTranslations.sortedDescending}`);
+				icon.textContent = ascending ? '↑' : '↓';
+			};
+
+			header.dataset.clientSortable = 'true';
+			icon.dataset.sortIcon = 'true';
+			header.addEventListener('click', sortRows);
+			header.addEventListener('keydown', (event) => {
+				if (event.key === 'Enter' || event.key === ' ') {
+					event.preventDefault();
+					sortRows();
+				}
+			});
+		});
+	}
+};
+
+initializeClientSideTableSorting();
+
 const initializeUiSelects = () => {
 	if (typeof window.jQuery?.fn?.select2 !== 'function') {
 		return 0;

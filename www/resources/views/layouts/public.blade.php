@@ -21,6 +21,10 @@
             'selectLoadingMore' => __('ui.select_loading_more'),
             'selectNoResults' => __('ui.select_no_results'),
             'selectSearching' => __('ui.select_searching'),
+            'sortBy' => __('ui.sort_by', ['column' => ':column']),
+            'sortedAscending' => __('ui.sorted_ascending'),
+            'sortedDescending' => __('ui.sorted_descending'),
+            'activateSort' => __('ui.activate_sort'),
         ];
     @endphp
     <script>
