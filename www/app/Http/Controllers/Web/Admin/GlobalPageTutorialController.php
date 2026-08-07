@@ -19,7 +19,7 @@ final class GlobalPageTutorialController extends Controller
         $sort = (string) $request->query('sort', 'route_name');
         $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
-        abort_unless(in_array($sort, ['route_name', 'title', 'updated_at', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'route_name', 'updated_at'], true), 404);
 
         $tutorials = PageTutorial::query()
             ->when($search !== '', static fn ($query) => $query->where(static fn ($q) => $q

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Web\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Models\SaaS\Subscription;
 use App\Services\SaaS\AccountOnboardingService;
 use App\Services\SaaS\AuditLogService;
 use Illuminate\Http\RedirectResponse;
@@ -21,9 +22,9 @@ final class GlobalCompanyController extends Controller
         $sort = (string) $request->query('sort', 'name');
         $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
-        abort_unless(in_array($sort, ['name', 'code', 'is_active', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'name', 'code', 'active_plan', 'users_count', 'is_active', 'created_at'], true), 404);
 
-        $companies = Company::query()
+        $companiesQuery = Company::query()
             ->withCount('users')
             ->with([
                 'latestSubscription' => static fn ($query) => $query->select([
@@ -36,8 +37,19 @@ final class GlobalCompanyController extends Controller
             ->when($search !== '', static fn ($query) => $query->where(static fn ($q) => $q
                 ->where('name', 'like', "%{$search}%")
                 ->orWhere('code', 'like', "%{$search}%")
-                ->orWhere('id', 'like', "%{$search}%")))
-            ->orderBy($sort, $direction)
+                ->orWhere('id', 'like', "%{$search}%")));
+
+        if ($sort === 'active_plan') {
+            $companiesQuery->orderBy(
+                Subscription::query()->select('plan_code')->whereColumn('subscriptions.company_id', 'companies.id')->latest('id')->limit(1),
+                $direction
+            );
+        } else {
+            $companiesQuery->orderBy($sort, $direction);
+        }
+
+        $companies = $companiesQuery
+            ->orderBy('id')
             ->paginate(15)
             ->withQueryString();
 

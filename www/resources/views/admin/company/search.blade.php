@@ -31,13 +31,13 @@
       <table class="min-w-full text-sm">
         <thead>
           <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-            <th class="px-3 py-3">ID</th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('name') }}">{{ __('global_company.name') }} ↕</a></th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('code') }}">{{ __('global_company.code') }} ↕</a></th>
-            <th class="px-3 py-3">{{ __('global_company.active_plan') }}</th>
-            <th class="px-3 py-3">{{ __('global_company.users_count') }}</th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('global_company.status') }} ↕</a></th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('global_company.created_at') }} ↕</a></th>
+            <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="name" :label="__('global_company.name')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="code" :label="__('global_company.code')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="active_plan" :label="__('global_company.active_plan')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="users_count" :label="__('global_company.users_count')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="is_active" :label="__('global_company.status')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="created_at" :label="__('global_company.created_at')" :sort="$sort" :direction="$direction" />
           </tr>
         </thead>
         <tbody>

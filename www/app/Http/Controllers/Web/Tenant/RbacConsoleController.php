@@ -34,19 +34,26 @@ final class RbacConsoleController extends Controller
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
+        $sort = (string) $request->query('sort', 'name');
+        $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
+
+        abort_unless(in_array($sort, ['name', 'slug', 'permissions_count', 'users_count'], true), 404);
 
         $roles = Role::query()
             ->withCount('permissions')
             ->withCount([
                 'users as users_count' => static fn (Builder $query) => $query->where('role_user.company_id', $company->id),
             ])
-            ->orderBy('name')
+            ->orderBy($sort, $direction)
+            ->orderBy('id')
             ->paginate(15)
             ->withQueryString();
 
         return view('client.rbac.roles', [
             'company' => $company,
             'roles' => $roles,
+            'sort' => $sort,
+            'direction' => $direction,
         ]);
     }
 

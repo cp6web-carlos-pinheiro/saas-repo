@@ -21,15 +21,23 @@ final class GlobalPlanController extends Controller
         $sort = (string) $request->query('sort', 'sort_order');
         $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
-        abort_unless(in_array($sort, ['code', 'label', 'amount_cents', 'is_active', 'sort_order', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'label', 'amount_cents', 'duration', 'sort_order', 'subscriptions_count', 'is_active'], true), 404);
 
-        $plans = Plan::query()
+        $plansQuery = Plan::query()
             ->withCount('subscriptions')
             ->when($search !== '', static fn ($query) => $query->where(static fn ($q) => $q
                 ->where('code', 'like', "%{$search}%")
                 ->orWhere('label', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%")))
-            ->orderBy($sort, $direction)
+                ->orWhere('description', 'like', "%{$search}%")));
+
+        if ($sort === 'duration') {
+            $plansQuery->orderByRaw('COALESCE(trial_days, interval_months * 30, 0) '.$direction);
+        } else {
+            $plansQuery->orderBy($sort, $direction);
+        }
+
+        $plans = $plansQuery
+            ->orderBy('id')
             ->paginate(15)
             ->withQueryString();
 

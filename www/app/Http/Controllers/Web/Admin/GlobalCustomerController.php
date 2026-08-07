@@ -27,12 +27,20 @@ final class GlobalCustomerController extends Controller
         $sort = (string) $request->query('sort', 'name');
         $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
-        abort_unless(in_array($sort, ['name', 'email', 'is_active', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'name', 'email', 'company', 'is_active', 'created_at'], true), 404);
 
-        $customers = User::query()
+        $customersQuery = User::query()
             ->with(['currentCompany:id,name,code,is_active,created_at,updated_at'])
-            ->when($search !== '', fn (Builder $query) => $this->applySearchFilters($query, $searchTerms))
-            ->orderBy($sort, $direction)
+            ->when($search !== '', fn (Builder $query) => $this->applySearchFilters($query, $searchTerms));
+
+        if ($sort === 'company') {
+            $customersQuery->orderBy(Company::query()->select('name')->whereColumn('companies.id', 'users.current_company_id'), $direction);
+        } else {
+            $customersQuery->orderBy($sort, $direction);
+        }
+
+        $customers = $customersQuery
+            ->orderBy('id')
             ->paginate(15)
             ->withQueryString();
 

@@ -26,13 +26,13 @@
       <table class="min-w-full text-sm">
         <thead>
           <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-            <th class="px-3 py-3">ID</th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('label') }}">{{ __('global_plan.label') }} ↕</a></th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('amount_cents') }}">{{ __('global_plan.amount_short') }} ↕</a></th>
-            <th class="px-3 py-3">{{ __('global_plan.duration') }}</th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('sort_order') }}">{{ __('global_plan.sort_order') }} ↕</a></th>
-            <th class="px-3 py-3">{{ __('global_plan.subscriptions_count') }}</th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('global_plan.status') }} ↕</a></th>
+            <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="label" :label="__('global_plan.label')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="amount_cents" :label="__('global_plan.amount_short')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="duration" :label="__('global_plan.duration')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="sort_order" :label="__('global_plan.sort_order')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="subscriptions_count" :label="__('global_plan.subscriptions_count')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="is_active" :label="__('global_plan.status')" :sort="$sort" :direction="$direction" />
           </tr>
         </thead>
         <tbody>

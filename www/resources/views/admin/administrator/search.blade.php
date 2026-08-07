@@ -30,10 +30,10 @@
       <table class="min-w-full text-sm">
         <thead>
           <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-            <th class="px-3 py-3"><a href="{{ $sortUrl('name') }}">{{ __('global_admin.name') }} ↕</a></th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('email') }}">{{ __('global_admin.email') }} ↕</a></th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('global_admin.status') }} ↕</a></th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('global_admin.created_at') }} ↕</a></th>
+            <x-ui.sortable-header column="name" :label="__('global_admin.name')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="email" :label="__('global_admin.email')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="is_active" :label="__('global_admin.status')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="created_at" :label="__('global_admin.created_at')" :sort="$sort" :direction="$direction" />
           </tr>
         </thead>
         <tbody>

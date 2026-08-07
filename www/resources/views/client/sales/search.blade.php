@@ -50,13 +50,13 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('id') }}">{{ __('sale.reference') }} ↕</a></th>
-                        <th class="px-3 py-3">{{ __('sale.customer') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('sale_date') }}">{{ __('sale.sale_date') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('amount_cents') }}">{{ __('sale.amount') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('status') }}">{{ __('sale.status') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('operational_status') }}">{{ __('sale.operational_status') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('sale.created_at') }} ↕</a></th>
+                        <x-ui.sortable-header column="id" :label="__('sale.reference')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="customer" :label="__('sale.customer')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="sale_date" :label="__('sale.sale_date')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="amount_cents" :label="__('sale.amount')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="status" :label="__('sale.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="operational_status" :label="__('sale.operational_status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="created_at" :label="__('sale.created_at')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

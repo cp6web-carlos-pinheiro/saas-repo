@@ -37,12 +37,12 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3">{{ __('purchase_quotation.number') }}</th>
-                        <th class="px-3 py-3">{{ __('purchase_quotation.supplier') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('quotation_date') }}">{{ __('purchase_quotation.quotation_date') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('status') }}">{{ __('purchase_quotation.status') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('amount_cents') }}">{{ __('purchase_quotation.amount') }} ↕</a></th>
+                        <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="quotation_number" :label="__('purchase_quotation.number')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="supplier" :label="__('purchase_quotation.supplier')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="quotation_date" :label="__('purchase_quotation.quotation_date')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="status" :label="__('purchase_quotation.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="amount_cents" :label="__('purchase_quotation.amount')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

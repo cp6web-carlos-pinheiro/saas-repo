@@ -36,12 +36,12 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3">{{ __('purchase_requisition.number') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('required_date') }}">{{ __('purchase_requisition.required_date') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('status') }}">{{ __('purchase_requisition.status') }} ↕</a></th>
-                        <th class="px-3 py-3">{{ __('purchase_requisition.lines_count') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('purchase_requisition.created_at') }} ↕</a></th>
+                        <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="requisition_number" :label="__('purchase_requisition.number')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="required_date" :label="__('purchase_requisition.required_date')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="status" :label="__('purchase_requisition.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="lines_count" :label="__('purchase_requisition.lines_count')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="created_at" :label="__('purchase_requisition.created_at')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

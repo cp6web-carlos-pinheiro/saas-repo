@@ -26,9 +26,9 @@
       <table class="min-w-full text-sm">
         <thead>
           <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-            <th class="px-3 py-3">ID</th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('route_name') }}">{{ __('global_tutorial.route_name') }} ↕</a></th>
-            <th class="px-3 py-3"><a href="{{ $sortUrl('updated_at') }}">{{ __('global_tutorial.updated_at') }} ↕</a></th>
+            <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="route_name" :label="__('global_tutorial.route_name')" :sort="$sort" :direction="$direction" />
+            <x-ui.sortable-header column="updated_at" :label="__('global_tutorial.updated_at')" :sort="$sort" :direction="$direction" />
           </tr>
         </thead>
         <tbody>

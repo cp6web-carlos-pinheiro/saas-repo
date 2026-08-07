@@ -36,12 +36,12 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3">{{ __('purchase_receipt.number') }}</th>
-                        <th class="px-3 py-3">{{ __('purchase_receipt.supplier') }}</th>
-                        <th class="px-3 py-3">{{ __('purchase_receipt.order') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('receipt_date') }}">{{ __('purchase_receipt.receipt_date') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('status') }}">{{ __('purchase_receipt.status') }} ↕</a></th>
+                        <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="receipt_number" :label="__('purchase_receipt.number')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="supplier" :label="__('purchase_receipt.supplier')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="purchase_order" :label="__('purchase_receipt.order')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="receipt_date" :label="__('purchase_receipt.receipt_date')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="status" :label="__('purchase_receipt.status')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

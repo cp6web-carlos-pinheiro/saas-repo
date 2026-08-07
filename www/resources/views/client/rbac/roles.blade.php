@@ -22,10 +22,10 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">{{ __('rbac.role_name') }}</th>
-                        <th class="px-3 py-3">{{ __('rbac.role_slug') }}</th>
-                        <th class="px-3 py-3">{{ __('rbac.permissions_count') }}</th>
-                        <th class="px-3 py-3">{{ __('rbac.users_count') }}</th>
+                        <x-ui.sortable-header column="name" :label="__('rbac.role_name')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="slug" :label="__('rbac.role_slug')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="permissions_count" :label="__('rbac.permissions_count')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="users_count" :label="__('rbac.users_count')" :sort="$sort" :direction="$direction" />
                         <th class="px-3 py-3">{{ __('rbac.actions') }}</th>
                     </tr>
                 </thead>
