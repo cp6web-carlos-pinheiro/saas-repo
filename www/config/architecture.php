@@ -11,6 +11,7 @@ return [
     'cache' => [
         'default_ttl' => 300,
         'prefix' => env('CACHE_PREFIX', 'beyond_mrp'),
+        'store' => env('ARCHITECTURE_CACHE_STORE', 'redis'),
     ],
 
     'queue' => [

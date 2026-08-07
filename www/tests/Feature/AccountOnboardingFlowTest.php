@@ -197,18 +197,17 @@ final class AccountOnboardingFlowTest extends TestCase
         return $user->fresh();
     }
 
-    public function test_it_allows_switching_to_a_paid_plan_after_onboarding(): void
+    public function test_it_redirects_to_payment_when_switching_to_a_paid_plan_after_onboarding(): void
     {
         $user = $this->completeWizard('renova@alpha.com', 'Renova Admin', 'Renova Industria');
 
         $this->actingAs($user)->post(route('billing.subscription.update'), [
             'plan_code' => 'monthly',
-        ])->assertRedirect(route('billing.subscription.show'));
+        ])->assertRedirect(route('onboarding.payment.create', ['planCode' => 'monthly']));
 
-        $this->assertDatabaseHas('subscriptions', [
-            'plan_code' => 'monthly',
-            'status' => 'active',
-        ]);
+        $this->assertSame('monthly', session('onboarding.payment_plan'));
+        $this->assertSame('billing', session('payment.context'));
+        $this->assertDatabaseMissing('subscriptions', ['plan_code' => 'monthly', 'status' => 'active']);
     }
 
     public function test_it_does_not_allow_reusing_the_free_trial_plan(): void

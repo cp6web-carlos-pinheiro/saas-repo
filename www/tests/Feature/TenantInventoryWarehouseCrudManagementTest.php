@@ -24,7 +24,6 @@ final class TenantInventoryWarehouseCrudManagementTest extends TestCase
         $this->actingAs($user, 'web')
             ->post(route('inventory.warehouses.store'), [
                 'name' => 'Almoxarifado Principal',
-                'code' => 'WH-ALPHA',
                 'plant_id' => $plant->id,
                 'is_active' => '1',
             ])
@@ -37,7 +36,7 @@ final class TenantInventoryWarehouseCrudManagementTest extends TestCase
             'company_id' => $company->id,
             'plant_id' => $plant->id,
             'name' => 'Almoxarifado Principal',
-            'code' => 'WH-ALPHA',
+            'code' => 'ALMOXARIFADO-PRINCIPAL',
             'is_active' => 1,
         ]);
 
@@ -49,7 +48,6 @@ final class TenantInventoryWarehouseCrudManagementTest extends TestCase
         $this->actingAs($user, 'web')
             ->put(route('inventory.warehouses.update', $warehouse), [
                 'name' => 'Almoxarifado Secundario',
-                'code' => 'WH-BETA',
                 'plant_id' => $plant->id,
                 'is_active' => '0',
             ])
@@ -58,7 +56,7 @@ final class TenantInventoryWarehouseCrudManagementTest extends TestCase
         $this->assertDatabaseHas('warehouses', [
             'id' => $warehouse->id,
             'name' => 'Almoxarifado Secundario',
-            'code' => 'WH-BETA',
+            'code' => 'ALMOXARIFADO-PRINCIPAL',
             'is_active' => 0,
         ]);
 

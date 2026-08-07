@@ -10,11 +10,10 @@ use App\Models\SaaS\Trial;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AccountOnboardingService;
-use App\Support\Security\PasswordPolicy;
 use App\Shared\Presentation\Http\Responses\ApiResponse;
+use App\Support\Security\PasswordPolicy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -28,7 +27,7 @@ final class SaaSOnboardingApiController
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'company' => ['required', 'string', 'max:180'],
-            'email' => ['required', 'email:rfc,dns', 'max:190'],
+            'email' => ['required', 'email:rfc', 'max:190'],
             'password' => ['required', 'confirmed', PasswordPolicy::rule()],
             'terms' => ['accepted'],
         ]);
@@ -284,7 +283,7 @@ final class SaaSOnboardingApiController
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
-            'email' => ['required', 'email:rfc,dns', 'max:190'],
+            'email' => ['required', 'email:rfc', 'max:190'],
             'password' => ['required', 'confirmed', PasswordPolicy::rule()],
             'role' => ['nullable', 'in:member,master'],
             'activate' => ['nullable', 'boolean'],

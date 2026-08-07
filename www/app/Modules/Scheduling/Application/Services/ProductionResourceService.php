@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 final class ProductionResourceService extends BaseService
 {
     private const RESOURCE_TYPES = ['MACHINE', 'EQUIPMENT', 'TOOL', 'LINE', 'OUTSOURCED'];
+
     private const STATUSES = ['ACTIVE', 'INACTIVE', 'MAINTENANCE', 'BLOCKED', 'DECOMMISSIONED'];
 
     public function __construct(TransactionManager $transaction, CacheManager $cache, AppLogger $logger)
@@ -115,7 +116,7 @@ final class ProductionResourceService extends BaseService
         WorkCenter::query()->findOrFail($workCenterId);
         $this->assertRatePayload($payload);
 
-        $this->assertNoRateOverlap($workCenterId, $payload['effective_from'], $payload['effective_to']);
+        $this->assertNoRateOverlap($workCenterId, $payload['effective_from'], $payload['effective_to'] ?? null);
 
         $rate = $this->inTransaction(function () use ($workCenterId, $payload, $approvedBy): WorkCenterHourRate {
             return WorkCenterHourRate::query()->create([

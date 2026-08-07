@@ -23,7 +23,6 @@ final class TenantInventoryPlantCrudManagementTest extends TestCase
         $this->actingAs($user, 'web')
             ->post(route('inventory.plants.store'), [
                 'name' => 'Planta Principal',
-                'code' => 'PLT-ALPHA',
                 'timezone' => 'America/Sao_Paulo',
                 'is_active' => '1',
             ])
@@ -35,7 +34,7 @@ final class TenantInventoryPlantCrudManagementTest extends TestCase
             'id' => $plant->id,
             'company_id' => $company->id,
             'name' => 'Planta Principal',
-            'code' => 'PLT-ALPHA',
+            'code' => 'PLANTA-PRINCIPAL',
             'timezone' => 'America/Sao_Paulo',
             'is_active' => 1,
         ]);
@@ -48,7 +47,6 @@ final class TenantInventoryPlantCrudManagementTest extends TestCase
         $this->actingAs($user, 'web')
             ->put(route('inventory.plants.update', $plant), [
                 'name' => 'Planta Secundaria',
-                'code' => 'PLT-BETA',
                 'timezone' => 'UTC',
                 'is_active' => '0',
             ])
@@ -57,7 +55,7 @@ final class TenantInventoryPlantCrudManagementTest extends TestCase
         $this->assertDatabaseHas('plants', [
             'id' => $plant->id,
             'name' => 'Planta Secundaria',
-            'code' => 'PLT-BETA',
+            'code' => 'PLANTA-PRINCIPAL',
             'timezone' => 'UTC',
             'is_active' => 0,
         ]);

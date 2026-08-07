@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 final class TenantUserManagementTest extends TestCase
@@ -88,6 +89,12 @@ final class TenantUserManagementTest extends TestCase
 
         $memberLogin->assertOk();
         $memberToken = (string) $memberLogin->json('data.token');
+        Auth::forgetGuards();
+
+        $this->withHeader('Authorization', 'Bearer '.$memberToken)
+            ->getJson('/api/v1/auth/me')
+            ->assertOk()
+            ->assertJsonPath('data.email', 'member@aurora.com');
 
         $forbiddenResponse = $this->withHeader('Authorization', 'Bearer '.$memberToken)
             ->postJson('/api/v1/tenant/users', [

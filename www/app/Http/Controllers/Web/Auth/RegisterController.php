@@ -28,7 +28,7 @@ final class RegisterController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
-            'email' => ['required', 'email:rfc,dns', 'max:190'],
+            'email' => ['required', 'email:rfc', 'max:190'],
             'password' => ['required', 'confirmed', PasswordPolicy::rule()],
             'preferred_locale' => ['required', 'string', 'in:pt_BR,en,es'],
             'terms' => ['accepted'],

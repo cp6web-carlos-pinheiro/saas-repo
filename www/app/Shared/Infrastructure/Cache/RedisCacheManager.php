@@ -9,7 +9,12 @@ use Illuminate\Support\Facades\Cache;
 
 final class RedisCacheManager implements CacheManager
 {
-    private string $store = 'redis';
+    private string $store;
+
+    public function __construct()
+    {
+        $this->store = (string) config('architecture.cache.store', 'redis');
+    }
 
     public function remember(string $key, int $ttl, callable $callback): mixed
     {
