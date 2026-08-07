@@ -5,13 +5,20 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\SaaS\Trial;
+use App\Modules\Bom\Infrastructure\Persistence\Models\BomHeader;
+use App\Modules\Bom\Infrastructure\Persistence\Models\BomItem;
 use App\Modules\Customer\Infrastructure\Persistence\Models\Customer;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
-use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryBalance;
+use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryReservation;
+use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
+use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -351,6 +358,176 @@ final class TenantSalesManagementTest extends TestCase
         $sale->refresh();
         $this->assertSame('SHIPPED', $sale->operational_status);
         $this->assertNull($sale->delivered_at);
+    }
+
+    public function test_sale_materials_page_nets_linked_and_free_stock_across_bom_levels(): void
+    {
+        ['company' => $company, 'user' => $user, 'customer' => $customer, 'productA' => $finishedProduct] = $this->salesContext();
+        $unit = $finishedProduct->unit;
+
+        $intermediate = Product::query()->create([
+            'company_id' => $company->id,
+            'sku' => 'WIP-001',
+            'description' => 'Conjunto intermediário',
+            'product_type' => 'WIP',
+            'unit_id' => $unit->id,
+            'safety_stock' => 0,
+            'lead_time_days' => 0,
+            'lot_control' => false,
+            'serial_control' => false,
+            'is_active' => true,
+        ]);
+        $rawMaterial = Product::query()->create([
+            'company_id' => $company->id,
+            'sku' => 'RAW-001',
+            'description' => 'Matéria-prima principal',
+            'product_type' => 'RAW',
+            'unit_id' => $unit->id,
+            'safety_stock' => 0,
+            'lead_time_days' => 0,
+            'lot_control' => false,
+            'serial_control' => false,
+            'is_active' => true,
+        ]);
+
+        $rootBom = BomHeader::query()->create([
+            'company_id' => $company->id,
+            'product_id' => $finishedProduct->id,
+            'version_number' => 1,
+            'status' => 'APPROVED',
+            'effective_from' => '2026-01-01',
+        ]);
+        BomItem::query()->create([
+            'company_id' => $company->id,
+            'bom_header_id' => $rootBom->id,
+            'component_product_id' => $intermediate->id,
+            'line_no' => 1,
+            'quantity_per' => 2,
+            'uom' => $unit->code,
+        ]);
+        BomItem::query()->create([
+            'company_id' => $company->id,
+            'bom_header_id' => $rootBom->id,
+            'component_product_id' => $rawMaterial->id,
+            'line_no' => 2,
+            'quantity_per' => 3,
+            'uom' => $unit->code,
+        ]);
+
+        $intermediateBom = BomHeader::query()->create([
+            'company_id' => $company->id,
+            'product_id' => $intermediate->id,
+            'version_number' => 1,
+            'status' => 'APPROVED',
+            'effective_from' => '2026-01-01',
+        ]);
+        BomItem::query()->create([
+            'company_id' => $company->id,
+            'bom_header_id' => $intermediateBom->id,
+            'component_product_id' => $rawMaterial->id,
+            'line_no' => 1,
+            'quantity_per' => 4,
+            'uom' => $unit->code,
+        ]);
+
+        $plant = Plant::query()->create([
+            'company_id' => $company->id,
+            'name' => 'Fábrica principal',
+            'code' => 'PLT-01',
+            'timezone' => 'America/Sao_Paulo',
+            'is_active' => true,
+        ]);
+        $warehouse = Warehouse::query()->create([
+            'company_id' => $company->id,
+            'plant_id' => $plant->id,
+            'name' => 'Estoque central',
+            'code' => 'WH-01',
+            'is_active' => true,
+        ]);
+
+        foreach ([
+            [$finishedProduct, 0.5, 0.5],
+            [$intermediate, 1, 0],
+            [$rawMaterial, 5, 1],
+        ] as [$product, $available, $reserved]) {
+            InventoryBalance::query()->create([
+                'company_id' => $company->id,
+                'warehouse_id' => $warehouse->id,
+                'product_id' => $product->id,
+                'qty_available' => $available,
+                'qty_reserved' => $reserved,
+            ]);
+        }
+
+        $sale = Sale::query()->create([
+            'company_id' => $company->id,
+            'customer_id' => $customer->id,
+            'sale_date' => '2026-08-03',
+            'status' => 'CONFIRMED',
+            'operational_status' => 'PENDING',
+            'subtotal_cents' => 2000,
+            'discount_cents' => 0,
+            'amount_cents' => 2000,
+        ]);
+        SaleLine::query()->create([
+            'company_id' => $company->id,
+            'sale_id' => $sale->id,
+            'product_id' => $finishedProduct->id,
+            'quantity' => 2,
+            'unit_price' => 10,
+        ]);
+
+        foreach ([
+            [$finishedProduct, 'SALE', 0.5, 'finished_good'],
+            [$rawMaterial, 'PRODUCTION', 1, 'production_component'],
+        ] as [$product, $origin, $quantity, $allocationType]) {
+            InventoryReservation::query()->create([
+                'company_id' => $company->id,
+                'warehouse_id' => $warehouse->id,
+                'product_id' => $product->id,
+                'reservation_origin' => $origin,
+                'priority' => 10,
+                'quantity' => $quantity,
+                'status' => 'RESERVED',
+                'reference_type' => 'sale',
+                'reference_id' => $sale->id,
+                'reserved_at' => now(),
+                'metadata' => ['allocation_type' => $allocationType],
+            ]);
+        }
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.show', $sale))
+            ->assertOk()
+            ->assertSee(route('sales.materials', $sale), false);
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.materials', $sale))
+            ->assertOk()
+            ->assertSee('RAW-001')
+            ->assertSee('WH-01')
+            ->assertViewHas('analysis', function (array $analysis) use ($intermediate, $rawMaterial): bool {
+                $finished = $analysis['finished_products'][0];
+                $materials = collect($analysis['materials'])->keyBy('product_id');
+                $wip = $materials->get($intermediate->id);
+                $raw = $materials->get($rawMaterial->id);
+
+                return $finished['required_quantity'] === 2.0
+                    && $finished['linked_quantity'] === 0.5
+                    && $finished['available_to_link'] === 0.5
+                    && $finished['quantity_to_produce'] === 1.0
+                    && $wip['required_quantity'] === 2.0
+                    && $wip['available_to_link'] === 1.0
+                    && $wip['shortage_quantity'] === 1.0
+                    && $wip['recommended_action'] === 'PRODUCE'
+                    && $raw['required_quantity'] === 7.0
+                    && $raw['linked_quantity'] === 1.0
+                    && $raw['available_to_link'] === 5.0
+                    && $raw['shortage_quantity'] === 1.0
+                    && $raw['recommended_action'] === 'BUY'
+                    && $analysis['purchase_items_count'] === 1
+                    && $analysis['production_items_count'] === 1;
+            });
     }
 
     /**

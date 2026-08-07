@@ -34,6 +34,8 @@ O dicionário de dados está distribuído nesses documentos: cada domínio descr
 - A referência do pedido de venda passou a acompanhar as ordens de produção nas listagens, detalhes, seleção e resultado da programação.
 - Tempos operacionais em minutos passaram a ser exibidos e editados como duração `HH:MM`, com conversão para minutos antes da validação e persistência.
 - Labels, mensagens, estados, filtros e textos auxiliares hardcoded da área do cliente foram migrados para os catálogos `pt_BR`, `en` e `es`, incluindo mensagens usadas pelo Select2 e pelo editor HTML.
+- As listas de registros passaram a aceitar ordenação ao clicar no título das colunas, preservando filtros e paginação nas consultas processadas pelo servidor.
+- O detalhe do pedido de venda passou a disponibilizar a análise dos materiais necessários para produção, separando reservas, estoque livre para vínculo, necessidades de produção e itens a comprar.
 
 ## Atualização
 

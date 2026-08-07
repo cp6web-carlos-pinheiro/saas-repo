@@ -39,6 +39,7 @@ Documentar as capacidades transversais usadas para integrar, operar e diagnostic
 - Catálogos de interface em `pt_BR`, `en` e `es`, selecionados por `users.preferred_locale`.
 - Mensagens necessárias ao JavaScript são serializadas pelo layout no idioma ativo, evitando textos fixos no bundle do frontend.
 - A máscara de duração converte entradas `HH:MM` em minutos antes do envio, mantendo compatibilidade com validações, serviços e contratos existentes.
+- Os títulos das colunas permitem ordenar as listagens. Nas telas paginadas, a ordenação é aplicada no servidor e preserva os filtros ativos; nas tabelas auxiliares, é aplicada localmente no navegador.
 
 ## Representação de ordens de produção
 

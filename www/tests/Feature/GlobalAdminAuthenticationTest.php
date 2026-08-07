@@ -25,6 +25,20 @@ final class GlobalAdminAuthenticationTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->get(route('global-admin.login'))
             ->assertRedirect(route('global-admin.home'));
+
+        $sortableLists = [
+            [route('global-admin.administrators.index'), 'email'],
+            [route('global-admin.companies.index'), 'active_plan'],
+            [route('global-admin.customers.index'), 'company'],
+            [route('global-admin.plans.index'), 'duration'],
+            [route('global-admin.tutorials.index'), 'id'],
+        ];
+
+        foreach ($sortableLists as [$url, $sort]) {
+            $this->actingAs($admin, 'admin')
+                ->get($url.'?'.http_build_query(['sort' => $sort, 'direction' => 'desc']))
+                ->assertOk();
+        }
     }
 
     public function test_authenticated_web_user_can_still_view_global_admin_login(): void

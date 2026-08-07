@@ -293,6 +293,7 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/products/search', [SaleController::class, 'searchProducts'])->name('products.search');
             Route::get('/create', [SaleController::class, 'create'])->name('create');
             Route::post('/', [SaleController::class, 'store'])->name('store');
+            Route::get('/{sale}/materials', [SaleController::class, 'materials'])->name('materials');
             Route::get('/{sale}', [SaleController::class, 'show'])->name('show');
             Route::get('/{sale}/edit', [SaleController::class, 'edit'])->name('edit');
             Route::post('/{sale}/transition', [SaleController::class, 'transition'])->name('transition');

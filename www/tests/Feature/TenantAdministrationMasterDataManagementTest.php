@@ -167,6 +167,38 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
         $this->assertDatabaseHas('purchase_requisitions', ['id' => $requisition->id]);
         $this->assertDatabaseHas('purchase_orders', ['id' => $order->id]);
         $this->assertDatabaseHas('sales', ['id' => $sale->id]);
+
+        $sortableLists = [
+            [route('admin-data.units.index'), 'company_id'],
+            [route('admin-data.categories.index'), 'id'],
+            [route('admin-data.brands.index'), 'id'],
+            [route('inventory.plants.index'), 'id'],
+            [route('inventory.warehouses.index'), 'plant'],
+            [route('inventory.balances.index'), 'product'],
+            [route('inventory.movements.index'), 'warehouse'],
+            [route('products.index'), 'description'],
+            [route('products.versions', ['product_id' => $product->id]), 'status'],
+            [route('customers.index'), 'email'],
+            [route('purchasing.suppliers.index'), 'person_type'],
+            [route('purchasing.requisitions.index'), 'lines_count'],
+            [route('purchasing.orders.index'), 'supplier'],
+            [route('purchasing.quotations.index'), 'supplier'],
+            [route('purchasing.receipts.index'), 'purchase_order'],
+            [route('sales.index'), 'customer'],
+            [route('production.orders.index'), 'product'],
+            [route('production.routing.index'), 'product'],
+            [route('production.work-centers.index'), 'plant'],
+            [route('production.calendar.index'), 'work_center'],
+            [route('bom.material-lists.index'), 'product'],
+            [route('bom.structures.index'), 'bom_headers_count'],
+            [route('company-access.rbac.roles.index'), 'users_count'],
+        ];
+
+        foreach ($sortableLists as [$url, $sort]) {
+            $this->actingAs($user, 'web')
+                ->get($url.(str_contains($url, '?') ? '&' : '?').http_build_query(['sort' => $sort, 'direction' => 'desc']))
+                ->assertOk();
+        }
     }
 
     public function test_user_without_permissions_cannot_access_admin_data_crud(): void

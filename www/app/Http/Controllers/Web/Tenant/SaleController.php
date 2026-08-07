@@ -9,6 +9,7 @@ use App\Modules\Customer\Infrastructure\Persistence\Models\Customer;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Sales\Application\Services\SaleFulfillmentService;
+use App\Modules\Sales\Application\Services\SaleMaterialRequirementService;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
 use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
@@ -152,6 +153,20 @@ final class SaleController extends Controller
         ]);
 
         return view('client.sales.show', compact('sale', 'company'));
+    }
+
+    public function materials(
+        Request $request,
+        Sale $sale,
+        SaleMaterialRequirementService $materialRequirementService
+    ): View {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
+
+        $sale->load(['customer:id,name', 'lines.product:id,sku,description,product_type,unit_id', 'lines.product.unit:id,code']);
+        $analysis = $materialRequirementService->analyze($sale);
+
+        return view('client.sales.materials', compact('sale', 'analysis', 'company'));
     }
 
     public function store(Request $request, AuditLogService $audit, SaleFulfillmentService $saleFulfillment): RedirectResponse
@@ -393,7 +408,7 @@ final class SaleController extends Controller
     }
 
     /**
-     * @param list<string> $permissions
+     * @param  list<string>  $permissions
      */
     private function ensureAnyPermission(Request $request, int $companyId, array $permissions): void
     {
@@ -454,11 +469,11 @@ final class SaleController extends Controller
                 ];
             })->values();
 
-            if (($sale?->operational_status !== null) && $data['status'] === 'CANCELLED' && in_array($sale->operational_status, ['INVOICED', 'SHIPPED', 'DELIVERED'], true)) {
-                throw ValidationException::withMessages([
-                    'status' => __('sale.cancel_after_invoiced_forbidden'),
-                ]);
-            }
+        if (($sale?->operational_status !== null) && $data['status'] === 'CANCELLED' && in_array($sale->operational_status, ['INVOICED', 'SHIPPED', 'DELIVERED'], true)) {
+            throw ValidationException::withMessages([
+                'status' => __('sale.cancel_after_invoiced_forbidden'),
+            ]);
+        }
 
         $data['items'] = $items->all();
         $data['subtotal_cents'] = (int) $items->sum('line_total_cents');

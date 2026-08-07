@@ -30,6 +30,8 @@ Administrar clientes, pedidos de venda e seu avanço comercial e operacional.
 - Produtos são selecionados do cadastro da empresa.
 - Ao confirmar o pedido, o sistema tenta reservar o saldo disponível dos produtos acabados.
 - Para a quantidade não atendida pelo estoque, produtos acabados ou em processo com BOM ativa podem gerar ordens de produção, incluindo as necessidades produtivas da estrutura explodida.
+- O detalhe do pedido oferece uma análise consolidada dos materiais necessários: produtos já reservados, saldo livre disponível para vínculo, intermediários a produzir e matérias-primas ou consumíveis que precisam ser comprados.
+- A análise utiliza a BOM vigente na data da venda e desconta o estoque em cada nível; quando um intermediário está coberto, seus componentes inferiores não são incluídos novamente na necessidade.
 - As OPs originadas da venda conservam o vínculo por `source_reference_type = sale` e `source_reference_id = sales.id`.
 - A referência comercial é exibida como `#<número da venda>` nas listas, detalhes e programação das OPs, facilitando o acompanhamento por pedido.
 - O cancelamento da venda libera as reservas ainda abertas vinculadas ao pedido.
