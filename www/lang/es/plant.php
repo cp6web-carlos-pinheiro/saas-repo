@@ -10,6 +10,8 @@ return [
     'reference' => 'Referencia',
     'name' => 'Nombre',
     'code' => 'Código',
+    'branch' => 'Sucursal',
+    'select_branch' => 'Seleccione una sucursal',
     'timezone' => 'Zona horaria',
     'status' => 'Estado',
     'active' => 'Activo',
@@ -25,4 +27,5 @@ return [
     'created' => 'Planta creada con éxito.',
     'updated' => 'Planta actualizada con éxito.',
     'removed' => 'Planta eliminada con éxito.',
+    'remove_blocked' => 'La planta tiene almacenes vinculados y no se puede eliminar.',
 ];

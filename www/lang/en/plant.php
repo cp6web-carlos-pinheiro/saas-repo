@@ -10,6 +10,8 @@ return [
     'reference' => 'Reference',
     'name' => 'Name',
     'code' => 'Code',
+    'branch' => 'Branch',
+    'select_branch' => 'Select a branch',
     'timezone' => 'Time zone',
     'status' => 'Status',
     'active' => 'Active',
@@ -25,4 +27,5 @@ return [
     'created' => 'Plant created successfully.',
     'updated' => 'Plant updated successfully.',
     'removed' => 'Plant removed successfully.',
+    'remove_blocked' => 'The plant has linked warehouses and cannot be removed.',
 ];
