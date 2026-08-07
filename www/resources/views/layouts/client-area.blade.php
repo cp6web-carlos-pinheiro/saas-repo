@@ -497,7 +497,7 @@
                 sidebarCollapseToggle.setAttribute('aria-expanded', effectiveCollapsed ? 'false' : 'true');
                 sidebarCollapseToggle.setAttribute(
                     'aria-label',
-                    effectiveCollapsed ? (sidebarCollapseToggle.dataset.expandLabel ?? 'Expand sidebar') : (sidebarCollapseToggle.dataset.collapseLabel ?? 'Collapse sidebar'),
+                    effectiveCollapsed ? (sidebarCollapseToggle.dataset.expandLabel ?? '') : (sidebarCollapseToggle.dataset.collapseLabel ?? ''),
                 );
 
                 if (toggleIcon) {
