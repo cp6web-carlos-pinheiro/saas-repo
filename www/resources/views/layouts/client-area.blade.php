@@ -359,14 +359,14 @@
 
                     <div class="ind-html-editor" data-html-editor>
                         <div class="ind-html-editor-toolbar" role="toolbar" aria-label="{{ __('ui.tutorial_content_html') }}">
-                            <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="P" title="Parágrafo">P</button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="H2" title="Título">H2</button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="bold" title="Negrito"><strong>B</strong></button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="italic" title="Itálico"><em>I</em></button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="underline" title="Sublinhado"><u>U</u></button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="insertUnorderedList" title="Lista">• Lista</button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="createLink" title="Link">Link</button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="removeFormat" title="Limpar formatação">Limpar</button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="P" title="{{ __('ui.editor_paragraph') }}">P</button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="H2" title="{{ __('ui.editor_title') }}">H2</button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="bold" title="{{ __('ui.editor_bold') }}"><strong>B</strong></button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="italic" title="{{ __('ui.editor_italic') }}"><em>I</em></button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="underline" title="{{ __('ui.editor_underline') }}"><u>U</u></button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="insertUnorderedList" title="{{ __('ui.editor_list') }}">• {{ __('ui.editor_list') }}</button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="createLink" title="{{ __('ui.editor_link') }}">{{ __('ui.editor_link') }}</button>
+                            <button type="button" class="ind-html-editor-button" data-editor-command="removeFormat" title="{{ __('ui.editor_clear_formatting') }}">{{ __('ui.editor_clear') }}</button>
                         </div>
 
                         <div
@@ -638,7 +638,7 @@
                     }
 
                     if (command === 'createLink') {
-                        const link = window.prompt('Informe a URL do link', 'https://');
+                        const link = window.prompt(@json(__('ui.editor_link_prompt')), 'https://');
 
                         if (link && link.trim() !== '') {
                             document.execCommand('createLink', false, link.trim());

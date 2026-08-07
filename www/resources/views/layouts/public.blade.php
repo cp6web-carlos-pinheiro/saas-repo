@@ -13,6 +13,16 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
 
+    <script>
+        window.uiTranslations = @json([
+            'selectErrorLoading' => __('ui.select_error_loading'),
+            'selectInputTooShortOne' => __('ui.select_input_too_short_one'),
+            'selectInputTooShortMany' => __('ui.select_input_too_short_many'),
+            'selectLoadingMore' => __('ui.select_loading_more'),
+            'selectNoResults' => __('ui.select_no_results'),
+            'selectSearching' => __('ui.select_searching'),
+        ]);
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('head')
 </head>

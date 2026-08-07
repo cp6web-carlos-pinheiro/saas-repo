@@ -134,74 +134,26 @@ for (const input of taxIdMaskedInputs) {
 	}
 }
 
-const resolveUiLocale = () => {
-	const htmlLang = document.documentElement.lang || '';
-	const normalized = htmlLang.replace('-', '_').toLowerCase();
+const uiTranslations = window.uiTranslations ?? {};
 
-	if (normalized === 'pt_br') {
-		return 'pt_BR';
-	}
+const select2Language = {
+	errorLoading: () => uiTranslations.selectErrorLoading ?? '',
+	inputTooShort: (args) => {
+		const remaining = Math.max(0, (args.minimum ?? 1) - (args.input?.length ?? 0));
 
-	if (normalized.startsWith('pt')) {
-		return 'pt_BR';
-	}
-
-	if (normalized.startsWith('es')) {
-		return 'es';
-	}
-
-	return 'en';
-};
-
-const select2MessagesByLocale = {
-	pt_BR: {
-		errorLoading: () => 'Os resultados não puderam ser carregados.',
-		inputTooShort: (args) => {
-			const remaining = Math.max(0, (args.minimum ?? 1) - (args.input?.length ?? 0));
-
-			return remaining === 1
-				? 'Digite mais 1 caractere.'
-				: `Digite mais ${remaining} caracteres.`;
-		},
-		loadingMore: () => 'Carregando mais resultados...',
-		noResults: () => 'Nenhum resultado encontrado.',
-		searching: () => 'Pesquisando...',
+		return remaining === 1
+			? uiTranslations.selectInputTooShortOne
+			: String(uiTranslations.selectInputTooShortMany ?? '').replace(':count', remaining);
 	},
-	es: {
-		errorLoading: () => 'No se pudieron cargar los resultados.',
-		inputTooShort: (args) => {
-			const remaining = Math.max(0, (args.minimum ?? 1) - (args.input?.length ?? 0));
-
-			return remaining === 1
-				? 'Escribe 1 carácter más.'
-				: `Escribe ${remaining} caracteres más.`;
-		},
-		loadingMore: () => 'Cargando más resultados...',
-		noResults: () => 'No se encontraron resultados.',
-		searching: () => 'Buscando...',
-	},
-	en: {
-		errorLoading: () => 'The results could not be loaded.',
-		inputTooShort: (args) => {
-			const remaining = Math.max(0, (args.minimum ?? 1) - (args.input?.length ?? 0));
-
-			return remaining === 1
-				? 'Please enter 1 more character.'
-				: `Please enter ${remaining} more characters.`;
-		},
-		loadingMore: () => 'Loading more results...',
-		noResults: () => 'No results found.',
-		searching: () => 'Searching...',
-	},
+	loadingMore: () => uiTranslations.selectLoadingMore ?? '',
+	noResults: () => uiTranslations.selectNoResults ?? '',
+	searching: () => uiTranslations.selectSearching ?? '',
 };
 
 const initializeUiSelects = () => {
 	if (typeof window.jQuery?.fn?.select2 !== 'function') {
 		return 0;
 	}
-
-	const locale = resolveUiLocale();
-	const select2Language = select2MessagesByLocale[locale] ?? select2MessagesByLocale.en;
 
 	const uiSelects = document.querySelectorAll('select[data-ui-select2="true"]');
 	let initializedCount = 0;
