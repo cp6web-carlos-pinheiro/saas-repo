@@ -59,7 +59,7 @@
                         <option value="{{ $id }}" @selected((string) old('unit_id', $product->unit_id ?? '') === (string) $id)>{{ $label }}</option>
                     @endforeach
                 </x-ui.select>
-                <p class="mt-2 text-sm text-[#5f6368]">{{ __('product.uom') }} será preenchida automaticamente com base na unidade selecionada.</p>
+                <p class="mt-2 text-sm text-[#5f6368]">{{ __('product.uom_auto_fill_hint') }}</p>
                 @error('unit_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 

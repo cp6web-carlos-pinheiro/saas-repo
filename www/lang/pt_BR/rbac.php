@@ -27,4 +27,5 @@ return [
     'role_updated' => 'Perfil de acesso atualizado com sucesso.',
     'role_deleted' => 'Perfil de acesso removido com sucesso.',
     'master_role_locked' => 'Perfil master bloqueado para edição e exclusão.',
+    'invalid_permission_naming' => 'Foram encontradas permissões com identificação fora do padrão: :permissions',
 ];

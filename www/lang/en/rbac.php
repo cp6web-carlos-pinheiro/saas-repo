@@ -27,4 +27,5 @@ return [
     'role_updated' => 'Role updated successfully.',
     'role_deleted' => 'Role deleted successfully.',
     'master_role_locked' => 'Administrative profile is locked for edit and delete.',
+    'invalid_permission_naming' => 'Permissions with non-standard identifiers were found: :permissions',
 ];

@@ -65,6 +65,7 @@ return [
     'uom' => 'Unidad',
     'unit_id' => 'Unidad maestra',
     'select_unit' => 'Seleccione una unidad',
+    'uom_auto_fill_hint' => 'La unidad se completará automáticamente según la unidad seleccionada.',
     'category_id' => 'Categoría',
     'select_category' => 'Seleccione una categoría',
     'brand_id' => 'Marca',

@@ -27,4 +27,5 @@ return [
     'role_updated' => 'Rol actualizado correctamente.',
     'role_deleted' => 'Rol eliminado correctamente.',
     'master_role_locked' => 'El perfil administrativo está bloqueado para edición y eliminación.',
+    'invalid_permission_naming' => 'Se encontraron permisos con identificadores fuera del estándar: :permissions',
 ];

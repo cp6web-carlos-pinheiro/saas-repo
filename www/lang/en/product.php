@@ -65,6 +65,7 @@ return [
     'uom' => 'Unit',
     'unit_id' => 'Master unit',
     'select_unit' => 'Select a unit',
+    'uom_auto_fill_hint' => 'The unit will be filled in automatically based on the selected unit.',
     'category_id' => 'Category',
     'select_category' => 'Select a category',
     'brand_id' => 'Brand',

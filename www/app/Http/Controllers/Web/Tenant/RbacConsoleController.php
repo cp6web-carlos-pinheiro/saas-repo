@@ -72,7 +72,7 @@ final class RbacConsoleController extends Controller
 
         if ($invalidSlugs !== []) {
             throw ValidationException::withMessages([
-                'permission_ids' => ['Foram encontradas permissões com naming fora do padrão: '.implode(', ', $invalidSlugs)],
+                'permission_ids' => [__('rbac.invalid_permission_naming', ['permissions' => implode(', ', $invalidSlugs)])],
             ]);
         }
 
@@ -155,7 +155,7 @@ final class RbacConsoleController extends Controller
 
         if ($invalidSlugs !== []) {
             throw ValidationException::withMessages([
-                'permission_ids' => ['Foram encontradas permissões com naming fora do padrão: '.implode(', ', $invalidSlugs)],
+                'permission_ids' => [__('rbac.invalid_permission_naming', ['permissions' => implode(', ', $invalidSlugs)])],
             ]);
         }
 
