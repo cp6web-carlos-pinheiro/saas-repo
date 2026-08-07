@@ -6,9 +6,11 @@ Administrar a ordem de produção desde sua criação até a execução das oper
 
 ## Ordem de produção
 
-- Criação manual ou originada do MRP.
+- Criação manual ou originada do MRP e de pedidos de venda.
 - Estados `DRAFT`, `RELEASED`, `IN_PROGRESS`, `PARTIALLY_COMPLETED`, `COMPLETED` e `CANCELLED`.
 - Produto, armazém, quantidade planejada, datas e origem.
+- Referência do pedido de venda exibida nas listas e nos detalhes da OP quando `source_reference_type` identifica uma venda válida.
+- A referência comercial também integra a serialização da OP como atributo calculado `sales_order_reference`; OPs sem origem em venda retornam valor nulo.
 - Congelamento de BOM, roteiro e versões usadas, preservando a base histórica.
 - Liberação, apontamentos parciais e conclusão.
 - Ordens concluídas ou canceladas não aceitam novos apontamentos nem consumos; a interface oculta esses formulários quando concluída.
@@ -19,6 +21,14 @@ Administrar a ordem de produção desde sua criação até a execução das oper
 - Sequência, centro, recurso planejado, quantidade, tempos previstos e referência ao snapshot.
 - Planejamento de início e fim por operação.
 - Estados próprios para acompanhamento da execução.
+
+## Apresentação e entrada de durações
+
+- Campos de setup, processamento, execução, fila e movimentação são apresentados em horas e minutos no formato `HH:MM`.
+- Inputs de duração aplicam máscara numérica `HH:MM`, aceitam mais de dois dígitos para horas e normalizam a parte dos minutos ao sair do campo.
+- No envio do formulário, a duração é convertida novamente para minutos antes das regras numéricas e da persistência.
+- Totais dos roteiros, tempos de apontamento, indicadores de produção e durações programadas usam a mesma formatação visual.
+- O schema e os contratos internos permanecem baseados em minutos; a mudança é de entrada e apresentação na interface web.
 
 ## Execução MES
 
@@ -302,9 +312,9 @@ As tabelas abaixo documentam o schema corrente do domínio. “Nula” informa s
 | `bom_version_number` | `int unsigned` | Sim | — | Versão de bom version number. |
 | `routing_version_id` | `bigint unsigned` | Sim | — | Identificador relacionado a routing version. |
 | `routing_version_number` | `int unsigned` | Sim | — | Versão de routing version number. |
-| `source_type` | `varchar(20)` | Não | — | Tipo ou classificação de source type. |
-| `source_reference_id` | `bigint unsigned` | Sim | — | Identificador relacionado a source reference. |
-| `source_reference_type` | `varchar(120)` | Sim | — | Tipo ou classificação de source reference type. |
+| `source_type` | `varchar(20)` | Não | — | Origem funcional da OP, como criação manual, MRP ou venda. |
+| `source_reference_id` | `bigint unsigned` | Sim | — | ID do documento de origem; para vendas, corresponde a `sales.id`. |
+| `source_reference_type` | `varchar(120)` | Sim | — | Tipo do documento de origem; `sale` e `sales_order` habilitam a referência comercial calculada. |
 | `order_number` | `varchar(50)` | Não | — | Número funcional de order number. |
 | `status` | `varchar(20)` | Não | `DRAFT` | Estado atual no workflow. |
 | `quantity_planned` | `decimal(18,6)` | Não | — | Quantidade de planned. |

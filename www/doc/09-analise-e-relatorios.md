@@ -8,7 +8,7 @@ Transformar os fatos de produção em indicadores operacionais reproduzíveis e 
 
 - Filtro por período.
 - Quantidade planejada e produzida, aderência ao plano e qualidade.
-- Tempos de setup e processo.
+- Tempos de setup e processo apresentados como duração `HH:MM`, embora os cálculos e dados persistidos permaneçam em minutos.
 - Distribuição das ordens por status.
 - Inspeções, refugo por dia e produtividade por operação.
 

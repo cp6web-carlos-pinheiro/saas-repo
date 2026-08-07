@@ -14,7 +14,14 @@ Administrar o ciclo inicial de uma conta SaaS, sua empresa, assinatura e separa�
 - Integração de pagamento via Pagar.me no fluxo de onboarding/assinatura.
 - Seleção da empresa atual do usuário e resolução do tenant nas requisições web e API.
 - Área administrativa global separada para administradores da plataforma, empresas, clientes, planos e tutoriais de página.
-- Preferência de idioma do usuário.
+- Preferência de idioma do usuário, aplicada aos catálogos `pt_BR`, `en` e `es` da área do cliente.
+
+## Internacionalização da área do cliente
+
+- Labels, mensagens de sucesso e erro, filtros, estados e textos auxiliares usam catálogos de tradução em vez de conteúdo fixo nas views e controllers.
+- Os dashboards por domínio, Produção, Estoque, Produtos, Clientes, Fornecedores, RBAC e os componentes compartilhados seguem a preferência de idioma do usuário.
+- Mensagens de componentes JavaScript, como Select2 e editor HTML, são fornecidas pelo servidor no idioma ativo.
+- Códigos técnicos persistidos, como estados e tipos, não são alterados; apenas sua apresentação é traduzida.
 
 ## Isolamento de dados
 

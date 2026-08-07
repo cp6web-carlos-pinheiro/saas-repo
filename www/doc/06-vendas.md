@@ -28,7 +28,12 @@ Administrar clientes, pedidos de venda e seu avanço comercial e operacional.
 ## Integrações atuais
 
 - Produtos são selecionados do cadastro da empresa.
-- O pedido comercial não executa automaticamente reserva, baixa de estoque, emissão fiscal ou faturamento financeiro.
+- Ao confirmar o pedido, o sistema tenta reservar o saldo disponível dos produtos acabados.
+- Para a quantidade não atendida pelo estoque, produtos acabados ou em processo com BOM ativa podem gerar ordens de produção, incluindo as necessidades produtivas da estrutura explodida.
+- As OPs originadas da venda conservam o vínculo por `source_reference_type = sale` e `source_reference_id = sales.id`.
+- A referência comercial é exibida como `#<número da venda>` nas listas, detalhes e programação das OPs, facilitando o acompanhamento por pedido.
+- O cancelamento da venda libera as reservas ainda abertas vinculadas ao pedido.
+- O fluxo não realiza automaticamente baixa de estoque, emissão fiscal ou faturamento financeiro.
 
 ## Entidades principais
 

@@ -23,9 +23,17 @@ O dicionário de dados está distribuído nesses documentos: cada domínio descr
 - A interface web usa autenticação de sessão; a API v1 aceita Sanctum e, nos fluxos previstos, JWT.
 - Ações protegidas exigem permissões granulares do domínio.
 - Estados e códigos técnicos são apresentados em maiúsculas porque correspondem aos valores persistidos.
+- A área do cliente possui catálogos de interface em português do Brasil (`pt_BR`), inglês (`en`) e espanhol (`es`), selecionados pela preferência de idioma do usuário.
+- Durações continuam persistidas e processadas em minutos; na interface web, campos de duração são apresentados e informados no formato `HH:MM`, inclusive quando ultrapassam 99 horas.
 - “Limitações atuais” descreve apenas fronteiras observadas na implementação, não um backlog comprometido.
 - O schema MySQL corrente possui 86 tabelas documentadas nos respectivos domínios.
 - A consolidação `2026_08_09_000001` tornou `companies` a única raiz de tenancy e `production_operation_outputs` a única fonte de apontamentos de produção.
+
+## Atualizações recentes
+
+- A referência do pedido de venda passou a acompanhar as ordens de produção nas listagens, detalhes, seleção e resultado da programação.
+- Tempos operacionais em minutos passaram a ser exibidos e editados como duração `HH:MM`, com conversão para minutos antes da validação e persistência.
+- Labels, mensagens, estados, filtros e textos auxiliares hardcoded da área do cliente foram migrados para os catálogos `pt_BR`, `en` e `es`, incluindo mensagens usadas pelo Select2 e pelo editor HTML.
 
 ## Atualização
 

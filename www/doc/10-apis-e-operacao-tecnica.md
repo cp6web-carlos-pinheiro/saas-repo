@@ -36,6 +36,14 @@ Documentar as capacidades transversais usadas para integrar, operar e diagnostic
 - Layout tenant responsivo e menu organizado por Engenharia, Planejamento, Chão de fábrica, Análise, Inventário, Compras, Vendas e Administração.
 - Componentes Blade compartilhados para painéis, alertas, campos, botões, menus e navegação.
 - Tutoriais contextuais vinculados ao nome da rota.
+- Catálogos de interface em `pt_BR`, `en` e `es`, selecionados por `users.preferred_locale`.
+- Mensagens necessárias ao JavaScript são serializadas pelo layout no idioma ativo, evitando textos fixos no bundle do frontend.
+- A máscara de duração converte entradas `HH:MM` em minutos antes do envio, mantendo compatibilidade com validações, serviços e contratos existentes.
+
+## Representação de ordens de produção
+
+- A serialização de uma OP inclui o atributo calculado `sales_order_reference`.
+- O atributo retorna `#<source_reference_id>` somente quando `source_reference_type` é `sale` ou `sales_order`; nas demais origens retorna `null`.
 
 ## Limitações atuais
 

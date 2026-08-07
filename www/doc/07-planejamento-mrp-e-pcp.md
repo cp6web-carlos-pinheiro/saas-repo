@@ -25,10 +25,12 @@ Calcular necessidades de materiais, governar sugestões de suprimento e programa
 ## Programação da produção
 
 - Seleção de ordens liberadas ou em execução.
+- Exibição da referência do pedido de venda na seleção e no resultado da programação quando a OP tem origem comercial.
 - Programação forward ou backward.
 - Modos finito e infinito e regras de sequenciamento por prioridade/data.
 - Uso de centros, turnos, calendário, capacidade e recursos produtivos.
 - Cálculo de janelas previstas por operação, separando tempo produtivo e lead time.
+- Apresentação das durações calculadas no formato `HH:MM`; os valores internos permanecem em minutos.
 - Persistência de programas e linhas, com número, versão, parâmetros e origem.
 - Publicação, cancelamento e comparação entre versões de programa.
 
