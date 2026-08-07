@@ -18,6 +18,8 @@ return [
     'status' => 'Status',
     'active' => 'Ativo',
     'inactive' => 'Inativo',
+    'all_types' => 'Todos os tipos',
+    'all_statuses' => 'Todos os status',
     'default_lead_time_days' => 'Lead time padrão (dias)',
     'payment_terms' => 'Condição de pagamento',
     'created_at' => 'Cadastrado em',

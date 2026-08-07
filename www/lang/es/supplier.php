@@ -15,6 +15,8 @@ return [
     'status' => 'Estado',
     'active' => 'Activo',
     'inactive' => 'Inactivo',
+    'all_types' => 'Todos los tipos',
+    'all_statuses' => 'Todos los estados',
     'default_lead_time_days' => 'Lead time predeterminado (días)',
     'payment_terms' => 'Condiciones de pago',
     'created_at' => 'Registrado en',

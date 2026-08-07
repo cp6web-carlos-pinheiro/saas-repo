@@ -13,6 +13,8 @@ return [
     'person_type' => 'Tipo de pessoa',
     'person_type_pf' => 'Pessoa física',
     'person_type_pj' => 'Pessoa jurídica',
+    'all_types' => 'Todos os tipos',
+    'all_statuses' => 'Todos os status',
     'email' => 'E-mail',
     'phone' => 'Telefone',
     'status' => 'Status',

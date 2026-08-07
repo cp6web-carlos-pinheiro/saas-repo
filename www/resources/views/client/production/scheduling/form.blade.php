@@ -3,12 +3,12 @@
 @php($editing = $runKey !== null)
 
 @section('title', __('ui.module_production').' | '.__('ui.module_scheduling'))
-@section('client-page-title', $editing ? 'Editar parâmetros de programação' : 'Nova programação')
+@section('client-page-title', $editing ? __('production.scheduling.edit') : __('production.scheduling.new'))
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ $editing ? 'Editar parâmetros de programação' : 'Nova programação' }}</h1>
+        <h1 class="font-display text-3xl font-bold">{{ $editing ? __('production.scheduling.edit') : __('production.scheduling.new') }}</h1>
         <x-ui.button :href="$editing ? route('production.scheduling.show', ['run' => $runKey]) : route('production.scheduling.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
@@ -54,7 +54,7 @@
                 <select class="ui-select mt-2 w-full" name="production_order_ids[]" multiple size="10" required>
                     @foreach ($orders as $order)
                         <option value="{{ $order->id }}" @selected(in_array((int) $order->id, $selectedOrders, true))>
-                            {{ $order->order_number }} | Venda: {{ $order->sales_order_reference ?? '—' }} | {{ __('ui.production_order_status_'.$order->status) }} | {{ optional($order->scheduled_end_date)->format('d/m/Y') }}
+                            {{ $order->order_number }} | {{ __('production.scheduling.sale', ['reference' => $order->sales_order_reference ?? '—']) }} | {{ __('ui.production_order_status_'.$order->status) }} | {{ optional($order->scheduled_end_date)->format('d/m/Y') }}
                         </option>
                     @endforeach
                 </select>

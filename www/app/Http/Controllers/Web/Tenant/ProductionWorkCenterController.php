@@ -86,7 +86,7 @@ final class ProductionWorkCenterController extends Controller
 
         $created = $this->service->create($data);
 
-        return redirect()->route('production.work-centers.show', (int) ($created['id'] ?? 0))->with('status', 'Centro de trabalho criado.');
+        return redirect()->route('production.work-centers.show', (int) ($created['id'] ?? 0))->with('status', __('production.work_centers.created'));
     }
 
     public function show(Request $request, WorkCenter $workCenter): View
@@ -137,7 +137,7 @@ final class ProductionWorkCenterController extends Controller
 
         $this->service->update((int) $workCenter->id, $data);
 
-        return redirect()->route('production.work-centers.show', $workCenter)->with('status', 'Centro de trabalho atualizado.');
+        return redirect()->route('production.work-centers.show', $workCenter)->with('status', __('production.work_centers.updated'));
     }
 
     public function storeShift(Request $request, WorkCenter $workCenter): RedirectResponse
@@ -156,6 +156,6 @@ final class ProductionWorkCenterController extends Controller
 
         $this->service->addShift((int) $workCenter->id, $data);
 
-        return redirect()->route('production.work-centers.show', $workCenter)->with('status', 'Turno adicionado com sucesso.');
+        return redirect()->route('production.work-centers.show', $workCenter)->with('status', __('production.work_centers.shift_added'));
     }
 }

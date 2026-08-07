@@ -31,10 +31,10 @@
         @php($sortUrl = fn ($column) => $filterUrl(['sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
 
         <div class="mt-4 flex flex-wrap gap-2 text-sm">
-            <a href="{{ $filterUrl(['person_type' => '']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $personType === '' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>Todos os tipos</a>
+            <a href="{{ $filterUrl(['person_type' => '']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $personType === '' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('customer.all_types') }}</a>
             <a href="{{ $filterUrl(['person_type' => 'PJ']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $personType === 'PJ' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('customer.person_type_pj') }}</a>
             <a href="{{ $filterUrl(['person_type' => 'PF']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $personType === 'PF' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('customer.person_type_pf') }}</a>
-            <a href="{{ $filterUrl(['status' => '']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === '' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>Todos os status</a>
+            <a href="{{ $filterUrl(['status' => '']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === '' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('customer.all_statuses') }}</a>
             <a href="{{ $filterUrl(['status' => 'ACTIVE']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'ACTIVE' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('customer.active') }}</a>
             <a href="{{ $filterUrl(['status' => 'INACTIVE']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'INACTIVE' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('customer.inactive') }}</a>
         </div>

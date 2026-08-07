@@ -96,7 +96,7 @@ final class ProductionRoutingController extends Controller
             'status' => 'DRAFT',
         ]);
 
-        return redirect()->route('production.routing.show', (int) ($created['id'] ?? 0))->with('status', 'Versao de roteamento criada.');
+        return redirect()->route('production.routing.show', (int) ($created['id'] ?? 0))->with('status', __('production.routing.created'));
     }
 
     public function show(Request $request, RoutingVersion $version): View
@@ -136,7 +136,7 @@ final class ProductionRoutingController extends Controller
         abort_unless((int) $version->company_id === (int) $company->id, 404);
 
         if ($version->status !== 'DRAFT') {
-            return redirect()->route('production.routing.show', $version)->withErrors(['routing' => 'Apenas versoes DRAFT podem ser editadas.']);
+            return redirect()->route('production.routing.show', $version)->withErrors(['routing' => __('production.routing.draft_only')]);
         }
 
         $data = $request->validate([
@@ -150,7 +150,7 @@ final class ProductionRoutingController extends Controller
         $version->fill($data);
         $version->save();
 
-        return redirect()->route('production.routing.show', $version)->with('status', 'Versao de roteamento atualizada.');
+        return redirect()->route('production.routing.show', $version)->with('status', __('production.routing.updated'));
     }
 
     public function storeOperation(Request $request, RoutingVersion $version): RedirectResponse
@@ -181,7 +181,7 @@ final class ProductionRoutingController extends Controller
 
         $this->service->addOperation((int) $version->id, $data);
 
-        return redirect()->route('production.routing.show', $version)->with('status', 'Operacao adicionada ao roteamento.');
+        return redirect()->route('production.routing.show', $version)->with('status', __('production.routing.operation_added'));
     }
 
     public function approve(Request $request, RoutingVersion $version): RedirectResponse
@@ -197,6 +197,6 @@ final class ProductionRoutingController extends Controller
 
         $this->service->approveVersion((int) $version->id, $data, $request->user()?->id);
 
-        return redirect()->route('production.routing.show', $version)->with('status', 'Roteamento aprovado com sucesso.');
+        return redirect()->route('production.routing.show', $version)->with('status', __('production.routing.approved'));
     }
 }

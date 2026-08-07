@@ -78,7 +78,7 @@ final class ProductionCalendarWebController extends Controller
 
         $day = $this->service->upsertDay((int) $data['work_center_id'], $data);
 
-        return redirect()->route('production.calendar.show', (int) ($day['id'] ?? 0))->with('status', 'Dia de calendario criado.');
+        return redirect()->route('production.calendar.show', (int) ($day['id'] ?? 0))->with('status', __('production.calendar.created'));
     }
 
     public function show(Request $request, ProductionCalendarDay $day): View
@@ -123,7 +123,7 @@ final class ProductionCalendarWebController extends Controller
 
         $this->service->upsertDay((int) $data['work_center_id'], $data);
 
-        return redirect()->route('production.calendar.show', $day)->with('status', 'Dia de calendario atualizado.');
+        return redirect()->route('production.calendar.show', $day)->with('status', __('production.calendar.updated'));
     }
 
     public function upsertDay(Request $request): RedirectResponse
@@ -145,7 +145,7 @@ final class ProductionCalendarWebController extends Controller
             'work_center_id' => (int) $data['work_center_id'],
             'from_date' => now()->startOfMonth()->toDateString(),
             'to_date' => now()->endOfMonth()->toDateString(),
-        ])->with('status', 'Dia de calendario atualizado.');
+        ])->with('status', __('production.calendar.updated'));
     }
 
     public function generate(Request $request): RedirectResponse
@@ -165,6 +165,6 @@ final class ProductionCalendarWebController extends Controller
             'work_center_id' => (int) $data['work_center_id'],
             'from_date' => (string) $data['from_date'],
             'to_date' => (string) $data['to_date'],
-        ])->with('status', 'Calendario gerado com sucesso.');
+        ])->with('status', __('production.calendar.generated'));
     }
 }

@@ -148,7 +148,7 @@ final class ProductionSchedulingWebController extends Controller
 
         return redirect()
             ->route('production.scheduling.show', ['run' => $runKey])
-            ->with('status', 'Programacao executada com sucesso.');
+            ->with('status', __('production.scheduling.completed'));
     }
 
     private function cacheKey(string $run): string

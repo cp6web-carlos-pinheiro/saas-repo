@@ -113,7 +113,7 @@ final class ProductionOrderController extends Controller
             ]);
         }
 
-        return redirect()->route('production.orders.show', $orderId)->with('status', 'Ordem de producao criada com sucesso.');
+        return redirect()->route('production.orders.show', $orderId)->with('status', __('production.orders.created'));
     }
 
     /**
@@ -275,7 +275,7 @@ final class ProductionOrderController extends Controller
 
         $this->orderService->release((int) $order->id, $request->user()?->id);
 
-        return redirect()->route('production.orders.show', $order)->with('status', 'Ordem liberada para execucao.');
+        return redirect()->route('production.orders.show', $order)->with('status', __('production.orders.released'));
     }
 
     public function complete(Request $request, ProductionOrder $order): RedirectResponse
@@ -286,7 +286,7 @@ final class ProductionOrderController extends Controller
 
         $this->orderService->complete((int) $order->id, $request->user()?->id);
 
-        return redirect()->route('production.orders.show', $order)->with('status', 'Ordem concluida com sucesso.');
+        return redirect()->route('production.orders.show', $order)->with('status', __('production.orders.completed'));
     }
 
     public function recordOutput(Request $request, ProductionOrder $order): RedirectResponse
@@ -318,12 +318,12 @@ final class ProductionOrderController extends Controller
         $data['inspection_status'] = (string) ($data['inspection_status'] ?? 'APPROVED');
 
         if ((float) $data['quantity_completed'] <= 0 && (float) $data['quantity_scrapped'] <= 0) {
-            return redirect()->route('production.orders.show', $order)->withErrors(['output' => 'Informe quantidade produzida ou refugada.']);
+            return redirect()->route('production.orders.show', $order)->withErrors(['output' => __('production.orders.posting_required')]);
         }
 
         $this->orderService->partialProduction((int) $order->id, $data, $request->user()?->id);
 
-        return redirect()->route('production.orders.show', $order)->with('status', 'Apontamento registrado com sucesso.');
+        return redirect()->route('production.orders.show', $order)->with('status', __('production.orders.posting_created'));
     }
 
     public function recordConsumption(Request $request, ProductionOrder $order): RedirectResponse
@@ -347,7 +347,7 @@ final class ProductionOrderController extends Controller
 
         $this->consumptionService->record((int) $order->id, $data, $request->user()?->id);
 
-        return redirect()->route('production.orders.show', $order)->with('status', 'Consumo registrado com sucesso.');
+        return redirect()->route('production.orders.show', $order)->with('status', __('production.orders.consumption_created'));
     }
 
     public function updateInspection(Request $request, ProductionOrder $order, ProductionOperationOutput $output): RedirectResponse
@@ -367,6 +367,6 @@ final class ProductionOrderController extends Controller
         $output->inspected_at = now();
         $output->save();
 
-        return redirect()->route('production.orders.show', $order)->with('status', 'Checkpoint de inspecao atualizado.');
+        return redirect()->route('production.orders.show', $order)->with('status', __('production.orders.inspection_updated'));
     }
 }
