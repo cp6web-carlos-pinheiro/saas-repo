@@ -24,7 +24,7 @@
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('sale.status')">{{ $order->status }}</x-ui.definition-item>
-            <x-ui.definition-item label="Venda">{{ $order->sales_order_reference ?? '—' }}</x-ui.definition-item>
+            <x-ui.definition-item label="Nº da venda">{{ $order->sales_order_reference ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('sale.product')">{{ $order->product?->sku }} - {{ $order->product?->description }}</x-ui.definition-item>
             <x-ui.definition-item label="Armazem">{{ $order->warehouse?->code }} - {{ $order->warehouse?->name }}</x-ui.definition-item>
             <x-ui.definition-item label="Qtd planejada">{{ number_format((float) $order->quantity_planned, 3, ',', '.') }}</x-ui.definition-item>

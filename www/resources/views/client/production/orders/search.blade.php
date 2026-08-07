@@ -7,7 +7,7 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ __('ui.production_orders') }}</h1>
-        <x-ui.button :href="route('production.orders.create')" variant="brand-primary" class="rounded-full">Nova ordem</x-ui.button>
+        <x-ui.button :href="route('production.orders.create')" variant="brand-primary" class="rounded-full">{{ __('production.orders.new_short') }}</x-ui.button>
     </div>
 
     @if (session('status'))
@@ -16,28 +16,28 @@
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
         <form class="grid gap-3 md:grid-cols-3" method="GET">
-            <x-ui.input name="search" :value="$search" placeholder="Buscar por ordem, SKU ou produto" />
+            <x-ui.input name="search" :value="$search" :placeholder="__('production.orders.search')" />
             <x-ui.select name="status" data-search="off">
-                <option value="">Todos os status</option>
+                <option value="">{{ __('production.all_statuses') }}</option>
                 @foreach (['DRAFT','RELEASED','IN_PROGRESS','PARTIALLY_COMPLETED','COMPLETED','CANCELLED'] as $option)
-                    <option value="{{ $option }}" @selected($status === $option)>{{ $option }}</option>
+                    <option value="{{ $option }}" @selected($status === $option)>{{ __('production.status_labels.'.$option) }}</option>
                 @endforeach
             </x-ui.select>
-            <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">Filtrar</x-ui.button>
+            <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('production.filter') }}</x-ui.button>
         </form>
 
         <div class="mt-6 overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">Ordem</th>
-                        <th class="px-3 py-3">Venda</th>
-                        <th class="px-3 py-3">Produto</th>
-                        <th class="px-3 py-3">Armazem</th>
-                        <th class="px-3 py-3">Planejado</th>
-                        <th class="px-3 py-3">Produzido</th>
-                        <th class="px-3 py-3">Refugo</th>
-                        <th class="px-3 py-3">Status</th>
+                        <th class="px-3 py-3">{{ __('production.orders.number') }}</th>
+                        <th class="px-3 py-3">{{ __('production.orders.sale_number') }}</th>
+                        <th class="px-3 py-3">{{ __('production.product') }}</th>
+                        <th class="px-3 py-3">{{ __('production.warehouse') }}</th>
+                        <th class="px-3 py-3">{{ __('production.orders.planned') }}</th>
+                        <th class="px-3 py-3">{{ __('production.orders.produced') }}</th>
+                        <th class="px-3 py-3">{{ __('production.orders.scrap') }}</th>
+                        <th class="px-3 py-3">{{ __('production.status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,11 +58,11 @@
                             <td class="px-3 py-4 text-[#5f6368]">{{ number_format((float) $order->quantity_planned, 3, ',', '.') }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ number_format((float) $order->quantity_produced, 3, ',', '.') }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ number_format((float) $order->quantity_scrapped, 3, ',', '.') }}</td>
-                            <td class="px-3 py-4"><span class="rounded-full border border-[#dadce0] px-2.5 py-1 text-xs">{{ $order->status }}</span></td>
+                            <td class="px-3 py-4"><span class="rounded-full border border-[#dadce0] px-2.5 py-1 text-xs">{{ __('production.status_labels.'.$order->status) }}</span></td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-3 py-10 text-center text-[#5f6368]">Nenhuma ordem encontrada.</td>
+                            <td colspan="8" class="px-3 py-10 text-center text-[#5f6368]">{{ __('production.orders.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

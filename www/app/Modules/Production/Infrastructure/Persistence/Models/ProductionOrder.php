@@ -19,6 +19,10 @@ final class ProductionOrder extends TenantModel
 
     protected $table = 'production_orders';
 
+    protected $appends = [
+        'sales_order_reference',
+    ];
+
     protected $fillable = [
         'company_id',
         'product_id',

@@ -32,7 +32,7 @@
         <div class="mt-4 space-y-4">
             @foreach (($result['orders'] ?? []) as $scheduledOrder)
                 <div class="rounded-xl border border-[#dadce0] p-4">
-                    <div class="font-medium">{{ $scheduledOrder['order_number'] ?? '—' }} | {{ strtoupper((string) ($scheduledOrder['mode'] ?? '—')) }} | {{ strtoupper((string) ($scheduledOrder['direction'] ?? '—')) }}</div>
+                    <div class="font-medium">{{ $scheduledOrder['order_number'] ?? '—' }} | Venda: {{ $scheduledOrder['sales_order_reference'] ?? '—' }} | {{ strtoupper((string) ($scheduledOrder['mode'] ?? '—')) }} | {{ strtoupper((string) ($scheduledOrder['direction'] ?? '—')) }}</div>
                     <div class="mt-2 overflow-x-auto">
                         <table class="min-w-full text-sm">
                             <thead>

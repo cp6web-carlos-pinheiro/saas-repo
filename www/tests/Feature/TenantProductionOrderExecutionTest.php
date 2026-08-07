@@ -118,6 +118,7 @@ final class TenantProductionOrderExecutionTest extends TestCase
         ]);
 
         $this->assertSame('#42', $salesOrder->sales_order_reference);
+        $this->assertSame('#42', $salesOrder->toArray()['sales_order_reference']);
         $this->assertNull($manualOrder->sales_order_reference);
     }
 

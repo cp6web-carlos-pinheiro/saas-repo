@@ -34,7 +34,7 @@ final class ProductionSchedulingWebController extends Controller
             ->whereIn('status', ['RELEASED', 'IN_PROGRESS', 'PARTIALLY_COMPLETED'])
             ->orderByDesc('id')
             ->limit(100)
-            ->get(['id', 'order_number', 'product_id', 'scheduled_start_date', 'scheduled_end_date', 'status']);
+            ->get(['id', 'order_number', 'product_id', 'source_reference_id', 'source_reference_type', 'scheduled_start_date', 'scheduled_end_date', 'status']);
 
         return view('client.production.scheduling.search', [
             'company' => $company,
@@ -51,7 +51,7 @@ final class ProductionSchedulingWebController extends Controller
             ->whereIn('status', ['RELEASED', 'IN_PROGRESS', 'PARTIALLY_COMPLETED'])
             ->orderByDesc('id')
             ->limit(100)
-            ->get(['id', 'order_number', 'scheduled_end_date', 'status']);
+            ->get(['id', 'order_number', 'source_reference_id', 'source_reference_type', 'scheduled_end_date', 'status']);
 
         return view('client.production.scheduling.form', [
             'company' => $company,
@@ -100,7 +100,7 @@ final class ProductionSchedulingWebController extends Controller
             ->whereIn('status', ['RELEASED', 'IN_PROGRESS', 'PARTIALLY_COMPLETED'])
             ->orderByDesc('id')
             ->limit(100)
-            ->get(['id', 'order_number', 'scheduled_end_date', 'status']);
+            ->get(['id', 'order_number', 'source_reference_id', 'source_reference_type', 'scheduled_end_date', 'status']);
 
         return view('client.production.scheduling.form', [
             'company' => $company,

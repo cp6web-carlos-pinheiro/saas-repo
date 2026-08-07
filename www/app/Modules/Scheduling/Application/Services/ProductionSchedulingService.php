@@ -139,6 +139,7 @@ final class ProductionSchedulingService extends BaseService
             return [
                 'production_order_id' => $order->id,
                 'order_number' => $order->order_number,
+                'sales_order_reference' => $order->sales_order_reference,
                 'product_id' => $order->product_id,
                 'sequencing_anchor' => $anchorEnd->toDateTimeString(),
                 'direction' => $direction,
@@ -159,6 +160,7 @@ final class ProductionSchedulingService extends BaseService
         return [
             'production_order_id' => $order->id,
             'order_number' => $order->order_number,
+            'sales_order_reference' => $order->sales_order_reference,
             'product_id' => $order->product_id,
             'sequencing_anchor' => $anchorStart->toDateTimeString(),
             'direction' => $direction,
