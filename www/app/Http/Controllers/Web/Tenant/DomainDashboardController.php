@@ -94,20 +94,20 @@ final class DomainDashboardController extends Controller
     private function engineeringData(int $companyId): array
     {
         $pendingItems = [
-            $this->metric('Versoes de produto em rascunho com aging > '.self::AGING_DRAFT_DAYS.'d', $this->countStatusAging($companyId, 'product_versions', ['DRAFT'], 'created_at', self::AGING_DRAFT_DAYS), 1, 5),
-            $this->metric('BOMs em rascunho com aging > '.self::AGING_DRAFT_DAYS.'d', $this->countStatusAging($companyId, 'bom_headers', ['DRAFT'], 'created_at', self::AGING_DRAFT_DAYS), 1, 5),
-            $this->metric('Roteiros em rascunho com aging > '.self::AGING_DRAFT_DAYS.'d', $this->countStatusAging($companyId, 'routing_versions', ['DRAFT'], 'created_at', self::AGING_DRAFT_DAYS), 1, 5),
+            $this->metric(__('domain_dashboard.metrics.draft_product_versions', ['days' => self::AGING_DRAFT_DAYS]), $this->countStatusAging($companyId, 'product_versions', ['DRAFT'], 'created_at', self::AGING_DRAFT_DAYS), 1, 5),
+            $this->metric(__('domain_dashboard.metrics.draft_boms', ['days' => self::AGING_DRAFT_DAYS]), $this->countStatusAging($companyId, 'bom_headers', ['DRAFT'], 'created_at', self::AGING_DRAFT_DAYS), 1, 5),
+            $this->metric(__('domain_dashboard.metrics.draft_routings', ['days' => self::AGING_DRAFT_DAYS]), $this->countStatusAging($companyId, 'routing_versions', ['DRAFT'], 'created_at', self::AGING_DRAFT_DAYS), 1, 5),
         ];
 
         $inProgressItems = [
-            $this->metric('ECOs em andamento', $this->countByStatus($companyId, 'engineering_change_orders', ['SUBMITTED', 'IN_REVIEW', 'APPROVED']), 5, 15),
-            $this->metric('Versoes aguardando aprovacao', $this->countByStatus($companyId, 'product_versions', ['DRAFT']), 3, 10),
+            $this->metric(__('domain_dashboard.metrics.ecos_in_progress'), $this->countByStatus($companyId, 'engineering_change_orders', ['SUBMITTED', 'IN_REVIEW', 'APPROVED']), 5, 15),
+            $this->metric(__('domain_dashboard.metrics.versions_awaiting_approval'), $this->countByStatus($companyId, 'product_versions', ['DRAFT']), 3, 10),
         ];
 
         return $this->compose(
             domain: 'engineering',
             title: __('ui.domain_engineering'),
-            description: 'Visao das estruturas de produto e processo com foco em pendencias tecnicas e liberacoes.',
+            description: __('domain_dashboard.descriptions.engineering'),
             pendingItems: $pendingItems,
             inProgressItems: $inProgressItems,
             shortcuts: [
@@ -125,27 +125,27 @@ final class DomainDashboardController extends Controller
     private function planningData(int $companyId): array
     {
         $pendingItems = [
-            $this->metric('Sugestoes MRP em atraso (need by vencido)', $this->countMrpSuggestionsOverdue($companyId), 1, 3),
-            $this->metric('Sugestoes MRP de alta prioridade (<= '.self::HIGH_PRIORITY_THRESHOLD.')', $this->countMrpSuggestionsHighPriority($companyId), 2, 8),
-            $this->metric('Programas em rascunho com aging > 2d', $this->countStatusAging($companyId, 'production_schedules', ['DRAFT'], 'created_at', 2), 1, 4),
+            $this->metric(__('domain_dashboard.metrics.overdue_mrp_suggestions'), $this->countMrpSuggestionsOverdue($companyId), 1, 3),
+            $this->metric(__('domain_dashboard.metrics.high_priority_mrp', ['priority' => self::HIGH_PRIORITY_THRESHOLD]), $this->countMrpSuggestionsHighPriority($companyId), 2, 8),
+            $this->metric(__('domain_dashboard.metrics.draft_schedules'), $this->countStatusAging($companyId, 'production_schedules', ['DRAFT'], 'created_at', 2), 1, 4),
         ];
 
         $inProgressItems = [
-            $this->metric('Runs MRP em execucao', $this->countByStatus($companyId, 'mrp_plan_runs', ['RUNNING']), 2, 5),
-            $this->metric('Ordens em draft com prioridade de liberacao (aging > 1d)', $this->countStatusAging($companyId, 'production_orders', ['DRAFT'], 'created_at', 1), 2, 6),
+            $this->metric(__('domain_dashboard.metrics.mrp_runs'), $this->countByStatus($companyId, 'mrp_plan_runs', ['RUNNING']), 2, 5),
+            $this->metric(__('domain_dashboard.metrics.draft_orders_priority'), $this->countStatusAging($companyId, 'production_orders', ['DRAFT'], 'created_at', 1), 2, 6),
         ];
 
         return $this->compose(
             domain: 'planning',
             title: __('ui.domain_planning'),
-            description: 'Acompanhe planejamento MRP e programacao da producao com foco em filas e publicacao de planos.',
+            description: __('domain_dashboard.descriptions.planning'),
             pendingItems: $pendingItems,
             inProgressItems: $inProgressItems,
             shortcuts: [
                 ['label' => __('ui.module_scheduling'), 'href' => route('production.scheduling.index')],
                 ['label' => __('ui.production_calendar'), 'href' => route('production.calendar.index')],
-                ['label' => 'Novo programa', 'href' => route('production.scheduling.create')],
-                ['label' => 'Gerar calendario', 'href' => route('production.calendar.create')],
+                ['label' => __('domain_dashboard.shortcuts_labels.new_schedule'), 'href' => route('production.scheduling.create')],
+                ['label' => __('domain_dashboard.shortcuts_labels.generate_calendar'), 'href' => route('production.calendar.create')],
             ]
         );
     }
@@ -154,25 +154,25 @@ final class DomainDashboardController extends Controller
     private function shopFloorData(int $companyId): array
     {
         $pendingItems = [
-            $this->metric('Ordens liberadas com SLA estourado (> '.self::SLA_RELEASED_ORDER_DAYS.'d)', $this->countStatusAging($companyId, 'production_orders', ['RELEASED'], 'released_at', self::SLA_RELEASED_ORDER_DAYS), 1, 3),
-            $this->metric('Ordens em andamento atrasadas vs fim planejado', $this->countProductionOrdersLate($companyId), 1, 3),
-            $this->metric('Retrabalhos abertos com aging > '.self::SLA_REWORK_OPEN_DAYS.'d', $this->countStatusAging($companyId, 'production_rework_orders', ['OPEN'], 'created_at', self::SLA_REWORK_OPEN_DAYS), 1, 3),
+            $this->metric(__('domain_dashboard.metrics.released_orders_sla', ['days' => self::SLA_RELEASED_ORDER_DAYS]), $this->countStatusAging($companyId, 'production_orders', ['RELEASED'], 'released_at', self::SLA_RELEASED_ORDER_DAYS), 1, 3),
+            $this->metric(__('domain_dashboard.metrics.late_orders'), $this->countProductionOrdersLate($companyId), 1, 3),
+            $this->metric(__('domain_dashboard.metrics.open_reworks', ['days' => self::SLA_REWORK_OPEN_DAYS]), $this->countStatusAging($companyId, 'production_rework_orders', ['OPEN'], 'created_at', self::SLA_REWORK_OPEN_DAYS), 1, 3),
         ];
 
         $inProgressItems = [
-            $this->metric('Ordens em andamento', $this->countByStatus($companyId, 'production_orders', ['IN_PROGRESS', 'PARTIALLY_COMPLETED']), 4, 12),
-            $this->metric('Registros de qualidade pendentes', $this->countByStatus($companyId, 'production_quality_records', ['PENDING']), 2, 6),
+            $this->metric(__('domain_dashboard.metrics.orders_in_progress'), $this->countByStatus($companyId, 'production_orders', ['IN_PROGRESS', 'PARTIALLY_COMPLETED']), 4, 12),
+            $this->metric(__('domain_dashboard.metrics.pending_quality'), $this->countByStatus($companyId, 'production_quality_records', ['PENDING']), 2, 6),
         ];
 
         return $this->compose(
             domain: 'shop_floor',
             title: __('ui.domain_shop_floor'),
-            description: 'Monitore execucao no chao de fabrica, gargalos de inicio e qualidade em aberto.',
+            description: __('domain_dashboard.descriptions.shop_floor'),
             pendingItems: $pendingItems,
             inProgressItems: $inProgressItems,
             shortcuts: [
                 ['label' => __('ui.production_orders'), 'href' => route('production.orders.index')],
-                ['label' => 'Nova ordem de producao', 'href' => route('production.orders.create')],
+                ['label' => __('domain_dashboard.shortcuts_labels.new_order'), 'href' => route('production.orders.create')],
             ]
         );
     }

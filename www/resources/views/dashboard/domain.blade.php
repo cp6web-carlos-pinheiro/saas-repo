@@ -17,7 +17,7 @@
     <div class="mt-6 grid gap-4 md:grid-cols-2">
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5 md:p-6">
             <div class="flex items-start justify-between gap-3">
-                <h2 class="text-lg font-semibold">Pendencias</h2>
+                <h2 class="text-lg font-semibold">{{ __('domain_dashboard.pending') }}</h2>
                 <span class="rounded-full border border-[#f9ab00] bg-[#fef7e0] px-3 py-1 text-sm font-semibold text-[#8a4b00]">{{ $dashboard['pending_total'] ?? 0 }}</span>
             </div>
             <div class="mt-4 space-y-3">
@@ -35,19 +35,19 @@
                                 'border-[#dadce0] bg-white text-[#5f6368]' => ($item['severity'] ?? 'normal') === 'normal',
                                 'border-[#f9ab00] bg-[#fef7e0] text-[#8a4b00]' => ($item['severity'] ?? 'normal') === 'attention',
                                 'border-[#d93025] bg-[#fce8e6] text-[#a50e0e]' => ($item['severity'] ?? 'normal') === 'critical',
-                            ])>{{ $item['severity_label'] ?? 'Normal' }}</span>
+                            ])>{{ $item['severity_label'] ?? __('domain_dashboard.severity.normal') }}</span>
                             <span class="rounded-lg bg-[#f1f3f4] px-2 py-1 text-xs font-semibold text-[#202124]">{{ $item['count'] }}</span>
                         </div>
                     </div>
                 @empty
-                    <p class="text-sm text-[#5f6368]">Nenhuma pendencia mapeada para este dominio.</p>
+                    <p class="text-sm text-[#5f6368]">{{ __('domain_dashboard.no_pending') }}</p>
                 @endforelse
             </div>
         </x-ui.panel>
 
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5 md:p-6">
             <div class="flex items-start justify-between gap-3">
-                <h2 class="text-lg font-semibold">Em andamento</h2>
+                <h2 class="text-lg font-semibold">{{ __('domain_dashboard.in_progress') }}</h2>
                 <span class="rounded-full border border-[#34a853] bg-[#e6f4ea] px-3 py-1 text-sm font-semibold text-[#0f5f2f]">{{ $dashboard['in_progress_total'] ?? 0 }}</span>
             </div>
             <div class="mt-4 space-y-3">
@@ -65,20 +65,20 @@
                                 'border-[#dadce0] bg-white text-[#5f6368]' => ($item['severity'] ?? 'normal') === 'normal',
                                 'border-[#f9ab00] bg-[#fef7e0] text-[#8a4b00]' => ($item['severity'] ?? 'normal') === 'attention',
                                 'border-[#d93025] bg-[#fce8e6] text-[#a50e0e]' => ($item['severity'] ?? 'normal') === 'critical',
-                            ])>{{ $item['severity_label'] ?? 'Normal' }}</span>
+                            ])>{{ $item['severity_label'] ?? __('domain_dashboard.severity.normal') }}</span>
                             <span class="rounded-lg bg-[#f1f3f4] px-2 py-1 text-xs font-semibold text-[#202124]">{{ $item['count'] }}</span>
                         </div>
                     </div>
                 @empty
-                    <p class="text-sm text-[#5f6368]">Nenhum item em andamento para este dominio.</p>
+                    <p class="text-sm text-[#5f6368]">{{ __('domain_dashboard.no_in_progress') }}</p>
                 @endforelse
             </div>
         </x-ui.panel>
     </div>
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
-        <h2 class="text-lg font-semibold">Atalhos de gerenciamento</h2>
-        <p class="mt-1 text-sm text-[#5f6368]">Acesse rapidamente as telas operacionais deste dominio.</p>
+        <h2 class="text-lg font-semibold">{{ __('domain_dashboard.shortcuts') }}</h2>
+        <p class="mt-1 text-sm text-[#5f6368]">{{ __('domain_dashboard.shortcuts_hint') }}</p>
         <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             @foreach (($dashboard['shortcuts'] ?? []) as $shortcut)
                 <a href="{{ $shortcut['href'] }}" class="rounded-xl border border-[#dadce0] px-4 py-3 text-sm font-semibold text-[#174ea6] no-underline transition hover:bg-[#f8fafd] hover:border-[#aecbfa]">
