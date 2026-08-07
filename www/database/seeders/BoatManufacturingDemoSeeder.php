@@ -535,6 +535,17 @@ final class BoatManufacturingDemoSeeder extends Seeder
         $this->upsertId('sale_lines', ['company_id' => self::COMPANY_ID, 'sale_id' => $this->id['sale'], 'product_id' => $this->id['boat']], [
             'quantity' => 1, 'unit_price' => 670000, 'metadata' => $this->json(['color' => 'branco e azul']),
         ]);
+        $this->id['sale_second_boat'] = $this->upsertId('sales', ['company_id' => self::COMPANY_ID, 'customer_id' => $this->id['customer'], 'notes' => 'Segunda lancha em carteira para entrega programada.'], [
+            'sale_date' => now()->subDays(4)->toDateString(),
+            'status' => 'CONFIRMED', 'confirmed_by' => $this->userId, 'confirmed_at' => now()->subDays(4),
+            'operational_status' => 'PENDING',
+            'subtotal_cents' => 69800000, 'discount_cents' => 0, 'amount_cents' => 69800000,
+            'notes' => 'Segunda lancha em carteira para entrega programada.',
+            'metadata' => $this->json(['scenario' => 'concurrent_boat_production']),
+        ]);
+        $this->upsertId('sale_lines', ['company_id' => self::COMPANY_ID, 'sale_id' => $this->id['sale_second_boat'], 'product_id' => $this->id['boat']], [
+            'quantity' => 1, 'unit_price' => 698000, 'metadata' => $this->json(['color' => 'cinza e branco', 'boat_slot' => 'B']),
+        ]);
         $this->id['components_sale'] = $this->upsertId('sales', ['company_id' => self::COMPANY_ID, 'customer_id' => $this->id['customer'], 'notes' => 'Venda demonstrativa de componentes náuticos para manutenção.'], [
             'sale_date' => now()->subDays(12)->toDateString(), 'status' => 'CONFIRMED', 'confirmed_by' => $this->userId,
             'confirmed_at' => now()->subDays(12), 'operational_status' => 'DELIVERED', 'picking_by' => $this->userId,
@@ -592,8 +603,14 @@ final class BoatManufacturingDemoSeeder extends Seeder
             'metadata' => $this->json(['warranty_months' => 36]),
         ]);
         $this->upsertId('inventory_reservations', ['company_id' => self::COMPANY_ID, 'warehouse_id' => $this->id['warehouse_raw'], 'product_id' => $this->id['engine'], 'reference_type' => 'sale', 'reference_id' => $this->id['sale']], [
-            'reservation_origin' => 'SALES_ORDER', 'priority' => 10, 'quantity' => 1, 'status' => 'RESERVED',
+            'reservation_origin' => 'SALE', 'priority' => 10, 'quantity' => 1, 'status' => 'RESERVED',
             'reserved_at' => now()->subDays(5), 'expires_at' => now()->addDays(10), 'created_by' => $this->userId,
+            'metadata' => $this->json(['allocation_scope' => 'sale:'.$this->id['sale'], 'boat_slot' => 'A']),
+        ]);
+        $this->upsertId('inventory_reservations', ['company_id' => self::COMPANY_ID, 'warehouse_id' => $this->id['warehouse_raw'], 'product_id' => $this->id['hull'], 'reference_type' => 'sale', 'reference_id' => $this->id['sale_second_boat']], [
+            'reservation_origin' => 'PRODUCTION', 'priority' => 20, 'quantity' => 1, 'status' => 'RESERVED',
+            'reserved_at' => now()->subDays(3), 'expires_at' => now()->addDays(20), 'created_by' => $this->userId,
+            'metadata' => $this->json(['allocation_scope' => 'sale:'.$this->id['sale_second_boat'], 'boat_slot' => 'B', 'dependency_level' => 1]),
         ]);
     }
 
@@ -748,6 +765,37 @@ final class BoatManufacturingDemoSeeder extends Seeder
         ]);
         $this->upsertId('genealogy_relations', ['company_id' => self::COMPANY_ID, 'parent_node_id' => $materialNode, 'child_node_id' => $boatNode, 'relation_type' => 'CONSUMES'], [
             'quantity' => 78, 'uom' => 'KG', 'production_order_id' => $this->id['order'], 'stock_movement_id' => $this->id['issue_movement'],
+        ]);
+
+        $this->id['order_second_hull'] = $this->upsertId('production_orders', ['company_id' => self::COMPANY_ID, 'order_number' => 'OP-BOAT-0002-HULL'], [
+            'product_id' => $this->id['hull'], 'warehouse_id' => $this->id['warehouse_raw'],
+            'bom_header_id' => $this->id['bom_hull'], 'bom_version_number' => 1,
+            'source_type' => 'SALE', 'source_reference_type' => 'sale', 'source_reference_id' => $this->id['sale_second_boat'],
+            'status' => 'RELEASED', 'quantity_planned' => 1, 'quantity_produced' => 0, 'quantity_scrapped' => 0,
+            'scheduled_start_date' => now()->addDays(1)->toDateString(), 'scheduled_end_date' => now()->addDays(8)->toDateString(),
+            'released_at' => now()->subDay(), 'created_by' => $this->userId, 'released_by' => $this->userId,
+            'metadata' => $this->json(['allocation_scope' => 'sale:'.$this->id['sale_second_boat'], 'dependency_level' => 2, 'root_product_id' => $this->id['boat']]),
+        ]);
+
+        $this->id['order_second_deck'] = $this->upsertId('production_orders', ['company_id' => self::COMPANY_ID, 'order_number' => 'OP-BOAT-0002-DECK'], [
+            'product_id' => $this->id['deck'], 'warehouse_id' => $this->id['warehouse_raw'],
+            'bom_header_id' => $this->id['bom_deck'], 'bom_version_number' => 1,
+            'source_type' => 'SALE', 'source_reference_type' => 'sale', 'source_reference_id' => $this->id['sale_second_boat'],
+            'status' => 'RELEASED', 'quantity_planned' => 1, 'quantity_produced' => 0, 'quantity_scrapped' => 0,
+            'scheduled_start_date' => now()->addDays(2)->toDateString(), 'scheduled_end_date' => now()->addDays(9)->toDateString(),
+            'released_at' => now()->subDay(), 'created_by' => $this->userId, 'released_by' => $this->userId,
+            'metadata' => $this->json(['allocation_scope' => 'sale:'.$this->id['sale_second_boat'], 'dependency_level' => 2, 'root_product_id' => $this->id['boat']]),
+        ]);
+
+        $this->id['order_second_boat'] = $this->upsertId('production_orders', ['company_id' => self::COMPANY_ID, 'order_number' => 'OP-BOAT-0002'], [
+            'product_id' => $this->id['boat'], 'warehouse_id' => $this->id['warehouse_fg'],
+            'bom_header_id' => $this->id['bom'], 'bom_version_number' => 1, 'routing_version_id' => $this->id['routing'],
+            'routing_version_number' => 1, 'source_type' => 'SALE', 'source_reference_type' => 'sale',
+            'source_reference_id' => $this->id['sale_second_boat'], 'status' => 'DRAFT',
+            'quantity_planned' => 1, 'quantity_produced' => 0, 'quantity_scrapped' => 0,
+            'scheduled_start_date' => now()->addDays(9)->toDateString(), 'scheduled_end_date' => now()->addDays(24)->toDateString(),
+            'created_by' => $this->userId,
+            'metadata' => $this->json(['allocation_scope' => 'sale:'.$this->id['sale_second_boat'], 'dependency_level' => 0, 'depends_on' => ['OP-BOAT-0002-HULL', 'OP-BOAT-0002-DECK']]),
         ]);
 
         $this->seedProductionOrdersInEveryStatus();

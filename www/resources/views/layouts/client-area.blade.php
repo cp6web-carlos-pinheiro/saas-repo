@@ -137,6 +137,14 @@
             return $leftRank <=> $rightRank;
         });
 
+        foreach (array_keys($moduleSubitems) as $domainKey) {
+            array_unshift($moduleSubitems[$domainKey], [
+                'label' => __('ui.dashboard'),
+                'href' => route('domains.dashboard', ['domain' => $domainKey]),
+                'active' => request()->routeIs('domains.dashboard') && (string) request()->route('domain') === $domainKey,
+            ]);
+        }
+
         $activeCompanyName = $company?->name ?? __('ui.app_name');
         $currentPageTitle = trim((string) $__env->yieldContent('client-page-title'));
         $rawTutorialRouteName = (string) (request()->route()?->getName() ?? '');

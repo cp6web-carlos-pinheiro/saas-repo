@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Customer\Infrastructure\Persistence\Models\Customer;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
+use App\Modules\Sales\Application\Services\SaleFulfillmentService;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
 use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
@@ -145,14 +146,14 @@ final class SaleController extends Controller
         return view('client.sales.show', compact('sale', 'company'));
     }
 
-    public function store(Request $request, AuditLogService $audit): RedirectResponse
+    public function store(Request $request, AuditLogService $audit, SaleFulfillmentService $saleFulfillment): RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
         $data = $this->validateSale($request, $company);
 
-        $sale = DB::transaction(function () use ($company, $data, $request): Sale {
+        $sale = DB::transaction(function () use ($company, $data, $request, $saleFulfillment): Sale {
             $sale = Sale::query()->create([
                 'company_id' => $company->id,
                 'customer_id' => $data['customer_id'],
@@ -169,6 +170,10 @@ final class SaleController extends Controller
             $sale->save();
 
             $this->syncLines($sale, $data['items']);
+
+            if ($sale->status === 'CONFIRMED') {
+                $saleFulfillment->fulfillConfirmedSale($sale, $request->user()?->id);
+            }
 
             return $sale;
         });
@@ -210,7 +215,7 @@ final class SaleController extends Controller
         ]);
     }
 
-    public function update(Request $request, Sale $sale, AuditLogService $audit): RedirectResponse
+    public function update(Request $request, Sale $sale, AuditLogService $audit, SaleFulfillmentService $saleFulfillment): RedirectResponse
     {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
@@ -229,7 +234,9 @@ final class SaleController extends Controller
 
         $data = $this->validateSale($request, $company, $sale);
 
-        DB::transaction(function () use ($sale, $data, $request): void {
+        DB::transaction(function () use ($sale, $data, $request, $saleFulfillment): void {
+            $previousStatus = $sale->status;
+
             $sale->fill([
                 'customer_id' => $data['customer_id'],
                 'sale_date' => $data['sale_date'],
@@ -244,6 +251,14 @@ final class SaleController extends Controller
             $sale->save();
 
             $this->syncLines($sale, $data['items']);
+
+            if ($sale->status === 'CONFIRMED' && $previousStatus !== 'CONFIRMED') {
+                $saleFulfillment->fulfillConfirmedSale($sale, $request->user()?->id);
+            }
+
+            if ($sale->status === 'CANCELLED' && $previousStatus === 'CONFIRMED') {
+                $saleFulfillment->releaseReservationsForCanceledSale($sale, $request->user()?->id);
+            }
         });
 
         $audit->record(

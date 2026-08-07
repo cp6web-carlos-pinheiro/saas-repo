@@ -68,6 +68,17 @@ final class ProductionOrderService extends BaseService
         );
     }
 
+    public function createForSale(array $payload, ?int $userId = null): array
+    {
+        return $this->createOrder(
+            $payload,
+            'SALE',
+            $payload['source_reference_id'] ?? null,
+            $payload['source_reference_type'] ?? 'sale',
+            $userId
+        );
+    }
+
     public function partialProduction(int $productionOrderId, array $payload, ?int $userId = null): array
     {
         $order = ProductionOrder::query()->findOrFail($productionOrderId);

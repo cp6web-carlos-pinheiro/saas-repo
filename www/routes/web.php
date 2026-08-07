@@ -28,6 +28,7 @@ use App\Http\Controllers\Web\Tenant\BomMaterialListController;
 use App\Http\Controllers\Web\Tenant\BomStructureController;
 use App\Http\Controllers\Web\Tenant\CompanyAccessUserController;
 use App\Http\Controllers\Web\Tenant\CustomerController;
+use App\Http\Controllers\Web\Tenant\DomainDashboardController;
 use App\Http\Controllers\Web\Tenant\InventoryWebController;
 use App\Http\Controllers\Web\Tenant\PageTutorialController;
 use App\Http\Controllers\Web\Tenant\PlantController;
@@ -128,6 +129,11 @@ Route::middleware('auth:web')->group(function (): void {
         Route::get('/dashboard', IndustrialDashboardController::class)
             ->middleware([EnsureTrialIsActive::class, CheckPermission::class.':company-access.dashboard.read'])
             ->name('dashboard.industrial');
+
+        Route::get('/domains/{domain}/dashboard', DomainDashboardController::class)
+            ->whereIn('domain', ['engineering', 'planning', 'shop_floor', 'analysis', 'inventory', 'purchasing', 'sales', 'administration'])
+            ->middleware(EnsureTrialIsActive::class)
+            ->name('domains.dashboard');
 
         Route::prefix('company-access/users')->name('company-access.users.')->middleware(EnsureTrialIsActive::class)->group(function (): void {
             Route::get('/', [CompanyAccessUserController::class, 'index'])->name('index');
