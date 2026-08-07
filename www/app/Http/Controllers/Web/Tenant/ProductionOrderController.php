@@ -13,6 +13,7 @@ use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperation
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Shared\Presentation\Exceptions\DomainException;
+use App\Support\Duration;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -293,6 +294,11 @@ final class ProductionOrderController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::PARTIAL_PERMISSION, $company->id);
         abort_unless((int) $order->company_id === (int) $company->id, 404);
+
+        $request->merge([
+            'setup_time_minutes' => Duration::minutesFromInput($request->input('setup_time_minutes')),
+            'process_time_minutes' => Duration::minutesFromInput($request->input('process_time_minutes')),
+        ]);
 
         $data = $request->validate([
             'quantity_completed' => ['required', 'numeric', 'min:0'],

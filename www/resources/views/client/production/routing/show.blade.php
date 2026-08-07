@@ -74,17 +74,17 @@
                 <label class="block text-sm font-medium">Sequencia
                     <x-ui.input class="mt-2" name="sequence" type="number" min="1" required />
                 </label>
-                <label class="block text-sm font-medium">Setup (min)
-                    <x-ui.input class="mt-2" name="setup_time_minutes" type="number" min="0" step="0.01" />
+                <label class="block text-sm font-medium">Setup (HH:MM)
+                    <x-ui.input class="mt-2" name="setup_time_minutes" type="text" inputmode="numeric" :value="old('setup_time_minutes', '00:00')" placeholder="00:00" data-duration-mask="true" />
                 </label>
-                <label class="block text-sm font-medium">Runtime (min)
-                    <x-ui.input class="mt-2" name="runtime_minutes" type="number" min="0" step="0.01" />
+                <label class="block text-sm font-medium">Runtime (HH:MM)
+                    <x-ui.input class="mt-2" name="runtime_minutes" type="text" inputmode="numeric" :value="old('runtime_minutes', '00:00')" placeholder="00:00" data-duration-mask="true" />
                 </label>
-                <label class="block text-sm font-medium">Queue (min)
-                    <x-ui.input class="mt-2" name="queue_time_minutes" type="number" min="0" step="0.01" />
+                <label class="block text-sm font-medium">Queue (HH:MM)
+                    <x-ui.input class="mt-2" name="queue_time_minutes" type="text" inputmode="numeric" :value="old('queue_time_minutes', '00:00')" placeholder="00:00" data-duration-mask="true" />
                 </label>
-                <label class="block text-sm font-medium">Move (min)
-                    <x-ui.input class="mt-2" name="move_time_minutes" type="number" min="0" step="0.01" />
+                <label class="block text-sm font-medium">Move (HH:MM)
+                    <x-ui.input class="mt-2" name="move_time_minutes" type="text" inputmode="numeric" :value="old('move_time_minutes', '00:00')" placeholder="00:00" data-duration-mask="true" />
                 </label>
                 <label class="inline-flex items-center gap-2 self-end pb-2 text-sm">
                     <input type="checkbox" name="is_outsourced" value="1" /> Terceirizada
@@ -107,7 +107,7 @@
                         <th class="px-3 py-2">Codigo</th>
                         <th class="px-3 py-2">Nome</th>
                         <th class="px-3 py-2">Centro de trabalho</th>
-                        <th class="px-3 py-2">Tempo total (min)</th>
+                        <th class="px-3 py-2">Tempo total (HH:MM)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -119,7 +119,7 @@
                             <td class="px-3 py-2">{{ $operation->operation_code }}</td>
                             <td class="px-3 py-2">{{ $operation->operation_name }}</td>
                             <td class="px-3 py-2">{{ $operation->workCenter?->code }} - {{ $operation->workCenter?->name }}</td>
-                            <td class="px-3 py-2">{{ number_format($totalMinutes, 2, ',', '.') }}</td>
+                            <td class="px-3 py-2">{{ \App\Support\Duration::formatMinutes($totalMinutes) }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="6" class="px-3 py-6 text-center text-[#5f6368]">Sem operacoes cadastradas.</td></tr>

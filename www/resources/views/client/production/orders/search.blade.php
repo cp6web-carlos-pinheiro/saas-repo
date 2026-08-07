@@ -31,6 +31,7 @@
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
                         <th class="px-3 py-3">Ordem</th>
+                        <th class="px-3 py-3">Venda</th>
                         <th class="px-3 py-3">Produto</th>
                         <th class="px-3 py-3">Armazem</th>
                         <th class="px-3 py-3">Planejado</th>
@@ -48,6 +49,7 @@
                             onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('production.orders.show', $order) }}'; }"
                         >
                             <td class="px-3 py-4 font-medium text-[#174ea6]">{{ $order->order_number }}</td>
+                            <td class="px-3 py-4 text-[#5f6368]">{{ $order->sales_order_reference ?? '—' }}</td>
                             <td class="px-3 py-4">
                                 <div>{{ $order->product?->description ?? '—' }}</div>
                                 <div class="text-xs text-[#5f6368]">{{ $order->product?->sku ?? '—' }}</div>
@@ -60,7 +62,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-3 py-10 text-center text-[#5f6368]">Nenhuma ordem encontrada.</td>
+                            <td colspan="8" class="px-3 py-10 text-center text-[#5f6368]">Nenhuma ordem encontrada.</td>
                         </tr>
                     @endforelse
                 </tbody>

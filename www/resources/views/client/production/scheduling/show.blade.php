@@ -42,7 +42,7 @@
                                     <th class="px-2 py-1">Centro</th>
                                     <th class="px-2 py-1">Início</th>
                                     <th class="px-2 py-1">Fim</th>
-                                    <th class="px-2 py-1">Duração (min)</th>
+                                    <th class="px-2 py-1">Duração (HH:MM)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -53,7 +53,7 @@
                                         <td class="px-2 py-1">{{ $operation['work_center_id'] ?? '—' }}</td>
                                         <td class="px-2 py-1">{{ $operation['start_at'] ?? '—' }}</td>
                                         <td class="px-2 py-1">{{ $operation['end_at'] ?? '—' }}</td>
-                                        <td class="px-2 py-1">{{ $operation['duration_minutes'] ?? '—' }}</td>
+                                        <td class="px-2 py-1">{{ isset($operation['duration_minutes']) ? \App\Support\Duration::formatMinutes((float) $operation['duration_minutes']) : '—' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

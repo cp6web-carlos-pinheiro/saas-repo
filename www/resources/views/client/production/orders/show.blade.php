@@ -24,6 +24,7 @@
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('sale.status')">{{ $order->status }}</x-ui.definition-item>
+            <x-ui.definition-item label="Venda">{{ $order->sales_order_reference ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('sale.product')">{{ $order->product?->sku }} - {{ $order->product?->description }}</x-ui.definition-item>
             <x-ui.definition-item label="Armazem">{{ $order->warehouse?->code }} - {{ $order->warehouse?->name }}</x-ui.definition-item>
             <x-ui.definition-item label="Qtd planejada">{{ number_format((float) $order->quantity_planned, 3, ',', '.') }}</x-ui.definition-item>
@@ -77,11 +78,11 @@
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <label class="block text-sm font-medium">Setup (min)
-                        <x-ui.input class="mt-2" type="number" step="0.01" min="0" name="setup_time_minutes" value="0" />
+                    <label class="block text-sm font-medium">Setup (HH:MM)
+                        <x-ui.input class="mt-2" type="text" inputmode="numeric" name="setup_time_minutes" :value="old('setup_time_minutes', '00:00')" placeholder="00:00" data-duration-mask="true" />
                     </label>
-                    <label class="block text-sm font-medium">Processo (min)
-                        <x-ui.input class="mt-2" type="number" step="0.01" min="0" name="process_time_minutes" value="0" />
+                    <label class="block text-sm font-medium">Processo (HH:MM)
+                        <x-ui.input class="mt-2" type="text" inputmode="numeric" name="process_time_minutes" :value="old('process_time_minutes', '00:00')" placeholder="00:00" data-duration-mask="true" />
                     </label>
                 </div>
 

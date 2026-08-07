@@ -58,6 +58,18 @@ final class ProductionOrder extends TenantModel
         'metadata' => 'array',
     ];
 
+    public function getSalesOrderReferenceAttribute(): ?string
+    {
+        $referenceType = mb_strtolower(trim((string) $this->source_reference_type));
+        $referenceId = (int) $this->source_reference_id;
+
+        if (! in_array($referenceType, ['sale', 'sales_order'], true) || $referenceId <= 0) {
+            return null;
+        }
+
+        return '#'.$referenceId;
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');

@@ -10,6 +10,7 @@ use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Routing\Application\Services\RoutingService;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersion;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
+use App\Support\Duration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -157,6 +158,13 @@ final class ProductionRoutingController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::OPERATION_CREATE_PERMISSION, $company->id);
         abort_unless((int) $version->company_id === (int) $company->id, 404);
+
+        $request->merge([
+            'setup_time_minutes' => Duration::minutesFromInput($request->input('setup_time_minutes')),
+            'runtime_minutes' => Duration::minutesFromInput($request->input('runtime_minutes')),
+            'queue_time_minutes' => Duration::minutesFromInput($request->input('queue_time_minutes')),
+            'move_time_minutes' => Duration::minutesFromInput($request->input('move_time_minutes')),
+        ]);
 
         $data = $request->validate([
             'work_center_id' => ['required', 'integer', 'exists:work_centers,id'],

@@ -36,11 +36,11 @@
         </x-ui.panel>
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5">
             <div class="text-xs uppercase tracking-wide text-[#5f6368]">Tempo de setup</div>
-            <div class="mt-2 text-3xl font-bold text-[#b06000]">{{ number_format($setupMinutes, 1, ',', '.') }} min</div>
+            <div class="mt-2 text-3xl font-bold text-[#b06000]">{{ \App\Support\Duration::formatMinutes($setupMinutes) }}</div>
         </x-ui.panel>
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5">
             <div class="text-xs uppercase tracking-wide text-[#5f6368]">Tempo de processo</div>
-            <div class="mt-2 text-3xl font-bold text-[#5e35b1]">{{ number_format($processMinutes, 1, ',', '.') }} min</div>
+            <div class="mt-2 text-3xl font-bold text-[#5e35b1]">{{ \App\Support\Duration::formatMinutes($processMinutes) }}</div>
         </x-ui.panel>
     </div>
 
@@ -96,7 +96,7 @@
                         <th class="px-3 py-2">Operação</th>
                         <th class="px-3 py-2">Qtd boa</th>
                         <th class="px-3 py-2">Qtd refugo</th>
-                        <th class="px-3 py-2">Tempo processo (min)</th>
+                        <th class="px-3 py-2">Tempo processo (HH:MM)</th>
                         <th class="px-3 py-2">Produtividade (qtd/min)</th>
                     </tr>
                 </thead>
@@ -110,7 +110,7 @@
                             <td class="px-3 py-2">{{ $row->operation_no }}</td>
                             <td class="px-3 py-2">{{ number_format((float) $row->good_qty, 3, ',', '.') }}</td>
                             <td class="px-3 py-2">{{ number_format((float) $row->scrap_qty, 3, ',', '.') }}</td>
-                            <td class="px-3 py-2">{{ number_format((float) $row->process_minutes, 2, ',', '.') }}</td>
+                            <td class="px-3 py-2">{{ \App\Support\Duration::formatMinutes((float) $row->process_minutes) }}</td>
                             <td class="px-3 py-2">{{ number_format($productivity, 4, ',', '.') }}</td>
                         </tr>
                     @empty

@@ -34,6 +34,59 @@ for (const input of currencyMaskedInputs) {
 	});
 }
 
+const durationMaskedInputs = document.querySelectorAll('input[data-duration-mask="true"]');
+
+const formatMinutesToDuration = (minutes) => {
+	const totalMinutes = Math.max(0, Math.round(Number(minutes) || 0));
+	const hours = Math.floor(totalMinutes / 60).toString().padStart(2, '0');
+	const remainingMinutes = (totalMinutes % 60).toString().padStart(2, '0');
+
+	return `${hours}:${remainingMinutes}`;
+};
+
+const normalizeDuration = (value) => {
+	const trimmed = String(value ?? '').trim();
+	const match = trimmed.match(/^(\d+):(\d{1,2})$/);
+
+	if (match) {
+		return formatMinutesToDuration((Number(match[1]) * 60) + Number(match[2]));
+	}
+
+	return formatMinutesToDuration(Number(trimmed.replace(',', '.')));
+};
+
+const maskDurationDigits = (value) => {
+	const digits = String(value ?? '').replace(/\D/g, '');
+
+	if (digits === '') {
+		return '';
+	}
+
+	const padded = digits.padStart(4, '0');
+	const hours = padded.slice(0, -2).replace(/^0+(?=\d{2})/, '');
+	const minutes = padded.slice(-2);
+
+	return `${hours}:${minutes}`;
+};
+
+for (const input of durationMaskedInputs) {
+	input.value = normalizeDuration(input.value);
+
+	input.addEventListener('input', () => {
+		input.value = maskDurationDigits(input.value);
+	});
+
+	input.addEventListener('blur', () => {
+		input.value = normalizeDuration(input.value);
+	});
+
+	input.form?.addEventListener('submit', () => {
+		const normalized = normalizeDuration(input.value);
+		const [hours, minutes] = normalized.split(':').map(Number);
+		input.value = String((hours * 60) + minutes);
+	});
+}
+
 const taxIdMaskedInputs = document.querySelectorAll('input[data-tax-id-mask="true"]');
 
 const maskCpf = (digits) => {

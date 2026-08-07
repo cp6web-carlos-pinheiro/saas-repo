@@ -85,6 +85,42 @@ final class TenantProductionOrderExecutionTest extends TestCase
         ]);
     }
 
+    public function test_sales_order_reference_is_exposed_only_for_sales_sources(): void
+    {
+        [$company, $warehouse, $product] = $this->context();
+
+        $salesOrder = ProductionOrder::query()->create([
+            'company_id' => $company->id,
+            'product_id' => $product->id,
+            'warehouse_id' => $warehouse->id,
+            'source_type' => 'SALE',
+            'source_reference_type' => 'sale',
+            'source_reference_id' => 42,
+            'order_number' => 'PO-20260806-000001',
+            'status' => 'DRAFT',
+            'quantity_planned' => 1,
+            'quantity_produced' => 0,
+            'quantity_scrapped' => 0,
+        ]);
+
+        $manualOrder = ProductionOrder::query()->create([
+            'company_id' => $company->id,
+            'product_id' => $product->id,
+            'warehouse_id' => $warehouse->id,
+            'source_type' => 'MANUAL',
+            'source_reference_type' => 'manual_note',
+            'source_reference_id' => 42,
+            'order_number' => 'PO-20260806-000002',
+            'status' => 'DRAFT',
+            'quantity_planned' => 1,
+            'quantity_produced' => 0,
+            'quantity_scrapped' => 0,
+        ]);
+
+        $this->assertSame('#42', $salesOrder->sales_order_reference);
+        $this->assertNull($manualOrder->sales_order_reference);
+    }
+
     /**
      * @return array{0: Company, 1: Warehouse, 2: Product}
      */
