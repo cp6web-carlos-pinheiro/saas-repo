@@ -31,14 +31,14 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3">{{ __('bom.product') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('version_number') }}">{{ __('bom.version_number') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('status') }}">{{ __('bom.status') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('effective_from') }}">{{ __('bom.effective_from') }} ↕</a></th>
-                        <th class="px-3 py-3">{{ __('bom.effective_to') }}</th>
-                        <th class="px-3 py-3">{{ __('bom.items') }}</th>
-                        <th class="px-3 py-3">{{ __('bom.description') }}</th>
+                        <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="product" :label="__('bom.product')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="version_number" :label="__('bom.version_number')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="status" :label="__('bom.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="effective_from" :label="__('bom.effective_from')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="effective_to" :label="__('bom.effective_to')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="items_count" :label="__('bom.items')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="description" :label="__('bom.description')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

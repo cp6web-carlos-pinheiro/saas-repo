@@ -54,9 +54,9 @@ final class PurchaseOrderController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['id', 'order_date', 'status', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'purchase_order_number', 'supplier', 'order_date', 'status', 'lines_count', 'created_at'], true), 404);
 
-        $orders = PurchaseOrder::query()
+        $ordersQuery = PurchaseOrder::query()
             ->with('supplier:id,name')
             ->withCount('lines')
             ->when($status !== '', static fn (Builder $query) => $query->where('status', $status))
@@ -70,8 +70,16 @@ final class PurchaseOrderController extends Controller
                 if ($searchId !== null) {
                     $query->orWhere('id', $searchId);
                 }
-            })
-            ->orderBy($sort, $direction)
+            });
+
+        if ($sort === 'supplier') {
+            $ordersQuery->orderBy(Supplier::query()->select('name')->whereColumn('suppliers.id', 'purchase_orders.supplier_id'), $direction);
+        } else {
+            $ordersQuery->orderBy($sort, $direction);
+        }
+
+        $orders = $ordersQuery
+            ->orderBy('id', $direction)
             ->paginate(15)
             ->withQueryString();
 

@@ -54,9 +54,9 @@ final class PurchaseQuotationController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['id', 'quotation_date', 'status', 'amount_cents', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'quotation_number', 'supplier', 'quotation_date', 'status', 'amount_cents'], true), 404);
 
-        $quotations = PurchaseQuotation::query()
+        $quotationsQuery = PurchaseQuotation::query()
             ->with('supplier:id,name')
             ->when($status !== '', static fn (Builder $query) => $query->where('status', $status))
             ->when($search !== '', static function (Builder $query) use ($search, $searchId): void {
@@ -69,8 +69,16 @@ final class PurchaseQuotationController extends Controller
                 if ($searchId !== null) {
                     $query->orWhere('id', $searchId);
                 }
-            })
-            ->orderBy($sort, $direction)
+            });
+
+        if ($sort === 'supplier') {
+            $quotationsQuery->orderBy(Supplier::query()->select('name')->whereColumn('suppliers.id', 'purchase_quotations.supplier_id'), $direction);
+        } else {
+            $quotationsQuery->orderBy($sort, $direction);
+        }
+
+        $quotations = $quotationsQuery
+            ->orderBy('id', $direction)
             ->paginate(15)
             ->withQueryString();
 

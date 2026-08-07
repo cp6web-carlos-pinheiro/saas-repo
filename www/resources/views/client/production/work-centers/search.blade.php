@@ -32,13 +32,13 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-2">{{ __('production.code') }}</th>
-                        <th class="px-3 py-2">{{ __('production.name') }}</th>
-                        <th class="px-3 py-2">{{ __('production.plant') }}</th>
-                        <th class="px-3 py-2">{{ __('production.type') }}</th>
-                        <th class="px-3 py-2">{{ __('production.capacity_per_day') }}</th>
-                        <th class="px-3 py-2">{{ __('production.efficiency') }}</th>
-                        <th class="px-3 py-2">{{ __('production.status') }}</th>
+                        <x-ui.sortable-header class="py-2" column="code" :label="__('production.code')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="name" :label="__('production.name')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="plant" :label="__('production.plant')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="resource_type" :label="__('production.type')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="capacity_per_day" :label="__('production.capacity_per_day')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="efficiency_factor" :label="__('production.efficiency')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="is_active" :label="__('production.status')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

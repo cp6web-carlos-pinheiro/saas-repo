@@ -44,7 +44,7 @@ final class SupplierController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['name', 'status', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'name', 'person_type', 'email', 'phone', 'status', 'created_at'], true), 404);
 
         $suppliers = Supplier::query()
             ->when($personType !== '', static fn (Builder $query) => $query->where('person_type', $personType))

@@ -36,7 +36,17 @@
 
         <div class="mt-6 overflow-x-auto">
             <table class="min-w-full text-sm">
-                <thead><tr class="border-b border-[#dadce0] text-left text-[#5f6368]"><th class="px-3 py-3">{{ __('inventory_web.warehouse') }}</th><th class="px-3 py-3">{{ __('inventory_web.product') }}</th><th class="px-3 py-3 text-right">{{ __('inventory_web.available') }}</th><th class="px-3 py-3 text-right">{{ __('inventory_web.reserved') }}</th><th class="px-3 py-3 text-right">{{ __('inventory_web.inspection') }}</th><th class="px-3 py-3 text-right">{{ __('inventory_web.in_transit') }}</th><th class="px-3 py-3">{{ __('inventory_web.last_movement') }}</th></tr></thead>
+                <thead>
+                    <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                        <x-ui.sortable-header column="warehouse" :label="__('inventory_web.warehouse')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="product" :label="__('inventory_web.product')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="text-right" column="qty_available" :label="__('inventory_web.available')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="text-right" column="qty_reserved" :label="__('inventory_web.reserved')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="text-right" column="qty_inspection" :label="__('inventory_web.inspection')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="text-right" column="qty_in_transit" :label="__('inventory_web.in_transit')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="last_movement_at" :label="__('inventory_web.last_movement')" :sort="$sort" :direction="$direction" />
+                    </tr>
+                </thead>
                 <tbody>
                     @forelse ($balances as $balance)
                         <tr class="border-b border-[#f1f3f4]"><td class="px-3 py-4">{{ $balance->warehouse?->code }} — {{ $balance->warehouse?->name }}</td><td class="px-3 py-4">{{ $balance->product?->sku }} — {{ $balance->product?->description }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_available, 3, ',', '.') }} {{ $balance->product?->unit?->code }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_reserved, 3, ',', '.') }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_inspection, 3, ',', '.') }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_in_transit, 3, ',', '.') }}</td><td class="px-3 py-4 text-[#5f6368]">{{ $balance->last_movement_at?->format('d/m/Y H:i') ?? '—' }}</td></tr>

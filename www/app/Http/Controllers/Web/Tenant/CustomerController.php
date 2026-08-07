@@ -44,7 +44,7 @@ final class CustomerController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['name', 'person_type', 'status', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'name', 'person_type', 'email', 'phone', 'status', 'created_at'], true), 404);
 
         $customers = Customer::query()
             ->when($personType !== '', static fn (Builder $query) => $query->where('person_type', $personType))

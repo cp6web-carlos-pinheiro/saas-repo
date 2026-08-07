@@ -59,14 +59,22 @@ final class SaleController extends Controller
             $operationalStatus = '';
         }
 
-        abort_unless(in_array($sort, ['id', 'sale_date', 'status', 'operational_status', 'amount_cents', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'customer', 'sale_date', 'status', 'operational_status', 'amount_cents', 'created_at'], true), 404);
 
-        $sales = Sale::query()
+        $salesQuery = Sale::query()
             ->with('customer:id,name')
             ->when($status !== '', static fn (Builder $query) => $query->where('status', $status))
             ->when($operationalStatus !== '', static fn (Builder $query) => $query->where('operational_status', $operationalStatus))
-            ->when($search !== '', fn (Builder $query) => $this->applySearchFilters($query, $searchTerms))
-            ->orderBy($sort, $direction)
+            ->when($search !== '', fn (Builder $query) => $this->applySearchFilters($query, $searchTerms));
+
+        if ($sort === 'customer') {
+            $salesQuery->orderBy(Customer::query()->select('name')->whereColumn('customers.id', 'sales.customer_id'), $direction);
+        } else {
+            $salesQuery->orderBy($sort, $direction);
+        }
+
+        $sales = $salesQuery
+            ->orderBy('id', $direction)
             ->paginate(15)
             ->withQueryString();
 

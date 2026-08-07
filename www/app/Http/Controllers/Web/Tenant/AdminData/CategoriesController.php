@@ -36,7 +36,7 @@ final class CategoriesController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['name', 'is_active', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'name', 'is_active', 'created_at'], true), 404);
 
         $categories = ProductCategory::query()
             ->where('company_id', $company->id)

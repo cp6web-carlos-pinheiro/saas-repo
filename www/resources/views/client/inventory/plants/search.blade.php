@@ -35,13 +35,12 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('name') }}">{{ __('plant.name') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('code') }}">{{ __('plant.code') }} ↕</a></th>
-                        <th class="px-3 py-3">{{ __('plant.branch') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('timezone') }}">{{ __('plant.timezone') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('plant.status') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('plant.created_at') }} ↕</a></th>
+                        <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="name" :label="__('plant.name')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="code" :label="__('plant.code')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="timezone" :label="__('plant.timezone')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="is_active" :label="__('plant.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="created_at" :label="__('plant.created_at')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>
@@ -55,7 +54,6 @@
                             <td class="px-3 py-4 text-[#5f6368]">{{ $plant->id }}</td>
                             <td class="px-3 py-4">{{ $plant->name }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $plant->code }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $plant->branch?->code }} - {{ $plant->branch?->name }}</td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $plant->timezone }}</td>
                             <td class="px-3 py-4">
                                 <x-ui.definition-item-status
@@ -69,7 +67,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-3 py-10 text-center text-[#5f6368]">{{ __('plant.empty') }}</td>
+                            <td colspan="6" class="px-3 py-10 text-center text-[#5f6368]">{{ __('plant.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

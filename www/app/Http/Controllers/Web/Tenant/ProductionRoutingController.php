@@ -36,12 +36,16 @@ final class ProductionRoutingController extends Controller
 
         $search = trim((string) $request->query('search'));
         $status = mb_strtoupper(trim((string) $request->query('status')));
+        $sort = (string) $request->query('sort', 'id');
+        $direction = (string) $request->query('direction', 'desc') === 'asc' ? 'asc' : 'desc';
 
         if ($status !== '' && ! in_array($status, ['DRAFT', 'APPROVED', 'OBSOLETE'], true)) {
             $status = '';
         }
 
-        $versions = RoutingVersion::query()
+        abort_unless(in_array($sort, ['id', 'product', 'version_number', 'status', 'operations_count'], true), 404);
+
+        $versionsQuery = RoutingVersion::query()
             ->with(['product:id,sku,description'])
             ->withCount('operations')
             ->when($status !== '', static fn ($query) => $query->where('status', $status))
@@ -53,12 +57,20 @@ final class ProductionRoutingController extends Controller
                             ->where('sku', 'like', "%{$search}%")
                             ->orWhere('description', 'like', "%{$search}%"));
                 });
-            })
-            ->orderByDesc('id')
+            });
+
+        if ($sort === 'product') {
+            $versionsQuery->orderBy(Product::query()->select('sku')->whereColumn('products.id', 'routing_versions.product_id'), $direction);
+        } else {
+            $versionsQuery->orderBy($sort, $direction);
+        }
+
+        $versions = $versionsQuery
+            ->orderBy('id', $direction)
             ->paginate(15)
             ->withQueryString();
 
-        return view('client.production.routing.search', compact('company', 'versions', 'search', 'status'));
+        return view('client.production.routing.search', compact('company', 'versions', 'search', 'status', 'sort', 'direction'));
     }
 
     public function create(Request $request): View

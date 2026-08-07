@@ -170,4 +170,8 @@ return [
     'editor_clear_formatting' => 'Limpar formatação',
     'editor_clear' => 'Limpar',
     'editor_link_prompt' => 'Informe a URL do link',
+    'sort_by' => 'Ordenar por :column',
+    'sorted_ascending' => 'Ordenado em ordem crescente',
+    'sorted_descending' => 'Ordenado em ordem decrescente',
+    'activate_sort' => 'Ativar ordenação',
 ];

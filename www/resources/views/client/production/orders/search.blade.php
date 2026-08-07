@@ -30,14 +30,14 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">{{ __('production.orders.number') }}</th>
-                        <th class="px-3 py-3">{{ __('production.orders.sale_number') }}</th>
-                        <th class="px-3 py-3">{{ __('production.product') }}</th>
-                        <th class="px-3 py-3">{{ __('production.warehouse') }}</th>
-                        <th class="px-3 py-3">{{ __('production.orders.planned') }}</th>
-                        <th class="px-3 py-3">{{ __('production.orders.produced') }}</th>
-                        <th class="px-3 py-3">{{ __('production.orders.scrap') }}</th>
-                        <th class="px-3 py-3">{{ __('production.status') }}</th>
+                        <x-ui.sortable-header column="order_number" :label="__('production.orders.number')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="sales_order" :label="__('production.orders.sale_number')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="product" :label="__('production.product')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="warehouse" :label="__('production.warehouse')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="quantity_planned" :label="__('production.orders.planned')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="quantity_produced" :label="__('production.orders.produced')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="quantity_scrapped" :label="__('production.orders.scrap')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="status" :label="__('production.status')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

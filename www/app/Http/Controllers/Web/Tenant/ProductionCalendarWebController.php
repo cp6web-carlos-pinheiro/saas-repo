@@ -36,17 +36,29 @@ final class ProductionCalendarWebController extends Controller
         $workCenterId = (int) $request->query('work_center_id', 0);
         $fromDate = (string) $request->query('from_date', now()->startOfMonth()->toDateString());
         $toDate = (string) $request->query('to_date', now()->endOfMonth()->toDateString());
+        $sort = (string) $request->query('sort', 'calendar_date');
+        $direction = (string) $request->query('direction', 'desc') === 'asc' ? 'asc' : 'desc';
 
-        $days = ProductionCalendarDay::query()
+        abort_unless(in_array($sort, ['calendar_date', 'work_center', 'is_working_day', 'available_capacity', 'notes'], true), 404);
+
+        $daysQuery = ProductionCalendarDay::query()
             ->with('workCenter:id,code,name')
             ->when($workCenterId > 0, static fn ($query) => $query->where('work_center_id', $workCenterId))
             ->whereDate('calendar_date', '>=', $fromDate)
-            ->whereDate('calendar_date', '<=', $toDate)
-            ->orderByDesc('calendar_date')
+            ->whereDate('calendar_date', '<=', $toDate);
+
+        if ($sort === 'work_center') {
+            $daysQuery->orderBy(WorkCenter::query()->select('name')->whereColumn('work_centers.id', 'production_calendar_days.work_center_id'), $direction);
+        } else {
+            $daysQuery->orderBy($sort, $direction);
+        }
+
+        $days = $daysQuery
+            ->orderBy('id', $direction)
             ->paginate(20)
             ->withQueryString();
 
-        return view('client.production.calendar.search', compact('company', 'workCenters', 'workCenterId', 'fromDate', 'toDate', 'days'));
+        return view('client.production.calendar.search', compact('company', 'workCenters', 'workCenterId', 'fromDate', 'toDate', 'sort', 'direction', 'days'));
     }
 
     public function create(Request $request): View

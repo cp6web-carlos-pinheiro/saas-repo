@@ -41,7 +41,7 @@ final class PlantController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['name', 'code', 'timezone', 'is_active', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'name', 'code', 'timezone', 'is_active', 'created_at'], true), 404);
 
         $plants = Plant::query()
             ->where('company_id', $company->id)

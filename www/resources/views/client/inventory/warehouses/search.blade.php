@@ -35,12 +35,12 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('name') }}">{{ __('warehouse.name') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('code') }}">{{ __('warehouse.code') }} ↕</a></th>
-                        <th class="px-3 py-3">{{ __('warehouse.plant') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('warehouse.status') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('warehouse.created_at') }} ↕</a></th>
+                        <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="name" :label="__('warehouse.name')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="code" :label="__('warehouse.code')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="plant" :label="__('warehouse.plant')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="is_active" :label="__('warehouse.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="created_at" :label="__('warehouse.created_at')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

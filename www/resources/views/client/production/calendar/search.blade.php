@@ -47,11 +47,11 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-2">{{ __('production.date') }}</th>
-                        <th class="px-3 py-2">{{ __('production.work_center') }}</th>
-                        <th class="px-3 py-2">{{ __('production.work_centers.working_day') }}</th>
-                        <th class="px-3 py-2">{{ __('production.capacity') }}</th>
-                        <th class="px-3 py-2">{{ __('production.notes') }}</th>
+                        <x-ui.sortable-header class="py-2" column="calendar_date" :label="__('production.date')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="work_center" :label="__('production.work_center')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="is_working_day" :label="__('production.work_centers.working_day')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="available_capacity" :label="__('production.capacity')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="notes" :label="__('production.notes')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

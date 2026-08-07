@@ -35,12 +35,12 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('code') }}">{{ __('admin_data.code') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('name') }}">{{ __('admin_data.name') }} ↕</a></th>
-                        <th class="px-3 py-3">{{ __('admin_data_units.scope') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('admin_data.status') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('admin_data.created_at') }} ↕</a></th>
+                        <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="code" :label="__('admin_data.code')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="name" :label="__('admin_data.name')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="company_id" :label="__('admin_data_units.scope')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="is_active" :label="__('admin_data.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="created_at" :label="__('admin_data.created_at')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

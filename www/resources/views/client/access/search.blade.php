@@ -35,11 +35,11 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('name') }}">{{ __('company_access.name') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('email') }}">{{ __('company_access.email') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('company_access.status') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('company_access.created_at') }} ↕</a></th>
+                        <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="name" :label="__('company_access.name')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="email" :label="__('company_access.email')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="is_active" :label="__('company_access.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="created_at" :label="__('company_access.created_at')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

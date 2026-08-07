@@ -62,12 +62,12 @@
                     <table class="min-w-full text-sm">
                         <thead>
                             <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                                <th class="px-3 py-3">{{ __('product.version') }}</th>
-                                <th class="px-3 py-3">{{ __('product.status') }}</th>
-                                <th class="px-3 py-3">{{ __('product.effective_from') }}</th>
-                                <th class="px-3 py-3">{{ __('product.effective_to') }}</th>
-                                <th class="px-3 py-3">{{ __('product.compatibility_rule') }}</th>
-                                <th class="px-3 py-3">{{ __('product.change_summary') }}</th>
+                                <x-ui.sortable-header column="version_number" :label="__('product.version')" :sort="$sort" :direction="$direction" />
+                                <x-ui.sortable-header column="status" :label="__('product.status')" :sort="$sort" :direction="$direction" />
+                                <x-ui.sortable-header column="effective_from" :label="__('product.effective_from')" :sort="$sort" :direction="$direction" />
+                                <x-ui.sortable-header column="effective_to" :label="__('product.effective_to')" :sort="$sort" :direction="$direction" />
+                                <x-ui.sortable-header column="compatibility_rule" :label="__('product.compatibility_rule')" :sort="$sort" :direction="$direction" />
+                                <x-ui.sortable-header column="change_summary" :label="__('product.change_summary')" :sort="$sort" :direction="$direction" />
                             </tr>
                         </thead>
                         <tbody>

@@ -43,13 +43,13 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('name') }}">{{ __('supplier.name') }} ↕</a></th>
-                        <th class="px-3 py-3">{{ __('supplier.person_type') }}</th>
-                        <th class="px-3 py-3">{{ __('supplier.email') }}</th>
-                        <th class="px-3 py-3">{{ __('supplier.phone') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('status') }}">{{ __('supplier.status') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('created_at') }}">{{ __('supplier.created_at') }} ↕</a></th>
+                        <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="name" :label="__('supplier.name')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="person_type" :label="__('supplier.person_type')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="email" :label="__('supplier.email')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="phone" :label="__('supplier.phone')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="status" :label="__('supplier.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="created_at" :label="__('supplier.created_at')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

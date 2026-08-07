@@ -42,7 +42,7 @@ final class WarehouseController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['name', 'code', 'is_active', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'name', 'code', 'plant', 'is_active', 'created_at'], true), 404);
 
         $warehouses = Warehouse::query()
             ->with('plant:id,name,code')
@@ -58,7 +58,14 @@ final class WarehouseController extends Controller
                     }
                 });
             })
-            ->orderBy($sort, $direction)
+            ->when(
+                $sort === 'plant',
+                static fn (Builder $query) => $query->orderBy(
+                    Plant::query()->select('name')->whereColumn('plants.id', 'warehouses.plant_id'),
+                    $direction
+                ),
+                static fn (Builder $query) => $query->orderBy($sort, $direction)
+            )
             ->paginate(15)
             ->withQueryString();
 

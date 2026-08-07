@@ -11,7 +11,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class EloquentProductRepository extends BaseRepository implements ProductRepository
 {
-    private const ALLOWED_SORT_COLUMNS = ['id', 'sku', 'product_type', 'lead_time_days', 'is_active', 'created_at'];
+    private const ALLOWED_SORT_COLUMNS = ['id', 'sku', 'description', 'product_type', 'uom', 'lead_time_days', 'is_active', 'created_at'];
 
     public function __construct(Product $model)
     {

@@ -215,7 +215,7 @@ final class ProductController extends Controller
         $sort = (string) $request->query('sort', 'sku');
         $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
-        abort_unless(in_array($sort, ['sku', 'product_type', 'lead_time_days', 'is_active', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'sku', 'description', 'product_type', 'uom', 'lead_time_days', 'is_active', 'created_at'], true), 404);
 
         $products = Product::query()
             ->where('company_id', $company->id)

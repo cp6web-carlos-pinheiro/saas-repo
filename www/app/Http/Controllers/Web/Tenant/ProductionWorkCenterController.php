@@ -33,12 +33,16 @@ final class ProductionWorkCenterController extends Controller
 
         $search = trim((string) $request->query('search'));
         $status = mb_strtoupper(trim((string) $request->query('status')));
+        $sort = (string) $request->query('sort', 'code');
+        $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
         if (! in_array($status, ['ACTIVE', 'INACTIVE'], true)) {
             $status = '';
         }
 
-        $centers = WorkCenter::query()
+        abort_unless(in_array($sort, ['code', 'name', 'plant', 'resource_type', 'capacity_per_day', 'efficiency_factor', 'is_active'], true), 404);
+
+        $centersQuery = WorkCenter::query()
             ->with('plant:id,code,name')
             ->when($status !== '', static fn ($query) => $query->where('is_active', $status === 'ACTIVE'))
             ->when($search !== '', static function ($query) use ($search): void {
@@ -47,12 +51,20 @@ final class ProductionWorkCenterController extends Controller
                         ->orWhere('name', 'like', "%{$search}%")
                         ->orWhere('resource_type', 'like', "%{$search}%");
                 });
-            })
-            ->orderBy('code')
+            });
+
+        if ($sort === 'plant') {
+            $centersQuery->orderBy(Plant::query()->select('name')->whereColumn('plants.id', 'work_centers.plant_id'), $direction);
+        } else {
+            $centersQuery->orderBy($sort, $direction);
+        }
+
+        $centers = $centersQuery
+            ->orderBy('id')
             ->paginate(15)
             ->withQueryString();
 
-        return view('client.production.work-centers.search', compact('company', 'centers', 'search', 'status'));
+        return view('client.production.work-centers.search', compact('company', 'centers', 'search', 'status', 'sort', 'direction'));
     }
 
     public function create(Request $request): View

@@ -39,7 +39,7 @@ final class CompanyAccessUserController extends Controller
         $sort = (string) $request->query('sort', 'name');
         $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
-        abort_unless(in_array($sort, ['name', 'email', 'is_active', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'name', 'email', 'is_active', 'created_at'], true), 404);
 
         $customers = User::query()
             ->whereHas('companies', static fn (Builder $query) => $query->where('companies.id', $company->id))

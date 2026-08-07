@@ -45,12 +45,16 @@ final class ProductionOrderController extends Controller
 
         $search = trim((string) $request->query('search'));
         $status = mb_strtoupper(trim((string) $request->query('status')));
+        $sort = (string) $request->query('sort', 'order_number');
+        $direction = (string) $request->query('direction', 'desc') === 'asc' ? 'asc' : 'desc';
 
         if ($status !== '' && ! in_array($status, ['DRAFT', 'RELEASED', 'IN_PROGRESS', 'PARTIALLY_COMPLETED', 'COMPLETED', 'CANCELLED'], true)) {
             $status = '';
         }
 
-        $orders = ProductionOrder::query()
+        abort_unless(in_array($sort, ['order_number', 'sales_order', 'product', 'warehouse', 'quantity_planned', 'quantity_produced', 'quantity_scrapped', 'status'], true), 404);
+
+        $ordersQuery = ProductionOrder::query()
             ->with(['product:id,description,sku', 'warehouse:id,name,code'])
             ->when($status !== '', static fn (Builder $query) => $query->where('status', $status))
             ->when($search !== '', static function (Builder $query) use ($search): void {
@@ -58,12 +62,24 @@ final class ProductionOrderController extends Controller
                     $nested->where('order_number', 'like', "%{$search}%")
                         ->orWhereHas('product', static fn (Builder $productQuery) => $productQuery->where('description', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%"));
                 });
-            })
-            ->orderByDesc('id')
+            });
+
+        if ($sort === 'sales_order') {
+            $ordersQuery->orderBy('source_reference_id', $direction);
+        } elseif ($sort === 'product') {
+            $ordersQuery->orderBy(Product::query()->select('sku')->whereColumn('products.id', 'production_orders.product_id'), $direction);
+        } elseif ($sort === 'warehouse') {
+            $ordersQuery->orderBy(Warehouse::query()->select('name')->whereColumn('warehouses.id', 'production_orders.warehouse_id'), $direction);
+        } else {
+            $ordersQuery->orderBy($sort, $direction);
+        }
+
+        $orders = $ordersQuery
+            ->orderBy('id', $direction)
             ->paginate(15)
             ->withQueryString();
 
-        return view('client.production.orders.search', compact('orders', 'search', 'status', 'company'));
+        return view('client.production.orders.search', compact('orders', 'search', 'status', 'sort', 'direction', 'company'));
     }
 
     public function create(Request $request): View

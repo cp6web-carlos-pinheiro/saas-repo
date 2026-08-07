@@ -35,7 +35,7 @@ final class UnitsController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['name', 'code', 'is_active', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'name', 'code', 'company_id', 'is_active', 'created_at'], true), 404);
 
         $units = Unit::query()
             ->when($status !== '', static fn (Builder $query) => $query->where('is_active', $status === 'ACTIVE'))

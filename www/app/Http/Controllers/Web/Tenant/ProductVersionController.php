@@ -34,6 +34,10 @@ final class ProductVersionController extends Controller
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
         $productId = (int) $request->query('product_id', 0);
+        $sort = (string) $request->query('sort', 'version_number');
+        $direction = (string) $request->query('direction', 'desc') === 'asc' ? 'asc' : 'desc';
+
+        abort_unless(in_array($sort, ['version_number', 'status', 'effective_from', 'effective_to', 'compatibility_rule', 'change_summary'], true), 404);
         $selectedProduct = $productId > 0
             ? Product::query()->find($productId)
             : null;
@@ -42,7 +46,9 @@ final class ProductVersionController extends Controller
             ? $service->history($selectedProduct->id)
             : collect();
 
-        return view('client.products.versions', compact('selectedProduct', 'versions', 'company'));
+        $versions = $versions->sortBy($sort, SORT_REGULAR, $direction === 'desc')->values();
+
+        return view('client.products.versions', compact('selectedProduct', 'versions', 'sort', 'direction', 'company'));
     }
 
     public function searchProducts(Request $request): JsonResponse

@@ -56,9 +56,9 @@ final class PurchaseReceiptController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['id', 'receipt_date', 'status', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'receipt_number', 'supplier', 'purchase_order', 'receipt_date', 'status'], true), 404);
 
-        $receipts = PurchaseReceipt::query()
+        $receiptsQuery = PurchaseReceipt::query()
             ->with(['supplier:id,name', 'purchaseOrder:id,purchase_order_number'])
             ->when($status !== '', static fn (Builder $query) => $query->where('status', $status))
             ->when($search !== '', static function (Builder $query) use ($search, $searchId): void {
@@ -71,8 +71,18 @@ final class PurchaseReceiptController extends Controller
                 if ($searchId !== null) {
                     $query->orWhere('id', $searchId);
                 }
-            })
-            ->orderBy($sort, $direction)
+            });
+
+        if ($sort === 'supplier') {
+            $receiptsQuery->orderBy(Supplier::query()->select('name')->whereColumn('suppliers.id', 'purchase_receipts.supplier_id'), $direction);
+        } elseif ($sort === 'purchase_order') {
+            $receiptsQuery->orderBy(PurchaseOrder::query()->select('purchase_order_number')->whereColumn('purchase_orders.id', 'purchase_receipts.purchase_order_id'), $direction);
+        } else {
+            $receiptsQuery->orderBy($sort, $direction);
+        }
+
+        $receipts = $receiptsQuery
+            ->orderBy('id', $direction)
             ->paginate(15)
             ->withQueryString();
 

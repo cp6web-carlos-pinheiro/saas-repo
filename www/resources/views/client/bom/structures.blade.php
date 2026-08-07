@@ -22,10 +22,10 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">{{ __('bom.product') }}</th>
-                        <th class="px-3 py-3">{{ __('bom.total_revisions') }}</th>
-                        <th class="px-3 py-3">{{ __('bom.approved_revisions') }}</th>
-                        <th class="px-3 py-3">{{ __('bom.latest_revision') }}</th>
+                        <x-ui.sortable-header column="sku" :label="__('bom.product')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="bom_headers_count" :label="__('bom.total_revisions')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="approved_bom_headers_count" :label="__('bom.approved_revisions')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="bom_headers_max_version_number" :label="__('bom.latest_revision')" :sort="$sort" :direction="$direction" />
                         <th class="px-3 py-3"></th>
                     </tr>
                 </thead>

@@ -37,14 +37,27 @@ final class InventoryWebController extends Controller
 
         $warehouseId = $request->integer('warehouse_id') ?: null;
         $productId = $request->integer('product_id') ?: null;
+        $sort = (string) $request->query('sort', 'warehouse');
+        $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
-        $balances = InventoryBalance::query()
+        abort_unless(in_array($sort, ['warehouse', 'product', 'qty_available', 'qty_reserved', 'qty_inspection', 'qty_in_transit', 'last_movement_at'], true), 404);
+
+        $balancesQuery = InventoryBalance::query()
             ->with(['warehouse:id,code,name', 'product:id,sku,description,unit_id', 'product.unit:id,code'])
             ->where('company_id', $company->id)
             ->when($warehouseId, static fn (Builder $query) => $query->where('warehouse_id', $warehouseId))
-            ->when($productId, static fn (Builder $query) => $query->where('product_id', $productId))
-            ->orderBy('warehouse_id')
-            ->orderBy('product_id')
+            ->when($productId, static fn (Builder $query) => $query->where('product_id', $productId));
+
+        if ($sort === 'warehouse') {
+            $balancesQuery->orderBy(Warehouse::query()->select('name')->whereColumn('warehouses.id', 'inventory_balances.warehouse_id'), $direction);
+        } elseif ($sort === 'product') {
+            $balancesQuery->orderBy(Product::query()->select('sku')->whereColumn('products.id', 'inventory_balances.product_id'), $direction);
+        } else {
+            $balancesQuery->orderBy($sort, $direction);
+        }
+
+        $balances = $balancesQuery
+            ->orderBy('id')
             ->paginate(20)
             ->withQueryString();
 
@@ -53,6 +66,8 @@ final class InventoryWebController extends Controller
             'balances' => $balances,
             'warehouseId' => $warehouseId,
             'productId' => $productId,
+            'sort' => $sort,
+            'direction' => $direction,
             'warehouses' => $this->warehouseOptions($company),
             'products' => $this->productOptions($company),
         ]);
@@ -66,19 +81,34 @@ final class InventoryWebController extends Controller
         $warehouseId = $request->integer('warehouse_id') ?: null;
         $productId = $request->integer('product_id') ?: null;
         $movementType = strtoupper(trim((string) $request->query('movement_type')));
+        $sort = (string) $request->query('sort', 'movement_at');
+        $direction = (string) $request->query('direction', 'desc') === 'asc' ? 'asc' : 'desc';
 
         if (! in_array($movementType, self::MOVEMENT_TYPES, true)) {
             $movementType = '';
         }
 
-        $movements = StockLedgerMovement::query()
+        abort_unless(in_array($sort, ['movement_at', 'movement_type', 'warehouse', 'product', 'quantity', 'reference', 'notes'], true), 404);
+
+        $movementsQuery = StockLedgerMovement::query()
             ->with(['warehouse:id,code,name', 'product:id,sku,description,unit_id', 'product.unit:id,code'])
             ->where('company_id', $company->id)
             ->when($warehouseId, static fn (Builder $query) => $query->where('warehouse_id', $warehouseId))
             ->when($productId, static fn (Builder $query) => $query->where('product_id', $productId))
-            ->when($movementType !== '', static fn (Builder $query) => $query->where('movement_type', $movementType))
-            ->orderByDesc('movement_at')
-            ->orderByDesc('id')
+            ->when($movementType !== '', static fn (Builder $query) => $query->where('movement_type', $movementType));
+
+        if ($sort === 'warehouse') {
+            $movementsQuery->orderBy(Warehouse::query()->select('code')->whereColumn('warehouses.id', 'stock_ledger_movements.warehouse_id'), $direction);
+        } elseif ($sort === 'product') {
+            $movementsQuery->orderBy(Product::query()->select('sku')->whereColumn('products.id', 'stock_ledger_movements.product_id'), $direction);
+        } elseif ($sort === 'reference') {
+            $movementsQuery->orderBy('reference_type', $direction)->orderBy('reference_id', $direction);
+        } else {
+            $movementsQuery->orderBy($sort, $direction);
+        }
+
+        $movements = $movementsQuery
+            ->orderBy('id', $direction)
             ->paginate(20)
             ->withQueryString();
 
@@ -88,6 +118,8 @@ final class InventoryWebController extends Controller
             'warehouseId' => $warehouseId,
             'productId' => $productId,
             'movementType' => $movementType,
+            'sort' => $sort,
+            'direction' => $direction,
             'movementTypes' => $this->movementTypes(),
             'warehouses' => $this->warehouseOptions($company),
             'products' => $this->productOptions($company),

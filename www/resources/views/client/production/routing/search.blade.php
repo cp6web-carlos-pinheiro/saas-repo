@@ -33,11 +33,11 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-2">ID</th>
-                        <th class="px-3 py-2">{{ __('production.product') }}</th>
-                        <th class="px-3 py-2">{{ __('production.version') }}</th>
-                        <th class="px-3 py-2">{{ __('production.status') }}</th>
-                        <th class="px-3 py-2">{{ __('production.routing.operations') }}</th>
+                        <x-ui.sortable-header class="py-2" column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="product" :label="__('production.product')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="version_number" :label="__('production.version')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="status" :label="__('production.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header class="py-2" column="operations_count" :label="__('production.routing.operations')" :sort="$sort" :direction="$direction" />
                     </tr>
                 </thead>
                 <tbody>

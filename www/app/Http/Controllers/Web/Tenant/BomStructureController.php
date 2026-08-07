@@ -24,6 +24,10 @@ final class BomStructureController extends Controller
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
         $search = trim((string) $request->query('search'));
+        $sort = (string) $request->query('sort', 'sku');
+        $direction = (string) $request->query('direction', 'asc') === 'desc' ? 'desc' : 'asc';
+
+        abort_unless(in_array($sort, ['sku', 'bom_headers_count', 'approved_bom_headers_count', 'bom_headers_max_version_number'], true), 404);
 
         $structures = Product::query()
             ->where('company_id', $company->id)
@@ -43,11 +47,12 @@ final class BomStructureController extends Controller
                         ->orWhere('description', 'like', $term);
                 });
             })
-            ->orderBy('sku')
+            ->orderBy($sort, $direction)
+            ->orderBy('id')
             ->paginate(15)
             ->withQueryString();
 
-        return view('client.bom.structures', compact('company', 'structures', 'search'));
+        return view('client.bom.structures', compact('company', 'structures', 'search', 'sort', 'direction'));
     }
 
     public function show(Request $request, Product $product): View

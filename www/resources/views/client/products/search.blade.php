@@ -50,13 +50,13 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
-                        <th class="px-3 py-3">ID</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('sku') }}">{{ __('product.sku') }} ↕</a></th>
-                        <th class="px-3 py-3">{{ __('product.description') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('product_type') }}">{{ __('product.product_type') }} ↕</a></th>
-                        <th class="px-3 py-3">{{ __('product.uom') }}</th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('is_active') }}">{{ __('product.status') }} ↕</a></th>
-                        <th class="px-3 py-3"><a href="{{ $sortUrl('lead_time_days') }}">{{ __('product.lead_time_days') }} ↕</a></th>
+                        <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="sku" :label="__('product.sku')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="description" :label="__('product.description')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="product_type" :label="__('product.product_type')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="uom" :label="__('product.uom')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="is_active" :label="__('product.status')" :sort="$sort" :direction="$direction" />
+                        <x-ui.sortable-header column="lead_time_days" :label="__('product.lead_time_days')" :sort="$sort" :direction="$direction" />
                         <th class="px-3 py-3">{{ __('ui.product_versions') }}</th>
                     </tr>
                 </thead>

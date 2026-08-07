@@ -170,4 +170,8 @@ return [
     'editor_clear_formatting' => 'Clear formatting',
     'editor_clear' => 'Clear',
     'editor_link_prompt' => 'Enter the link URL',
+    'sort_by' => 'Sort by :column',
+    'sorted_ascending' => 'Sorted in ascending order',
+    'sorted_descending' => 'Sorted in descending order',
+    'activate_sort' => 'Activate sorting',
 ];

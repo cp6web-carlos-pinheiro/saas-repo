@@ -38,7 +38,7 @@ final class BomMaterialListController extends Controller
         $sort = (string) $request->query('sort', 'version_number');
         $direction = (string) $request->query('direction', 'desc') === 'asc' ? 'asc' : 'desc';
 
-        $sortableColumns = ['version_number', 'status', 'effective_from', 'created_at'];
+        $sortableColumns = ['id', 'product', 'version_number', 'status', 'effective_from', 'effective_to', 'items_count', 'description'];
         $sort = in_array($sort, $sortableColumns, true) ? $sort : 'version_number';
 
         $query = BomHeader::query()
@@ -58,7 +58,13 @@ final class BomMaterialListController extends Controller
             });
         }
 
-        $boms = $query->orderBy($sort, $direction)->paginate(15)->withQueryString();
+        if ($sort === 'product') {
+            $query->orderBy(Product::query()->select('sku')->whereColumn('products.id', 'bom_headers.product_id'), $direction);
+        } else {
+            $query->orderBy($sort, $direction);
+        }
+
+        $boms = $query->orderBy('id', $direction)->paginate(15)->withQueryString();
 
         return view('client.bom.search', compact('company', 'search', 'sort', 'direction', 'boms'));
     }

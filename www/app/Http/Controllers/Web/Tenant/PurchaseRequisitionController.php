@@ -53,7 +53,7 @@ final class PurchaseRequisitionController extends Controller
             $status = '';
         }
 
-        abort_unless(in_array($sort, ['id', 'required_date', 'status', 'created_at'], true), 404);
+        abort_unless(in_array($sort, ['id', 'requisition_number', 'required_date', 'status', 'lines_count', 'created_at'], true), 404);
 
         $requisitions = PurchaseRequisition::query()
             ->withCount('lines')
