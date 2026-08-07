@@ -11,4 +11,5 @@ return [
     'empty_balances' => 'No balances found.', 'empty_movements' => 'No movements found.',
     'filter' => 'Filter', 'back' => 'Back', 'cancel' => 'Cancel', 'save' => 'Record movement', 'select' => 'Select',
     'lot' => 'Lot', 'reference_type' => 'Reference type', 'reference_id' => 'Reference ID',
+    'movement_types' => ['RECEIPT' => 'Receipt', 'ISSUE' => 'Issue', 'RESERVE' => 'Reservation', 'RELEASE' => 'Reservation release', 'TRANSFER_OUT' => 'Transfer - outbound', 'TRANSFER_IN' => 'Transfer - inbound', 'INSPECTION_HOLD' => 'Inspection hold', 'INSPECTION_RELEASE' => 'Inspection release'],
 ];

@@ -181,19 +181,19 @@ final class DomainDashboardController extends Controller
     private function analysisData(int $companyId): array
     {
         $pendingItems = [
-            $this->metric('Recomendacoes pendentes com aging > '.self::AGING_ANALYTICS_DAYS.'d', $this->countStatusAging($companyId, 'manufacturing_analytics_recommendations', ['PENDING', 'INVESTIGATE'], 'created_at', self::AGING_ANALYTICS_DAYS), 1, 4),
-            $this->metric('Qualidade pendente de fechamento', $this->countByStatus($companyId, 'production_quality_records', ['PENDING']), 2, 6),
+            $this->metric(__('domain_dashboard.metrics.pending_recommendations', ['days' => self::AGING_ANALYTICS_DAYS]), $this->countStatusAging($companyId, 'manufacturing_analytics_recommendations', ['PENDING', 'INVESTIGATE'], 'created_at', self::AGING_ANALYTICS_DAYS), 1, 4),
+            $this->metric(__('domain_dashboard.metrics.quality_closing'), $this->countByStatus($companyId, 'production_quality_records', ['PENDING']), 2, 6),
         ];
 
         $inProgressItems = [
-            $this->metric('Ordens com apontamentos parciais', $this->countByStatus($companyId, 'production_orders', ['PARTIALLY_COMPLETED']), 2, 8),
-            $this->metric('Apontamentos de hoje', $this->countToday($companyId, 'production_operation_outputs', 'reported_at'), 1, 999999),
+            $this->metric(__('domain_dashboard.metrics.partial_postings'), $this->countByStatus($companyId, 'production_orders', ['PARTIALLY_COMPLETED']), 2, 8),
+            $this->metric(__('domain_dashboard.metrics.today_postings'), $this->countToday($companyId, 'production_operation_outputs', 'reported_at'), 1, 999999),
         ];
 
         return $this->compose(
             domain: 'analysis',
             title: __('ui.domain_analysis'),
-            description: 'Acompanhe indicadores operacionais, recomendacoes e pontos que exigem acao imediata.',
+            description: __('domain_dashboard.descriptions.analysis'),
             pendingItems: $pendingItems,
             inProgressItems: $inProgressItems,
             shortcuts: [
@@ -207,27 +207,27 @@ final class DomainDashboardController extends Controller
     private function inventoryData(int $companyId): array
     {
         $pendingItems = [
-            $this->metric('Reservas de alta prioridade (<= 20)', $this->countInventoryReservationsHighPriority($companyId, 20), 2, 6),
-            $this->metric('Reservas vencidas e ainda ativas', $this->countExpiredReservationsStillActive($companyId), 1, 3),
-            $this->metric('Itens abaixo do estoque de seguranca', $this->countLowStock($companyId), 2, 8),
+            $this->metric(__('domain_dashboard.metrics.high_priority_reservations'), $this->countInventoryReservationsHighPriority($companyId, 20), 2, 6),
+            $this->metric(__('domain_dashboard.metrics.expired_reservations'), $this->countExpiredReservationsStillActive($companyId), 1, 3),
+            $this->metric(__('domain_dashboard.metrics.low_stock'), $this->countLowStock($companyId), 2, 8),
         ];
 
         $inProgressItems = [
-            $this->metric('Movimentos hoje', $this->countToday($companyId, 'stock_ledger_movements', 'movement_at'), 1, 999999),
-            $this->metric('Transferencias hoje', $this->countByMovementTypeToday($companyId, ['TRANSFER_OUT', 'TRANSFER_IN']), 1, 999999),
-            $this->metric('Itens em inspecao', $this->countInspectionQueue($companyId), 2, 6),
+            $this->metric(__('domain_dashboard.metrics.today_movements'), $this->countToday($companyId, 'stock_ledger_movements', 'movement_at'), 1, 999999),
+            $this->metric(__('domain_dashboard.metrics.today_transfers'), $this->countByMovementTypeToday($companyId, ['TRANSFER_OUT', 'TRANSFER_IN']), 1, 999999),
+            $this->metric(__('domain_dashboard.metrics.inspection_items'), $this->countInspectionQueue($companyId), 2, 6),
         ];
 
         return $this->compose(
             domain: 'inventory',
             title: __('ui.module_inventory'),
-            description: 'Controle rapido de reservas, criticidades de saldo e movimentacoes recentes.',
+            description: __('domain_dashboard.descriptions.inventory'),
             pendingItems: $pendingItems,
             inProgressItems: $inProgressItems,
             shortcuts: [
                 ['label' => __('ui.inventory_count'), 'href' => route('inventory.balances.index')],
                 ['label' => __('ui.inventory_movements'), 'href' => route('inventory.movements.index')],
-                ['label' => 'Novo movimento', 'href' => route('inventory.movements.create')],
+                ['label' => __('domain_dashboard.shortcuts_labels.new_movement'), 'href' => route('inventory.movements.create')],
                 ['label' => __('ui.inventory_warehouses'), 'href' => route('inventory.warehouses.index')],
             ]
         );
@@ -237,20 +237,20 @@ final class DomainDashboardController extends Controller
     private function purchasingData(int $companyId): array
     {
         $pendingItems = [
-            $this->metric('Linhas de requisicao vencidas (need by < hoje)', $this->countOpenRequisitionLinesOverdue($companyId), 1, 3),
-            $this->metric('Pedidos de compra com entrega atrasada', $this->countPurchaseOrdersDeliveryOverdue($companyId), 1, 3),
-            $this->metric('Recebimentos em rascunho com aging > 2d', $this->countStatusAging($companyId, 'purchase_receipts', ['DRAFT'], 'created_at', 2), 2, 5),
+            $this->metric(__('domain_dashboard.metrics.overdue_requisition_lines'), $this->countOpenRequisitionLinesOverdue($companyId), 1, 3),
+            $this->metric(__('domain_dashboard.metrics.late_purchase_orders'), $this->countPurchaseOrdersDeliveryOverdue($companyId), 1, 3),
+            $this->metric(__('domain_dashboard.metrics.draft_receipts'), $this->countStatusAging($companyId, 'purchase_receipts', ['DRAFT'], 'created_at', 2), 2, 5),
         ];
 
         $inProgressItems = [
-            $this->metric('Pedidos de compra em aberto', $this->countByStatus($companyId, 'purchase_orders', ['APPROVED', 'OPEN']), 5, 15),
-            $this->metric('Linhas de requisicao urgentes (need by <= D+3)', $this->countOpenRequisitionLinesUrgent($companyId), 2, 6),
+            $this->metric(__('domain_dashboard.metrics.open_purchase_orders'), $this->countByStatus($companyId, 'purchase_orders', ['APPROVED', 'OPEN']), 5, 15),
+            $this->metric(__('domain_dashboard.metrics.urgent_requisition_lines'), $this->countOpenRequisitionLinesUrgent($companyId), 2, 6),
         ];
 
         return $this->compose(
             domain: 'purchasing',
             title: __('ui.module_purchasing'),
-            description: 'Consolide pendencias de suprimentos e acompanhe o fluxo de compras em execucao.',
+            description: __('domain_dashboard.descriptions.purchasing'),
             pendingItems: $pendingItems,
             inProgressItems: $inProgressItems,
             shortcuts: [
@@ -266,27 +266,27 @@ final class DomainDashboardController extends Controller
     private function salesData(int $companyId): array
     {
         $pendingItems = [
-            $this->metric('Pedidos em rascunho', $this->countByStatus($companyId, 'sales', ['DRAFT']), 3, 8),
-            $this->metric('Pedidos confirmados pendentes com SLA estourado (> '.self::SLA_SALES_PENDING_DAYS.'d)', $this->countSalesPendingSlaBreached($companyId), 1, 4),
-            $this->metric('Pedidos confirmados pendentes (total)', $this->countConfirmedPendingOperational($companyId), 3, 10),
+            $this->metric(__('domain_dashboard.metrics.draft_sales'), $this->countByStatus($companyId, 'sales', ['DRAFT']), 3, 8),
+            $this->metric(__('domain_dashboard.metrics.pending_sales_sla', ['days' => self::SLA_SALES_PENDING_DAYS]), $this->countSalesPendingSlaBreached($companyId), 1, 4),
+            $this->metric(__('domain_dashboard.metrics.pending_sales_total'), $this->countConfirmedPendingOperational($companyId), 3, 10),
         ];
 
         $inProgressItems = [
-            $this->metric('Pedidos em separacao/faturamento/expedicao', $this->countByOperationalStatus($companyId, ['PICKING', 'INVOICED', 'SHIPPED']), 4, 12),
-            $this->metric('Pedidos expedidos com aging > 2d', $this->countStatusAgingByOperationalStatus($companyId, ['SHIPPED'], 'shipped_at', 2), 2, 6),
+            $this->metric(__('domain_dashboard.metrics.sales_in_fulfillment'), $this->countByOperationalStatus($companyId, ['PICKING', 'INVOICED', 'SHIPPED']), 4, 12),
+            $this->metric(__('domain_dashboard.metrics.shipped_sales_aging'), $this->countStatusAgingByOperationalStatus($companyId, ['SHIPPED'], 'shipped_at', 2), 2, 6),
         ];
 
         return $this->compose(
             domain: 'sales',
             title: __('ui.module_sales'),
-            description: 'Visualize rapidamente o funil operacional de vendas e acesse os cadastros principais.',
+            description: __('domain_dashboard.descriptions.sales'),
             pendingItems: $pendingItems,
             inProgressItems: $inProgressItems,
             shortcuts: [
                 ['label' => __('ui.sales_register'), 'href' => route('sales.index')],
-                ['label' => 'Novo pedido de venda', 'href' => route('sales.create')],
+                ['label' => __('domain_dashboard.shortcuts_labels.new_sale'), 'href' => route('sales.create')],
                 ['label' => __('ui.sales_customers'), 'href' => route('customers.index')],
-                ['label' => 'Novo cliente', 'href' => route('customers.create')],
+                ['label' => __('domain_dashboard.shortcuts_labels.new_customer'), 'href' => route('customers.create')],
             ]
         );
     }
@@ -295,19 +295,19 @@ final class DomainDashboardController extends Controller
     private function administrationData(int $companyId): array
     {
         $pendingItems = [
-            $this->metric('Convites pendentes com SLA estourado (> '.self::SLA_INVITATION_DAYS.'d)', $this->countPendingInvitationsSlaBreached($companyId), 1, 3),
-            $this->metric('Aprovacoes de acesso pendentes com aging > 2d', $this->countStatusAging($companyId, 'role_assignment_approvals', ['pending'], 'created_at', 2), 2, 5),
+            $this->metric(__('domain_dashboard.metrics.pending_invitations_sla', ['days' => self::SLA_INVITATION_DAYS]), $this->countPendingInvitationsSlaBreached($companyId), 1, 3),
+            $this->metric(__('domain_dashboard.metrics.pending_access_approvals'), $this->countStatusAging($companyId, 'role_assignment_approvals', ['pending'], 'created_at', 2), 2, 5),
         ];
 
         $inProgressItems = [
-            $this->metric('Usuarios ativos com acesso a empresa', $this->countActiveCompanyUsers($companyId), 1, 999999),
-            $this->metric('Convites enviados hoje', $this->countTodayInvitations($companyId), 1, 999999),
+            $this->metric(__('domain_dashboard.metrics.active_company_users'), $this->countActiveCompanyUsers($companyId), 1, 999999),
+            $this->metric(__('domain_dashboard.metrics.today_invitations'), $this->countTodayInvitations($companyId), 1, 999999),
         ];
 
         return $this->compose(
             domain: 'administration',
             title: __('ui.domain_administration'),
-            description: 'Gerencie acessos e governanca com foco em convites, perfis e pendencias administrativas.',
+            description: __('domain_dashboard.descriptions.administration'),
             pendingItems: $pendingItems,
             inProgressItems: $inProgressItems,
             shortcuts: [
@@ -721,9 +721,9 @@ final class DomainDashboardController extends Controller
     private function severityLabel(string $severity): string
     {
         return match ($severity) {
-            'critical' => 'Critico',
-            'attention' => 'Atencao',
-            default => 'Normal',
+            'critical' => __('domain_dashboard.severity.critical'),
+            'attention' => __('domain_dashboard.severity.attention'),
+            default => __('domain_dashboard.severity.normal'),
         };
     }
 }

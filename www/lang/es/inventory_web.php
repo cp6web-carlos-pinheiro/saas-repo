@@ -11,4 +11,5 @@ return [
     'empty_balances' => 'No se encontraron saldos.', 'empty_movements' => 'No se encontraron movimientos.',
     'filter' => 'Filtrar', 'back' => 'Volver', 'cancel' => 'Cancelar', 'save' => 'Registrar movimiento', 'select' => 'Seleccione',
     'lot' => 'Lote', 'reference_type' => 'Tipo de referencia', 'reference_id' => 'ID de referencia',
+    'movement_types' => ['RECEIPT' => 'Entrada', 'ISSUE' => 'Salida', 'RESERVE' => 'Reserva', 'RELEASE' => 'Liberación de reserva', 'TRANSFER_OUT' => 'Transferencia - salida', 'TRANSFER_IN' => 'Transferencia - entrada', 'INSPECTION_HOLD' => 'Bloqueo para inspección', 'INSPECTION_RELEASE' => 'Liberación de inspección'],
 ];

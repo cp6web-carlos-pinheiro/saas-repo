@@ -28,17 +28,7 @@ final class InventoryWebController extends Controller
 
     private const UPDATE_PERMISSION = 'inventory.update';
 
-    /** @var array<string, string> */
-    private const MOVEMENT_TYPES = [
-        'RECEIPT' => 'Entrada',
-        'ISSUE' => 'Saída',
-        'RESERVE' => 'Reserva',
-        'RELEASE' => 'Liberação de reserva',
-        'TRANSFER_OUT' => 'Transferência - saída',
-        'TRANSFER_IN' => 'Transferência - entrada',
-        'INSPECTION_HOLD' => 'Bloqueio para inspeção',
-        'INSPECTION_RELEASE' => 'Liberação da inspeção',
-    ];
+    private const MOVEMENT_TYPES = ['RECEIPT', 'ISSUE', 'RESERVE', 'RELEASE', 'TRANSFER_OUT', 'TRANSFER_IN', 'INSPECTION_HOLD', 'INSPECTION_RELEASE'];
 
     public function balances(Request $request): View
     {
@@ -77,7 +67,7 @@ final class InventoryWebController extends Controller
         $productId = $request->integer('product_id') ?: null;
         $movementType = strtoupper(trim((string) $request->query('movement_type')));
 
-        if (! array_key_exists($movementType, self::MOVEMENT_TYPES)) {
+        if (! in_array($movementType, self::MOVEMENT_TYPES, true)) {
             $movementType = '';
         }
 
@@ -98,7 +88,7 @@ final class InventoryWebController extends Controller
             'warehouseId' => $warehouseId,
             'productId' => $productId,
             'movementType' => $movementType,
-            'movementTypes' => self::MOVEMENT_TYPES,
+            'movementTypes' => $this->movementTypes(),
             'warehouses' => $this->warehouseOptions($company),
             'products' => $this->productOptions($company),
         ]);
@@ -111,7 +101,7 @@ final class InventoryWebController extends Controller
 
         return view('client.inventory.movements.form', [
             'company' => $company,
-            'movementTypes' => self::MOVEMENT_TYPES,
+            'movementTypes' => $this->movementTypes(),
             'warehouses' => $this->warehouseOptions($company),
             'products' => $this->productOptions($company),
         ]);
@@ -125,7 +115,7 @@ final class InventoryWebController extends Controller
         $data = $request->validate([
             'warehouse_id' => ['required', 'integer', Rule::exists('warehouses', 'id')->where('company_id', $company->id)],
             'product_id' => ['required', 'integer', Rule::exists('products', 'id')->where('company_id', $company->id)],
-            'movement_type' => ['required', Rule::in(array_keys(self::MOVEMENT_TYPES))],
+            'movement_type' => ['required', Rule::in(self::MOVEMENT_TYPES)],
             'quantity' => ['required', 'numeric', 'min:0.000001'],
             'allocation_strategy' => ['nullable', Rule::in(['FIFO', 'FEFO'])],
             'lot_number' => ['nullable', 'string', 'max:80'],
@@ -157,5 +147,13 @@ final class InventoryWebController extends Controller
     private function productOptions(Company $company)
     {
         return Product::query()->where('company_id', $company->id)->where('is_active', true)->orderBy('sku')->get(['id', 'sku', 'description']);
+    }
+
+    /** @return array<string, string> */
+    private function movementTypes(): array
+    {
+        return collect(self::MOVEMENT_TYPES)
+            ->mapWithKeys(static fn (string $type): array => [$type => __('inventory_web.movement_types.'.$type)])
+            ->all();
     }
 }
