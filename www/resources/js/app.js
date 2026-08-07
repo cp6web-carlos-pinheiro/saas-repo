@@ -191,7 +191,7 @@ const initializeClientSideTableSorting = () => {
 
 		const dataRows = Array.from(body.rows).filter((row) => row.cells.length === headerRow.cells.length && !row.querySelector('td[colspan]'));
 
-		if (dataRows.length < 2) {
+		if (dataRows.length < 1) {
 			continue;
 		}
 
