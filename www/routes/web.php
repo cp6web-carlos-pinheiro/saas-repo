@@ -401,6 +401,7 @@ Route::middleware('auth:web')->group(function (): void {
 
 Route::prefix('global-admin')->name('global-admin.')->middleware('auth:admin')->group(function (): void {
     Route::get('/', GlobalAdminHomeController::class)->name('home');
+    Route::view('/design-system', 'docs.design-system')->name('design-system');
     Route::get('/docs', [DocumentationController::class, 'indexGlobal'])->name('docs.index');
     Route::get('/docs/{file}', [DocumentationController::class, 'showGlobal'])
         ->where('file', '[^/]+')

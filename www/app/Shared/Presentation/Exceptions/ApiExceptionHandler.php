@@ -20,7 +20,7 @@ class ApiExceptionHandler
     public function render(Request $request, Throwable $exception): Response
     {
         if ($exception instanceof AuthenticationException && ! $request->expectsJson()) {
-            return redirect()->guest(route('login'));
+            return redirect()->guest($exception->redirectTo($request) ?? route('login'));
         }
 
         if ($exception instanceof DomainException && ! $request->expectsJson()) {

@@ -13,6 +13,23 @@ final class GlobalAdminAuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_global_admin_login_renders_a_single_form(): void
+    {
+        $this->withoutVite();
+
+        $response = $this->get(route('global-admin.login'))
+            ->assertOk()
+            ->assertViewIs('admin.login');
+
+        self::assertSame(1, substr_count($response->getContent(), '<form'));
+    }
+
+    public function test_guest_is_redirected_to_global_admin_login_from_protected_area(): void
+    {
+        $this->get(route('global-admin.home'))
+            ->assertRedirect(route('global-admin.login'));
+    }
+
     public function test_authenticated_global_admin_is_redirected_from_login_to_global_admin_home(): void
     {
         $admin = Admin::query()->create([

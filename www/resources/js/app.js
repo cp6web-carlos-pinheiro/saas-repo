@@ -1,8 +1,10 @@
 import './bootstrap';
 import jQuery from 'jquery';
-import 'select2/dist/css/select2.min.css';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import chevronDownIconSvg from '../icons/tabler/chevron-down.svg?raw';
+import circleCheckIconSvg from '../icons/tabler/circle-check.svg?raw';
+import closeIconSvg from '../icons/tabler/x.svg?raw';
 
 window.$ = window.jQuery = jQuery;
 
@@ -147,6 +149,7 @@ const select2Language = {
 	},
 	loadingMore: () => uiTranslations.selectLoadingMore ?? '',
 	noResults: () => uiTranslations.selectNoResults ?? '',
+	removeItem: () => uiTranslations.selectRemoveItem ?? 'Remover item',
 	searching: () => uiTranslations.selectSearching ?? '',
 };
 
@@ -198,17 +201,22 @@ const initializeClientSideTableSorting = () => {
 		Array.from(headerRow.cells).forEach((header, columnIndex) => {
 			const label = header.textContent.trim();
 			const sampleCell = dataRows[0]?.cells[columnIndex];
+			const hasBlockingControl = sampleCell
+				? [...sampleCell.querySelectorAll('a, button, form, input, select')]
+					.some((control) => !control.matches('.ui-table-cell-action, .ui-table-cell-input'))
+				: false;
 
-			if (label === '' || header.querySelector('a, button') || sampleCell?.querySelector('a, button, form')) {
+			if (label === '' || header.querySelector('a, button, input, select') || hasBlockingControl) {
 				return;
 			}
 
 			const icon = document.createElement('span');
-			icon.className = 'ml-1';
+			icon.className = 'ui-table-sort-icon';
 			icon.setAttribute('aria-hidden', 'true');
-			icon.textContent = '↕';
+			icon.dataset.sortState = 'none';
+			icon.innerHTML = chevronDownIconSvg;
 			header.append(icon);
-			header.classList.add('cursor-pointer', 'select-none', 'hover:text-[#1a73e8]');
+			header.classList.add('ui-table-sortable');
 			header.setAttribute('role', 'button');
 			header.setAttribute('tabindex', '0');
 			header.setAttribute('aria-sort', 'none');
@@ -220,7 +228,8 @@ const initializeClientSideTableSorting = () => {
 				for (const otherHeader of headerRow.cells) {
 					if (otherHeader !== header && otherHeader.dataset.clientSortable === 'true') {
 						otherHeader.setAttribute('aria-sort', 'none');
-						otherHeader.querySelector('[data-sort-icon]')?.replaceChildren('↕');
+						const otherIcon = otherHeader.querySelector('[data-sort-icon]');
+						if (otherIcon instanceof HTMLElement) otherIcon.dataset.sortState = 'none';
 					}
 				}
 
@@ -239,9 +248,11 @@ const initializeClientSideTableSorting = () => {
 					body.append(row);
 				}
 
+				table.dispatchEvent(new CustomEvent('ui:table-sorted'));
+
 				header.setAttribute('aria-sort', ascending ? 'ascending' : 'descending');
 				header.setAttribute('aria-label', `${label}. ${ascending ? uiTranslations.sortedAscending : uiTranslations.sortedDescending}`);
-				icon.textContent = ascending ? '↑' : '↓';
+				icon.dataset.sortState = ascending ? 'ascending' : 'descending';
 			};
 
 			header.dataset.clientSortable = 'true';
@@ -251,8 +262,8 @@ const initializeClientSideTableSorting = () => {
 				if (event.key === 'Enter' || event.key === ' ') {
 					event.preventDefault();
 					sortRows();
-				}
-			});
+		}
+});
 		});
 	}
 };
@@ -318,7 +329,57 @@ const initializeUiSelects = () => {
 			};
 		}
 
+		if (element.multiple) {
+			select2Options.closeOnSelect = false;
+			select2Options.templateResult = (data) => {
+				if (!data.id) {
+					return data.text;
+				}
+
+				const option = document.createElement('span');
+				const label = document.createElement('span');
+				option.className = 'ui-select2-option';
+				label.textContent = data.text;
+				option.append(label);
+
+				if (data.element?.selected) {
+					const check = document.createElement('span');
+					check.className = 'ui-select2-option-check';
+					check.setAttribute('aria-hidden', 'true');
+					check.innerHTML = circleCheckIconSvg;
+					option.append(check);
+				}
+
+				return option;
+			};
+		}
+
 		select.select2(select2Options);
+
+		if (element.multiple) {
+			const decorateChoicesAsBadges = () => {
+				window.requestAnimationFrame(() => {
+					const container = select.next('.select2-container');
+					container
+						.find('.select2-selection__choice')
+						.addClass('ui-badge ui-badge-primary ui-badge-md');
+
+					container.find('.select2-selection__choice__remove').each((_, button) => {
+						if (button.dataset.uiIcon === 'x') {
+							return;
+						}
+
+						button.dataset.uiIcon = 'x';
+						button.innerHTML = closeIconSvg;
+						button.querySelector('svg')?.setAttribute('aria-hidden', 'true');
+					});
+				});
+			};
+
+			select.on('select2:select select2:unselect', decorateChoicesAsBadges);
+			decorateChoicesAsBadges();
+		}
+
 		initializedCount += 1;
 	}
 
@@ -491,6 +552,122 @@ if (sidebarShell && sidebar && sidebarToggle) {
 	});
 }
 
+const designSystemSidebarShell = document.querySelector('[data-ds-sidebar-shell]');
+const designSystemSidebar = document.querySelector('[data-ds-sidebar]');
+const designSystemSidebarToggle = document.querySelector('[data-ds-sidebar-toggle]');
+const designSystemMobileToggle = document.querySelector('[data-ds-sidebar-mobile-toggle]');
+const designSystemSidebarOverlay = document.querySelector('[data-ds-sidebar-overlay]');
+
+if (designSystemSidebarShell && designSystemSidebar && designSystemSidebarToggle) {
+	const storageKey = 'design-system.sidebar-collapsed';
+	const desktopMedia = window.matchMedia('(min-width: 768px)');
+	let collapsed = false;
+
+	try {
+		collapsed = window.localStorage.getItem(storageKey) === '1';
+	} catch (_) {
+		collapsed = false;
+	}
+
+	const applyDesignSystemSidebarState = () => {
+		designSystemSidebarShell.classList.toggle('is-collapsed', collapsed);
+		designSystemSidebar.classList.toggle('is-collapsed', collapsed);
+		designSystemSidebarToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+		designSystemSidebarToggle.setAttribute(
+			'aria-label',
+			collapsed
+				? (designSystemSidebarToggle.dataset.expandLabel ?? 'Expandir menu lateral')
+				: (designSystemSidebarToggle.dataset.collapseLabel ?? 'Recolher menu lateral'),
+		);
+	};
+
+	const setDesignSystemMobileMenu = (isOpen) => {
+		designSystemSidebar.classList.toggle('is-mobile-open', isOpen);
+		designSystemSidebarOverlay?.classList.toggle('is-open', isOpen);
+		designSystemMobileToggle?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+	};
+
+	designSystemSidebarToggle.addEventListener('click', () => {
+		if (!desktopMedia.matches) {
+			setDesignSystemMobileMenu(false);
+			return;
+		}
+
+		collapsed = !collapsed;
+		applyDesignSystemSidebarState();
+
+		try {
+			window.localStorage.setItem(storageKey, collapsed ? '1' : '0');
+		} catch (_) {}
+	});
+
+	designSystemMobileToggle?.addEventListener('click', () => {
+		setDesignSystemMobileMenu(!designSystemSidebar.classList.contains('is-mobile-open'));
+	});
+
+	designSystemSidebarOverlay?.addEventListener('click', () => setDesignSystemMobileMenu(false));
+
+	const closeOtherDesignSystemSubmenus = (currentToggle = null) => {
+		for (const toggle of designSystemSidebar.querySelectorAll('[data-ds-sidebar-submenu-toggle]')) {
+			if (toggle === currentToggle) continue;
+
+			const submenuId = toggle.getAttribute('aria-controls');
+			const submenu = submenuId ? document.getElementById(submenuId) : null;
+			toggle.setAttribute('aria-expanded', 'false');
+			submenu?.classList.add('hidden');
+		}
+	};
+
+	for (const toggle of designSystemSidebar.querySelectorAll('[data-ds-sidebar-submenu-toggle]')) {
+		toggle.addEventListener('click', () => {
+			if (desktopMedia.matches && collapsed) {
+				collapsed = false;
+				applyDesignSystemSidebarState();
+
+				try {
+					window.localStorage.setItem(storageKey, '0');
+				} catch (_) {}
+			}
+
+			const submenuId = toggle.getAttribute('aria-controls');
+			const submenu = submenuId ? document.getElementById(submenuId) : null;
+			const shouldOpen = toggle.getAttribute('aria-expanded') !== 'true';
+
+			closeOtherDesignSystemSubmenus(toggle);
+			toggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+			submenu?.classList.toggle('hidden', !shouldOpen);
+		});
+	}
+
+	for (const link of designSystemSidebar.querySelectorAll('[data-ds-sidebar-link]')) {
+		link.addEventListener('click', () => {
+			if (link.getAttribute('href')?.startsWith('#')) {
+				for (const sidebarLink of designSystemSidebar.querySelectorAll('[data-ds-sidebar-link]')) {
+					const isCurrent = sidebarLink === link;
+					sidebarLink.classList.toggle('is-active', isCurrent);
+
+					if (isCurrent) {
+						sidebarLink.setAttribute('aria-current', 'page');
+					} else {
+						sidebarLink.removeAttribute('aria-current');
+					}
+				}
+			}
+
+			setDesignSystemMobileMenu(false);
+		});
+	}
+
+	desktopMedia.addEventListener('change', () => setDesignSystemMobileMenu(false));
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape') {
+			setDesignSystemMobileMenu(false);
+		}
+	});
+
+	applyDesignSystemSidebarState();
+}
+
 const adminDeleteForms = document.querySelectorAll('form[data-admin-delete-confirm]');
 
 for (const form of adminDeleteForms) {
@@ -531,6 +708,831 @@ for (const form of adminDeleteForms) {
 			form.dataset.confirmed = 'true';
 			HTMLFormElement.prototype.submit.call(form);
 		}
+	});
+}
+
+const closeUiDropdown = (dropdown, restoreFocus = false) => {
+	const trigger = dropdown?.querySelector('[data-ui-dropdown-trigger]');
+	const menu = dropdown?.querySelector('[data-ui-dropdown-menu]');
+
+	if (!(trigger instanceof HTMLElement) || !(menu instanceof HTMLElement)) {
+		return;
+	}
+
+	trigger.setAttribute('aria-expanded', 'false');
+	menu.classList.add('hidden');
+
+	if (restoreFocus) {
+		trigger.focus();
+	}
+};
+
+const closeOtherUiDropdowns = (currentDropdown = null) => {
+	for (const dropdown of document.querySelectorAll('[data-ui-dropdown]')) {
+		if (dropdown !== currentDropdown) {
+			closeUiDropdown(dropdown);
+		}
+	}
+};
+
+for (const dropdown of document.querySelectorAll('[data-ui-dropdown]')) {
+	const trigger = dropdown.querySelector('[data-ui-dropdown-trigger]');
+	const menu = dropdown.querySelector('[data-ui-dropdown-menu]');
+
+	if (!(trigger instanceof HTMLElement) || !(menu instanceof HTMLElement)) {
+		continue;
+	}
+
+	trigger.addEventListener('click', () => {
+		const shouldOpen = trigger.getAttribute('aria-expanded') !== 'true';
+		closeOtherUiDropdowns(dropdown);
+		trigger.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+		menu.classList.toggle('hidden', !shouldOpen);
+	});
+
+	trigger.addEventListener('keydown', (event) => {
+		if (event.key !== 'ArrowDown') {
+			return;
+		}
+
+		event.preventDefault();
+		closeOtherUiDropdowns(dropdown);
+		trigger.setAttribute('aria-expanded', 'true');
+		menu.classList.remove('hidden');
+		menu.querySelector('[role="menuitem"]:not([disabled])')?.focus();
+	});
+
+	menu.addEventListener('click', (event) => {
+		if (event.target instanceof Element && event.target.closest('[role="menuitem"]')) {
+			closeUiDropdown(dropdown, true);
+		}
+	});
+}
+
+for (const dismissButton of document.querySelectorAll('[data-ui-alert-dismiss]')) {
+	dismissButton.addEventListener('click', () => {
+		const alert = dismissButton.closest('[data-ui-alert]');
+
+		if (alert instanceof HTMLElement) {
+			if (alert.hasAttribute('data-ui-demo-alert')) {
+				alert.classList.add('hidden');
+			} else {
+				alert.remove();
+			}
+		}
+	});
+}
+
+for (const trigger of document.querySelectorAll('[data-ui-alert-trigger]')) {
+	trigger.addEventListener('click', () => {
+		const requestedVariant = trigger.getAttribute('data-ui-alert-trigger');
+
+		for (const alert of document.querySelectorAll('[data-ui-demo-alert]')) {
+			const shouldShow = requestedVariant === 'all' || alert.getAttribute('data-ui-demo-alert') === requestedVariant;
+
+			if (shouldShow) {
+				alert.classList.remove('hidden');
+			}
+		}
+	});
+}
+
+const activateUiTab = (tabs, selectedTab, moveFocus = false) => {
+	const tabButtons = [...tabs.querySelectorAll('[data-ui-tab]')];
+
+	for (const tab of tabButtons) {
+		const isSelected = tab === selectedTab;
+		const panelId = tab.getAttribute('aria-controls');
+		const panel = panelId ? document.getElementById(panelId) : null;
+
+		tab.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+		tab.setAttribute('tabindex', isSelected ? '0' : '-1');
+
+		if (panel instanceof HTMLElement) {
+			panel.hidden = !isSelected;
+		}
+	}
+
+	if (moveFocus) {
+		selectedTab.focus();
+	}
+};
+
+for (const tabs of document.querySelectorAll('[data-ui-tabs]')) {
+	const tabButtons = [...tabs.querySelectorAll('[data-ui-tab]')];
+	const enabledTabs = tabButtons.filter((tab) => !tab.disabled);
+
+	for (const tab of tabButtons) {
+		tab.addEventListener('click', () => activateUiTab(tabs, tab));
+
+		tab.addEventListener('keydown', (event) => {
+			if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key) || enabledTabs.length === 0) {
+				return;
+			}
+
+			event.preventDefault();
+			const currentIndex = enabledTabs.indexOf(tab);
+			let nextIndex = currentIndex;
+
+			if (event.key === 'Home') nextIndex = 0;
+			if (event.key === 'End') nextIndex = enabledTabs.length - 1;
+			if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % enabledTabs.length;
+			if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + enabledTabs.length) % enabledTabs.length;
+
+			activateUiTab(tabs, enabledTabs[nextIndex], true);
+		});
+	}
+
+	const initialTab = tabButtons.find((tab) => tab.getAttribute('aria-selected') === 'true') ?? enabledTabs[0];
+
+	if (initialTab) {
+		activateUiTab(tabs, initialTab);
+	}
+}
+
+let activeUiModal = null;
+let uiModalPreviousFocus = null;
+let uiModalPreviousOverflow = '';
+
+const uiModalFocusableSelector = [
+	'a[href]',
+	'button:not([disabled])',
+	'input:not([disabled])',
+	'select:not([disabled])',
+	'textarea:not([disabled])',
+	'[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+const closeUiModal = (modal, restoreFocus = true) => {
+	if (!(modal instanceof HTMLElement)) {
+		return;
+	}
+
+	modal.classList.add('hidden');
+	modal.setAttribute('aria-hidden', 'true');
+
+	if (activeUiModal === modal) {
+		activeUiModal = null;
+		document.body.style.overflow = uiModalPreviousOverflow;
+
+		if (restoreFocus && uiModalPreviousFocus instanceof HTMLElement) {
+			uiModalPreviousFocus.focus();
+		}
+
+		uiModalPreviousFocus = null;
+	}
+};
+
+const openUiModal = (modal, trigger = null) => {
+	if (!(modal instanceof HTMLElement)) {
+		return;
+	}
+
+	if (activeUiModal) {
+		closeUiModal(activeUiModal, false);
+	}
+
+	uiModalPreviousFocus = trigger instanceof HTMLElement ? trigger : document.activeElement;
+	uiModalPreviousOverflow = document.body.style.overflow;
+	activeUiModal = modal;
+	modal.classList.remove('hidden');
+	modal.setAttribute('aria-hidden', 'false');
+	document.body.style.overflow = 'hidden';
+
+	const panel = modal.querySelector('[role="dialog"]');
+	const firstFocusable = panel?.querySelector(uiModalFocusableSelector);
+	(firstFocusable ?? panel)?.focus();
+};
+
+for (const trigger of document.querySelectorAll('[data-ui-modal-open]')) {
+	trigger.addEventListener('click', () => {
+		const modalId = trigger.getAttribute('data-ui-modal-open');
+		openUiModal(modalId ? document.getElementById(modalId) : null, trigger);
+	});
+}
+
+for (const closeButton of document.querySelectorAll('[data-ui-modal-close]')) {
+	closeButton.addEventListener('click', () => closeUiModal(closeButton.closest('[data-ui-modal]')));
+}
+
+document.addEventListener('click', (event) => {
+	if (event.target instanceof Element && !event.target.closest('[data-ui-dropdown]')) {
+		closeOtherUiDropdowns();
+	}
+});
+
+document.addEventListener('keydown', (event) => {
+	if (event.key === 'Escape') {
+		if (activeUiModal) {
+			event.preventDefault();
+			closeUiModal(activeUiModal);
+			return;
+		}
+
+		const openDropdown = document.querySelector('[data-ui-dropdown-trigger][aria-expanded="true"]')?.closest('[data-ui-dropdown]');
+
+		if (openDropdown) {
+			event.preventDefault();
+			closeUiDropdown(openDropdown, true);
+		}
+	}
+
+	if (event.key !== 'Tab' || !activeUiModal) {
+		return;
+	}
+
+	const focusableElements = [...activeUiModal.querySelectorAll(uiModalFocusableSelector)]
+		.filter((element) => element instanceof HTMLElement && element.offsetParent !== null);
+
+	if (focusableElements.length === 0) {
+		event.preventDefault();
+		activeUiModal.querySelector('[role="dialog"]')?.focus();
+		return;
+	}
+
+	const firstElement = focusableElements[0];
+	const lastElement = focusableElements[focusableElements.length - 1];
+
+	if (event.shiftKey && document.activeElement === firstElement) {
+		event.preventDefault();
+		lastElement.focus();
+	} else if (!event.shiftKey && document.activeElement === lastElement) {
+		event.preventDefault();
+		firstElement.focus();
+	}
+});
+
+const uiDemoToast = document.querySelector('[data-ui-demo-toast]');
+const uiDemoToastMessage = uiDemoToast?.querySelector('[data-ui-demo-toast-message]');
+let uiDemoToastTimeout = null;
+
+for (const trigger of document.querySelectorAll('[data-ui-demo-message]')) {
+	trigger.addEventListener('click', () => {
+		if (!(uiDemoToast instanceof HTMLElement) || !(uiDemoToastMessage instanceof HTMLElement)) {
+			return;
+		}
+
+		uiDemoToastMessage.textContent = trigger.getAttribute('data-ui-demo-message') ?? 'Ação executada.';
+		uiDemoToast.classList.remove('hidden');
+
+		if (uiDemoToastTimeout !== null) {
+			window.clearTimeout(uiDemoToastTimeout);
+		}
+
+		uiDemoToastTimeout = window.setTimeout(() => {
+			uiDemoToast.classList.add('hidden');
+			uiDemoToastTimeout = null;
+		}, 3200);
+	});
+}
+
+for (const copyButton of document.querySelectorAll('[data-ui-copy-code]')) {
+	copyButton.addEventListener('click', async () => {
+		const code = copyButton.closest('.ui-code-example')?.querySelector('[data-ui-code]')?.textContent ?? '';
+
+		if (code.trim() === '') {
+			return;
+		}
+
+		try {
+			await navigator.clipboard.writeText(code.trim());
+		} catch (_) {
+			const textarea = document.createElement('textarea');
+			textarea.value = code.trim();
+			textarea.style.position = 'fixed';
+			textarea.style.opacity = '0';
+			document.body.appendChild(textarea);
+			textarea.select();
+			document.execCommand('copy');
+			textarea.remove();
+		}
+
+		copyButton.textContent = copyButton.dataset.copiedLabel ?? 'Copiado';
+		window.setTimeout(() => {
+			copyButton.textContent = copyButton.dataset.copyLabel ?? 'Copiar';
+		}, 1600);
+	});
+}
+
+document.addEventListener('click', (event) => {
+	if (!(event.target instanceof Element)) {
+		return;
+	}
+
+	const readonlyButton = event.target.closest('[data-ui-readonly="true"]');
+
+	if (!readonlyButton) {
+		return;
+	}
+
+	event.preventDefault();
+	event.stopImmediatePropagation();
+
+	const playgroundStatus = readonlyButton.closest('[data-ui-button-playground]')?.querySelector('[data-ui-button-playground-status]');
+
+	if (playgroundStatus instanceof HTMLElement) {
+		playgroundStatus.textContent = 'Somente leitura: a ação foi bloqueada, mas o botão continua acessível pelo teclado.';
+	}
+}, true);
+
+const updateUiProgress = (progress, value) => {
+	if (!(progress instanceof HTMLElement)) {
+		return;
+	}
+
+	const max = Number(progress.getAttribute('aria-valuemax')) || 100;
+	const normalizedValue = Math.min(max, Math.max(0, Number(value) || 0));
+	const percent = (normalizedValue / max) * 100;
+	const suffix = progress.dataset.uiProgressSuffix ?? '%';
+
+	progress.setAttribute('aria-valuenow', String(normalizedValue));
+	const fill = progress.querySelector('[data-ui-progress-fill]');
+	const valueLabel = progress.querySelector('[data-ui-progress-value]');
+
+	if (fill instanceof HTMLElement) {
+		fill.style.width = `${percent}%`;
+	}
+
+	if (valueLabel instanceof HTMLElement) {
+		valueLabel.textContent = `${normalizedValue}${suffix}`;
+	}
+};
+
+for (const slider of document.querySelectorAll('[data-ui-slider]')) {
+	const input = slider.querySelector('[data-ui-slider-input]');
+	const output = slider.querySelector('[data-ui-slider-output]');
+
+	if (!(input instanceof HTMLInputElement)) {
+		continue;
+	}
+
+	const updateSlider = () => {
+		const min = Number(input.min) || 0;
+		const max = Number(input.max) || 100;
+		const value = Number(input.value);
+		const percent = max === min ? 0 : ((value - min) / (max - min)) * 100;
+		const suffix = slider.dataset.uiSliderSuffix ?? '';
+
+		slider.style.setProperty('--ui-slider-progress', `${percent}%`);
+
+		if (output instanceof HTMLOutputElement) {
+			output.value = `${input.value}${suffix}`;
+		}
+
+		const progressSelector = slider.dataset.uiProgressTarget;
+		const progress = progressSelector ? document.querySelector(progressSelector) : null;
+		updateUiProgress(progress, value);
+	};
+
+	input.addEventListener('input', updateSlider);
+	updateSlider();
+}
+
+const buttonVariantClasses = [
+	'ui-button-primary',
+	'ui-button-neutral',
+	'ui-button-info',
+	'ui-button-success',
+	'ui-button-warning',
+	'ui-button-danger',
+	'ui-button-secondary',
+	'ui-button-outline',
+	'ui-button-ghost',
+];
+const buttonSizeClasses = [
+	'min-h-9', 'px-3', 'py-2', 'text-xs',
+	'min-h-10', 'px-4', 'text-sm',
+	'min-h-12', 'px-6', 'py-3', 'text-base',
+];
+const buttonSizeClassMap = {
+	sm: ['min-h-9', 'px-3', 'py-2', 'text-xs'],
+	md: ['min-h-10', 'px-4', 'py-2', 'text-sm'],
+	lg: ['min-h-12', 'px-6', 'py-3', 'text-base'],
+};
+
+for (const playground of document.querySelectorAll('[data-ui-button-playground]')) {
+	const preview = playground.querySelector('[data-ui-button-playground-preview]');
+	const code = playground.querySelector('[data-ui-code]');
+	const status = playground.querySelector('[data-ui-button-playground-status]');
+	const getControl = (name) => playground.querySelector(`[data-ui-button-control="${name}"]`);
+
+	if (!(preview instanceof HTMLButtonElement) || !(code instanceof HTMLElement)) {
+		continue;
+	}
+
+	const renderPlaygroundButton = () => {
+		const variant = getControl('variant')?.value ?? 'primary';
+		const size = getControl('size')?.value ?? 'md';
+		const text = getControl('text')?.value?.trim() || 'Botão';
+		const icon = getControl('icon')?.value ?? '';
+		const disabled = Boolean(getControl('disabled')?.checked);
+		const readonly = Boolean(getControl('readonly')?.checked);
+		const loading = Boolean(getControl('loading')?.checked);
+		const unavailable = disabled || loading;
+
+		preview.classList.remove(...buttonVariantClasses, ...buttonSizeClasses, 'ui-button-readonly');
+		preview.classList.add(`ui-button-${variant}`, ...(buttonSizeClassMap[size] ?? buttonSizeClassMap.md));
+		preview.disabled = unavailable;
+		preview.toggleAttribute('aria-busy', loading);
+
+		if (readonly && !unavailable) {
+			preview.setAttribute('aria-disabled', 'true');
+			preview.dataset.uiReadonly = 'true';
+			preview.classList.add('ui-button-readonly');
+		} else {
+			preview.removeAttribute('aria-disabled');
+			delete preview.dataset.uiReadonly;
+		}
+
+		preview.replaceChildren();
+
+		if (loading) {
+			const spinner = document.createElement('span');
+			spinner.className = 'ui-spinner';
+			spinner.setAttribute('aria-hidden', 'true');
+			preview.append(spinner, document.createTextNode('Carregando'));
+		} else {
+			const iconTemplate = icon ? playground.querySelector(`[data-ui-button-icon-template="${icon}"]`) : null;
+
+			if (iconTemplate instanceof HTMLTemplateElement) {
+				preview.append(iconTemplate.content.cloneNode(true));
+			}
+
+			preview.append(document.createTextNode(text));
+		}
+
+		const bladeAttributes = [`variant="${variant}"`, `size="${size}"`];
+		if (disabled) bladeAttributes.push(':disabled="true"');
+		if (readonly) bladeAttributes.push(':readonly="true"');
+		if (loading) bladeAttributes.push(':loading="true"', 'loading-label="Carregando"');
+		const safeText = text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+		const contents = icon
+			? `\n    <x-ui.icon name="${icon}" size="sm" /> ${safeText}\n`
+			: safeText;
+
+		code.textContent = `<x-ui.button ${bladeAttributes.join(' ')}>${contents}</x-ui.button>`;
+
+		if (status instanceof HTMLElement) {
+			status.textContent = loading
+				? 'Loading ativo: o botão fica desabilitado enquanto processa.'
+				: disabled
+					? 'Disabled ativo: o botão não recebe foco nem executa a ação.'
+					: readonly
+						? 'Somente leitura: continua focável, mas a ação é bloqueada.'
+						: 'Pronto para testar. Clique no botão da prévia.';
+		}
+	};
+
+	for (const control of playground.querySelectorAll('[data-ui-button-control]')) {
+		control.addEventListener('input', renderPlaygroundButton);
+		control.addEventListener('change', renderPlaygroundButton);
+	}
+
+	preview.addEventListener('click', () => {
+		if (status instanceof HTMLElement) {
+			status.textContent = 'Botão acionado com sucesso.';
+		}
+	});
+
+	renderPlaygroundButton();
+}
+
+for (const accordion of document.querySelectorAll('[data-ui-accordion]')) {
+	const items = [...accordion.querySelectorAll('.ui-accordion-item')];
+	const allowsMultiple = accordion.dataset.uiAccordionMultiple === 'true';
+
+	for (const item of items) {
+		const trigger = item.querySelector('.ui-accordion-trigger');
+
+		if (item.dataset.disabled === 'true') {
+			trigger?.addEventListener('click', (event) => event.preventDefault());
+			continue;
+		}
+
+		item.addEventListener('toggle', () => {
+			if (!item.open || allowsMultiple) {
+				return;
+			}
+
+			for (const otherItem of items) {
+				if (otherItem !== item) otherItem.open = false;
+			}
+		});
+	}
+}
+
+for (const buttonGroup of document.querySelectorAll('.ui-button-group')) {
+	for (const button of buttonGroup.querySelectorAll('.ui-button[aria-pressed]')) {
+		button.addEventListener('click', () => {
+			for (const groupButton of buttonGroup.querySelectorAll('.ui-button[aria-pressed]')) {
+				groupButton.setAttribute('aria-pressed', groupButton === button ? 'true' : 'false');
+			}
+		});
+	}
+}
+
+for (const removeButton of document.querySelectorAll('[data-ui-attachment-remove]')) {
+	removeButton.addEventListener('click', () => {
+		const attachment = removeButton.closest('[data-ui-attachment]');
+
+		if (attachment instanceof HTMLElement) {
+			attachment.remove();
+		}
+	});
+}
+
+const calendarDateToIso = (date) => {
+	const year = date.getUTCFullYear();
+	const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+	const day = String(date.getUTCDate()).padStart(2, '0');
+
+	return `${year}-${month}-${day}`;
+};
+
+const initializeUiCalendar = (calendar) => {
+	const grid = calendar.querySelector('[data-ui-calendar-grid]');
+	const heading = calendar.querySelector('[data-ui-calendar-heading]');
+	const input = calendar.querySelector('[data-ui-calendar-input]');
+	const [initialYear, initialMonth] = (calendar.dataset.uiCalendarMonth || '').split('-').map(Number);
+	let visibleDate = new Date(Date.UTC(initialYear || new Date().getFullYear(), (initialMonth || (new Date().getMonth() + 1)) - 1, 1));
+	let selected = calendar.dataset.uiCalendarSelected || '';
+
+	if (!(grid instanceof HTMLElement) || !(heading instanceof HTMLElement)) {
+		return;
+	}
+
+	const renderCalendar = () => {
+		const year = visibleDate.getUTCFullYear();
+		const month = visibleDate.getUTCMonth();
+		const firstWeekday = new Date(Date.UTC(year, month, 1)).getUTCDay();
+		const firstCellDate = new Date(Date.UTC(year, month, 1 - firstWeekday));
+		const today = new Date();
+		const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+		heading.textContent = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(visibleDate);
+		grid.replaceChildren();
+
+		for (let index = 0; index < 42; index += 1) {
+			const date = new Date(firstCellDate);
+			date.setUTCDate(firstCellDate.getUTCDate() + index);
+			const iso = calendarDateToIso(date);
+			const dayButton = document.createElement('button');
+			const isOutside = date.getUTCMonth() !== month;
+			const isDisabled = (calendar.dataset.uiCalendarMin && iso < calendar.dataset.uiCalendarMin)
+				|| (calendar.dataset.uiCalendarMax && iso > calendar.dataset.uiCalendarMax);
+
+			dayButton.type = 'button';
+			dayButton.className = 'ui-calendar-day';
+			dayButton.textContent = String(date.getUTCDate());
+			dayButton.dataset.date = iso;
+			dayButton.setAttribute('role', 'gridcell');
+			dayButton.setAttribute('aria-label', new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeZone: 'UTC' }).format(date));
+			dayButton.classList.toggle('is-outside', isOutside);
+			dayButton.classList.toggle('is-today', iso === todayIso);
+			dayButton.classList.toggle('is-selected', iso === selected);
+			dayButton.setAttribute('aria-selected', iso === selected ? 'true' : 'false');
+			dayButton.disabled = Boolean(isDisabled);
+
+			dayButton.addEventListener('click', () => {
+				selected = iso;
+				calendar.dataset.uiCalendarSelected = iso;
+				visibleDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+
+				if (input instanceof HTMLInputElement) {
+					input.value = iso;
+					input.dispatchEvent(new Event('change', { bubbles: true }));
+				}
+
+				calendar.dispatchEvent(new CustomEvent('ui:date-selected', { bubbles: true, detail: { value: iso } }));
+				renderCalendar();
+			});
+
+			grid.append(dayButton);
+		}
+	};
+
+	calendar.querySelector('[data-ui-calendar-previous]')?.addEventListener('click', () => {
+		visibleDate = new Date(Date.UTC(visibleDate.getUTCFullYear(), visibleDate.getUTCMonth() - 1, 1));
+		renderCalendar();
+	});
+	calendar.querySelector('[data-ui-calendar-next]')?.addEventListener('click', () => {
+		visibleDate = new Date(Date.UTC(visibleDate.getUTCFullYear(), visibleDate.getUTCMonth() + 1, 1));
+		renderCalendar();
+	});
+
+	renderCalendar();
+};
+
+for (const calendar of document.querySelectorAll('[data-ui-calendar]')) {
+	initializeUiCalendar(calendar);
+}
+
+const closeUiDatePicker = (datePicker) => {
+	const trigger = datePicker?.querySelector('[data-ui-date-picker-trigger]');
+	const panel = datePicker?.querySelector('[data-ui-date-picker-panel]');
+
+	if (trigger instanceof HTMLElement && panel instanceof HTMLElement) {
+		trigger.setAttribute('aria-expanded', 'false');
+		panel.classList.add('hidden');
+	}
+};
+
+for (const datePicker of document.querySelectorAll('[data-ui-date-picker]')) {
+	const trigger = datePicker.querySelector('[data-ui-date-picker-trigger]');
+	const panel = datePicker.querySelector('[data-ui-date-picker-panel]');
+	const label = datePicker.querySelector('[data-ui-date-picker-label]');
+
+	trigger?.addEventListener('click', () => {
+		const shouldOpen = trigger.getAttribute('aria-expanded') !== 'true';
+
+		for (const otherPicker of document.querySelectorAll('[data-ui-date-picker]')) {
+			if (otherPicker !== datePicker) closeUiDatePicker(otherPicker);
+		}
+
+		trigger.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+		panel?.classList.toggle('hidden', !shouldOpen);
+	});
+
+	datePicker.addEventListener('ui:date-selected', (event) => {
+		const value = event.detail?.value;
+
+		if (value && label instanceof HTMLElement) {
+			const date = new Date(`${value}T00:00:00Z`);
+			label.textContent = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeZone: 'UTC' }).format(date);
+		}
+
+		closeUiDatePicker(datePicker);
+		trigger?.focus();
+	});
+}
+
+document.addEventListener('click', (event) => {
+	if (!(event.target instanceof Element)) return;
+
+	for (const datePicker of document.querySelectorAll('[data-ui-date-picker]')) {
+		if (!datePicker.contains(event.target)) closeUiDatePicker(datePicker);
+	}
+});
+
+document.addEventListener('keydown', (event) => {
+	if (event.key !== 'Escape') return;
+
+	for (const datePicker of document.querySelectorAll('[data-ui-date-picker]')) {
+		const trigger = datePicker.querySelector('[data-ui-date-picker-trigger][aria-expanded="true"]');
+
+		if (trigger instanceof HTMLElement) {
+			closeUiDatePicker(datePicker);
+			trigger.focus();
+		}
+	}
+});
+
+for (const dataTable of document.querySelectorAll('[data-ui-data-table]')) {
+	const table = dataTable.querySelector('table');
+	const body = table?.tBodies[0];
+	const filter = dataTable.querySelector('[data-ui-data-table-filter]');
+	const previous = dataTable.querySelector('[data-ui-data-table-previous]');
+	const next = dataTable.querySelector('[data-ui-data-table-next]');
+	const status = dataTable.querySelector('[data-ui-data-table-status]');
+	const pageSize = Number(dataTable.dataset.uiDataTablePageSize) || 5;
+	let page = 0;
+	let rows = body ? [...body.rows] : [];
+
+	if (!table || !body) continue;
+
+	const renderDataTable = () => {
+		rows = [...body.rows];
+		const term = filter instanceof HTMLInputElement ? filter.value.trim().toLocaleLowerCase() : '';
+		const filteredRows = rows.filter((row) => row.textContent.toLocaleLowerCase().includes(term));
+		const pageCount = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+		page = Math.min(page, pageCount - 1);
+
+		for (const row of rows) {
+			const filteredIndex = filteredRows.indexOf(row);
+			row.hidden = filteredIndex < page * pageSize || filteredIndex >= (page + 1) * pageSize;
+		}
+
+		if (status instanceof HTMLElement) {
+			status.textContent = `${filteredRows.length} resultado(s) · Página ${page + 1} de ${pageCount}`;
+		}
+
+		if (previous instanceof HTMLButtonElement) previous.disabled = page === 0;
+		if (next instanceof HTMLButtonElement) next.disabled = page >= pageCount - 1;
+	};
+
+	filter?.addEventListener('input', () => { page = 0; renderDataTable(); });
+	previous?.addEventListener('click', () => { page = Math.max(0, page - 1); renderDataTable(); });
+	next?.addEventListener('click', () => { page += 1; renderDataTable(); });
+	table.addEventListener('ui:table-sorted', renderDataTable);
+	table.addEventListener('ui:table-cell-updated', renderDataTable);
+	renderDataTable();
+}
+
+const writeUiClipboardText = async (value) => {
+	if (navigator.clipboard?.writeText) {
+		try {
+			await navigator.clipboard.writeText(value);
+			return;
+		} catch (_) {
+			// Use the selection fallback when clipboard permission is unavailable.
+		}
+	}
+
+	const textarea = document.createElement('textarea');
+	textarea.value = value;
+	textarea.style.position = 'fixed';
+	textarea.style.opacity = '0';
+	document.body.append(textarea);
+	textarea.select();
+	document.execCommand('copy');
+	textarea.remove();
+};
+
+const showUiCopyFeedback = (button) => {
+	const originalLabel = button.getAttribute('aria-label') ?? '';
+	button.classList.add('is-copied');
+	button.setAttribute('aria-label', uiTranslations.copied ?? 'Copiado');
+	window.setTimeout(() => {
+		button.classList.remove('is-copied');
+		button.setAttribute('aria-label', originalLabel);
+	}, 1400);
+};
+
+const setUiTableCellEditing = (cell, editing) => {
+	const display = cell.querySelector('[data-ui-table-cell-display]');
+	const input = cell.querySelector('[data-ui-table-cell-input]');
+	const edit = cell.querySelector('[data-ui-table-cell-edit]');
+	const save = cell.querySelector('[data-ui-table-cell-save]');
+	const cancel = cell.querySelector('[data-ui-table-cell-cancel]');
+
+	if (!(input instanceof HTMLInputElement)) return;
+
+	cell.classList.toggle('is-editing', editing);
+	display?.classList.toggle('hidden', editing);
+	input.classList.toggle('hidden', !editing);
+	edit?.classList.toggle('hidden', editing);
+	save?.classList.toggle('hidden', !editing);
+	cancel?.classList.toggle('hidden', !editing);
+
+	if (editing) {
+		input.dataset.originalValue = input.value;
+		input.focus();
+		input.select();
+	}
+};
+
+for (const cell of document.querySelectorAll('[data-ui-table-cell]')) {
+	const input = cell.querySelector('[data-ui-table-cell-input]');
+	const display = cell.querySelector('[data-ui-table-cell-display]');
+	const edit = cell.querySelector('[data-ui-table-cell-edit]');
+	const save = cell.querySelector('[data-ui-table-cell-save]');
+	const cancel = cell.querySelector('[data-ui-table-cell-cancel]');
+	const copy = cell.querySelector('[data-ui-table-cell-copy]');
+
+	const cancelEditing = () => {
+		if (input instanceof HTMLInputElement) input.value = input.dataset.originalValue ?? cell.dataset.uiTableCellValue ?? '';
+		setUiTableCellEditing(cell, false);
+	};
+
+	const saveEditing = () => {
+		if (!(input instanceof HTMLInputElement) || !(display instanceof HTMLElement)) return;
+
+		const previousValue = cell.dataset.uiTableCellValue ?? '';
+		const value = input.value.trim();
+		cell.dataset.uiTableCellValue = value;
+		display.textContent = value === '' ? '—' : value;
+		copy?.setAttribute('aria-label', `${uiTranslations.copy ?? 'Copiar'}: ${value}`);
+		edit?.setAttribute('aria-label', `${uiTranslations.edit ?? 'Editar'}: ${value}`);
+		setUiTableCellEditing(cell, false);
+		cell.dispatchEvent(new CustomEvent('ui:table-cell-updated', {
+			bubbles: true,
+			detail: { previousValue, value, name: input.name || null },
+		}));
+	};
+
+	edit?.addEventListener('click', () => setUiTableCellEditing(cell, true));
+	save?.addEventListener('click', saveEditing);
+	cancel?.addEventListener('click', cancelEditing);
+	copy?.addEventListener('click', async () => {
+		await writeUiClipboardText(cell.dataset.uiTableCellValue ?? '');
+		showUiCopyFeedback(copy);
+	});
+	input?.addEventListener('keydown', (event) => {
+		if (event.key === 'Enter') saveEditing();
+		if (event.key === 'Escape') cancelEditing();
+	});
+}
+
+for (const button of document.querySelectorAll('[data-ui-copy-text]')) {
+	button.addEventListener('click', async () => {
+		await writeUiClipboardText(button.dataset.uiCopyText ?? '');
+		showUiCopyFeedback(button);
+	});
+}
+
+for (const button of document.querySelectorAll('[data-ui-table-row-edit]')) {
+	button.addEventListener('click', () => {
+		button.closest('tr')?.querySelector('[data-ui-table-cell-edit]')?.click();
 	});
 }
 

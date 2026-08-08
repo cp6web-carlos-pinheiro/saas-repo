@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', __('ui.app_name'))</title>
+    @yield('head-preload')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -20,7 +21,11 @@
             'selectInputTooShortMany' => __('ui.select_input_too_short_many'),
             'selectLoadingMore' => __('ui.select_loading_more'),
             'selectNoResults' => __('ui.select_no_results'),
+            'selectRemoveItem' => __('ui.select_remove_item'),
             'selectSearching' => __('ui.select_searching'),
+            'copy' => __('ui.copy'),
+            'copied' => __('ui.copied'),
+            'edit' => __('ui.edit'),
             'sortBy' => __('ui.sort_by', ['column' => ':column']),
             'sortedAscending' => __('ui.sorted_ascending'),
             'sortedDescending' => __('ui.sorted_descending'),
