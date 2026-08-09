@@ -15,11 +15,16 @@ final class SecurityHeaders
         /** @var Response $response */
         $response = $next($request);
 
+        $viteDevPort = (int) env('VITE_HMR_CLIENT_PORT', 5173);
+        if ($viteDevPort < 1 || $viteDevPort > 65535) {
+            $viteDevPort = 5173;
+        }
+
         $viteHttpDevOrigins = app()->environment('local')
-            ? ' http://localhost:5173 http://127.0.0.1:5173'
+            ? " http://localhost:{$viteDevPort} http://127.0.0.1:{$viteDevPort}"
             : '';
         $viteWsDevOrigins = app()->environment('local')
-            ? ' ws://localhost:5173 ws://127.0.0.1:5173'
+            ? " ws://localhost:{$viteDevPort} ws://127.0.0.1:{$viteDevPort}"
             : '';
 
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');

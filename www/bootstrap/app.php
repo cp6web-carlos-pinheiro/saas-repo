@@ -22,6 +22,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup('web', EnsureMfaIsVerified::class);
         $middleware->appendToGroup('api', ApplyLocalePreference::class);
         $middleware->append(SecurityHeaders::class);
+        $middleware->redirectGuestsTo(function ($request): string {
+            if ($request->is('global-admin') || $request->is('global-admin/*')) {
+                return route('global-admin.login');
+            }
+
+            return route('login');
+        });
         $middleware->redirectUsersTo(function ($request): string {
             if ($request->is('global-admin') || $request->is('global-admin/*')) {
                 return route('global-admin.home');
@@ -37,9 +44,9 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $handler = new ApiExceptionHandler();
+        $handler = new ApiExceptionHandler;
 
-        $exceptions->render(function (\Throwable $exception, $request) use ($handler) {
+        $exceptions->render(function (Throwable $exception, $request) use ($handler) {
             return $handler->render($request, $exception);
         });
     })->create();

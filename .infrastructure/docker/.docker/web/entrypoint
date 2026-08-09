@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+umask 0002
+cd /var/www/html
+
+mkdir -p \
+    bootstrap/cache \
+    storage/app/private \
+    storage/app/public \
+    storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/testing \
+    storage/framework/views \
+    storage/logs
+
+chmod -R 0777 storage bootstrap/cache
+
+if [ ! -f vendor/autoload.php ]; then
+    composer install --no-interaction --prefer-dist
+fi
+
+if [ ! -x node_modules/.bin/vite ]; then
+    npm ci
+fi
+
+php artisan package:discover --ansi
+
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

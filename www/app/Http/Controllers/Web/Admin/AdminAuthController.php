@@ -51,7 +51,7 @@ final class AdminAuthController extends Controller
                 userAgent: $request->userAgent(),
             );
 
-            return back()->withErrors(['email' => __('global_admin.invalid_credentials')])->onlyInput('email');
+            return back()->withErrors(['email' => __('messages.invalid_credentials')])->onlyInput('email');
         }
 
         RateLimiter::clear($throttleKey);

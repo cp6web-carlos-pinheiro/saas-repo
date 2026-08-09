@@ -13,6 +13,8 @@ use Illuminate\Database\Seeder;
 
 final class TenantFoundationSeeder extends Seeder
 {
+    public const ADMIN_EMAIL = 'admin@beyondmrp.local';
+
     public function run(): void
     {
         $company = Company::query()->updateOrCreate(
@@ -27,7 +29,7 @@ final class TenantFoundationSeeder extends Seeder
         );
 
         $user = User::query()->updateOrCreate(
-            ['email' => 'admin@beyondmrp.local'],
+            ['email' => self::ADMIN_EMAIL],
             [
                 'name' => 'Beyond Admin',
                 'password' => 'ChangeMe123!',

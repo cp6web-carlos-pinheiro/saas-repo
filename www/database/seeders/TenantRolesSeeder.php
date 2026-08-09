@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Modules\Identity\Infrastructure\Persistence\Models\Permission;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
+use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use Illuminate\Database\Seeder;
 
@@ -281,6 +282,8 @@ final class TenantRolesSeeder extends Seeder
             ->pluck('id', 'slug');
 
         Company::query()->each(function (Company $company) use ($roleMatrix, $permissionIdsBySlug): void {
+            $masterRole = null;
+
             foreach ($roleMatrix as $roleSlug => $definition) {
                 $role = Role::query()->updateOrCreate(
                     [
@@ -299,6 +302,21 @@ final class TenantRolesSeeder extends Seeder
                     ->all();
 
                 $role->permissions()->sync($rolePermissionIds);
+
+                if ($roleSlug === 'master') {
+                    $masterRole = $role;
+                }
+            }
+
+            $seedAdmin = User::query()
+                ->where('email', TenantFoundationSeeder::ADMIN_EMAIL)
+                ->where('current_company_id', $company->id)
+                ->first();
+
+            if ($seedAdmin !== null && $masterRole !== null) {
+                $seedAdmin->roles()->syncWithoutDetaching([
+                    $masterRole->id => ['company_id' => $company->id],
+                ]);
             }
         });
     }
