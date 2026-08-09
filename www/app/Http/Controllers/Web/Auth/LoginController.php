@@ -125,6 +125,9 @@ final class LoginController extends Controller
     public function destroy(Request $request, AuditLogService $audit): RedirectResponse
     {
         $user = Auth::user();
+        $redirectTo = $request->input('redirect_to') === 'home'
+            ? url('/')
+            : route('login');
 
         Log::channel('auth')->info('auth.logout', [
             'channel' => 'web',
@@ -145,6 +148,6 @@ final class LoginController extends Controller
             userAgent: $request->userAgent(),
         );
 
-        return redirect()->route('login');
+        return redirect()->to($redirectTo);
     }
 }

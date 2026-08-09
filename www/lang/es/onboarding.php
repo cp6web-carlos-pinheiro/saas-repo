@@ -5,6 +5,8 @@ return [
     'account_onboarding' => 'Onboarding de la cuenta',
     'build_account' => 'Configure su cuenta en 4 pasos',
     'step_of' => 'Paso :step de 4',
+    'cancel_go_home' => 'Cancelar y volver al sitio',
+    'exit_go_login' => 'Salir e ir al inicio de sesión',
     'user' => 'Usuario',
     'company' => 'Empresa',
     'plan' => 'Plan',

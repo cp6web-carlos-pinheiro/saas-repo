@@ -126,6 +126,36 @@ final class AccountOnboardingFlowTest extends TestCase
         ])->assertRedirect(route('onboarding.wizard'));
     }
 
+    public function test_it_can_cancel_onboarding_and_return_to_the_public_home(): void
+    {
+        config()->set('security.mfa.enabled', false);
+
+        $user = User::query()->create([
+            'name' => 'Cancelled Onboarding',
+            'email' => 'cancelled-onboarding@example.com',
+            'password' => bcrypt(self::TEST_SECRET),
+            'current_company_id' => null,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user, 'web')
+            ->get(self::ONBOARDING_PATH)
+            ->assertOk()
+            ->assertSee(__('onboarding.cancel_go_home'))
+            ->assertSee(__('onboarding.exit_go_login'));
+
+        $this->post('/logout', ['redirect_to' => 'home'])
+            ->assertRedirect(url('/'));
+
+        $this->assertGuest('web');
+
+        $this->actingAs($user, 'web')
+            ->post('/logout', ['redirect_to' => 'login'])
+            ->assertRedirect(route('login'));
+
+        $this->assertGuest('web');
+    }
+
     public function test_dashboard_modules_only_include_the_user_accessible_modules(): void
     {
         $user = User::query()->create([

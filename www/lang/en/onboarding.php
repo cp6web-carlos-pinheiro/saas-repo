@@ -5,6 +5,8 @@ return [
     'account_onboarding' => 'Account onboarding',
     'build_account' => 'Set up your account in 4 steps',
     'step_of' => 'Step :step of 4',
+    'cancel_go_home' => 'Cancel and return to site',
+    'exit_go_login' => 'Exit and go to login',
     'user' => 'User',
     'company' => 'Company',
     'plan' => 'Plan',

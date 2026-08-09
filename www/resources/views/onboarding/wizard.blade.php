@@ -20,8 +20,24 @@
           <p class="text-sm text-slate-500">{{ __('onboarding.account_onboarding') }}</p>
           <h1 class="font-display text-3xl font-bold">{{ __('onboarding.build_account') }}</h1>
         </div>
-        <div class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600">
-          {{ __('onboarding.step_of', ['step' => $step]) }}
+        <div class="flex flex-wrap items-center justify-end gap-2">
+          <div class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600">
+            {{ __('onboarding.step_of', ['step' => $step]) }}
+          </div>
+          <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <input type="hidden" name="redirect_to" value="home">
+            <x-ui.button type="submit" variant="ghost" size="sm" class="rounded-full">
+              {{ __('onboarding.cancel_go_home') }}
+            </x-ui.button>
+          </form>
+          <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <input type="hidden" name="redirect_to" value="login">
+            <x-ui.button type="submit" variant="outline" size="sm" class="rounded-full">
+              {{ __('onboarding.exit_go_login') }}
+            </x-ui.button>
+          </form>
         </div>
       </div>
 
@@ -79,7 +95,22 @@
 
             <div>
               <label class="block text-sm font-medium mb-2" for="timezone">{{ __('onboarding.timezone') }}</label>
-              <x-ui.input id="timezone" name="timezone" type="text" :value="old('timezone', $profile?->timezone ?? 'America/Sao_Paulo')" />
+              @php
+                $selectedTimezone = old('timezone', $profile?->timezone ?? 'UTC');
+                $shouldDetectTimezone = old('timezone') === null && $profile?->timezone === null;
+              @endphp
+              <x-ui.select
+                id="timezone"
+                name="timezone"
+                class="w-full rounded-xl border border-slate-300 px-4 py-3"
+                data-search="on"
+                :data-detect-timezone="$shouldDetectTimezone ? 'true' : 'false'"
+                required
+              >
+                @foreach (DateTimeZone::listIdentifiers() as $timezone)
+                  <option value="{{ $timezone }}" @selected($selectedTimezone === $timezone)>{{ $timezone }}</option>
+                @endforeach
+              </x-ui.select>
             </div>
 
             <div class="pt-2">
@@ -175,4 +206,28 @@
       @endif
     </x-ui.panel>
   </main>
+@endsection
+
+@section('scripts')
+  @if ($step === 2)
+    <script>
+      (() => {
+        const timezoneSelect = document.getElementById('timezone');
+
+        if (!timezoneSelect || timezoneSelect.dataset.detectTimezone !== 'true') {
+          return;
+        }
+
+        const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        const hasDetectedTimezone = Array.from(timezoneSelect.options)
+          .some((option) => option.value === detectedTimezone);
+
+        if (detectedTimezone && hasDetectedTimezone) {
+          timezoneSelect.value = detectedTimezone;
+          timezoneSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      })();
+    </script>
+  @endif
 @endsection
