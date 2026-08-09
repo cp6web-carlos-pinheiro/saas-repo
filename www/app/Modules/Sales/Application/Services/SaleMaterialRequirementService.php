@@ -9,6 +9,8 @@ use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryBalance;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryReservation;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
+use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
+use Illuminate\Support\Collection;
 
 final class SaleMaterialRequirementService
 {
@@ -49,14 +51,32 @@ final class SaleMaterialRequirementService
     /** @return array<string, mixed> */
     public function analyze(Sale $sale): array
     {
-        $this->reset();
         $sale->loadMissing(['lines.product.unit']);
+
+        return $this->analyzeLines($sale, $sale->lines);
+    }
+
+    /** @return array<string, mixed> */
+    public function analyzeLine(Sale $sale, SaleLine $line): array
+    {
+        $line->loadMissing('product.unit');
+
+        return $this->analyzeLines($sale, collect([$line]), (int) $line->id);
+    }
+
+    /**
+     * @param  Collection<int, SaleLine>  $lines
+     * @return array<string, mixed>
+     */
+    private function analyzeLines(Sale $sale, Collection $lines, ?int $saleLineId = null): array
+    {
+        $this->reset();
         $this->referenceDate = $sale->sale_date?->toDateString() ?? now()->toDateString();
-        $this->loadSaleReservations((int) $sale->id);
+        $this->loadSaleReservations((int) $sale->id, $saleLineId);
 
         $demandByProduct = [];
 
-        foreach ($sale->lines as $line) {
+        foreach ($lines as $line) {
             $productId = (int) $line->product_id;
             $demandByProduct[$productId] = round(
                 (float) ($demandByProduct[$productId] ?? 0) + (float) $line->quantity,
@@ -245,7 +265,7 @@ final class SaleMaterialRequirementService
         ])->all();
     }
 
-    private function loadSaleReservations(int $saleId): void
+    private function loadSaleReservations(int $saleId, ?int $saleLineId = null): void
     {
         $reservations = InventoryReservation::query()
             ->where('reference_type', 'sale')
@@ -254,6 +274,12 @@ final class SaleMaterialRequirementService
             ->get(['product_id', 'reservation_origin', 'quantity', 'metadata']);
 
         foreach ($reservations as $reservation) {
+            $reservationSaleLineId = (int) (($reservation->metadata ?? [])['sale_line_id'] ?? 0);
+
+            if ($saleLineId !== null && $reservationSaleLineId > 0 && $reservationSaleLineId !== $saleLineId) {
+                continue;
+            }
+
             $productId = (int) $reservation->product_id;
             $quantity = round((float) $reservation->quantity, 6);
             $allocationType = (string) (($reservation->metadata ?? [])['allocation_type'] ?? '');

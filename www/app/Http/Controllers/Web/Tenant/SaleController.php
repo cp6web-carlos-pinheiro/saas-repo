@@ -9,7 +9,7 @@ use App\Modules\Customer\Infrastructure\Persistence\Models\Customer;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Sales\Application\Services\SaleFulfillmentService;
-use App\Modules\Sales\Application\Services\SaleMaterialRequirementService;
+use App\Modules\Sales\Application\Services\SaleProductionStatusService;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
 use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
@@ -155,18 +155,26 @@ final class SaleController extends Controller
         return view('client.sales.show', compact('sale', 'company'));
     }
 
-    public function materials(
+    public function materials(Request $request, Sale $sale): RedirectResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
+
+        return redirect()->route('sales.production-status', $sale);
+    }
+
+    public function productionStatus(
         Request $request,
         Sale $sale,
-        SaleMaterialRequirementService $materialRequirementService
+        SaleProductionStatusService $productionStatusService
     ): View {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
         $sale->load(['customer:id,name', 'lines.product:id,sku,description,product_type,unit_id', 'lines.product.unit:id,code']);
-        $analysis = $materialRequirementService->analyze($sale);
+        $analysis = $productionStatusService->analyze($sale);
 
-        return view('client.sales.materials', compact('sale', 'analysis', 'company'));
+        return view('client.sales.production-status', compact('sale', 'analysis', 'company'));
     }
 
     public function store(Request $request, AuditLogService $audit, SaleFulfillmentService $saleFulfillment): RedirectResponse

@@ -57,6 +57,7 @@
                         <x-ui.sortable-header column="status" :label="__('sale.status')" :sort="$sort" :direction="$direction" />
                         <x-ui.sortable-header column="operational_status" :label="__('sale.operational_status')" :sort="$sort" :direction="$direction" />
                         <x-ui.sortable-header column="created_at" :label="__('sale.created_at')" :sort="$sort" :direction="$direction" />
+                        <th class="px-3 py-3 text-right">{{ __('sale.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -107,10 +108,22 @@
                                 />
                             </td>
                             <td class="px-3 py-4 text-[#5f6368]">{{ $sale->created_at->format('d/m/Y') }}</td>
+                            <td class="px-3 py-4 text-right">
+                                <x-ui.button
+                                    :href="route('sales.production-status', $sale)"
+                                    variant="material-versions"
+                                    size="sm"
+                                    class="rounded-full whitespace-nowrap"
+                                    onclick="event.stopPropagation()"
+                                    onkeydown="event.stopPropagation()"
+                                >
+                                    {{ __('sale.production_status.view') }}
+                                </x-ui.button>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-3 py-10 text-center text-[#5f6368]">{{ __('sale.empty') }}</td>
+                            <td colspan="8" class="px-3 py-10 text-center text-[#5f6368]">{{ __('sale.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

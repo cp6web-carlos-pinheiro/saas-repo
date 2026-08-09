@@ -13,8 +13,15 @@ use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryBalance;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryReservation;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderMaterialConsumption;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOperation;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\SupplierProduct;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
 use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
+use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
+use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenterHourRate;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
@@ -360,7 +367,7 @@ final class TenantSalesManagementTest extends TestCase
         $this->assertNull($sale->delivered_at);
     }
 
-    public function test_sale_materials_page_nets_linked_and_free_stock_across_bom_levels(): void
+    public function test_sale_production_page_consolidates_coverage_and_stock_across_bom_levels(): void
     {
         ['company' => $company, 'user' => $user, 'customer' => $customer, 'productA' => $finishedProduct] = $this->salesContext();
         $unit = $finishedProduct->unit;
@@ -499,23 +506,34 @@ final class TenantSalesManagementTest extends TestCase
         $this->actingAs($user, 'web')
             ->get(route('sales.show', $sale))
             ->assertOk()
-            ->assertSee(route('sales.materials', $sale), false);
+            ->assertSee(route('sales.production-status', $sale), false)
+            ->assertDontSee(route('sales.materials', $sale), false);
 
         $this->actingAs($user, 'web')
             ->get(route('sales.materials', $sale))
+            ->assertRedirect(route('sales.production-status', $sale));
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.production-status', $sale))
             ->assertOk()
+            ->assertSee('WIP-001')
             ->assertSee('RAW-001')
             ->assertSee('WH-01')
-            ->assertViewHas('analysis', function (array $analysis) use ($intermediate, $rawMaterial): bool {
-                $finished = $analysis['finished_products'][0];
-                $materials = collect($analysis['materials'])->keyBy('product_id');
+            ->assertViewHas('analysis', function (array $analysis) use ($finishedProduct, $intermediate, $rawMaterial): bool {
+                $item = $analysis['items'][0];
+                $forecastProductIds = collect($item['forecasts'])->pluck('product_id');
+                $materials = collect($item['materials'])->keyBy('product_id');
                 $wip = $materials->get($intermediate->id);
                 $raw = $materials->get($rawMaterial->id);
 
-                return $finished['required_quantity'] === 2.0
-                    && $finished['linked_quantity'] === 0.5
-                    && $finished['available_to_link'] === 0.5
-                    && $finished['quantity_to_produce'] === 1.0
+                return $item['production_status'] === 'forecast'
+                    && $item['coverage']['required_quantity'] === 2.0
+                    && $item['coverage']['linked_quantity'] === 0.5
+                    && $item['coverage']['available_to_link'] === 0.5
+                    && $item['coverage']['quantity_to_produce'] === 1.0
+                    && $item['counts']['forecast'] === 2
+                    && $forecastProductIds->contains($finishedProduct->id)
+                    && $forecastProductIds->contains($intermediate->id)
                     && $wip['required_quantity'] === 2.0
                     && $wip['available_to_link'] === 1.0
                     && $wip['shortage_quantity'] === 1.0
@@ -525,8 +543,182 @@ final class TenantSalesManagementTest extends TestCase
                     && $raw['available_to_link'] === 5.0
                     && $raw['shortage_quantity'] === 1.0
                     && $raw['recommended_action'] === 'BUY'
-                    && $analysis['purchase_items_count'] === 1
-                    && $analysis['production_items_count'] === 1;
+                    && $item['counts']['materials_short'] === 2
+                    && $item['counts']['to_buy'] === 1
+                    && $item['counts']['to_produce'] === 1;
+            });
+    }
+
+    public function test_sale_production_status_page_explodes_orders_materials_and_costs(): void
+    {
+        ['company' => $company, 'user' => $user, 'customer' => $customer, 'productA' => $finishedProduct] = $this->salesContext();
+        $unit = $finishedProduct->unit;
+        $rawMaterial = Product::query()->create([
+            'company_id' => $company->id,
+            'sku' => 'RAW-COST-001',
+            'description' => 'Material com custo',
+            'product_type' => 'RAW',
+            'unit_id' => $unit->id,
+            'safety_stock' => 0,
+            'lead_time_days' => 0,
+            'lot_control' => false,
+            'serial_control' => false,
+            'is_active' => true,
+        ]);
+
+        $bom = BomHeader::query()->create([
+            'company_id' => $company->id,
+            'product_id' => $finishedProduct->id,
+            'version_number' => 1,
+            'status' => 'APPROVED',
+            'effective_from' => '2026-01-01',
+        ]);
+        BomItem::query()->create([
+            'company_id' => $company->id,
+            'bom_header_id' => $bom->id,
+            'component_product_id' => $rawMaterial->id,
+            'line_no' => 1,
+            'quantity_per' => 2,
+            'uom' => $unit->code,
+        ]);
+
+        $plant = Plant::query()->create([
+            'company_id' => $company->id,
+            'name' => 'Planta de custos',
+            'code' => 'PLT-COST',
+            'timezone' => 'America/Sao_Paulo',
+            'is_active' => true,
+        ]);
+        $warehouse = Warehouse::query()->create([
+            'company_id' => $company->id,
+            'plant_id' => $plant->id,
+            'name' => 'Estoque de custos',
+            'code' => 'WH-COST',
+            'is_active' => true,
+        ]);
+        $workCenter = WorkCenter::query()->create([
+            'company_id' => $company->id,
+            'plant_id' => $plant->id,
+            'code' => 'WC-COST',
+            'name' => 'Centro de custos',
+            'resource_type' => 'MACHINE',
+            'capacity_per_day' => 480,
+            'efficiency_factor' => 100,
+            'is_active' => true,
+        ]);
+        WorkCenterHourRate::query()->create([
+            'company_id' => $company->id,
+            'work_center_id' => $workCenter->id,
+            'hourly_rate' => 120,
+            'currency' => 'BRL',
+            'effective_from' => '2026-01-01',
+            'status' => 'ACTIVE',
+        ]);
+
+        $supplier = Supplier::query()->create([
+            'company_id' => $company->id,
+            'code' => 'SUP-COST',
+            'name' => 'Fornecedor de custos',
+            'person_type' => 'PJ',
+            'status' => 'ACTIVE',
+            'default_lead_time_days' => 2,
+        ]);
+        SupplierProduct::query()->create([
+            'company_id' => $company->id,
+            'supplier_id' => $supplier->id,
+            'product_id' => $rawMaterial->id,
+            'moq' => 1,
+            'lead_time_days' => 2,
+            'unit_price' => 5,
+            'is_preferred' => true,
+            'is_active' => true,
+        ]);
+
+        $sale = Sale::query()->create([
+            'company_id' => $company->id,
+            'customer_id' => $customer->id,
+            'sale_date' => '2026-08-03',
+            'status' => 'CONFIRMED',
+            'operational_status' => 'PENDING',
+            'subtotal_cents' => 30000,
+            'discount_cents' => 0,
+            'amount_cents' => 30000,
+        ]);
+        $line = SaleLine::query()->create([
+            'company_id' => $company->id,
+            'sale_id' => $sale->id,
+            'product_id' => $finishedProduct->id,
+            'quantity' => 3,
+            'unit_price' => 100,
+        ]);
+        $order = ProductionOrder::query()->create([
+            'company_id' => $company->id,
+            'product_id' => $finishedProduct->id,
+            'warehouse_id' => $warehouse->id,
+            'source_type' => 'SALE',
+            'source_reference_id' => $sale->id,
+            'source_reference_type' => 'sale',
+            'order_number' => 'OP-SALE-COST',
+            'status' => 'PARTIALLY_COMPLETED',
+            'quantity_planned' => 3,
+            'quantity_produced' => 1.5,
+            'quantity_scrapped' => 0,
+            'metadata' => [
+                'sale_line_id' => $line->id,
+                'root_product_id' => $finishedProduct->id,
+                'dependency_level' => 0,
+            ],
+        ]);
+        ProductionOrderOperation::query()->create([
+            'company_id' => $company->id,
+            'production_order_id' => $order->id,
+            'operation_no' => 10,
+            'operation_code' => 'OP10',
+            'operation_name' => 'Produzir item vendido',
+            'sequence' => 1,
+            'work_center_id' => $workCenter->id,
+            'status' => 'IN_PROGRESS',
+            'quantity_planned' => 3,
+            'setup_scope' => 'ROUTING',
+            'setup_time_minutes' => 30,
+            'runtime_time_minutes' => 60,
+            'productive_time_minutes' => 90,
+            'total_time_minutes' => 90,
+            'actual_productive_minutes' => 30,
+        ]);
+        ProductionOrderMaterialConsumption::query()->create([
+            'company_id' => $company->id,
+            'production_order_id' => $order->id,
+            'product_id' => $rawMaterial->id,
+            'warehouse_id' => $warehouse->id,
+            'quantity_consumed' => 2,
+            'quantity_scrapped' => 0,
+            'consumed_at' => now(),
+        ]);
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.index'))
+            ->assertOk()
+            ->assertSee(route('sales.production-status', $sale), false);
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.production-status', $sale))
+            ->assertOk()
+            ->assertSee('OP-SALE-COST')
+            ->assertSee('RAW-COST-001')
+            ->assertViewHas('analysis', function (array $analysis): bool {
+                $item = $analysis['items'][0];
+
+                return $item['production_status'] === 'in_progress'
+                    && $item['counts']['in_progress'] === 1
+                    && $item['costs']['estimated_material'] === 30.0
+                    && $item['costs']['estimated_production'] === 180.0
+                    && $item['costs']['estimated_total'] === 210.0
+                    && $item['costs']['actual_material'] === 10.0
+                    && $item['costs']['actual_production'] === 60.0
+                    && $item['costs']['actual_total'] === 70.0
+                    && $item['costs']['estimated_incomplete'] === false
+                    && $item['costs']['actual_incomplete'] === false;
             });
     }
 

@@ -32,7 +32,7 @@
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('sales.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
 
-            <x-ui.button :href="route('sales.materials', $sale)" variant="material-versions" class="rounded-full">{{ __('sale.materials.view') }}</x-ui.button>
+            <x-ui.button :href="route('sales.production-status', $sale)" variant="material-versions" class="rounded-full">{{ __('sale.production_status.view') }}</x-ui.button>
 
             @if (! $isLockedForEditing)
                 <x-ui.button :href="route('sales.edit', $sale)" variant="material-edit" class="rounded-full">{{ __('sale.edit') }}</x-ui.button>
