@@ -9,10 +9,6 @@
 
 @section('content')
   <main class="max-w-6xl mx-auto">
-    <x-ui.breadcrumb :items="[
-      ['label' => __('ui.app_name'), 'href' => route('dashboard.industrial')],
-      ['label' => __('onboarding.title')],
-    ]" />
 
     <x-ui.panel padding="p-6 md:p-10">
       <div class="flex flex-wrap items-start justify-between gap-4">

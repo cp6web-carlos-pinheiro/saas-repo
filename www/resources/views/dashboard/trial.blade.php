@@ -9,10 +9,6 @@
 
 @section('content')
   <main class="max-w-7xl mx-auto space-y-6">
-    <x-ui.breadcrumb :items="[
-      ['label' => __('ui.app_name'), 'href' => route('dashboard.industrial')],
-      ['label' => __('onboarding.trial_dashboard_title')],
-    ]" />
 
     <header class="rounded-3xl bg-night text-white p-7">
       <p class="text-sm text-mist">{{ __('onboarding.workspace', ['name' => $organization->name]) }}</p>
