@@ -11,13 +11,13 @@ use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisitionLine;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\SupplierProduct;
-use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
+use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Services\SaaS\AuditLogService;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -336,7 +336,7 @@ final class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * @param array<int, array{product_id: int, warehouse_id: int|null, supplier_id: int|null, quantity: float, need_by_date: string, order_date: string}> $items
+     * @param  array<int, array{product_id: int, warehouse_id: int|null, supplier_id: int|null, quantity: float, need_by_date: string, order_date: string}>  $items
      */
     private function syncLines(PurchaseRequisition $requisition, array $items): void
     {
@@ -437,7 +437,7 @@ final class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * @param array<int, mixed> $fallback
+     * @param  array<int, mixed>  $fallback
      * @return array<int, mixed>
      */
     private function oldItemRows(Request $request, array $fallback): array
@@ -448,7 +448,7 @@ final class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * @param array<int, array<string, mixed>> $lineRows
+     * @param  array<int, array<string, mixed>>  $lineRows
      * @return array<int, int>
      */
     private function selectedProductIdsFromLineRows(array $lineRows): array
@@ -463,7 +463,7 @@ final class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * @param array<int, array<string, mixed>> $lineRows
+     * @param  array<int, array<string, mixed>>  $lineRows
      * @return array<int, int>
      */
     private function selectedWarehouseIdsFromLineRows(array $lineRows): array
@@ -478,7 +478,7 @@ final class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * @param array<int, array<string, mixed>> $lineRows
+     * @param  array<int, array<string, mixed>>  $lineRows
      * @return array<int, int>
      */
     private function selectedSupplierIdsFromLineRows(array $lineRows): array
@@ -493,7 +493,7 @@ final class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * @param array<int, int> $ids
+     * @param  array<int, int>  $ids
      */
     private function productOptionsByIds(Company $company, array $ids): Collection
     {
@@ -505,7 +505,7 @@ final class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * @param array<int, int> $ids
+     * @param  array<int, int>  $ids
      */
     private function warehouseOptionsByIds(Company $company, array $ids): Collection
     {
@@ -517,7 +517,7 @@ final class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * @param array<int, int> $ids
+     * @param  array<int, int>  $ids
      */
     private function supplierOptionsByIds(Company $company, array $ids): Collection
     {
@@ -536,5 +536,4 @@ final class PurchaseRequisitionController extends Controller
 
         return $number;
     }
-
 }

@@ -6,11 +6,11 @@ namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Web\Tenant\Concerns\HandlesTenantAuthorization;
+use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Production\Application\Services\MaterialConsumptionService;
 use App\Modules\Production\Application\Services\ProductionOrderService;
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
-use App\Modules\Product\Infrastructure\Persistence\Models\Product;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Shared\Presentation\Exceptions\DomainException;
@@ -27,17 +27,21 @@ final class ProductionOrderController extends Controller
     use HandlesTenantAuthorization;
 
     private const READ_PERMISSION = 'production-orders.read';
+
     private const CREATE_PERMISSION = 'production-orders.create';
+
     private const RELEASE_PERMISSION = 'production-orders.release';
+
     private const PARTIAL_PERMISSION = 'production-orders.partial';
+
     private const COMPLETE_PERMISSION = 'production-orders.complete';
+
     private const CONSUMPTION_CREATE_PERMISSION = 'production-orders.consumption.create';
 
     public function __construct(
         private readonly ProductionOrderService $orderService,
         private readonly MaterialConsumptionService $consumptionService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): View
     {
@@ -257,6 +261,7 @@ final class ProductionOrderController extends Controller
                 $item = $items->first();
                 $planned = (float) $items->sum('quantity_required');
                 $consumed = (float) ($consumedByProduct[(int) $item->component_product_id] ?? 0);
+
                 return ['component' => $item, 'planned_quantity' => $planned, 'consumed_quantity' => $consumed, 'remaining_quantity' => max(0, round($planned - $consumed, 6))];
             })->values();
 
