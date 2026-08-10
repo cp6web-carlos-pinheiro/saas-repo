@@ -363,11 +363,13 @@
                                 <thead><tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
                                     <th class="px-4 py-3">{{ __('sale.product') }}</th>
                                     <th class="px-4 py-3">{{ __('sale.production_status.required') }}</th>
-                                    <th class="px-4 py-3">{{ __('sale.production_status.stock') }}</th>
-                                    <th class="px-4 py-3">{{ __('sale.production_status.covered') }}</th>
-                                    <th class="px-4 py-3">{{ __('sale.materials.shortage') }}</th>
-                                    <th class="px-4 py-3">{{ __('sale.materials.recommendation') }}</th>
-                                    <th class="px-4 py-3">{{ __('sale.materials.warehouses') }}</th>
+                                    <th class="px-4 py-3">{{ __('sale.production_status.reserved_quantity') }}</th>
+                                    <th class="px-4 py-3">{{ __('sale.production_status.available_stock') }}</th>
+                                    <th class="px-4 py-3">{{ __('sale.production_status.in_production') }}</th>
+                                    <th class="px-4 py-3">{{ __('sale.production_status.in_purchase') }}</th>
+                                    <th class="px-4 py-3">{{ __('sale.production_status.received') }}</th>
+                                    <th class="px-4 py-3">{{ __('sale.production_status.net_shortage') }}</th>
+                                    <th class="px-4 py-3">{{ __('sale.production_status.unit_cost') }}</th>
                                     <th class="px-4 py-3 text-right">{{ __('sale.actions') }}</th>
                                 </tr></thead>
                                 <tbody>
@@ -375,33 +377,22 @@
                                         <tr class="border-b border-[#f1f3f4]">
                                             <td class="px-4 py-4 font-medium">{{ $material['sku'] }} - {{ $material['description'] }}</td>
                                             <td class="px-4 py-4">{{ $formatQuantity($material['required_quantity']) }} {{ $material['unit'] }}</td>
-                                            <td class="px-4 py-4">{{ $formatQuantity($material['stock_available']) }} {{ $material['unit'] }}</td>
-                                            <td class="px-4 py-4 text-[#137333]">{{ $formatQuantity($material['linked_quantity'] + $material['available_to_link']) }} {{ $material['unit'] }}</td>
-                                            <td class="px-4 py-4 font-semibold {{ $material['shortage_quantity'] > 0 ? 'text-[#b3261e]' : 'text-[#137333]' }}">{{ $formatQuantity($material['shortage_quantity']) }} {{ $material['unit'] }}</td>
-                                            <td class="px-4 py-4">
-                                                @if ($material['shortage_quantity'] <= 0)
-                                                    {{ __('sale.materials.action_covered') }}
-                                                @elseif ($material['recommended_action'] === 'BUY')
-                                                    {{ __('sale.materials.action_buy') }}
-                                                @else
-                                                    {{ __('sale.materials.action_produce') }}
-                                                @endif
-                                            </td>
-                                            <td class="px-4 py-4 text-xs text-[#5f6368]">
-                                                @forelse ($material['warehouses'] as $warehouse)
-                                                    <div>{{ $warehouse['code'] }} · {{ $formatQuantity($warehouse['quantity']) }} {{ $material['unit'] }}</div>
-                                                @empty
-                                                    —
-                                                @endforelse
-                                            </td>
+                                            <td class="px-4 py-4 text-[#137333]">{{ $formatQuantity($material['reserved_quantity']) }}</td>
+                                            <td class="px-4 py-4">{{ $formatQuantity($material['available_quantity']) }}</td>
+                                            <td class="px-4 py-4">{{ $formatQuantity($material['in_production']) }}</td>
+                                            <td class="px-4 py-4">{{ $formatQuantity($material['in_purchase']) }}</td>
+                                            <td class="px-4 py-4">{{ $formatQuantity($material['received_quantity']) }}</td>
+                                            <td class="px-4 py-4 font-semibold {{ $material['net_shortage'] > 0 ? 'text-[#b3261e]' : 'text-[#137333]' }}">{{ $formatQuantity($material['net_shortage']) }}</td>
+                                            <td class="px-4 py-4 text-xs">{{ $material['unit_cost'] !== null ? $formatMoney($material['unit_cost']) : '—' }}<div class="mt-1 text-[#5f6368]">{{ $material['cost_reference'] ?? '' }}</div></td>
                                             <td class="px-4 py-4 text-right">
-                                                @if ($material['shortage_quantity'] > 0 && $material['recommended_action'] === 'BUY' && $capabilities['create_purchase_requisition'])
+                                                <div class="flex min-w-44 flex-col items-end gap-2">
+                                                @if ($material['net_shortage'] > 0 && $material['recommended_action'] === 'BUY' && $capabilities['create_purchase_requisition'])
                                                     <x-ui.button
                                                         :href="route('purchasing.requisitions.create', [
                                                             'sale_id' => $sale->id,
                                                             'sale_line_id' => $item['line_id'],
                                                             'product_id' => $material['product_id'],
-                                                            'quantity' => $material['shortage_quantity'],
+                                                            'quantity' => $material['net_shortage'],
                                                             'warehouse_id' => data_get($material, 'warehouses.0.id'),
                                                         ])"
                                                         variant="material-versions"
@@ -409,10 +400,26 @@
                                                         class="rounded-full whitespace-nowrap"
                                                     >{{ __('sale.production_status.create_requisition') }}</x-ui.button>
                                                 @endif
+                                                @if ($material['available_quantity'] > 0 && $capabilities['reserve_stock'] && data_get($material, 'warehouses.0.id'))
+                                                    <form method="POST" action="{{ route('sales.production-status.reserve', $sale) }}">
+                                                        @csrf
+                                                        <input type="hidden" name="sale_line_id" value="{{ $item['line_id'] }}">
+                                                        <input type="hidden" name="product_id" value="{{ $material['product_id'] }}">
+                                                        <input type="hidden" name="warehouse_id" value="{{ data_get($material, 'warehouses.0.id') }}">
+                                                        <input type="hidden" name="quantity" value="{{ min($material['available_quantity'], (float) data_get($material, 'warehouses.0.quantity', 0)) }}">
+                                                        <button class="rounded-full border border-[#dadce0] px-3 py-1.5 text-xs font-semibold text-[#174ea6]" type="submit">{{ __('sale.production_status.reserve_stock') }}</button>
+                                                    </form>
+                                                @endif
+                                                @if ($capabilities['read_purchase_order'])
+                                                    @foreach ($material['purchase_orders'] as $purchaseOrder)
+                                                        <a class="text-xs font-semibold text-[#174ea6] hover:underline" href="{{ route('purchasing.orders.show', $purchaseOrder['id']) }}">{{ __('sale.production_status.open_purchase_order') }} {{ $purchaseOrder['number'] }}</a>
+                                                    @endforeach
+                                                @endif
+                                                </div>
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="8" class="px-4 py-8 text-center text-[#5f6368]">{{ __('sale.production_status.no_materials') }}</td></tr>
+                                        <tr><td colspan="10" class="px-4 py-8 text-center text-[#5f6368]">{{ __('sale.production_status.no_materials') }}</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>
