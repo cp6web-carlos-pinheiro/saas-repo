@@ -182,7 +182,7 @@ final class SaleProductionStatusService
         $daysLate = $promisedDate !== null
             ? max(0, today()->parse($projectedCompletion ?? today())->startOfDay()->diffInDays(today()->parse($promisedDate)->startOfDay(), false) * -1)
             : 0;
-        $criticalOrder = $realOrderRows->filter('scheduled_end')->sortByDesc('scheduled_end')->first();
+        $criticalOrder = $realOrderRows->filter(static fn (array $order): bool => $order['scheduled_end'] !== null)->sortByDesc('scheduled_end')->first();
         $limitingMaterial = $items->flatMap(static fn (array $item): array => $item['materials'])
             ->filter(static fn (array $material): bool => $material['recommended_action'] === 'BUY'
                 && ((float) $material['net_shortage'] > 0 || (float) $material['in_purchase'] > 0))
