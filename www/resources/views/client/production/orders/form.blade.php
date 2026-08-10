@@ -17,6 +17,12 @@
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ route('production.orders.store') }}" class="space-y-5">
             @csrf
+            @if ($creationContext)
+                <input type="hidden" name="sale_id" value="{{ $creationContext['sale_id'] }}">
+                <input type="hidden" name="sale_line_id" value="{{ $creationContext['sale_line_id'] }}">
+                <input type="hidden" name="dependency_level" value="{{ $creationContext['dependency_level'] }}">
+                <x-ui.alert variant="info">{{ __('production.orders.sale_context', ['sale' => $creationContext['sale_id']]) }}</x-ui.alert>
+            @endif
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <label class="block text-sm font-medium">
@@ -37,7 +43,7 @@
                     <x-ui.select name="warehouse_id" class="mt-2" data-search="on">
                         <option value="">{{ __('production.select_warehouse') }}</option>
                         @foreach ($warehouses as $warehouse)
-                            <option value="{{ $warehouse->id }}" @selected((string) old('warehouse_id') === (string) $warehouse->id)>{{ $warehouse->code }} - {{ $warehouse->name }}</option>
+                            <option value="{{ $warehouse->id }}" @selected((string) old('warehouse_id', $initialValues['warehouse_id']) === (string) $warehouse->id)>{{ $warehouse->code }} - {{ $warehouse->name }}</option>
                         @endforeach
                     </x-ui.select>
                     @error('warehouse_id')
@@ -49,7 +55,7 @@
             <div class="grid gap-5 sm:grid-cols-3">
                 <label class="block text-sm font-medium">
                     {{ __('production.orders.planned_quantity') }}
-                    <x-ui.input name="quantity_planned" type="number" step="0.001" min="0.001" :value="old('quantity_planned', '1')" class="mt-2" required />
+                    <x-ui.input name="quantity_planned" type="number" step="0.001" min="0.001" :value="old('quantity_planned', $initialValues['quantity_planned'])" class="mt-2" required />
                     @error('quantity_planned')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -57,7 +63,7 @@
 
                 <label class="block text-sm font-medium">
                     {{ __('production.orders.scheduled_start') }}
-                    <x-ui.input name="scheduled_start_date" type="date" :value="old('scheduled_start_date')" class="mt-2" />
+                    <x-ui.input name="scheduled_start_date" type="date" :value="old('scheduled_start_date', $initialValues['scheduled_start_date'])" class="mt-2" />
                     @error('scheduled_start_date')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -65,7 +71,7 @@
 
                 <label class="block text-sm font-medium">
                     {{ __('production.orders.scheduled_end') }}
-                    <x-ui.input name="scheduled_end_date" type="date" :value="old('scheduled_end_date')" class="mt-2" />
+                    <x-ui.input name="scheduled_end_date" type="date" :value="old('scheduled_end_date', $initialValues['scheduled_end_date'])" class="mt-2" />
                     @error('scheduled_end_date')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror

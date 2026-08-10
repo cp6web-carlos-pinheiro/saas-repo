@@ -10,6 +10,9 @@ use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisitionLine;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\SupplierProduct;
+use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
+use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Services\SaaS\AuditLogService;
@@ -81,7 +84,8 @@ final class PurchaseRequisitionController extends Controller
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
 
-        $lineRows = $this->oldItemRows($request, $this->defaultLineRows());
+        $prefill = $this->salePrefill($request, $company);
+        $lineRows = $this->oldItemRows($request, $prefill['lines'] ?? $this->defaultLineRows());
 
         return view('client.purchasing.requisitions.form', [
             'requisition' => null,
@@ -90,6 +94,12 @@ final class PurchaseRequisitionController extends Controller
             'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
             'suppliers' => $this->supplierOptionsByIds($company, $this->selectedSupplierIdsFromLineRows($lineRows)),
             'lineRows' => $lineRows,
+            'creationContext' => $prefill['context'] ?? null,
+            'initialValues' => [
+                'required_date' => $prefill['required_date'] ?? null,
+                'source_type' => $prefill !== null ? 'sale' : 'manual',
+                'notes' => $prefill !== null ? __('purchase_requisition.sale_context_notes', ['sale' => $prefill['context']['sale_id']]) : null,
+            ],
         ]);
     }
 
@@ -122,6 +132,8 @@ final class PurchaseRequisitionController extends Controller
                 'required_date' => $data['required_date'] ?? null,
                 'status' => 'DRAFT',
                 'source_type' => $data['source_type'] ?? 'manual',
+                'source_reference_id' => $data['source_reference_id'] ?? null,
+                'source_reference_type' => $data['source_reference_type'] ?? null,
                 'requested_by' => $request->user()?->id,
                 'notes' => $data['notes'] ?? null,
             ]);
@@ -162,6 +174,12 @@ final class PurchaseRequisitionController extends Controller
             'warehouses' => $this->warehouseOptionsByIds($company, $this->selectedWarehouseIdsFromLineRows($lineRows)),
             'suppliers' => $this->supplierOptionsByIds($company, $this->selectedSupplierIdsFromLineRows($lineRows)),
             'lineRows' => $lineRows,
+            'creationContext' => null,
+            'initialValues' => [
+                'required_date' => null,
+                'source_type' => 'manual',
+                'notes' => null,
+            ],
         ]);
     }
 
@@ -235,6 +253,8 @@ final class PurchaseRequisitionController extends Controller
             'required_date' => ['nullable', 'date'],
             'status' => ['required', Rule::in(['DRAFT', 'APPROVED', 'CANCELLED'])],
             'source_type' => ['nullable', 'string', 'max:80'],
+            'source_reference_id' => ['nullable', 'integer', 'required_with:source_reference_type'],
+            'source_reference_type' => ['nullable', 'string', 'required_with:source_reference_id', Rule::in(['sale'])],
             'notes' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer', Rule::exists('products', 'id')],
@@ -256,7 +276,63 @@ final class PurchaseRequisitionController extends Controller
             ])
             ->all();
 
+        if (($data['source_reference_type'] ?? null) === 'sale'
+            && ! Sale::query()->whereKey((int) $data['source_reference_id'])->exists()) {
+            throw ValidationException::withMessages([
+                'source_reference_id' => __('purchase_requisition.invalid_sale_context'),
+            ]);
+        }
+
         return $data;
+    }
+
+    /** @return array<string, mixed>|null */
+    private function salePrefill(Request $request, Company $company): ?array
+    {
+        $saleId = (int) $request->query('sale_id', 0);
+        $saleLineId = (int) $request->query('sale_line_id', 0);
+        $productId = (int) $request->query('product_id', 0);
+        $quantity = round((float) $request->query('quantity', 0), 6);
+
+        if ($saleId <= 0 || $saleLineId <= 0 || $productId <= 0 || $quantity <= 0) {
+            return null;
+        }
+
+        $saleLine = SaleLine::query()->whereKey($saleLineId)->where('sale_id', $saleId)->first();
+        $product = Product::query()->where('company_id', $company->id)->find($productId);
+
+        if (! $saleLine instanceof SaleLine || ! $product instanceof Product) {
+            return null;
+        }
+
+        $supplierRule = SupplierProduct::query()
+            ->where('product_id', $productId)
+            ->where('is_active', true)
+            ->orderByDesc('is_preferred')
+            ->orderByDesc('id')
+            ->first(['supplier_id', 'lead_time_days']);
+        $needByDate = now()->addDays(max(1, (int) ($supplierRule?->lead_time_days ?? 7)))->toDateString();
+        $warehouseId = (int) $request->query('warehouse_id', 0);
+
+        if ($warehouseId > 0 && ! Warehouse::query()->where('company_id', $company->id)->whereKey($warehouseId)->exists()) {
+            $warehouseId = 0;
+        }
+
+        return [
+            'context' => [
+                'sale_id' => $saleId,
+                'sale_line_id' => $saleLineId,
+            ],
+            'required_date' => $needByDate,
+            'lines' => [[
+                'product_id' => $productId,
+                'warehouse_id' => $warehouseId > 0 ? $warehouseId : null,
+                'supplier_id' => $supplierRule?->supplier_id,
+                'quantity' => $quantity,
+                'need_by_date' => $needByDate,
+                'order_date' => now()->toDateString(),
+            ]],
+        ];
     }
 
     /**

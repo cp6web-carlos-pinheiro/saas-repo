@@ -173,8 +173,17 @@ final class SaleController extends Controller
 
         $sale->load(['customer:id,name', 'lines.product:id,sku,description,product_type,unit_id', 'lines.product.unit:id,code']);
         $analysis = $productionStatusService->analyze($sale);
+        $user = $request->user();
+        $isAdministrator = $user instanceof User
+            && app(CompanyUserAccessService::class)->isCompanyAdministrator($user, $company);
+        $capabilities = [
+            'create_production_order' => $isAdministrator
+                || ($user instanceof User && $user->hasPermission('production-orders.create', $company->id)),
+            'create_purchase_requisition' => $isAdministrator
+                || ($user instanceof User && $user->hasPermission('purchasing.requisitions.create', $company->id)),
+        ];
 
-        return view('client.sales.production-status', compact('sale', 'analysis', 'company'));
+        return view('client.sales.production-status', compact('sale', 'analysis', 'company', 'capabilities'));
     }
 
     public function store(Request $request, AuditLogService $audit, SaleFulfillmentService $saleFulfillment): RedirectResponse

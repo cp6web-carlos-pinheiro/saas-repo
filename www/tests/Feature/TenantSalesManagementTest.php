@@ -471,12 +471,13 @@ final class TenantSalesManagementTest extends TestCase
             'customer_id' => $customer->id,
             'sale_date' => '2026-08-03',
             'status' => 'CONFIRMED',
+            'confirmed_at' => now(),
             'operational_status' => 'PENDING',
             'subtotal_cents' => 2000,
             'discount_cents' => 0,
             'amount_cents' => 2000,
         ]);
-        SaleLine::query()->create([
+        $line = SaleLine::query()->create([
             'company_id' => $company->id,
             'sale_id' => $sale->id,
             'product_id' => $finishedProduct->id,
@@ -519,6 +520,8 @@ final class TenantSalesManagementTest extends TestCase
             ->assertSee('WIP-001')
             ->assertSee('RAW-001')
             ->assertSee('WH-01')
+            ->assertSee(__('sale.production_status.create_order'))
+            ->assertSee(__('sale.production_status.create_requisition'))
             ->assertViewHas('analysis', function (array $analysis) use ($finishedProduct, $intermediate, $rawMaterial): bool {
                 $item = $analysis['items'][0];
                 $forecastProductIds = collect($item['forecasts'])->pluck('product_id');
@@ -527,6 +530,12 @@ final class TenantSalesManagementTest extends TestCase
                 $raw = $materials->get($rawMaterial->id);
 
                 return $item['production_status'] === 'forecast'
+                    && $analysis['readiness'] === 'blocked_materials'
+                    && $analysis['progress_percent'] === 0.0
+                    && $analysis['schedule_incomplete'] === true
+                    && collect($analysis['alerts'])->pluck('key')->contains('materials_to_buy')
+                    && collect($analysis['alerts'])->pluck('key')->contains('orders_not_created')
+                    && collect($analysis['timeline'])->pluck('type')->contains('sale_confirmed')
                     && $item['coverage']['required_quantity'] === 2.0
                     && $item['coverage']['linked_quantity'] === 0.5
                     && $item['coverage']['available_to_link'] === 0.5
@@ -547,6 +556,77 @@ final class TenantSalesManagementTest extends TestCase
                     && $item['counts']['to_buy'] === 1
                     && $item['counts']['to_produce'] === 1;
             });
+
+        $this->actingAs($user, 'web')
+            ->get(route('production.orders.create', [
+                'sale_id' => $sale->id,
+                'sale_line_id' => $line->id,
+                'product_id' => $intermediate->id,
+                'quantity_planned' => 1,
+                'dependency_level' => 1,
+            ]))
+            ->assertOk()
+            ->assertViewHas('creationContext', fn (?array $context): bool => $context === [
+                'sale_id' => $sale->id,
+                'sale_line_id' => $line->id,
+                'root_product_id' => $finishedProduct->id,
+                'dependency_level' => 1,
+            ])
+            ->assertViewHas('initialValues', fn (array $values): bool => $values['quantity_planned'] === 1.0);
+
+        $this->actingAs($user, 'web')
+            ->post(route('production.orders.store'), [
+                'sale_id' => $sale->id,
+                'sale_line_id' => $line->id,
+                'dependency_level' => 1,
+                'product_id' => $intermediate->id,
+                'warehouse_id' => $warehouse->id,
+                'quantity_planned' => 1,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $createdOrder = ProductionOrder::query()->latest('id')->firstOrFail();
+        $this->assertSame($sale->id, $createdOrder->source_reference_id);
+        $this->assertSame('sale', $createdOrder->source_reference_type);
+        $this->assertSame($line->id, (int) data_get($createdOrder->metadata, 'sale_line_id'));
+        $this->assertSame(1, (int) data_get($createdOrder->metadata, 'dependency_level'));
+
+        $this->actingAs($user, 'web')
+            ->get(route('purchasing.requisitions.create', [
+                'sale_id' => $sale->id,
+                'sale_line_id' => $line->id,
+                'product_id' => $rawMaterial->id,
+                'quantity' => 1,
+                'warehouse_id' => $warehouse->id,
+            ]))
+            ->assertOk()
+            ->assertViewHas('creationContext', fn (?array $context): bool => $context['sale_id'] === $sale->id)
+            ->assertViewHas('lineRows', fn (array $rows): bool => $rows[0]['product_id'] === $rawMaterial->id
+                && $rows[0]['warehouse_id'] === $warehouse->id
+                && $rows[0]['quantity'] === 1.0);
+
+        $this->actingAs($user, 'web')
+            ->post(route('purchasing.requisitions.store'), [
+                'required_date' => now()->addDays(7)->toDateString(),
+                'status' => 'DRAFT',
+                'source_type' => 'sale',
+                'source_reference_id' => $sale->id,
+                'source_reference_type' => 'sale',
+                'items' => [[
+                    'product_id' => $rawMaterial->id,
+                    'warehouse_id' => $warehouse->id,
+                    'quantity' => 1,
+                    'need_by_date' => now()->addDays(7)->toDateString(),
+                    'order_date' => now()->toDateString(),
+                ]],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('purchase_requisitions', [
+            'company_id' => $company->id,
+            'source_reference_id' => $sale->id,
+            'source_reference_type' => 'sale',
+        ]);
     }
 
     public function test_sale_production_status_page_explodes_orders_materials_and_costs(): void
@@ -639,6 +719,7 @@ final class TenantSalesManagementTest extends TestCase
             'customer_id' => $customer->id,
             'sale_date' => '2026-08-03',
             'status' => 'CONFIRMED',
+            'confirmed_at' => now(),
             'operational_status' => 'PENDING',
             'subtotal_cents' => 30000,
             'discount_cents' => 0,
@@ -663,6 +744,8 @@ final class TenantSalesManagementTest extends TestCase
             'quantity_planned' => 3,
             'quantity_produced' => 1.5,
             'quantity_scrapped' => 0,
+            'scheduled_start_date' => now()->subDays(2)->toDateString(),
+            'scheduled_end_date' => now()->addDays(5)->toDateString(),
             'metadata' => [
                 'sale_line_id' => $line->id,
                 'root_product_id' => $finishedProduct->id,
@@ -710,6 +793,12 @@ final class TenantSalesManagementTest extends TestCase
                 $item = $analysis['items'][0];
 
                 return $item['production_status'] === 'in_progress'
+                    && $analysis['readiness'] === 'in_progress'
+                    && $analysis['progress_percent'] === 50.0
+                    && $analysis['projected_completion'] === now()->addDays(5)->toDateString()
+                    && $analysis['costs']['variance'] === -140.0
+                    && $analysis['costs']['variance_percent'] === -66.7
+                    && collect($analysis['timeline'])->pluck('type')->contains('order_created')
                     && $item['counts']['in_progress'] === 1
                     && $item['costs']['estimated_material'] === 30.0
                     && $item['costs']['estimated_production'] === 180.0

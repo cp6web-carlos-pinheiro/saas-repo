@@ -35,6 +35,8 @@ return [
     'select_work_center' => 'Selecione um centro de trabalho',
 
     'orders' => [
+        'sale_context' => 'Esta OP será vinculada à venda #:sale e aparecerá no acompanhamento do pedido.',
+        'invalid_sale_context' => 'O contexto da venda não é válido para esta ordem de produção.',
         'new' => 'Nova ordem de produção',
         'new_short' => 'Nova ordem',
         'create' => 'Criar ordem',

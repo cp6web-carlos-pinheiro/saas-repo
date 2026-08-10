@@ -101,19 +101,50 @@ final class SaleProductionStatusService
             ];
         })->values();
 
+        $counts = [
+            'completed' => $items->sum('counts.completed'),
+            'in_progress' => $items->sum('counts.in_progress'),
+            'planned' => $items->sum('counts.planned'),
+            'forecast' => $items->sum('counts.forecast'),
+            'materials_short' => $items->sum('counts.materials_short'),
+            'overdue' => $items->sum(static fn (array $item): int => collect($item['production_orders'])->where('is_overdue', true)->count()),
+        ];
+        $realOrderRows = $items->flatMap('production_orders');
+        $productionRows = $items->flatMap(
+            static fn (array $item): array => array_merge($item['production_orders'], $item['forecasts'])
+        );
+        $allCoveredWithoutProduction = $items->isNotEmpty() && $items->every(
+            static fn (array $item): bool => (float) ($item['coverage']['quantity_to_produce'] ?? 0) <= 0
+        );
+        $progressPercent = $productionRows->isNotEmpty()
+            ? round((float) $productionRows->avg('progress_percent'), 1)
+            : ($allCoveredWithoutProduction ? 100.0 : 0.0);
+        $scheduledEnds = $realOrderRows->pluck('scheduled_end')->filter()->sort()->values();
+        $scheduleIncomplete = $counts['forecast'] > 0 || $realOrderRows->contains(
+            static fn (array $order): bool => $order['status_group'] !== 'completed' && $order['scheduled_end'] === null
+        );
+        $estimatedTotal = round((float) $items->sum('costs.estimated_total'), 2);
+        $actualTotal = round((float) $items->sum('costs.actual_total'), 2);
+        $costVariance = round($actualTotal - $estimatedTotal, 2);
+        $alerts = $this->alerts($items, $counts, $scheduleIncomplete);
+        $readiness = $this->readiness($items, $counts, $scheduleIncomplete);
+
         return [
             'sale_id' => (int) $sale->id,
             'items' => $items->all(),
-            'counts' => [
-                'completed' => $items->sum('counts.completed'),
-                'in_progress' => $items->sum('counts.in_progress'),
-                'planned' => $items->sum('counts.planned'),
-                'forecast' => $items->sum('counts.forecast'),
-                'materials_short' => $items->sum('counts.materials_short'),
-            ],
+            'readiness' => $readiness,
+            'progress_percent' => $progressPercent,
+            'projected_completion' => $scheduledEnds->last(),
+            'schedule_incomplete' => $scheduleIncomplete,
+            'last_updated_at' => now()->toIso8601String(),
+            'alerts' => $alerts,
+            'timeline' => $this->timeline($sale, $orders),
+            'counts' => $counts,
             'costs' => [
-                'estimated_total' => round((float) $items->sum('costs.estimated_total'), 2),
-                'actual_total' => round((float) $items->sum('costs.actual_total'), 2),
+                'estimated_total' => $estimatedTotal,
+                'actual_total' => $actualTotal,
+                'variance' => $costVariance,
+                'variance_percent' => $estimatedTotal > 0 ? round(($costVariance / $estimatedTotal) * 100, 1) : null,
                 'estimated_incomplete' => $items->contains('costs.estimated_incomplete', true),
                 'actual_incomplete' => $items->contains('costs.actual_incomplete', true),
             ],
@@ -229,6 +260,9 @@ final class SaleProductionStatusService
                 : 0.0,
             'scheduled_start' => $order->scheduled_start_date?->toDateString(),
             'scheduled_end' => $order->scheduled_end_date?->toDateString(),
+            'is_overdue' => $order->status !== 'COMPLETED'
+                && $order->scheduled_end_date !== null
+                && $order->scheduled_end_date->isBefore(today()),
             'warehouse' => $order->warehouse?->code,
             'operations_count' => $order->operations->count(),
             'costs' => [
@@ -287,6 +321,7 @@ final class SaleProductionStatusService
                 'progress_percent' => 0.0,
                 'scheduled_start' => null,
                 'scheduled_end' => null,
+                'is_overdue' => false,
                 'warehouse' => null,
                 'operations_count' => 0,
                 'costs' => null,
@@ -402,5 +437,137 @@ final class SaleProductionStatusService
         return $finished !== null && (float) $finished['quantity_to_produce'] <= 0
             ? 'available'
             : 'forecast';
+    }
+
+    private function alerts(Collection $items, array $counts, bool $scheduleIncomplete): array
+    {
+        $alerts = collect();
+
+        foreach ($items as $item) {
+            $context = [
+                'line_id' => $item['line_id'],
+                'product' => $item['sku'],
+            ];
+
+            if ($item['cycles'] !== []) {
+                $alerts->push($context + ['key' => 'bom_cycle', 'severity' => 'error']);
+            }
+
+            if ($item['missing_boms'] !== []) {
+                $alerts->push($context + ['key' => 'missing_bom', 'severity' => 'error']);
+            }
+
+            if ($item['counts']['to_buy'] > 0) {
+                $alerts->push($context + [
+                    'key' => 'materials_to_buy',
+                    'severity' => 'warning',
+                    'count' => $item['counts']['to_buy'],
+                ]);
+            }
+
+            if ($item['counts']['forecast'] > 0) {
+                $alerts->push($context + [
+                    'key' => 'orders_not_created',
+                    'severity' => 'warning',
+                    'count' => $item['counts']['forecast'],
+                ]);
+            }
+
+            if ($item['costs']['estimated_incomplete'] || $item['costs']['actual_incomplete']) {
+                $alerts->push($context + ['key' => 'cost_incomplete', 'severity' => 'info']);
+            }
+        }
+
+        if ($counts['overdue'] > 0) {
+            $alerts->prepend([
+                'key' => 'orders_overdue',
+                'severity' => 'error',
+                'count' => $counts['overdue'],
+                'line_id' => null,
+                'product' => null,
+            ]);
+        }
+
+        if ($scheduleIncomplete) {
+            $alerts->push([
+                'key' => 'schedule_incomplete',
+                'severity' => 'info',
+                'line_id' => null,
+                'product' => null,
+            ]);
+        }
+
+        return $alerts->values()->all();
+    }
+
+    private function readiness(Collection $items, array $counts, bool $scheduleIncomplete): string
+    {
+        if ($items->contains(static fn (array $item): bool => $item['cycles'] !== [] || $item['missing_boms'] !== [])) {
+            return 'blocked_structure';
+        }
+
+        if ($items->sum('counts.to_buy') > 0) {
+            return 'blocked_materials';
+        }
+
+        if ($counts['overdue'] > 0) {
+            return 'at_risk';
+        }
+
+        if ($counts['forecast'] > 0 || $scheduleIncomplete) {
+            return 'attention';
+        }
+
+        if ($counts['in_progress'] > 0) {
+            return 'in_progress';
+        }
+
+        if ($counts['planned'] > 0) {
+            return 'planned';
+        }
+
+        return 'ready';
+    }
+
+    /** @param Collection<int, ProductionOrder> $orders */
+    private function timeline(Sale $sale, Collection $orders): array
+    {
+        $events = collect();
+
+        foreach ([
+            ['date' => $sale->confirmed_at, 'type' => 'sale_confirmed'],
+            ['date' => $sale->picking_at, 'type' => 'sale_picking'],
+            ['date' => $sale->invoiced_at, 'type' => 'sale_invoiced'],
+            ['date' => $sale->shipped_at, 'type' => 'sale_shipped'],
+            ['date' => $sale->delivered_at, 'type' => 'sale_delivered'],
+        ] as $event) {
+            if ($event['date'] !== null) {
+                $events->push($event + ['order_number' => null]);
+            }
+        }
+
+        foreach ($orders as $order) {
+            foreach ([
+                ['date' => $order->created_at, 'type' => 'order_created'],
+                ['date' => $order->released_at, 'type' => 'order_released'],
+                ['date' => $order->started_at, 'type' => 'order_started'],
+                ['date' => $order->completed_at, 'type' => 'order_completed'],
+            ] as $event) {
+                if ($event['date'] !== null) {
+                    $events->push($event + ['order_number' => (string) $order->order_number]);
+                }
+            }
+        }
+
+        return $events
+            ->sortByDesc('date')
+            ->take(12)
+            ->map(static fn (array $event): array => [
+                'date' => $event['date']->toIso8601String(),
+                'type' => $event['type'],
+                'order_number' => $event['order_number'],
+            ])
+            ->values()
+            ->all();
     }
 }

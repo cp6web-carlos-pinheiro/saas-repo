@@ -11,6 +11,7 @@ use App\Modules\Production\Application\Services\ProductionOrderService;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
+use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Shared\Presentation\Exceptions\DomainException;
 use App\Support\Duration;
@@ -88,7 +89,7 @@ final class ProductionOrderController extends Controller
         $this->ensurePermission($request, self::CREATE_PERMISSION, $company->id);
         $referenceDate = now()->toDateString();
 
-        $selectedProductId = (int) ($request->old('product_id') ?? 0);
+        $selectedProductId = (int) ($request->old('product_id') ?? $request->query('product_id', 0));
         $selectedProduct = $selectedProductId > 0
             ? Product::query()
                 ->where('is_active', true)
@@ -96,8 +97,27 @@ final class ProductionOrderController extends Controller
                 ->find($selectedProductId, ['id', 'sku', 'description'])
             : null;
         $warehouses = Warehouse::query()->where('is_active', true)->orderBy('name')->get(['id', 'code', 'name']);
+        $saleId = (int) $request->query('sale_id', 0);
+        $saleLineId = (int) $request->query('sale_line_id', 0);
+        $saleLine = $saleId > 0 && $saleLineId > 0
+            ? SaleLine::query()->whereKey($saleLineId)->where('sale_id', $saleId)->first()
+            : null;
+        $creationContext = $saleLine !== null && (int) $saleLine->product_id > 0
+            ? [
+                'sale_id' => $saleId,
+                'sale_line_id' => $saleLineId,
+                'root_product_id' => (int) $saleLine->product_id,
+                'dependency_level' => max(0, (int) $request->query('dependency_level', 0)),
+            ]
+            : null;
+        $initialValues = [
+            'warehouse_id' => (int) $request->query('warehouse_id', 0),
+            'quantity_planned' => max(0.001, (float) $request->query('quantity_planned', 1)),
+            'scheduled_start_date' => (string) $request->query('scheduled_start_date', ''),
+            'scheduled_end_date' => (string) $request->query('scheduled_end_date', ''),
+        ];
 
-        return view('client.production.orders.form', compact('selectedProduct', 'warehouses', 'company'));
+        return view('client.production.orders.form', compact('selectedProduct', 'warehouses', 'company', 'creationContext', 'initialValues'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -111,10 +131,42 @@ final class ProductionOrderController extends Controller
             'quantity_planned' => ['required', 'numeric', 'gt:0'],
             'scheduled_start_date' => ['nullable', 'date'],
             'scheduled_end_date' => ['nullable', 'date', 'after_or_equal:scheduled_start_date'],
+            'sale_id' => ['nullable', 'integer'],
+            'sale_line_id' => ['nullable', 'integer'],
+            'dependency_level' => ['nullable', 'integer', 'min:0'],
         ]);
 
+        $saleLine = null;
+
+        if ((int) ($data['sale_id'] ?? 0) > 0 || (int) ($data['sale_line_id'] ?? 0) > 0) {
+            $saleLine = SaleLine::query()
+                ->whereKey((int) ($data['sale_line_id'] ?? 0))
+                ->where('sale_id', (int) ($data['sale_id'] ?? 0))
+                ->first();
+
+            if (! $saleLine instanceof SaleLine) {
+                return redirect()->back()->withInput()->withErrors([
+                    'product_id' => __('production.orders.invalid_sale_context'),
+                ]);
+            }
+        }
+
         try {
-            $created = $this->orderService->createManual($data, $request->user()?->id);
+            if ($saleLine instanceof SaleLine) {
+                $created = $this->orderService->createForSale(array_merge($data, [
+                    'source_reference_id' => (int) $data['sale_id'],
+                    'source_reference_type' => 'sale',
+                    'metadata' => [
+                        'sale_id' => (int) $data['sale_id'],
+                        'sale_line_id' => (int) $saleLine->id,
+                        'root_product_id' => (int) $saleLine->product_id,
+                        'dependency_level' => (int) ($data['dependency_level'] ?? 0),
+                        'allocation_scope' => sprintf('sale:%d', (int) $data['sale_id']),
+                    ],
+                ]), $request->user()?->id);
+            } else {
+                $created = $this->orderService->createManual($data, $request->user()?->id);
+            }
         } catch (DomainException $exception) {
             return redirect()->back()
                 ->withInput($request->except(['password', 'password_confirmation', 'current_password']))

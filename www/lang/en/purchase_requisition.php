@@ -41,4 +41,7 @@ return [
     'updated' => 'Requisition updated successfully.',
     'removed' => 'Requisition removed successfully.',
     'invalid_transition' => 'Invalid requisition status transition.',
+    'sale_context' => 'This requisition will be linked to sale #:sale.',
+    'sale_context_notes' => 'Material replenishment for sale #:sale.',
+    'invalid_sale_context' => 'The selected sale does not belong to the current company.',
 ];

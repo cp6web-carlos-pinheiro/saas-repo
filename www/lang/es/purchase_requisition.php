@@ -41,4 +41,7 @@ return [
     'updated' => 'Solicitud actualizada con éxito.',
     'removed' => 'Solicitud eliminada con éxito.',
     'invalid_transition' => 'Transición de estado de la solicitud inválida.',
+    'sale_context' => 'Esta solicitud se vinculará a la venta #:sale.',
+    'sale_context_notes' => 'Reposición de materiales para la venta #:sale.',
+    'invalid_sale_context' => 'La venta informada no pertenece a la empresa actual.',
 ];

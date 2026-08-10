@@ -28,7 +28,7 @@ final class SaleMaterialRequirementService
     /** @var array<int, float> */
     private array $remainingFreeStock = [];
 
-    /** @var array<int, list<array{code: string, name: string, quantity: float}>> */
+    /** @var array<int, list<array{id: int, code: string, name: string, quantity: float}>> */
     private array $stockByWarehouse = [];
 
     /** @var array<int, float> */
@@ -259,6 +259,7 @@ final class SaleMaterialRequirementService
         $this->initialFreeStock[$productId] = $quantity;
         $this->remainingFreeStock[$productId] = $quantity;
         $this->stockByWarehouse[$productId] = $balances->map(static fn (InventoryBalance $balance): array => [
+            'id' => (int) $balance->warehouse_id,
             'code' => (string) ($balance->warehouse?->code ?? '—'),
             'name' => (string) ($balance->warehouse?->name ?? '—'),
             'quantity' => round((float) $balance->qty_available, 6),

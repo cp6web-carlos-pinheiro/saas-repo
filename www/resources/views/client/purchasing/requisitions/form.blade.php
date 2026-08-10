@@ -27,11 +27,16 @@
             @if ($editing)
                 @method('PUT')
             @endif
+            @if (! $editing && $creationContext)
+                <input type="hidden" name="source_reference_id" value="{{ $creationContext['sale_id'] }}">
+                <input type="hidden" name="source_reference_type" value="sale">
+                <x-ui.alert variant="info">{{ __('purchase_requisition.sale_context', ['sale' => $creationContext['sale_id']]) }}</x-ui.alert>
+            @endif
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <label class="block text-sm font-medium">
                     {{ __('purchase_requisition.required_date') }}
-                    <x-ui.input type="date" name="required_date" :value="old('required_date', $requisition?->required_date?->format('Y-m-d'))" class="mt-2" />
+                    <x-ui.input type="date" name="required_date" :value="old('required_date', $requisition?->required_date?->format('Y-m-d') ?? $initialValues['required_date'])" class="mt-2" />
                     @error('required_date')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
                 </label>
 
@@ -48,7 +53,7 @@
 
             <label class="block text-sm font-medium">
                 {{ __('purchase_requisition.source_type') }}
-                <x-ui.input name="source_type" :value="old('source_type', $requisition?->source_type ?? 'manual')" class="mt-2" />
+                <x-ui.input name="source_type" :value="old('source_type', $requisition?->source_type ?? $initialValues['source_type'])" class="mt-2" />
                 @error('source_type')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
@@ -121,7 +126,7 @@
 
             <label class="block text-sm font-medium">
                 {{ __('purchase_requisition.notes') }}
-                <x-ui.textarea name="notes" class="mt-2" rows="4">{{ old('notes', $requisition?->notes) }}</x-ui.textarea>
+                <x-ui.textarea name="notes" class="mt-2" rows="4">{{ old('notes', $requisition?->notes ?? $initialValues['notes']) }}</x-ui.textarea>
                 @error('notes')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
