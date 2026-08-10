@@ -11,15 +11,14 @@ use App\Modules\Inventory\Application\Services\InventoryService;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryBalance;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Sales\Application\Services\SaleFulfillmentService;
-use App\Modules\Sales\Application\Services\SaleProductionStatusService;
 use App\Modules\Sales\Application\Services\SaleProductionStatusExportService;
+use App\Modules\Sales\Application\Services\SaleProductionStatusService;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
 use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
 use App\Shared\Presentation\Exceptions\DomainException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -30,6 +29,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 final class SaleController extends Controller
 {

@@ -92,7 +92,13 @@
             <div><div class="text-xs text-[#5f6368]">{{ __('sale.production_status.limiting_material') }}</div><div class="mt-1 font-semibold">{{ data_get($analysis, 'schedule.limiting_material.sku', '—') }}</div></div>
         </div>
         @if ($analysis['schedule']['critical_path'])
-            <div class="mt-4 border-t border-[#dadce0] pt-3 text-sm text-[#5f6368]">{{ __('sale.production_status.critical_path') }}: <a class="font-semibold text-[#174ea6] hover:underline" href="{{ route('production.orders.show', $analysis['schedule']['critical_path']['order_id']) }}">{{ $analysis['schedule']['critical_path']['order_number'] }} · {{ $analysis['schedule']['critical_path']['product'] }}</a></div>
+            <div class="mt-4 border-t border-[#dadce0] pt-3 text-sm text-[#5f6368]">{{ __('sale.production_status.critical_path') }}:
+                @if ($capabilities['read_production_order'])
+                    <a class="font-semibold text-[#174ea6] hover:underline" href="{{ route('production.orders.show', $analysis['schedule']['critical_path']['order_id']) }}">{{ $analysis['schedule']['critical_path']['order_number'] }} · {{ $analysis['schedule']['critical_path']['product'] }}</a>
+                @else
+                    <strong>{{ $analysis['schedule']['critical_path']['order_number'] }} · {{ $analysis['schedule']['critical_path']['product'] }}</strong>
+                @endif
+            </div>
         @endif
     </x-ui.panel>
 

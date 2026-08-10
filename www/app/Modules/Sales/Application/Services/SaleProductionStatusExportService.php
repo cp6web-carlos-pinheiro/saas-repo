@@ -14,7 +14,7 @@ final class SaleProductionStatusExportService
 {
     public function excel(Sale $sale, array $analysis, string $companyName): string
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $summary = $spreadsheet->getActiveSheet();
         $summary->setTitle('Resumo');
         $summary->fromArray([

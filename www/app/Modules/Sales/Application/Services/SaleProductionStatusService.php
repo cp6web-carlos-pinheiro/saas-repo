@@ -6,8 +6,8 @@ namespace App\Modules\Sales\Application\Services;
 
 use App\Models\SaaS\AuditLog;
 use App\Modules\Bom\Infrastructure\Persistence\Models\BomHeader;
-use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryReservation;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryReservation;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrder;
@@ -33,6 +33,12 @@ final class SaleProductionStatusService
     /** @var array<string, array{amount: float|null, source: string|null, reference: string|null}> */
     private array $hourRateEvidence = [];
 
+    /** @var array<int, Product> */
+    private array $treeProducts = [];
+
+    /** @var array<string, BomHeader|null> */
+    private array $treeBoms = [];
+
     public function __construct(
         private readonly SaleMaterialRequirementService $materialRequirementService
     ) {}
@@ -44,6 +50,8 @@ final class SaleProductionStatusService
         $this->hourRates = [];
         $this->unitCostEvidence = [];
         $this->hourRateEvidence = [];
+        $this->treeProducts = [];
+        $this->treeBoms = [];
         $sale->loadMissing(['customer:id,name', 'lines.product.unit']);
 
         $orders = ProductionOrder::query()
@@ -133,9 +141,9 @@ final class SaleProductionStatusService
                     'in_progress' => $allProductionRows->where('status_group', 'in_progress')->count(),
                     'planned' => $allProductionRows->where('status_group', 'planned')->count(),
                     'forecast' => $allProductionRows->where('status_group', 'forecast')->count(),
-                    'materials_short' => collect($materials['materials'])->where('shortage_quantity', '>', 0)->count(),
+                    'materials_short' => $enrichedMaterials->where('net_shortage', '>', 0)->count(),
                     'materials_in_stock' => $materials['materials_in_stock_count'],
-                    'to_buy' => $materials['purchase_items_count'],
+                    'to_buy' => $enrichedMaterials->filter(static fn (array $material): bool => $material['recommended_action'] === 'BUY' && (float) $material['net_shortage'] > 0)->count(),
                     'to_produce' => $materials['production_items_count'],
                 ],
                 'costs' => $costs,
@@ -182,6 +190,9 @@ final class SaleProductionStatusService
         $daysLate = $promisedDate !== null
             ? max(0, today()->parse($projectedCompletion ?? today())->startOfDay()->diffInDays(today()->parse($promisedDate)->startOfDay(), false) * -1)
             : 0;
+        if ($daysLate > 0 && $readiness !== 'blocked_materials') {
+            $readiness = 'at_risk';
+        }
         $criticalOrder = $realOrderRows->filter(static fn (array $order): bool => $order['scheduled_end'] !== null)->sortByDesc('scheduled_end')->first();
         $limitingMaterial = $items->flatMap(static fn (array $item): array => $item['materials'])
             ->filter(static fn (array $material): bool => $material['recommended_action'] === 'BUY'
@@ -356,9 +367,8 @@ final class SaleProductionStatusService
                 continue;
             }
 
-            $actualMaterial += $quantity * (float) $unitCost;
-
             $scrappedQuantity = (float) $consumption->quantity_scrapped;
+            $actualMaterial += max(0.0, $quantity - $scrappedQuantity) * (float) $unitCost;
 
             if ($scrappedQuantity > 0 && $unitCost === null) {
                 $actualIncomplete = true;
@@ -712,7 +722,7 @@ final class SaleProductionStatusService
         Collection $purchasingByProduct,
         ?array $rootCoverage = null,
     ): array {
-        $product = Product::query()->with('unit:id,code')->findOrFail($productId);
+        $product = $this->treeProducts[$productId] ??= Product::query()->with('unit:id,code')->findOrFail($productId);
         $material = $materials->get($productId, []);
         $productRows = $rows->get($productId, collect());
         $purchasing = $purchasingByProduct->get($productId, ['open' => 0.0, 'received' => 0.0, 'orders' => []]);
@@ -721,13 +731,16 @@ final class SaleProductionStatusService
         $inProduction = round((float) $productRows->whereNotNull('id')->sum(
             static fn (array $row): float => max(0.0, (float) $row['quantity_planned'] - (float) $row['quantity_produced'])
         ), 6);
+        $produced = round((float) $productRows->whereNotNull('id')->sum('quantity_produced'), 6);
         $inPurchase = (float) ($purchasing['open'] ?? 0);
-        $netShortage = max(0.0, round($requiredQuantity - $reserved - $available - $inProduction - $inPurchase, 6));
+        $received = round((float) ($purchasing['received'] ?? 0) + $produced, 6);
+        $netShortage = max(0.0, round($requiredQuantity - $reserved - $available - $inProduction - $received - $inPurchase, 6));
         $isCycle = in_array($productId, $path, true);
         $children = [];
 
         if (! $isCycle && $level < 20) {
-            $bom = BomHeader::query()
+            $bomKey = $productId.'|'.$referenceDate;
+            $bom = $this->treeBoms[$bomKey] ??= BomHeader::query()
                 ->where('product_id', $productId)
                 ->where('status', 'APPROVED')
                 ->whereDate('effective_from', '<=', $referenceDate)
@@ -764,7 +777,7 @@ final class SaleProductionStatusService
             'available_quantity' => round($available, 6),
             'in_production' => $inProduction,
             'in_purchase' => round($inPurchase, 6),
-            'received_quantity' => round((float) ($purchasing['received'] ?? 0), 6),
+            'received_quantity' => $received,
             'net_shortage' => $netShortage,
             'status' => $isCycle ? 'blocked' : ($netShortage > 0 ? 'shortage' : ($primaryOrder['status_group'] ?? 'available')),
             'order' => $primaryOrder,
@@ -973,8 +986,8 @@ final class SaleProductionStatusService
     }
 
     /**
-     * @param Collection<int, ProductionOrder> $orders
-     * @param Collection<int, PurchaseOrder> $purchaseOrders
+     * @param  Collection<int, ProductionOrder>  $orders
+     * @param  Collection<int, PurchaseOrder>  $purchaseOrders
      */
     private function timeline(Sale $sale, Collection $orders, Collection $purchaseOrders): array
     {
@@ -1035,7 +1048,9 @@ final class SaleProductionStatusService
 
         return $events
             ->sortByDesc('date')
-            ->take(12)
+            ->take(30)
+            ->unique(static fn (array $event): string => $event['type'].'|'.($event['order_number'] ?? ''))
+            ->sortBy('date')
             ->map(static fn (array $event): array => [
                 'date' => $event['date']->toIso8601String(),
                 'type' => $event['type'],

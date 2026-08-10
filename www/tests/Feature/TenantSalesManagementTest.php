@@ -16,6 +16,10 @@ use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderMaterialConsumption;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOperation;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrder;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseOrderLine;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition;
+use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisitionLine;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\SupplierProduct;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
@@ -630,6 +634,55 @@ final class TenantSalesManagementTest extends TestCase
             'source_reference_id' => $sale->id,
             'source_reference_type' => 'sale',
         ]);
+
+        $this->actingAs($user, 'web')
+            ->post(route('sales.production-status.tracking', $sale), [
+                'promised_date' => now()->addDays(10)->toDateString(),
+                'responsible_user_id' => $user->id,
+                'comment' => 'Priorizar matéria-prima crítica.',
+            ])
+            ->assertRedirect(route('sales.production-status', $sale))
+            ->assertSessionHasNoErrors();
+
+        $sale->refresh();
+        $this->assertSame($user->id, (int) data_get($sale->metadata, 'production_tracking.responsible_user_id'));
+        $this->assertSame('Priorizar matéria-prima crítica.', data_get($sale->metadata, 'production_tracking.comments.0.text'));
+
+        $this->actingAs($user, 'web')
+            ->post(route('sales.production-status.reserve', $sale), [
+                'sale_line_id' => $line->id,
+                'product_id' => $rawMaterial->id,
+                'warehouse_id' => $warehouse->id,
+                'quantity' => 1,
+            ])
+            ->assertRedirect(route('sales.production-status', $sale))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('inventory_reservations', [
+            'reference_type' => 'sale',
+            'reference_id' => $sale->id,
+            'product_id' => $rawMaterial->id,
+            'quantity' => 1,
+            'status' => 'RESERVED',
+        ]);
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.production-status', $sale))
+            ->assertOk()
+            ->assertViewHas('analysis', fn (array $analysis): bool => $analysis['tracking']['responsible_user_id'] === $user->id
+                && $analysis['tracking']['comments'][0]['text'] === 'Priorizar matéria-prima crítica.'
+                && collect($analysis['history'])->pluck('event')->contains('tenant_sale.production_tracking.updated')
+                && collect($analysis['history'])->pluck('event')->contains('tenant_sale.production_material_reserved'));
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.production-status.export', [$sale, 'xlsx']))
+            ->assertOk()
+            ->assertDownload('venda-'.$sale->id.'-producao.xlsx');
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.production-status.export', [$sale, 'pdf']))
+            ->assertOk()
+            ->assertDownload('venda-'.$sale->id.'-producao.pdf');
     }
 
     public function test_sale_production_status_page_explodes_orders_materials_and_costs(): void
@@ -735,6 +788,45 @@ final class TenantSalesManagementTest extends TestCase
             'quantity' => 3,
             'unit_price' => 100,
         ]);
+        $requisition = PurchaseRequisition::query()->create([
+            'company_id' => $company->id,
+            'requisition_number' => 'PR-SALE-COST',
+            'status' => 'APPROVED',
+            'source_type' => 'sale',
+            'source_reference_id' => $sale->id,
+            'source_reference_type' => 'sale',
+            'required_date' => now()->addDays(4)->toDateString(),
+        ]);
+        $requisitionLine = PurchaseRequisitionLine::query()->create([
+            'company_id' => $company->id,
+            'purchase_requisition_id' => $requisition->id,
+            'product_id' => $rawMaterial->id,
+            'requested_quantity' => 4,
+            'need_by_date' => now()->addDays(4)->toDateString(),
+            'order_date' => now()->toDateString(),
+            'status' => 'APPROVED',
+        ]);
+        $purchaseOrder = PurchaseOrder::query()->create([
+            'company_id' => $company->id,
+            'purchase_order_number' => 'PC-SALE-COST',
+            'supplier_id' => $supplier->id,
+            'purchase_requisition_id' => $requisition->id,
+            'status' => 'APPROVED',
+            'order_date' => now()->toDateString(),
+            'expected_delivery_date' => now()->addDays(4)->toDateString(),
+        ]);
+        PurchaseOrderLine::query()->create([
+            'company_id' => $company->id,
+            'purchase_order_id' => $purchaseOrder->id,
+            'purchase_requisition_line_id' => $requisitionLine->id,
+            'product_id' => $rawMaterial->id,
+            'warehouse_id' => $warehouse->id,
+            'quantity_ordered' => 4,
+            'quantity_received' => 1,
+            'unit_price' => 5,
+            'promised_date' => now()->addDays(4)->toDateString(),
+            'status' => 'PARTIAL',
+        ]);
         $order = ProductionOrder::query()->create([
             'company_id' => $company->id,
             'product_id' => $finishedProduct->id,
@@ -808,7 +900,14 @@ final class TenantSalesManagementTest extends TestCase
                     && $analysis['projected_completion'] === now()->addDays(5)->toDateString()
                     && $analysis['costs']['variance'] === -140.0
                     && $analysis['costs']['variance_percent'] === -66.7
+                    && $analysis['costs']['estimated_machine'] === 180.0
+                    && $analysis['costs']['actual_machine'] === 60.0
+                    && $analysis['costs']['estimated_margin'] === 90.0
                     && collect($analysis['timeline'])->pluck('type')->contains('order_created')
+                    && $item['tree']['children'][0]['sku'] === 'RAW-COST-001'
+                    && $item['tree']['children'][0]['in_purchase'] === 3.0
+                    && $item['materials'][0]['received_quantity'] === 1.0
+                    && $item['materials'][0]['purchase_orders'][0]['number'] === 'PC-SALE-COST'
                     && $item['counts']['in_progress'] === 1
                     && $item['costs']['estimated_material'] === 30.0
                     && $item['costs']['estimated_production'] === 180.0
@@ -819,6 +918,21 @@ final class TenantSalesManagementTest extends TestCase
                     && $item['costs']['estimated_incomplete'] === false
                     && $item['costs']['actual_incomplete'] === false;
             });
+
+        $this->actingAs($user, 'web')
+            ->post(route('production.orders.reschedule', $order), [
+                'scheduled_start_date' => now()->addDay()->toDateString(),
+                'scheduled_end_date' => now()->addDays(8)->toDateString(),
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(now()->addDays(8)->toDateString(), $order->refresh()->scheduled_end_date?->toDateString());
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.production-status', $sale))
+            ->assertOk()
+            ->assertViewHas('analysis', fn (array $analysis): bool => $analysis['projected_completion'] === now()->addDays(8)->toDateString()
+                && collect($analysis['history'])->pluck('event')->contains('tenant_production_order.rescheduled'));
     }
 
     /**
