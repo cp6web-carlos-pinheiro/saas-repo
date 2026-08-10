@@ -136,4 +136,7 @@ trap - ERR
 # Done
 # --------------------------------------------------
 
+cd ..
+sudo chmod +x deploy.sh
+
 echo "Deployment script completed successfully."
