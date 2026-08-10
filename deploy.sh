@@ -6,7 +6,7 @@ set -e
 # Configuration
 # --------------------------------------------------
 
-PROJECT_DIR="$HOME/www"
+PROJECT_DIR="$HOME/beyond-mrp/www"
 
 # --------------------------------------------------
 # Functions
