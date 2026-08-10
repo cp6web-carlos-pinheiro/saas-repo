@@ -74,7 +74,8 @@ if [ ! -f vendor/autoload.php ]; then
         --no-dev \
         --prefer-dist \
         --no-interaction \
-        --no-progress
+        --no-progress \
+        --optimize-autoloader
 
 elif [ "$COMPOSER_DEPS_CHANGED" -eq 0 ]; then
 
@@ -90,7 +91,8 @@ else
         --no-dev \
         --prefer-dist \
         --no-interaction \
-        --no-progress
+        --no-progress \
+        --optimize-autoloader
 
 fi
 
