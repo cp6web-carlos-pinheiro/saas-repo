@@ -109,7 +109,7 @@ final class SaleProductionStatusService
             'materials_short' => $items->sum('counts.materials_short'),
             'overdue' => $items->sum(static fn (array $item): int => collect($item['production_orders'])->where('is_overdue', true)->count()),
         ];
-        $realOrderRows = $items->flatMap('production_orders');
+        $realOrderRows = $items->flatMap(static fn (array $item): array => $item['production_orders']);
         $productionRows = $items->flatMap(
             static fn (array $item): array => array_merge($item['production_orders'], $item['forecasts'])
         );
