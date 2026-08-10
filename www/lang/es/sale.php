@@ -83,7 +83,7 @@ return [
     'removed' => 'Venta eliminada correctamente.',
     'production_status' => [
         'view' => 'Seguir producción',
-        'title' => 'Seguimiento de producción y materiales',
+        'title' => 'Seguimiento',
         'subtitle' => 'Productos, órdenes de producción, materiales y costos del pedido del cliente :customer.',
         'completed' => 'Completadas',
         'in_progress' => 'En curso',
@@ -132,6 +132,7 @@ return [
         'export_pdf' => 'Exportar PDF',
         'print' => 'Imprimir',
         'share' => 'Compartir',
+        'report_actions' => 'Acciones del informe',
         'link_copied' => 'Enlace copiado',
         'auto_refresh' => 'Actualizar automáticamente cada 5 minutos',
         'promised_date' => 'Fecha prometida al cliente',

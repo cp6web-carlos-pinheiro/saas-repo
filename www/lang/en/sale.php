@@ -83,7 +83,7 @@ return [
     'removed' => 'Sale removed successfully.',
     'production_status' => [
         'view' => 'Track production',
-        'title' => 'Production and materials tracking',
+        'title' => 'Tracking',
         'subtitle' => 'Products, production orders, materials, and costs for customer :customer.',
         'completed' => 'Completed',
         'in_progress' => 'In progress',
@@ -132,6 +132,7 @@ return [
         'export_pdf' => 'Export PDF',
         'print' => 'Print',
         'share' => 'Share',
+        'report_actions' => 'Report actions',
         'link_copied' => 'Link copied',
         'auto_refresh' => 'Automatically refresh every 5 minutes',
         'promised_date' => 'Customer promised date',

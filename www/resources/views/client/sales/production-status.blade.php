@@ -30,20 +30,31 @@
         };
     @endphp
 
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <p class="text-sm font-semibold uppercase tracking-wide text-[#5f6368]">{{ __('sale.reference_label', ['id' => $sale->id]) }}</p>
-            <h1 class="mt-1 font-display text-3xl font-bold">{{ __('sale.production_status.title') }}</h1>
-            <p class="mt-2 text-sm text-[#5f6368]">{{ __('sale.production_status.subtitle', ['customer' => $sale->customer?->name ?? __('sale.customer_removed')]) }}</p>
+    <div>
+        <p class="text-sm font-semibold uppercase tracking-wide text-[#5f6368]">{{ __('sale.reference_label', ['id' => $sale->id]) }}</p>
+        <div class="mt-1 flex flex-wrap items-center justify-between gap-4">
+            <h1 class="font-display text-3xl font-bold">{{ __('sale.production_status.title') }}</h1>
+            <div class="flex flex-wrap items-center justify-end gap-1 print:hidden" role="group" aria-label="{{ __('sale.production_status.report_actions') }}">
+                <a class="ui-icon-button border border-[#dadce0] bg-white" href="{{ route('sales.production-status.export', [$sale, 'xlsx']) }}" title="{{ __('sale.production_status.export_excel') }}" aria-label="{{ __('sale.production_status.export_excel') }}">
+                    <x-ui.icon name="chart-bar" />
+                </a>
+                <a class="ui-icon-button border border-[#dadce0] bg-white" href="{{ route('sales.production-status.export', [$sale, 'pdf']) }}" title="{{ __('sale.production_status.export_pdf') }}" aria-label="{{ __('sale.production_status.export_pdf') }}">
+                    <x-ui.icon name="receipt" />
+                </a>
+                <button type="button" class="ui-icon-button border border-[#dadce0] bg-white" title="{{ __('sale.production_status.print') }}" aria-label="{{ __('sale.production_status.print') }}" onclick="window.print()">
+                    <x-ui.icon name="printer" />
+                </button>
+                <button type="button" class="ui-icon-button border border-[#dadce0] bg-white" title="{{ __('sale.production_status.share') }}" aria-label="{{ __('sale.production_status.share') }}" data-share-report>
+                    <x-ui.icon name="share" />
+                </button>
+                <a class="ui-icon-button border border-[#dadce0] bg-white" href="{{ route('sales.production-status', $sale) }}" title="{{ __('sale.production_status.refresh') }}" aria-label="{{ __('sale.production_status.refresh') }}">
+                    <x-ui.icon name="refresh" />
+                </a>
+                <span class="mx-2 h-6 w-px bg-[#dadce0]" aria-hidden="true"></span>
+                <x-ui.button :href="route('sales.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+            </div>
         </div>
-        <div class="flex flex-wrap gap-3">
-            <x-ui.button :href="route('sales.production-status.export', [$sale, 'xlsx'])" variant="surface-muted" class="rounded-full print:hidden">{{ __('sale.production_status.export_excel') }}</x-ui.button>
-            <x-ui.button :href="route('sales.production-status.export', [$sale, 'pdf'])" variant="surface-muted" class="rounded-full print:hidden">{{ __('sale.production_status.export_pdf') }}</x-ui.button>
-            <button type="button" class="rounded-full border border-[#dadce0] bg-white px-4 py-2 text-sm font-semibold print:hidden" onclick="window.print()">{{ __('sale.production_status.print') }}</button>
-            <button type="button" class="rounded-full border border-[#dadce0] bg-white px-4 py-2 text-sm font-semibold print:hidden" data-share-report>{{ __('sale.production_status.share') }}</button>
-            <x-ui.button :href="route('sales.production-status', $sale)" variant="surface-muted" class="rounded-full">{{ __('sale.production_status.refresh') }}</x-ui.button>
-            <x-ui.button :href="route('sales.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
-        </div>
+        <p class="mt-2 text-sm text-[#5f6368]">{{ __('sale.production_status.subtitle', ['customer' => $sale->customer?->name ?? __('sale.customer_removed')]) }}</p>
     </div>
 
     <x-ui.tabs class="mt-6" :label="__('sale.production_status.tabs_label')" data-production-tabs>
@@ -629,9 +640,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('[data-share-report]')?.addEventListener('click', async (event) => {
         await navigator.clipboard.writeText(window.location.href);
-        const original = event.currentTarget.textContent;
-        event.currentTarget.textContent = @json(__('sale.production_status.link_copied'));
-        window.setTimeout(() => { event.currentTarget.textContent = original; }, 1800);
+        const originalTitle = event.currentTarget.title;
+        const originalLabel = event.currentTarget.getAttribute('aria-label');
+        event.currentTarget.title = @json(__('sale.production_status.link_copied'));
+        event.currentTarget.setAttribute('aria-label', @json(__('sale.production_status.link_copied')));
+        window.setTimeout(() => {
+            event.currentTarget.title = originalTitle;
+            event.currentTarget.setAttribute('aria-label', originalLabel);
+        }, 1800);
     });
 
     const autoRefresh = document.querySelector('[data-auto-refresh]');
