@@ -31,6 +31,11 @@ prepare:
 
 up:
 	$(COMPOSE) up -d
+	@port="$$( $(COMPOSE) port $(WEB) 8080 | sed -n '1s/.*://p' )"; \
+	printf "\nBeyond MRP esta rodando em:\n"; \
+	printf "  Projeto: http://localhost:%s\n" "$$port"; \
+	printf "  Admin:   http://localhost:%s/global-admin/login\n" "$$port"; \
+	printf "  Cliente: http://localhost:%s/login\n\n" "$$port"
 
 down:
 	$(COMPOSE) down
