@@ -58,13 +58,30 @@
     </div>
 
     <x-ui.tabs class="mt-6" :label="__('sale.production_status.tabs_label')" data-production-tabs>
-        <x-ui.tabs.list class="print:hidden">
-            <x-ui.tabs.tab id="production-status-tab-summary" target="production-status-panel-summary" :active="true" data-production-tab-name="summary">
-                {{ __('sale.production_status.tab_summary') }}
-            </x-ui.tabs.tab>
-            @foreach (['items', 'timeline', 'tracking'] as $tab)
-                <x-ui.tabs.tab id="production-status-tab-{{ $tab }}" target="production-status-panel-{{ $tab }}" data-production-tab-name="{{ $tab }}">
-                    {{ __('sale.production_status.tab_'.$tab) }}
+        @php
+            $productionTabs = [
+                'summary' => ['icon' => 'layout-dashboard', 'metric' => number_format($analysis['progress_percent'], 0, ',', '.').'%', 'active' => true],
+                'items' => ['icon' => 'package', 'metric' => count($analysis['items']), 'active' => false],
+                'timeline' => ['icon' => 'calendar', 'metric' => count($analysis['timeline']), 'active' => false],
+                'tracking' => ['icon' => 'users', 'metric' => count($analysis['tracking']['comments']), 'active' => false],
+            ];
+        @endphp
+        <x-ui.tabs.list class="production-status-tabs-list print:hidden">
+            @foreach ($productionTabs as $tab => $presentation)
+                <x-ui.tabs.tab
+                    id="production-status-tab-{{ $tab }}"
+                    target="production-status-panel-{{ $tab }}"
+                    :active="$presentation['active']"
+                    class="production-status-tab"
+                    data-production-tab-name="{{ $tab }}"
+                >
+                    <span class="production-status-tab-icon"><x-ui.icon :name="$presentation['icon']" /></span>
+                    <span class="min-w-0 flex-1 text-left">
+                        <span class="production-status-tab-title">{{ __('sale.production_status.tab_'.$tab) }}</span>
+                        <span class="production-status-tab-description">{{ __('sale.production_status.tab_'.$tab.'_description') }}</span>
+                    </span>
+                    <span class="production-status-tab-metric" aria-hidden="true">{{ $presentation['metric'] }}</span>
+                    <span class="sr-only">{{ __('sale.production_status.tab_'.$tab.'_metric', ['count' => $presentation['metric']]) }}</span>
                 </x-ui.tabs.tab>
             @endforeach
         </x-ui.tabs.list>

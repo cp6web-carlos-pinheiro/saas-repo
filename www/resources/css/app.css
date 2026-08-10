@@ -1455,6 +1455,66 @@ html[data-theme='dark'] {
         opacity: 0.45;
     }
 
+    .production-status-tabs-list {
+        @apply grid grid-cols-1 gap-2 overflow-visible rounded-2xl border p-2 sm:grid-cols-2 xl:grid-cols-4;
+        border-color: var(--ui-border);
+        background: var(--ui-surface);
+        box-shadow: var(--ui-shadow-sm);
+    }
+
+    .production-status-tab {
+        @apply flex min-w-0 items-center gap-3 rounded-xl border px-3 py-3 text-left;
+        border-color: transparent;
+        background: transparent;
+    }
+
+    .production-status-tab::after {
+        display: none;
+    }
+
+    .production-status-tab:hover {
+        border-color: var(--ui-border);
+        background: var(--ui-surface-hover);
+    }
+
+    .production-status-tab[aria-selected='true'] {
+        border-color: color-mix(in srgb, var(--ui-primary) 38%, var(--ui-border));
+        background: color-mix(in srgb, var(--ui-primary) 10%, var(--ui-surface));
+        box-shadow: 0 1px 3px color-mix(in srgb, var(--ui-primary) 14%, transparent);
+    }
+
+    .production-status-tab-icon {
+        @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-xl;
+        color: var(--ui-text-muted);
+        background: var(--ui-surface-muted);
+    }
+
+    .production-status-tab[aria-selected='true'] .production-status-tab-icon {
+        color: var(--ui-primary);
+        background: color-mix(in srgb, var(--ui-primary) 16%, var(--ui-surface));
+    }
+
+    .production-status-tab-title {
+        @apply block truncate text-sm font-bold;
+        color: var(--ui-text);
+    }
+
+    .production-status-tab-description {
+        @apply mt-0.5 hidden truncate text-xs font-normal leading-4 sm:block;
+        color: var(--ui-text-muted);
+    }
+
+    .production-status-tab-metric {
+        @apply inline-flex min-w-7 shrink-0 items-center justify-center rounded-full px-2 py-1 text-xs font-bold;
+        color: var(--ui-text-muted);
+        background: var(--ui-surface-muted);
+    }
+
+    .production-status-tab[aria-selected='true'] .production-status-tab-metric {
+        color: var(--ui-primary);
+        background: color-mix(in srgb, var(--ui-primary) 16%, var(--ui-surface));
+    }
+
     .ui-tab-panel {
         @apply py-5 text-sm leading-7;
         color: var(--ui-text-muted);
