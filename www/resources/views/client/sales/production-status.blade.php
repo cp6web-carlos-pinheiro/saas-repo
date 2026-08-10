@@ -47,7 +47,7 @@
     </div>
 
     <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
-        <div class="grid gap-6 lg:grid-cols-[1.4fr_1fr_1fr] lg:items-center">
+        <div class="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-center">
             <div>
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="rounded-full px-3 py-1.5 text-sm font-semibold {{ $readinessPresentation[1] }}">{{ $readinessPresentation[0] }}</span>
@@ -69,11 +69,6 @@
                 <div class="text-sm text-[#5f6368]">{{ __('sale.production_status.cost_variance') }}</div>
                 <div class="mt-1 text-2xl font-bold {{ $analysis['costs']['variance'] > 0 ? 'text-[#b3261e]' : 'text-[#137333]' }}">{{ $formatMoney($analysis['costs']['variance']) }}</div>
                 <div class="mt-1 text-xs text-[#5f6368]">{{ $analysis['costs']['variance_percent'] !== null ? number_format($analysis['costs']['variance_percent'], 1, ',', '.').'%' : '—' }}</div>
-            </div>
-            <div class="border-[#dadce0] lg:border-l lg:pl-6">
-                <div class="text-sm text-[#5f6368]">{{ __('sale.production_status.exceptions') }}</div>
-                <div class="mt-1 text-2xl font-bold {{ count($analysis['alerts']) > 0 ? 'text-[#b3261e]' : 'text-[#137333]' }}">{{ count($analysis['alerts']) }}</div>
-                <div class="mt-1 text-xs text-[#5f6368]">{{ __('sale.production_status.overdue_orders', ['count' => $analysis['counts']['overdue']]) }}</div>
             </div>
         </div>
     </x-ui.panel>
@@ -151,19 +146,6 @@
             <div><div class="text-xs text-[#5f6368]">{{ __('sale.production_status.estimated_margin_percent') }}</div><div class="mt-1 font-bold">{{ $analysis['costs']['estimated_margin_percent'] !== null ? number_format($analysis['costs']['estimated_margin_percent'], 1, ',', '.').'%' : '—' }}</div></div>
         </div>
     </x-ui.panel>
-
-    @if ($analysis['alerts'] !== [])
-        <x-ui.panel class="mt-4 border-[#dadce0] shadow-none" padding="p-5">
-            <h2 class="font-semibold">{{ __('sale.production_status.alert_center') }}</h2>
-            <div class="mt-3 grid gap-2 md:grid-cols-2">
-                @foreach ($analysis['alerts'] as $alert)
-                    <button type="button" class="rounded-xl border px-3 py-2 text-left text-sm transition hover:bg-white {{ $alert['severity'] === 'error' ? 'border-[#f6aea9] bg-[#fce8e6] text-[#b3261e]' : ($alert['severity'] === 'warning' ? 'border-[#f9d98c] bg-[#fef7e0] text-[#8a5a00]' : 'border-[#aecbfa] bg-[#e8f0fe] text-[#174ea6]') }}" data-alert-line="{{ $alert['line_id'] }}">
-                        {{ __('sale.production_status.alerts.'.$alert['key'], ['product' => $alert['product'] ?? '', 'count' => $alert['count'] ?? 0]) }}
-                    </button>
-                @endforeach
-            </div>
-        </x-ui.panel>
-    @endif
 
     <div class="mt-6 flex flex-wrap items-center gap-2" role="group" aria-label="{{ __('sale.production_status.filters') }}">
         @foreach ([
@@ -560,15 +542,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.setInterval(() => { if (autoRefresh.checked) window.location.reload(); }, 300000);
     }
 
-    document.querySelectorAll('[data-alert-line]').forEach((alert) => alert.addEventListener('click', () => {
-        const lineId = alert.dataset.alertLine;
-        if (!lineId) return;
-        const item = document.getElementById(`sale-line-${lineId}`);
-        if (!item) return;
-        item.classList.remove('hidden');
-        item.open = true;
-        item.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }));
 });
 </script>
 @endsection

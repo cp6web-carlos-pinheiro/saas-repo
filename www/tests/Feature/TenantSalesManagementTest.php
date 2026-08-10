@@ -538,8 +538,6 @@ final class TenantSalesManagementTest extends TestCase
                     && $analysis['readiness'] === 'blocked_materials'
                     && $analysis['progress_percent'] === 0.0
                     && $analysis['schedule_incomplete'] === true
-                    && collect($analysis['alerts'])->pluck('key')->contains('materials_to_buy')
-                    && collect($analysis['alerts'])->pluck('key')->contains('orders_not_created')
                     && collect($analysis['timeline'])->pluck('type')->contains('sale_confirmed')
                     && $item['coverage']['required_quantity'] === 2.0
                     && $item['coverage']['linked_quantity'] === 0.5

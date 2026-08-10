@@ -183,7 +183,6 @@ final class SaleProductionStatusService
         $estimatedTotal = round((float) $items->sum('costs.estimated_total'), 2);
         $actualTotal = round((float) $items->sum('costs.actual_total'), 2);
         $costVariance = round($actualTotal - $estimatedTotal, 2);
-        $alerts = $this->alerts($items, $counts, $scheduleIncomplete);
         $readiness = $this->readiness($items, $counts, $scheduleIncomplete);
         $promisedDate = data_get($sale->metadata, 'production_tracking.promised_date');
         $projectedCompletion = collect([$scheduledEnds->last(), $purchasePromisedDates->last()])->filter()->sort()->last();
@@ -229,7 +228,6 @@ final class SaleProductionStatusService
                 ] : null,
             ],
             'last_updated_at' => now()->toIso8601String(),
-            'alerts' => $alerts,
             'timeline' => $this->timeline($sale, $orders, $purchaseOrders),
             'tracking' => $this->tracking($sale),
             'history' => $this->history($sale),
@@ -856,110 +854,6 @@ final class SaleProductionStatusService
         return $finished !== null && (float) $finished['quantity_to_produce'] <= 0
             ? 'available'
             : 'forecast';
-    }
-
-    private function alerts(Collection $items, array $counts, bool $scheduleIncomplete): array
-    {
-        $alerts = collect();
-
-        foreach ($items as $item) {
-            $context = [
-                'line_id' => $item['line_id'],
-                'product' => $item['sku'],
-            ];
-
-            if ($item['cycles'] !== []) {
-                $alerts->push($context + ['key' => 'bom_cycle', 'severity' => 'error']);
-            }
-
-            if ($item['missing_boms'] !== []) {
-                $alerts->push($context + ['key' => 'missing_bom', 'severity' => 'error']);
-            }
-
-            if ($item['counts']['to_buy'] > 0) {
-                $alerts->push($context + [
-                    'key' => 'materials_to_buy',
-                    'severity' => 'warning',
-                    'count' => $item['counts']['to_buy'],
-                ]);
-            }
-
-            foreach ($item['materials'] as $material) {
-                if ((float) $material['net_shortage'] > 0) {
-                    $alerts->push($context + [
-                        'key' => 'stock_insufficient',
-                        'severity' => 'error',
-                        'product' => $material['sku'],
-                        'count' => $material['net_shortage'],
-                    ]);
-                }
-
-                if ((float) $material['required_quantity'] > 0 && $material['unit_cost'] === null && $material['recommended_action'] === 'BUY') {
-                    $alerts->push($context + [
-                        'key' => 'material_without_price',
-                        'severity' => 'warning',
-                        'product' => $material['sku'],
-                    ]);
-                }
-            }
-
-            foreach ($item['production_orders'] as $order) {
-                $orderContext = $context + ['order' => $order['order_number']];
-
-                if ($order['missing_routing']) {
-                    $alerts->push($orderContext + ['key' => 'order_without_routing', 'severity' => 'warning']);
-                }
-
-                if (collect($order['costs']['rate_evidence'])->contains('rate', null)) {
-                    $alerts->push($orderContext + ['key' => 'work_center_without_rate', 'severity' => 'warning']);
-                }
-
-                if ($order['excess_consumption_count'] > 0) {
-                    $alerts->push($orderContext + [
-                        'key' => 'consumption_above_plan',
-                        'severity' => 'error',
-                        'count' => $order['excess_consumption_count'],
-                    ]);
-                }
-
-                if ($order['scrap_above_limit']) {
-                    $alerts->push($orderContext + ['key' => 'scrap_above_limit', 'severity' => 'error']);
-                }
-            }
-
-            if ($item['counts']['forecast'] > 0) {
-                $alerts->push($context + [
-                    'key' => 'orders_not_created',
-                    'severity' => 'warning',
-                    'count' => $item['counts']['forecast'],
-                ]);
-            }
-
-            if ($item['costs']['estimated_incomplete'] || $item['costs']['actual_incomplete']) {
-                $alerts->push($context + ['key' => 'cost_incomplete', 'severity' => 'info']);
-            }
-        }
-
-        if ($counts['overdue'] > 0) {
-            $alerts->prepend([
-                'key' => 'orders_overdue',
-                'severity' => 'error',
-                'count' => $counts['overdue'],
-                'line_id' => null,
-                'product' => null,
-            ]);
-        }
-
-        if ($scheduleIncomplete) {
-            $alerts->push([
-                'key' => 'schedule_incomplete',
-                'severity' => 'info',
-                'line_id' => null,
-                'product' => null,
-            ]);
-        }
-
-        return $alerts->values()->all();
     }
 
     private function readiness(Collection $items, array $counts, bool $scheduleIncomplete): string
