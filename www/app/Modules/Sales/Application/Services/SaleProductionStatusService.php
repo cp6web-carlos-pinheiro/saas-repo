@@ -72,10 +72,22 @@ final class SaleProductionStatusService
 
         $purchaseOrders = $this->purchaseOrders($sale);
         $purchasingByProduct = $this->purchasingByProduct($purchaseOrders);
+        $referenceDate = $sale->sale_date?->toDateString() ?? now()->toDateString();
+        $this->warmProductTreeGraph(
+            $sale->lines->pluck('product_id')->map(static fn ($id): int => (int) $id)->all(),
+            $referenceDate,
+        );
 
         $items = $sale->lines->map(function (SaleLine $line) use ($sale, $orders, $purchasingByProduct): array {
             $lineOrders = $orders->filter(fn (ProductionOrder $order): bool => $this->belongsToLine($order, $line));
             $materials = $this->materialRequirementService->analyzeLine($sale, $line);
+            $this->warmUnitCosts(collect($materials['materials'])
+                ->pluck('product_id')
+                ->merge($lineOrders->flatMap(static fn (ProductionOrder $order) => $order->materialConsumptions->pluck('product_id')))
+                ->map(static fn ($id): int => (int) $id)
+                ->unique()
+                ->values()
+                ->all());
             $orderProductIds = $lineOrders->pluck('product_id')->map(static fn ($id): int => (int) $id)->unique();
             $orderRows = $lineOrders
                 ->map(fn (ProductionOrder $order): array => $this->orderRow($order, $sale, $orderProductIds))
@@ -525,6 +537,68 @@ final class SaleProductionStatusService
         return $this->unitCosts[$productId] = $this->unitCostDetails($productId)['amount'];
     }
 
+    /** @param list<int> $productIds */
+    private function warmUnitCosts(array $productIds): void
+    {
+        $productIds = array_values(array_filter(
+            array_unique($productIds),
+            fn (int $productId): bool => ! isset($this->unitCostEvidence[$productId])
+        ));
+
+        if ($productIds === []) {
+            return;
+        }
+
+        $latestPurchaseLineIds = PurchaseOrderLine::query()
+            ->selectRaw('MAX(id)')
+            ->whereIn('product_id', $productIds)
+            ->whereNotNull('unit_price')
+            ->where('unit_price', '>', 0)
+            ->whereHas('purchaseOrder', static fn ($query) => $query->where('status', '!=', 'CANCELLED'))
+            ->groupBy('product_id');
+        $purchaseLines = PurchaseOrderLine::query()
+            ->whereIn('id', $latestPurchaseLineIds)
+            ->with('purchaseOrder:id,purchase_order_number')
+            ->get(['id', 'product_id', 'purchase_order_id', 'unit_price'])
+            ->keyBy('product_id');
+        $productsWithoutPurchase = array_values(array_filter(
+            $productIds,
+            static fn (int $productId): bool => ! $purchaseLines->has($productId)
+        ));
+        $supplierRules = $productsWithoutPurchase === []
+            ? collect()
+            : SupplierProduct::query()
+                ->whereIn('product_id', $productsWithoutPurchase)
+                ->where('is_active', true)
+                ->whereNotNull('unit_price')
+                ->where('unit_price', '>', 0)
+                ->with('supplier:id,code')
+                ->orderByDesc('is_preferred')
+                ->orderByDesc('id')
+                ->get(['id', 'product_id', 'supplier_id', 'unit_price'])
+                ->groupBy('product_id')
+                ->map(static fn (Collection $rules) => $rules->first());
+
+        foreach ($productIds as $productId) {
+            $purchaseLine = $purchaseLines->get($productId);
+            $supplierRule = $supplierRules->get($productId);
+            $evidence = $purchaseLine !== null
+                ? [
+                    'amount' => (float) $purchaseLine->unit_price,
+                    'source' => 'purchase_order',
+                    'reference' => $purchaseLine->purchaseOrder?->purchase_order_number,
+                ]
+                : [
+                    'amount' => $supplierRule !== null ? (float) $supplierRule->unit_price : null,
+                    'source' => $supplierRule !== null ? 'supplier_catalog' : null,
+                    'reference' => $supplierRule?->supplier?->code,
+                ];
+
+            $this->unitCostEvidence[$productId] = $evidence;
+            $this->unitCosts[$productId] = $evidence['amount'];
+        }
+    }
+
     /** @return array{amount: float|null, source: string|null, reference: string|null} */
     private function unitCostDetails(int $productId): array
     {
@@ -589,9 +663,9 @@ final class SaleProductionStatusService
         $rate = WorkCenterHourRate::query()
             ->where('work_center_id', $workCenterId)
             ->where('status', 'ACTIVE')
-            ->whereDate('effective_from', '<=', $date)
+            ->where('effective_from', '<=', $date)
             ->where(function ($query) use ($date): void {
-                $query->whereNull('effective_to')->orWhereDate('effective_to', '>=', $date);
+                $query->whereNull('effective_to')->orWhere('effective_to', '>=', $date);
             })
             ->with('workCenter:id,code')
             ->orderByDesc('effective_from')
@@ -709,6 +783,81 @@ final class SaleProductionStatusService
         );
     }
 
+    /** @param list<int> $rootProductIds */
+    private function warmProductTreeGraph(array $rootProductIds, string $referenceDate): void
+    {
+        $visited = [];
+        $frontier = array_values(array_unique($rootProductIds));
+
+        while ($frontier !== []) {
+            $frontier = array_values(array_filter(
+                $frontier,
+                static fn (int $productId): bool => ! isset($visited[$productId])
+            ));
+
+            if ($frontier === []) {
+                break;
+            }
+
+            foreach ($frontier as $productId) {
+                $visited[$productId] = true;
+            }
+
+            $missingProductIds = array_values(array_filter(
+                $frontier,
+                fn (int $productId): bool => ! isset($this->treeProducts[$productId])
+            ));
+
+            if ($missingProductIds !== []) {
+                Product::query()
+                    ->with('unit:id,code')
+                    ->whereKey($missingProductIds)
+                    ->get()
+                    ->each(function (Product $product): void {
+                        $this->treeProducts[(int) $product->id] = $product;
+                    });
+            }
+
+            $manufacturedIds = array_values(array_filter(
+                $frontier,
+                fn (int $productId): bool => isset($this->treeProducts[$productId])
+                    && in_array((string) $this->treeProducts[$productId]->product_type, ['FG', 'WIP'], true)
+            ));
+            $headersByProduct = collect();
+
+            if ($manufacturedIds !== []) {
+                $headersByProduct = BomHeader::query()
+                    ->whereIn('product_id', $manufacturedIds)
+                    ->where('status', 'APPROVED')
+                    ->where('effective_from', '<=', $referenceDate)
+                    ->where(static fn ($query) => $query->whereNull('effective_to')->orWhere('effective_to', '>=', $referenceDate))
+                    ->with('items.componentProduct.unit')
+                    ->orderByDesc('effective_from')
+                    ->orderByDesc('version_number')
+                    ->get()
+                    ->groupBy('product_id');
+            }
+
+            $next = [];
+
+            foreach ($manufacturedIds as $productId) {
+                $header = $headersByProduct->get($productId, collect())->first();
+                $this->treeBoms[$productId.'|'.$referenceDate] = $header;
+
+                foreach ($header?->items ?? [] as $item) {
+                    $component = $item->componentProduct;
+
+                    if ($component !== null) {
+                        $this->treeProducts[(int) $component->id] = $component;
+                        $next[] = (int) $component->id;
+                    }
+                }
+            }
+
+            $frontier = array_values(array_unique($next));
+        }
+    }
+
     private function buildProductTreeNode(
         int $productId,
         float $requiredQuantity,
@@ -736,13 +885,13 @@ final class SaleProductionStatusService
         $isCycle = in_array($productId, $path, true);
         $children = [];
 
-        if (! $isCycle && $level < 20) {
+        if (! $isCycle && $level < 20 && in_array((string) $product->product_type, ['FG', 'WIP'], true)) {
             $bomKey = $productId.'|'.$referenceDate;
             $bom = $this->treeBoms[$bomKey] ??= BomHeader::query()
                 ->where('product_id', $productId)
                 ->where('status', 'APPROVED')
-                ->whereDate('effective_from', '<=', $referenceDate)
-                ->where(static fn ($query) => $query->whereNull('effective_to')->orWhereDate('effective_to', '>=', $referenceDate))
+                ->where('effective_from', '<=', $referenceDate)
+                ->where(static fn ($query) => $query->whereNull('effective_to')->orWhere('effective_to', '>=', $referenceDate))
                 ->with('items.componentProduct:id,sku,description,product_type,unit_id')
                 ->orderByDesc('effective_from')
                 ->orderByDesc('version_number')
@@ -801,6 +950,7 @@ final class SaleProductionStatusService
     private function history(Sale $sale): array
     {
         return AuditLog::query()
+            ->where('company_id', $sale->company_id)
             ->where(static function ($query): void {
                 $query->where('event', 'like', 'tenant_sale.%')
                     ->orWhere('event', 'tenant_production_order.rescheduled');

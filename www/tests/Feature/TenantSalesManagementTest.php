@@ -32,11 +32,34 @@ use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 final class TenantSalesManagementTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_production_status_queries_have_dedicated_indexes(): void
+    {
+        $expectedIndexes = [
+            'production_orders' => 'ix_po_sale_reference',
+            'purchase_requisitions' => 'ix_pr_sale_reference',
+            'purchase_orders' => 'ix_purchase_order_requisition',
+            'purchase_order_lines' => 'ix_po_line_product_latest',
+            'supplier_products' => 'ix_supplier_product_active_preferred',
+            'work_center_hour_rates' => 'ix_hour_rate_active_effective',
+            'inventory_reservations' => 'ix_inventory_reservation_reference',
+            'inventory_balances' => 'ix_inventory_balance_product_available',
+            'bom_headers' => 'ix_bom_header_active_effective',
+            'audit_logs' => 'ix_audit_log_company_history',
+        ];
+
+        foreach ($expectedIndexes as $table => $index) {
+            $indexNames = collect(Schema::getIndexes($table))->pluck('name');
+
+            $this->assertTrue($indexNames->contains($index), "Index {$index} was not created on {$table}.");
+        }
+    }
 
     public function test_invoiced_order_blocks_editing_but_allows_next_operational_transition(): void
     {

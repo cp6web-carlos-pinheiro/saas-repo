@@ -73,6 +73,7 @@ final class SaleMaterialRequirementService
         $this->reset();
         $this->referenceDate = $sale->sale_date?->toDateString() ?? now()->toDateString();
         $this->loadSaleReservations((int) $sale->id, $saleLineId);
+        $this->warmProductGraph($lines->pluck('product_id')->map(static fn ($id): int => (int) $id)->all());
 
         $demandByProduct = [];
 
@@ -226,14 +227,112 @@ final class SaleMaterialRequirementService
         return $this->bomHeaders[$productId] = BomHeader::query()
             ->where('product_id', $productId)
             ->where('status', 'APPROVED')
-            ->whereDate('effective_from', '<=', $this->referenceDate)
+            ->where('effective_from', '<=', $this->referenceDate)
             ->where(function ($query): void {
                 $query->whereNull('effective_to')
-                    ->orWhereDate('effective_to', '>=', $this->referenceDate);
+                    ->orWhere('effective_to', '>=', $this->referenceDate);
             })
             ->orderByDesc('effective_from')
             ->orderByDesc('version_number')
             ->first();
+    }
+
+    /** @param list<int> $rootProductIds */
+    private function warmProductGraph(array $rootProductIds): void
+    {
+        $visited = [];
+        $frontier = array_values(array_unique($rootProductIds));
+
+        while ($frontier !== []) {
+            $frontier = array_values(array_filter(
+                $frontier,
+                static fn (int $productId): bool => ! isset($visited[$productId])
+            ));
+
+            if ($frontier === []) {
+                break;
+            }
+
+            foreach ($frontier as $productId) {
+                $visited[$productId] = true;
+            }
+
+            $missingProductIds = array_values(array_filter(
+                $frontier,
+                fn (int $productId): bool => ! isset($this->products[$productId])
+            ));
+
+            if ($missingProductIds !== []) {
+                Product::query()
+                    ->with('unit:id,code')
+                    ->whereKey($missingProductIds)
+                    ->get()
+                    ->each(function (Product $product): void {
+                        $this->products[(int) $product->id] = $product;
+                    });
+            }
+
+            $balancesByProduct = InventoryBalance::query()
+                ->with('warehouse:id,code,name')
+                ->whereIn('product_id', $frontier)
+                ->where('qty_available', '>', 0)
+                ->orderByDesc('qty_available')
+                ->get()
+                ->groupBy('product_id');
+
+            foreach ($frontier as $productId) {
+                $balances = $balancesByProduct->get($productId, collect());
+                $quantity = round((float) $balances->sum('qty_available'), 6);
+                $this->initialFreeStock[$productId] = $quantity;
+                $this->remainingFreeStock[$productId] = $quantity;
+                $this->stockByWarehouse[$productId] = $balances->map(static fn (InventoryBalance $balance): array => [
+                    'id' => (int) $balance->warehouse_id,
+                    'code' => (string) ($balance->warehouse?->code ?? '—'),
+                    'name' => (string) ($balance->warehouse?->name ?? '—'),
+                    'quantity' => round((float) $balance->qty_available, 6),
+                ])->all();
+            }
+
+            $manufacturedIds = array_values(array_filter(
+                $frontier,
+                fn (int $productId): bool => isset($this->products[$productId])
+                    && in_array((string) $this->products[$productId]->product_type, self::PRODUCTION_PRODUCT_TYPES, true)
+            ));
+            $headersByProduct = collect();
+
+            if ($manufacturedIds !== []) {
+                $headersByProduct = BomHeader::query()
+                    ->whereIn('product_id', $manufacturedIds)
+                    ->where('status', 'APPROVED')
+                    ->where('effective_from', '<=', $this->referenceDate)
+                    ->where(function ($query): void {
+                        $query->whereNull('effective_to')->orWhere('effective_to', '>=', $this->referenceDate);
+                    })
+                    ->with(['items.componentProduct.unit'])
+                    ->orderByDesc('effective_from')
+                    ->orderByDesc('version_number')
+                    ->get()
+                    ->groupBy('product_id');
+            }
+
+            $next = [];
+
+            foreach ($manufacturedIds as $productId) {
+                $header = $headersByProduct->get($productId, collect())->first();
+                $this->bomHeaders[$productId] = $header;
+
+                foreach ($header?->items ?? [] as $item) {
+                    $component = $item->componentProduct;
+
+                    if ($component !== null) {
+                        $this->products[(int) $component->id] = $component;
+                        $next[] = (int) $component->id;
+                    }
+                }
+            }
+
+            $frontier = array_values(array_unique($next));
+        }
     }
 
     private function product(int $productId): Product
