@@ -21,7 +21,8 @@ return new class extends Migration {
             $table->string('description', 255)->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
-            $table->timestamp('frozen_at');
+            // DATETIME avoids legacy MySQL's implicit zero-date default for required TIMESTAMP columns.
+            $table->dateTime('frozen_at');
             $table->string('snapshot_hash', 64);
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

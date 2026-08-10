@@ -21,7 +21,8 @@ return new class extends Migration
             $table->unsignedInteger('source_bom_version_number');
             $table->string('snapshot_hash', 64);
             $table->boolean('has_cycle')->default(false);
-            $table->timestamp('frozen_at');
+            // DATETIME avoids legacy MySQL's implicit zero-date default for required TIMESTAMP columns.
+            $table->dateTime('frozen_at');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 

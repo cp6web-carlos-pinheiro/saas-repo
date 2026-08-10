@@ -28,7 +28,8 @@ return new class extends Migration {
             $table->decimal('quantity_scrapped_target', 18, 6)->default(0);
             // Integrity
             $table->string('snapshot_hash', 64);
-            $table->timestamp('frozen_at');
+            // DATETIME avoids legacy MySQL's implicit zero-date default for required TIMESTAMP columns.
+            $table->dateTime('frozen_at');
             $table->foreignId('frozen_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
