@@ -522,11 +522,12 @@ final class TenantSalesManagementTest extends TestCase
         $this->actingAs($user, 'web')
             ->get(route('sales.production-status', $sale))
             ->assertOk()
-            ->assertSee('WIP-001')
-            ->assertSee('RAW-001')
-            ->assertSee('WH-01')
-            ->assertSee(__('sale.production_status.create_order'))
-            ->assertSee(__('sale.production_status.create_requisition'))
+            ->assertSee(__('sale.production_status.tab_summary'))
+            ->assertSee(__('sale.production_status.tab_items'))
+            ->assertSee(__('sale.production_status.tab_timeline'))
+            ->assertSee(__('sale.production_status.tab_tracking'))
+            ->assertDontSee(__('sale.production_status.create_order'))
+            ->assertDontSee(__('sale.production_status.create_requisition'))
             ->assertViewHas('analysis', function (array $analysis) use ($finishedProduct, $intermediate, $rawMaterial): bool {
                 $item = $analysis['items'][0];
                 $forecastProductIds = collect($item['forecasts'])->pluck('product_id');
@@ -559,6 +560,26 @@ final class TenantSalesManagementTest extends TestCase
                     && $item['counts']['to_buy'] === 1
                     && $item['counts']['to_produce'] === 1;
             });
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.production-status.tab', [$sale, 'items']))
+            ->assertOk()
+            ->assertSee('WIP-001')
+            ->assertSee('RAW-001')
+            ->assertSee('WH-01')
+            ->assertSee(__('sale.production_status.create_order'))
+            ->assertSee(__('sale.production_status.create_requisition'));
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.production-status.tab', [$sale, 'timeline']))
+            ->assertOk()
+            ->assertSee(__('sale.production_status.timeline_events.sale_confirmed'));
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.production-status.tab', [$sale, 'tracking']))
+            ->assertOk()
+            ->assertSee(__('sale.production_status.comments_responsible'))
+            ->assertSee(__('sale.production_status.change_history'));
 
         $this->actingAs($user, 'web')
             ->get(route('production.orders.create', [
@@ -887,8 +908,8 @@ final class TenantSalesManagementTest extends TestCase
         $this->actingAs($user, 'web')
             ->get(route('sales.production-status', $sale))
             ->assertOk()
-            ->assertSee('OP-SALE-COST')
-            ->assertSee('RAW-COST-001')
+            ->assertDontSee(__('sale.production_status.open_order'))
+            ->assertDontSee(__('sale.production_status.reserve_stock'))
             ->assertViewHas('analysis', function (array $analysis): bool {
                 $item = $analysis['items'][0];
 
@@ -916,6 +937,12 @@ final class TenantSalesManagementTest extends TestCase
                     && $item['costs']['estimated_incomplete'] === false
                     && $item['costs']['actual_incomplete'] === false;
             });
+
+        $this->actingAs($user, 'web')
+            ->get(route('sales.production-status.tab', [$sale, 'items']))
+            ->assertOk()
+            ->assertSee('OP-SALE-COST')
+            ->assertSee('RAW-COST-001');
 
         $this->actingAs($user, 'web')
             ->post(route('production.orders.reschedule', $order), [

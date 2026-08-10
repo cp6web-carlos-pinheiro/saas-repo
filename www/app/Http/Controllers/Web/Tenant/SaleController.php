@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -174,6 +175,31 @@ final class SaleController extends Controller
         Sale $sale,
         SaleProductionStatusService $productionStatusService
     ): View {
+        return view('client.sales.production-status', $this->productionStatusViewData($request, $sale, $productionStatusService));
+    }
+
+    public function productionStatusTab(
+        Request $request,
+        Sale $sale,
+        string $tab,
+        SaleProductionStatusService $productionStatusService,
+    ): Response {
+        abort_unless(in_array($tab, ['items', 'timeline', 'tracking'], true), 404);
+
+        $data = $this->productionStatusViewData($request, $sale, $productionStatusService);
+        $data['productionStatusTab'] = $tab;
+
+        return response(view('client.sales.production-status', $data)->fragment('production-status-'.$tab));
+    }
+
+    /**
+     * @return array{sale: Sale, analysis: array<string, mixed>, company: Company, capabilities: array<string, bool>, responsibleUsers: Collection}
+     */
+    private function productionStatusViewData(
+        Request $request,
+        Sale $sale,
+        SaleProductionStatusService $productionStatusService,
+    ): array {
         $company = $this->activeCompanyFrom($request);
         $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
 
@@ -200,7 +226,7 @@ final class SaleController extends Controller
         ];
         $responsibleUsers = $company->users()->where('users.is_active', true)->orderBy('users.name')->get(['users.id', 'users.name']);
 
-        return view('client.sales.production-status', compact('sale', 'analysis', 'company', 'capabilities', 'responsibleUsers'));
+        return compact('sale', 'analysis', 'company', 'capabilities', 'responsibleUsers');
     }
 
     public function exportProductionStatus(

@@ -46,7 +46,20 @@
         </div>
     </div>
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+    <x-ui.tabs class="mt-6" :label="__('sale.production_status.tabs_label')" data-production-tabs>
+        <x-ui.tabs.list class="print:hidden">
+            <x-ui.tabs.tab id="production-status-tab-summary" target="production-status-panel-summary" :active="true" data-production-tab-name="summary">
+                {{ __('sale.production_status.tab_summary') }}
+            </x-ui.tabs.tab>
+            @foreach (['items', 'timeline', 'tracking'] as $tab)
+                <x-ui.tabs.tab id="production-status-tab-{{ $tab }}" target="production-status-panel-{{ $tab }}" data-production-tab-name="{{ $tab }}">
+                    {{ __('sale.production_status.tab_'.$tab) }}
+                </x-ui.tabs.tab>
+            @endforeach
+        </x-ui.tabs.list>
+
+        <x-ui.tabs.panel id="production-status-panel-summary" labelledby="production-status-tab-summary" :active="true">
+    <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5 md:p-6">
         <div class="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-center">
             <div>
                 <div class="flex flex-wrap items-center gap-3">
@@ -147,6 +160,24 @@
         </div>
     </x-ui.panel>
 
+        </x-ui.tabs.panel>
+
+        @foreach (['items', 'timeline', 'tracking'] as $tab)
+            <x-ui.tabs.panel
+                id="production-status-panel-{{ $tab }}"
+                labelledby="production-status-tab-{{ $tab }}"
+                data-production-tab-panel="{{ $tab }}"
+                data-production-tab-url="{{ route('sales.production-status.tab', [$sale, $tab]) }}"
+            >
+                <div class="rounded-xl border border-[#dadce0] bg-white p-8 text-center text-sm text-[#5f6368]" data-production-tab-placeholder>
+                    {{ __('sale.production_status.tab_select_hint') }}
+                </div>
+            </x-ui.tabs.panel>
+        @endforeach
+    </x-ui.tabs>
+
+    @if (($productionStatusTab ?? null) === 'items')
+    @fragment('production-status-items')
     <div class="mt-6 flex flex-wrap items-center gap-2" role="group" aria-label="{{ __('sale.production_status.filters') }}">
         @foreach ([
             'all' => __('sale.production_status.filter_all'),
@@ -427,7 +458,11 @@
             </x-ui.panel>
         @endforelse
     </div>
+    @endfragment
+    @endif
 
+    @if (($productionStatusTab ?? null) === 'timeline')
+    @fragment('production-status-timeline')
     @if ($analysis['timeline'] !== [])
         <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
             <h2 class="text-lg font-semibold">{{ __('sale.production_status.timeline') }}</h2>
@@ -441,8 +476,16 @@
                 @endforeach
             </ol>
         </x-ui.panel>
+    @else
+        <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-8">
+            <p class="text-center text-[#5f6368]">{{ __('sale.production_status.timeline_empty') }}</p>
+        </x-ui.panel>
+    @endif
+    @endfragment
     @endif
 
+    @if (($productionStatusTab ?? null) === 'tracking')
+    @fragment('production-status-tracking')
     <div class="mt-6 grid gap-6 lg:grid-cols-2 print:hidden">
         <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5 md:p-6">
             <h2 class="text-lg font-semibold">{{ __('sale.production_status.comments_responsible') }}</h2>
@@ -486,47 +529,103 @@
             </ol>
         </x-ui.panel>
     </div>
+    @endfragment
+    @endif
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const items = Array.from(document.querySelectorAll('[data-production-item]'));
-    const filters = document.querySelectorAll('[data-production-filter]');
-    const emptyState = document.querySelector('[data-production-filter-empty]');
+    const tabsRoot = document.querySelector('[data-production-tabs]');
 
-    const matchesFilter = (item, filter) => {
-        if (filter === 'all') return true;
-        if (filter === 'shortage') return item.dataset.shortage === 'true';
-        if (filter === 'forecast') return item.dataset.forecast === 'true';
-        if (filter === 'overdue') return item.dataset.overdue === 'true';
-        if (filter === 'in_progress') return item.dataset.inProgress === 'true';
-        if (filter === 'cost') return item.dataset.costIncomplete === 'true';
-        if (filter === 'structure_rate') return item.dataset.structureRate === 'true';
-        return true;
+    const initializeProductionItems = (root) => {
+        const items = Array.from(root.querySelectorAll('[data-production-item]'));
+        const filters = Array.from(root.querySelectorAll('[data-production-filter]'));
+        const emptyState = root.querySelector('[data-production-filter-empty]');
+        const matchesFilter = (item, filter) => {
+            if (filter === 'all') return true;
+            if (filter === 'shortage') return item.dataset.shortage === 'true';
+            if (filter === 'forecast') return item.dataset.forecast === 'true';
+            if (filter === 'overdue') return item.dataset.overdue === 'true';
+            if (filter === 'in_progress') return item.dataset.inProgress === 'true';
+            if (filter === 'cost') return item.dataset.costIncomplete === 'true';
+            if (filter === 'structure_rate') return item.dataset.structureRate === 'true';
+            return true;
+        };
+        const applyFilter = (filter) => {
+            let visible = 0;
+
+            filters.forEach((candidate) => candidate.setAttribute('aria-pressed', candidate.dataset.productionFilter === filter ? 'true' : 'false'));
+            items.forEach((item) => {
+                const matches = matchesFilter(item, filter);
+                item.classList.toggle('hidden', !matches);
+                if (matches) visible += 1;
+            });
+            emptyState?.classList.toggle('hidden', visible > 0);
+        };
+
+        filters.forEach((button) => button.addEventListener('click', () => {
+            const filter = button.dataset.productionFilter;
+            const url = new URL(window.location.href);
+            filter === 'all' ? url.searchParams.delete('filter') : url.searchParams.set('filter', filter);
+            window.history.replaceState({}, '', url);
+            applyFilter(filter);
+        }));
+
+        const initialFilter = new URL(window.location.href).searchParams.get('filter') || 'all';
+        applyFilter(filters.some((button) => button.dataset.productionFilter === initialFilter) ? initialFilter : 'all');
     };
 
-    const applyFilter = (filter) => {
-        let visible = 0;
+    const loadProductionTab = async (button) => {
+        const tab = button.dataset.productionTabName;
+        const panel = document.getElementById(button.getAttribute('aria-controls'));
+        if (!panel || tab === 'summary' || panel.dataset.loaded === 'true' || panel.dataset.loading === 'true') return;
 
-        filters.forEach((candidate) => candidate.setAttribute('aria-pressed', candidate.dataset.productionFilter === filter ? 'true' : 'false'));
-        items.forEach((item) => {
-            const matches = matchesFilter(item, filter);
-            item.classList.toggle('hidden', !matches);
-            if (matches) visible += 1;
-        });
-        emptyState?.classList.toggle('hidden', visible > 0);
+        panel.dataset.loading = 'true';
+        panel.setAttribute('aria-busy', 'true');
+        panel.innerHTML = `<div class="rounded-xl border border-[#dadce0] bg-white p-8 text-center text-sm text-[#5f6368]">${@json(__('sale.production_status.tab_loading'))}</div>`;
+
+        try {
+            const response = await fetch(panel.dataset.productionTabUrl, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' },
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            panel.innerHTML = await response.text();
+            panel.dataset.loaded = 'true';
+            if (tab === 'items') initializeProductionItems(panel);
+        } catch (error) {
+            const errorBox = document.createElement('div');
+            errorBox.className = 'rounded-xl border border-[#f6aea9] bg-[#fce8e6] p-8 text-center text-sm text-[#b3261e]';
+            const message = document.createElement('p');
+            message.textContent = @json(__('sale.production_status.tab_load_error'));
+            const retry = document.createElement('button');
+            retry.type = 'button';
+            retry.className = 'mt-3 rounded-full border border-[#b3261e] px-4 py-2 font-semibold';
+            retry.textContent = @json(__('sale.production_status.tab_retry'));
+            retry.addEventListener('click', () => loadProductionTab(button));
+            errorBox.append(message, retry);
+            panel.replaceChildren(errorBox);
+        } finally {
+            delete panel.dataset.loading;
+            panel.removeAttribute('aria-busy');
+        }
     };
 
-    filters.forEach((button) => button.addEventListener('click', () => {
-        const filter = button.dataset.productionFilter;
-        const url = new URL(window.location.href);
-        filter === 'all' ? url.searchParams.delete('filter') : url.searchParams.set('filter', filter);
-        window.history.replaceState({}, '', url);
-        applyFilter(filter);
-    }));
+    if (tabsRoot) {
+        const tabButtons = Array.from(tabsRoot.querySelectorAll('[data-production-tab-name]'));
+        tabButtons.forEach((button) => button.addEventListener('click', () => {
+            const tab = button.dataset.productionTabName;
+            const url = new URL(window.location.href);
+            tab === 'summary' ? url.searchParams.delete('tab') : url.searchParams.set('tab', tab);
+            if (tab !== 'items') url.searchParams.delete('filter');
+            window.history.replaceState({}, '', url);
+            loadProductionTab(button);
+        }));
 
-    const initialFilter = new URL(window.location.href).searchParams.get('filter') || 'all';
-    applyFilter(Array.from(filters).some((button) => button.dataset.productionFilter === initialFilter) ? initialFilter : 'all');
+        const requestedTab = new URL(window.location.href).searchParams.get('tab');
+        const initialTab = tabButtons.find((button) => button.dataset.productionTabName === requestedTab);
+        if (initialTab) initialTab.click();
+    }
 
     document.querySelector('[data-share-report]')?.addEventListener('click', async (event) => {
         await navigator.clipboard.writeText(window.location.href);

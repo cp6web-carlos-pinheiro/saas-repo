@@ -294,6 +294,7 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/create', [SaleController::class, 'create'])->name('create');
             Route::post('/', [SaleController::class, 'store'])->name('store');
             Route::get('/{sale}/production-status', [SaleController::class, 'productionStatus'])->name('production-status');
+            Route::get('/{sale}/production-status/tabs/{tab}', [SaleController::class, 'productionStatusTab'])->name('production-status.tab');
             Route::get('/{sale}/production-status/export/{format}', [SaleController::class, 'exportProductionStatus'])->name('production-status.export');
             Route::post('/{sale}/production-status/tracking', [SaleController::class, 'updateProductionTracking'])->name('production-status.tracking');
             Route::post('/{sale}/production-status/reservations', [SaleController::class, 'reserveProductionMaterial'])->name('production-status.reserve');
