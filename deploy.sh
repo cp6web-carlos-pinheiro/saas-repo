@@ -53,6 +53,8 @@ echo "Pulling latest code from Git repository..."
 git reset --hard
 git pull
 
+sudo chmod +x ../deploy.sh
+
 # --------------------------------------------------
 # Check Composer dependencies
 # --------------------------------------------------
@@ -138,8 +140,5 @@ trap - ERR
 # --------------------------------------------------
 # Done
 # --------------------------------------------------
-
-cd ..
-sudo chmod +x deploy.sh
 
 echo "Deployment script completed successfully."
