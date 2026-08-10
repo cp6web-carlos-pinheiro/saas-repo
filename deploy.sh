@@ -100,7 +100,10 @@ fi
 # Laravel cache
 # --------------------------------------------------
 
-echo "Clearing Laravel cache..."
+echo "Clearing cached Laravel configuration..."
+php artisan config:clear
+
+echo "Clearing Laravel application cache..."
 php artisan cache:clear
 
 echo "Caching Laravel configuration..."
