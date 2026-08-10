@@ -502,26 +502,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const matchesFilter = (item, filter) => {
         if (filter === 'all') return true;
-        if (filter === 'attention') return item.dataset.shortage === 'true' || item.dataset.forecast === 'true' || item.dataset.overdue === 'true' || item.dataset.costIncomplete === 'true';
         if (filter === 'shortage') return item.dataset.shortage === 'true';
         if (filter === 'forecast') return item.dataset.forecast === 'true';
         if (filter === 'overdue') return item.dataset.overdue === 'true';
+        if (filter === 'in_progress') return item.dataset.inProgress === 'true';
         if (filter === 'cost') return item.dataset.costIncomplete === 'true';
+        if (filter === 'structure_rate') return item.dataset.structureRate === 'true';
         return true;
     };
 
-    filters.forEach((button) => button.addEventListener('click', () => {
-        const filter = button.dataset.productionFilter;
+    const applyFilter = (filter) => {
         let visible = 0;
 
-        filters.forEach((candidate) => candidate.setAttribute('aria-pressed', candidate === button ? 'true' : 'false'));
+        filters.forEach((candidate) => candidate.setAttribute('aria-pressed', candidate.dataset.productionFilter === filter ? 'true' : 'false'));
         items.forEach((item) => {
             const matches = matchesFilter(item, filter);
             item.classList.toggle('hidden', !matches);
             if (matches) visible += 1;
         });
         emptyState?.classList.toggle('hidden', visible > 0);
+    };
+
+    filters.forEach((button) => button.addEventListener('click', () => {
+        const filter = button.dataset.productionFilter;
+        const url = new URL(window.location.href);
+        filter === 'all' ? url.searchParams.delete('filter') : url.searchParams.set('filter', filter);
+        window.history.replaceState({}, '', url);
+        applyFilter(filter);
     }));
+
+    const initialFilter = new URL(window.location.href).searchParams.get('filter') || 'all';
+    applyFilter(Array.from(filters).some((button) => button.dataset.productionFilter === initialFilter) ? initialFilter : 'all');
+
+    document.querySelector('[data-share-report]')?.addEventListener('click', async (event) => {
+        await navigator.clipboard.writeText(window.location.href);
+        const original = event.currentTarget.textContent;
+        event.currentTarget.textContent = @json(__('sale.production_status.link_copied'));
+        window.setTimeout(() => { event.currentTarget.textContent = original; }, 1800);
+    });
+
+    const autoRefresh = document.querySelector('[data-auto-refresh]');
+    if (autoRefresh) {
+        autoRefresh.checked = window.localStorage.getItem('sale-production-auto-refresh') === '1';
+        autoRefresh.addEventListener('change', () => window.localStorage.setItem('sale-production-auto-refresh', autoRefresh.checked ? '1' : '0'));
+        window.setInterval(() => { if (autoRefresh.checked) window.location.reload(); }, 300000);
+    }
 
     document.querySelectorAll('[data-alert-line]').forEach((alert) => alert.addEventListener('click', () => {
         const lineId = alert.dataset.alertLine;
