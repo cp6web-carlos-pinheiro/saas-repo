@@ -294,6 +294,9 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/create', [SaleController::class, 'create'])->name('create');
             Route::post('/', [SaleController::class, 'store'])->name('store');
             Route::get('/{sale}/production-status', [SaleController::class, 'productionStatus'])->name('production-status');
+            Route::get('/{sale}/production-status/export/{format}', [SaleController::class, 'exportProductionStatus'])->name('production-status.export');
+            Route::post('/{sale}/production-status/tracking', [SaleController::class, 'updateProductionTracking'])->name('production-status.tracking');
+            Route::post('/{sale}/production-status/reservations', [SaleController::class, 'reserveProductionMaterial'])->name('production-status.reserve');
             Route::get('/{sale}/materials', [SaleController::class, 'materials'])->name('materials');
             Route::get('/{sale}', [SaleController::class, 'show'])->name('show');
             Route::get('/{sale}/edit', [SaleController::class, 'edit'])->name('edit');
@@ -311,6 +314,7 @@ Route::middleware('auth:web')->group(function (): void {
             Route::get('/orders/{order}', [ProductionOrderController::class, 'show'])->whereNumber('order')->name('orders.show');
             Route::post('/orders/{order}/release', [ProductionOrderController::class, 'release'])->whereNumber('order')->name('orders.release');
             Route::post('/orders/{order}/complete', [ProductionOrderController::class, 'complete'])->whereNumber('order')->name('orders.complete');
+            Route::post('/orders/{order}/reschedule', [ProductionOrderController::class, 'reschedule'])->whereNumber('order')->name('orders.reschedule');
             Route::post('/orders/{order}/outputs', [ProductionOrderController::class, 'recordOutput'])->whereNumber('order')->name('orders.outputs.store');
             Route::post('/orders/{order}/consumptions', [ProductionOrderController::class, 'recordConsumption'])->whereNumber('order')->name('orders.consumptions.store');
             Route::post('/orders/{order}/outputs/{output}/inspection', [ProductionOrderController::class, 'updateInspection'])

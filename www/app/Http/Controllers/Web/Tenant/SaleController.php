@@ -7,20 +7,27 @@ namespace App\Http\Controllers\Web\Tenant;
 use App\Http\Controllers\Controller;
 use App\Modules\Customer\Infrastructure\Persistence\Models\Customer;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Modules\Inventory\Application\Services\InventoryService;
+use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryBalance;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Sales\Application\Services\SaleFulfillmentService;
 use App\Modules\Sales\Application\Services\SaleProductionStatusService;
+use App\Modules\Sales\Application\Services\SaleProductionStatusExportService;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
 use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
+use App\Shared\Presentation\Exceptions\DomainException;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -181,9 +188,152 @@ final class SaleController extends Controller
                 || ($user instanceof User && $user->hasPermission('production-orders.create', $company->id)),
             'create_purchase_requisition' => $isAdministrator
                 || ($user instanceof User && $user->hasPermission('purchasing.requisitions.create', $company->id)),
+            'read_production_order' => $isAdministrator
+                || ($user instanceof User && $user->hasPermission('production-orders.read', $company->id)),
+            'read_purchase_order' => $isAdministrator
+                || ($user instanceof User && $user->hasPermission('purchasing.orders.read', $company->id)),
+            'reserve_stock' => $isAdministrator
+                || ($user instanceof User && $user->hasPermission('inventory.update', $company->id)),
+            'reschedule_production_order' => $isAdministrator
+                || ($user instanceof User && $user->hasPermission('production-scheduling.run', $company->id)),
+            'manage_tracking' => $isAdministrator
+                || ($user instanceof User && $user->hasPermission(self::UPDATE_PERMISSION, $company->id)),
         ];
+        $responsibleUsers = $company->users()->where('users.is_active', true)->orderBy('users.name')->get(['users.id', 'users.name']);
 
-        return view('client.sales.production-status', compact('sale', 'analysis', 'company', 'capabilities'));
+        return view('client.sales.production-status', compact('sale', 'analysis', 'company', 'capabilities', 'responsibleUsers'));
+    }
+
+    public function exportProductionStatus(
+        Request $request,
+        Sale $sale,
+        string $format,
+        SaleProductionStatusService $productionStatusService,
+        SaleProductionStatusExportService $exportService,
+    ): BinaryFileResponse {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, self::READ_PERMISSION, $company->id);
+        abort_unless(in_array($format, ['xlsx', 'pdf'], true), 404);
+
+        $sale->load(['customer:id,name', 'lines.product:id,sku,description,product_type,unit_id', 'lines.product.unit:id,code']);
+        $analysis = $productionStatusService->analyze($sale);
+        $path = $format === 'xlsx'
+            ? $exportService->excel($sale, $analysis, $company->name)
+            : $exportService->pdf($sale, $analysis, $company->name);
+
+        return response()->download($path, 'venda-'.$sale->id.'-producao.'.$format)->deleteFileAfterSend(true);
+    }
+
+    public function updateProductionTracking(Request $request, Sale $sale, AuditLogService $audit): RedirectResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, self::UPDATE_PERMISSION, $company->id);
+
+        $data = $request->validate([
+            'promised_date' => ['nullable', 'date'],
+            'responsible_user_id' => ['nullable', 'integer'],
+            'comment' => ['nullable', 'string', 'max:2000'],
+        ]);
+        $responsibleId = (int) ($data['responsible_user_id'] ?? 0);
+
+        if ($responsibleId > 0 && ! $company->users()->whereKey($responsibleId)->exists()) {
+            throw ValidationException::withMessages(['responsible_user_id' => __('sale.production_status.invalid_responsible')]);
+        }
+
+        $metadata = (array) ($sale->metadata ?? []);
+        $tracking = (array) data_get($metadata, 'production_tracking', []);
+        $tracking['promised_date'] = $data['promised_date'] ?? null;
+        $tracking['responsible_user_id'] = $responsibleId > 0 ? $responsibleId : null;
+
+        if (trim((string) ($data['comment'] ?? '')) !== '') {
+            $comments = (array) ($tracking['comments'] ?? []);
+            $comments[] = [
+                'id' => (string) Str::uuid(),
+                'text' => trim((string) $data['comment']),
+                'user_id' => $request->user()?->id,
+                'user_name' => $request->user()?->name,
+                'created_at' => now()->toIso8601String(),
+            ];
+            $tracking['comments'] = array_slice($comments, -100);
+        }
+
+        $metadata['production_tracking'] = $tracking;
+        $sale->metadata = $metadata;
+        $sale->save();
+
+        $audit->record('tenant_sale.production_tracking.updated', context: [
+            'sale_id' => $sale->id,
+            'company_id' => $company->id,
+            'promised_date' => $tracking['promised_date'],
+            'responsible_user_id' => $tracking['responsible_user_id'],
+            'comment_added' => trim((string) ($data['comment'] ?? '')) !== '',
+        ], userId: $request->user()?->id, companyId: $company->id, ipAddress: $request->ip(), userAgent: $request->userAgent());
+
+        return redirect()->route('sales.production-status', $sale)->with('status', __('sale.production_status.tracking_updated'));
+    }
+
+    public function reserveProductionMaterial(
+        Request $request,
+        Sale $sale,
+        InventoryService $inventoryService,
+        SaleProductionStatusService $productionStatusService,
+        AuditLogService $audit,
+    ): RedirectResponse {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, 'inventory.update', $company->id);
+        $data = $request->validate([
+            'sale_line_id' => ['required', 'integer'],
+            'product_id' => ['required', 'integer'],
+            'warehouse_id' => ['required', 'integer'],
+            'quantity' => ['required', 'numeric', 'gt:0'],
+        ]);
+        $line = $sale->lines()->whereKey((int) $data['sale_line_id'])->firstOrFail();
+        $sale->load(['lines.product.unit']);
+        $item = collect($productionStatusService->analyze($sale)['items'])->firstWhere('line_id', (int) $line->id);
+        $material = collect($item['materials'] ?? [])->firstWhere('product_id', (int) $data['product_id']);
+        $balance = InventoryBalance::query()
+            ->where('warehouse_id', (int) $data['warehouse_id'])
+            ->where('product_id', (int) $data['product_id'])
+            ->first();
+
+        if ($material === null || $balance === null || (float) $data['quantity'] > (float) $material['available_quantity'] + 0.000001) {
+            return redirect()->route('sales.production-status', $sale)->withErrors([
+                'reservation' => __('sale.production_status.invalid_reservation'),
+            ]);
+        }
+
+        try {
+            $inventoryService->reserveStock([
+                'warehouse_id' => (int) $data['warehouse_id'],
+                'product_id' => (int) $data['product_id'],
+                'reservation_origin' => 'PRODUCTION',
+                'priority' => 20,
+                'quantity' => (float) $data['quantity'],
+                'reference_type' => 'sale',
+                'reference_id' => (int) $sale->id,
+                'notes' => __('sale.production_status.reservation_note', ['sale' => $sale->id]),
+                'metadata' => [
+                    'sale_id' => (int) $sale->id,
+                    'sale_line_id' => (int) $line->id,
+                    'allocation_scope' => sprintf('sale:%d', (int) $sale->id),
+                    'allocation_type' => 'production_component',
+                ],
+            ], $request->user()?->id);
+        } catch (DomainException) {
+            return redirect()->route('sales.production-status', $sale)->withErrors([
+                'reservation' => __('sale.production_status.invalid_reservation'),
+            ]);
+        }
+
+        $audit->record('tenant_sale.production_material_reserved', context: [
+            'sale_id' => $sale->id,
+            'company_id' => $company->id,
+            'sale_line_id' => $line->id,
+            'product_id' => (int) $data['product_id'],
+            'quantity' => (float) $data['quantity'],
+        ], userId: $request->user()?->id, companyId: $company->id, ipAddress: $request->ip(), userAgent: $request->userAgent());
+
+        return redirect()->route('sales.production-status', $sale)->with('status', __('sale.production_status.reserved'));
     }
 
     public function store(Request $request, AuditLogService $audit, SaleFulfillmentService $saleFulfillment): RedirectResponse

@@ -13,6 +13,7 @@ use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperation
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
+use App\Services\SaaS\AuditLogService;
 use App\Shared\Presentation\Exceptions\DomainException;
 use App\Support\Duration;
 use Illuminate\Database\Eloquent\Builder;
@@ -360,6 +361,37 @@ final class ProductionOrderController extends Controller
         $this->orderService->complete((int) $order->id, $request->user()?->id);
 
         return redirect()->route('production.orders.show', $order)->with('status', __('production.orders.completed'));
+    }
+
+    public function reschedule(Request $request, ProductionOrder $order, AuditLogService $audit): RedirectResponse
+    {
+        $company = $this->activeCompanyFrom($request);
+        $this->ensurePermission($request, 'production-scheduling.run', $company->id);
+        abort_unless((int) $order->company_id === (int) $company->id, 404);
+
+        if (in_array($order->status, ['COMPLETED', 'CANCELLED'], true)) {
+            return redirect()->back()->withErrors(['schedule' => __('production.orders.reschedule_closed')]);
+        }
+
+        $data = $request->validate([
+            'scheduled_start_date' => ['required', 'date'],
+            'scheduled_end_date' => ['required', 'date', 'after_or_equal:scheduled_start_date'],
+        ]);
+        $previous = [
+            'scheduled_start_date' => $order->scheduled_start_date?->toDateString(),
+            'scheduled_end_date' => $order->scheduled_end_date?->toDateString(),
+        ];
+        $order->forceFill($data)->save();
+
+        $audit->record('tenant_production_order.rescheduled', context: [
+            'production_order_id' => $order->id,
+            'sale_id' => $order->source_reference_type === 'sale' ? $order->source_reference_id : null,
+            'company_id' => $company->id,
+            'previous' => $previous,
+            'current' => $data,
+        ], userId: $request->user()?->id, companyId: $company->id, ipAddress: $request->ip(), userAgent: $request->userAgent());
+
+        return redirect()->back()->with('status', __('production.orders.rescheduled'));
     }
 
     public function recordOutput(Request $request, ProductionOrder $order): RedirectResponse
