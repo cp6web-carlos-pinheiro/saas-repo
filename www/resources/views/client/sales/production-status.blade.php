@@ -448,6 +448,50 @@
             </ol>
         </x-ui.panel>
     @endif
+
+    <div class="mt-6 grid gap-6 lg:grid-cols-2 print:hidden">
+        <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+            <h2 class="text-lg font-semibold">{{ __('sale.production_status.comments_responsible') }}</h2>
+            @if ($capabilities['manage_tracking'])
+                <form method="POST" action="{{ route('sales.production-status.tracking', $sale) }}" class="mt-4 space-y-4">
+                    @csrf
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <label class="text-sm">{{ __('sale.production_status.promised_date') }}<input class="mt-1 w-full rounded-xl border border-[#dadce0] p-2.5" type="date" name="promised_date" value="{{ old('promised_date', $analysis['tracking']['promised_date']) }}"></label>
+                        <label class="text-sm">{{ __('sale.production_status.responsible') }}
+                            <select class="mt-1 w-full rounded-xl border border-[#dadce0] p-2.5" name="responsible_user_id">
+                                <option value="">{{ __('sale.production_status.no_responsible') }}</option>
+                                @foreach ($responsibleUsers as $responsible)
+                                    <option value="{{ $responsible->id }}" @selected((int) old('responsible_user_id', $analysis['tracking']['responsible_user_id']) === (int) $responsible->id)>{{ $responsible->name }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                    </div>
+                    <label class="block text-sm">{{ __('sale.production_status.new_comment') }}<textarea class="mt-1 w-full rounded-xl border border-[#dadce0] p-3" name="comment" rows="3" maxlength="2000"></textarea></label>
+                    <button class="rounded-full bg-[#1a73e8] px-4 py-2 text-sm font-semibold text-white" type="submit">{{ __('sale.production_status.save_tracking') }}</button>
+                </form>
+            @else
+                <p class="mt-3 text-sm text-[#5f6368]">{{ $analysis['tracking']['responsible_name'] ?? __('sale.production_status.no_responsible') }}</p>
+            @endif
+            <div class="mt-5 space-y-3 border-t border-[#dadce0] pt-4">
+                @forelse ($analysis['tracking']['comments'] as $comment)
+                    <article class="rounded-xl bg-[#f8fafd] p-3"><div class="text-xs text-[#5f6368]">{{ $comment['user_name'] ?? '—' }} · {{ \Illuminate\Support\Carbon::parse($comment['created_at'])->format('d/m/Y H:i') }}</div><p class="mt-1 whitespace-pre-line text-sm">{{ $comment['text'] }}</p></article>
+                @empty
+                    <p class="text-sm text-[#5f6368]">{{ __('sale.production_status.no_comments') }}</p>
+                @endforelse
+            </div>
+        </x-ui.panel>
+
+        <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+            <h2 class="text-lg font-semibold">{{ __('sale.production_status.change_history') }}</h2>
+            <ol class="mt-4 space-y-3">
+                @forelse ($analysis['history'] as $history)
+                    <li class="border-l-2 border-[#1a73e8] pl-3"><div class="text-xs text-[#5f6368]">{{ $history['date'] ? \Illuminate\Support\Carbon::parse($history['date'])->format('d/m/Y H:i') : '—' }}</div><div class="mt-1 text-sm font-medium">{{ __('sale.production_status.history_events.'.str_replace('.', '_', $history['event'])) }}</div></li>
+                @empty
+                    <li class="text-sm text-[#5f6368]">{{ __('sale.production_status.no_history') }}</li>
+                @endforelse
+            </ol>
+        </x-ui.panel>
+    </div>
 </div>
 
 <script>
