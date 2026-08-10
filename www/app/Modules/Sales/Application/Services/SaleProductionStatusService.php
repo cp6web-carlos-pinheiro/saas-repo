@@ -947,7 +947,8 @@ final class SaleProductionStatusService
 
     private function readiness(Collection $items, array $counts, bool $scheduleIncomplete): string
     {
-        if ($items->flatMap('materials')->contains(static fn (array $material): bool => (float) $material['net_shortage'] > 0)) {
+        if ($items->flatMap(static fn (array $item): array => $item['materials'])
+            ->contains(static fn (array $material): bool => (float) $material['net_shortage'] > 0)) {
             return 'blocked_materials';
         }
 
