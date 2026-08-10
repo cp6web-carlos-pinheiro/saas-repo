@@ -183,8 +183,9 @@ final class SaleProductionStatusService
             ? max(0, today()->parse($projectedCompletion ?? today())->startOfDay()->diffInDays(today()->parse($promisedDate)->startOfDay(), false) * -1)
             : 0;
         $criticalOrder = $realOrderRows->filter('scheduled_end')->sortByDesc('scheduled_end')->first();
-        $limitingMaterial = $items->flatMap('materials')
-            ->filter(static fn (array $material): bool => (float) $material['net_shortage'] > 0 || (float) $material['in_purchase'] > 0)
+        $limitingMaterial = $items->flatMap(static fn (array $item): array => $item['materials'])
+            ->filter(static fn (array $material): bool => $material['recommended_action'] === 'BUY'
+                && ((float) $material['net_shortage'] > 0 || (float) $material['in_purchase'] > 0))
             ->sortByDesc(static fn (array $material): string => (string) ($material['latest_promised_date'] ?? '9999-12-31'))
             ->first();
         $salesAmount = round((float) $sale->amount_cents / 100, 2);
@@ -789,12 +790,15 @@ final class SaleProductionStatusService
     private function history(Sale $sale): array
     {
         return AuditLog::query()
-            ->where('company_id', $sale->company_id)
-            ->where('event', 'like', 'tenant_sale.%')
+            ->where(static function ($query): void {
+                $query->where('event', 'like', 'tenant_sale.%')
+                    ->orWhere('event', 'tenant_production_order.rescheduled');
+            })
             ->orderByDesc('occurred_at')
-            ->limit(100)
+            ->limit(500)
             ->get(['id', 'user_id', 'event', 'context', 'occurred_at'])
-            ->filter(static fn (AuditLog $log): bool => (int) data_get($log->context, 'sale_id') === (int) $sale->id)
+            ->filter(static fn (AuditLog $log): bool => (int) data_get($log->context, 'company_id') === (int) $sale->company_id
+                && (int) data_get($log->context, 'sale_id') === (int) $sale->id)
             ->take(30)
             ->map(static fn (AuditLog $log): array => [
                 'id' => (int) $log->id,
@@ -948,7 +952,7 @@ final class SaleProductionStatusService
     private function readiness(Collection $items, array $counts, bool $scheduleIncomplete): string
     {
         if ($items->flatMap(static fn (array $item): array => $item['materials'])
-            ->contains(static fn (array $material): bool => (float) $material['net_shortage'] > 0)) {
+            ->contains(static fn (array $material): bool => $material['recommended_action'] === 'BUY' && (float) $material['net_shortage'] > 0)) {
             return 'blocked_materials';
         }
 

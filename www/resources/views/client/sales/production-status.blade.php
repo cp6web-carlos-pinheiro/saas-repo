@@ -5,6 +5,12 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
+    @if (session('status'))
+        <x-ui.alert class="mb-4" variant="success">{{ session('status') }}</x-ui.alert>
+    @endif
+    @if ($errors->any())
+        <x-ui.alert class="mb-4" variant="error">{{ $errors->first() }}</x-ui.alert>
+    @endif
     @php
         $formatQuantity = static fn (float|int $quantity): string => rtrim(rtrim(number_format((float) $quantity, 6, ',', '.'), '0'), ',');
         $formatMoney = static fn (float|int $amount): string => 'R$ '.number_format((float) $amount, 2, ',', '.');

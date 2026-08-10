@@ -19,7 +19,6 @@ use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
 use App\Shared\Presentation\Exceptions\DomainException;
-use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;

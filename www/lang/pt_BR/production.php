@@ -37,6 +37,8 @@ return [
     'orders' => [
         'sale_context' => 'Esta OP será vinculada à venda #:sale e aparecerá no acompanhamento do pedido.',
         'invalid_sale_context' => 'O contexto da venda não é válido para esta ordem de produção.',
+        'reschedule_closed' => 'Ordens concluídas ou canceladas não podem ser reprogramadas.',
+        'rescheduled' => 'Ordem de produção reprogramada com sucesso.',
         'new' => 'Nova ordem de produção',
         'new_short' => 'Nova ordem',
         'create' => 'Criar ordem',
