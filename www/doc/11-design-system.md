@@ -53,3 +53,32 @@ Para a construção naval, prefira o vocabulário já agrupado no catálogo: emb
 - Validar os componentes em fluxos reais do produto.
 - Consolidar padrões de filtros, paginação e estados vazios.
 - Definir processo de revisão visual e acessibilidade para novas variantes.
+
+## Fundação (onda 1 — shell reutilizável e componentes ausentes)
+
+- O shell do catálogo foi extraído para `<x-ui.app-shell>` (`resources/views/components/ui/app-shell.blade.php`), que recebe navegação, marca e ações via props/slots. O catálogo consome o mesmo componente que Global Admin e área cliente usarão nas próximas ondas — nenhuma navegação real está acoplada a ele.
+- Os tokens `--ui-*` e o fundo do shell deixaram de depender da classe `.ds-shell`: a classe correta agora é `.ui-shell`, aplicada ao `<body>` por qualquer layout que use `<x-ui.app-shell>`, não apenas pelo catálogo.
+- Container e cabeçalho de página padronizados: `.ui-page` (largura e espaçamento de conteúdo) e `x-ui.page-heading`, que agora aceita `:breadcrumbs="[...]"` (delegando para `x-ui.breadcrumb`, já migrado para tokens semânticos), um `eyebrow` opcional e um slot `actions` para ações no topo da página.
+- `x-ui.field` agora emite `data-ui-field` e `data-for`; um script em `resources/js/app.js` liga `aria-describedby` automaticamente ao dica/erro do campo, sem exigir que cada view repita o id manualmente. Erros de validação continuam sendo linkados automaticamente por `x-ui.input`/`select`/`textarea` a partir do `name`.
+- Novos componentes compartilhados:
+  - `x-ui.icon-button` — formaliza `.ui-icon-button` como componente com `label` obrigatório (`aria-label`/`title`).
+  - `x-ui.filter-bar` — busca (`search`, GET) + slots `fields` e `actions` para listagens.
+  - `x-ui.empty-state` — ícone, título, descrição e ações para estados vazios de listagens.
+  - `x-ui.row-actions` — agrupa ícones de ação no fim de uma linha de tabela.
+  - `x-ui.editor-toolbar` — toolbar para editores de conteúdo (ex.: tutoriais).
+  - `x-ui.confirm-button` — ação destrutiva com formulário + confirmação acessível (`data-ui-confirm`, tratado com SweetAlert2 e classes `.ui-swal-*` em tokens semânticos; substitui o padrão anterior restrito a `data-admin-delete-confirm`/`.g-swal-*`, que continua funcionando).
+  - Paginação: `resources/views/vendor/pagination/ui.blade.php`, registrada em `AppServiceProvider` via `Paginator::defaultView()`. Toda chamada existente a `$paginator->links()` passa a usar o componente `.ui-pagination` automaticamente, sem alterar controllers, filtros ou query string.
+- Mapeamento de variantes legadas de botão para as variantes semânticas (mantidas temporariamente, ver comentário em `resources/views/components/ui/button.blade.php`):
+
+  | Variante legada | Variante semântica |
+  | --- | --- |
+  | `brand-primary` | `primary` |
+  | `material-edit` | `primary` |
+  | `material-remove` | `danger` |
+  | `material-versions` | `info` |
+  | `material-back` | `outline` |
+  | `surface-muted` | `secondary` |
+  | `danger-outline` | `danger` (estilo outline) |
+  | `inverse-outline` | `outline` (sobre fundos escuros) |
+
+- Ainda não migrados nesta onda (fica para as ondas de Global Admin, área cliente e páginas públicas do plano de entrega): troca efetiva de `layouts.client-area` e `layouts.global-admin` para `<x-ui.app-shell>`, remoção das cores fixas e variantes legadas das telas, e migração dos ícones inline/Heroicons para `x-ui.icon`.

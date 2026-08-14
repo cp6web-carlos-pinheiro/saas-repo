@@ -37,29 +37,29 @@
 }
 
 /* Scoped semantic selectors outrank legacy component rules during incremental migration. */
-.ds-shell .ui-input,
-.ds-shell .ui-select,
-.ds-shell .ui-textarea {
+.ui-shell .ui-input,
+.ui-shell .ui-select,
+.ui-shell .ui-textarea {
     color: var(--ui-text);
     background-color: var(--ui-surface);
     border-color: var(--ui-border-strong);
 }
 
-.ds-shell .ui-input::placeholder,
-.ds-shell .ui-textarea::placeholder {
+.ui-shell .ui-input::placeholder,
+.ui-shell .ui-textarea::placeholder {
     color: var(--ui-text-subtle);
 }
 
-.ds-shell .ui-input:focus,
-.ds-shell .ui-select:focus,
-.ds-shell .ui-textarea:focus {
+.ui-shell .ui-input:focus,
+.ui-shell .ui-select:focus,
+.ui-shell .ui-textarea:focus {
     border-color: var(--ui-primary);
     box-shadow: 0 0 0 3px var(--ui-focus);
 }
 
-.ds-shell .ui-input[aria-invalid='true'],
-.ds-shell .ui-select[aria-invalid='true'],
-.ds-shell .ui-textarea[aria-invalid='true'] {
+.ui-shell .ui-input[aria-invalid='true'],
+.ui-shell .ui-select[aria-invalid='true'],
+.ui-shell .ui-textarea[aria-invalid='true'] {
     border-color: var(--ui-danger);
 }
 
@@ -197,7 +197,13 @@ html[data-theme='dark'] {
     box-sizing: border-box;
 }
 
-.ds-shell {
+/*
+ * .ui-shell is the approved application shell: body class applied by any layout that renders
+ * <x-ui.app-shell> (design system catalog, Global Admin, client area, public pages). It is not
+ * exclusive to the catalog anymore — the --ui-* tokens and shell chrome are available wherever
+ * this class is present, keeping the exact same visual contract in every area.
+ */
+.ui-shell {
     color: var(--ui-text);
     background:
         radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--ui-primary) 12%, transparent), transparent 30rem),
@@ -694,7 +700,7 @@ html[data-theme='dark'] {
     }
 
     .ui-input-group .ui-input-group-control,
-    .ds-shell .ui-input-group .ui-input-group-control {
+    .ui-shell .ui-input-group .ui-input-group-control {
         min-width: 0;
         min-height: 0;
         border: 0;
@@ -704,7 +710,7 @@ html[data-theme='dark'] {
     }
 
     .ui-input-group .ui-input-group-control:focus,
-    .ds-shell .ui-input-group .ui-input-group-control:focus {
+    .ui-shell .ui-input-group .ui-input-group-control:focus {
         border: 0;
         box-shadow: none;
     }
@@ -1519,6 +1525,123 @@ html[data-theme='dark'] {
         @apply py-5 text-sm leading-7;
         color: var(--ui-text-muted);
     }
+
+    /* ---------------------------------------------------------------------
+     * Fundação (Wave 1): container padrão, cabeçalho de página, filtros,
+     * estado vazio, paginação, ações de linha, toolbar de editor e
+     * icon-button formal. Compartilhados por catálogo, área cliente,
+     * Global Admin e páginas públicas.
+     * --------------------------------------------------------------------- */
+
+    .ui-page {
+        @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8;
+    }
+
+    .ui-page-narrow {
+        @apply max-w-4xl;
+    }
+
+    .ui-page-header {
+        @apply mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+    }
+
+    .ui-page-header-main {
+        @apply min-w-0 flex-1;
+    }
+
+    .ui-page-actions {
+        @apply flex shrink-0 flex-wrap items-center gap-2;
+    }
+
+    /* Filter bar: search + slotted filters + slotted actions. */
+    .ui-filter-bar {
+        @apply flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:flex-wrap sm:items-center;
+        background: var(--ui-surface);
+        border-color: var(--ui-border);
+        box-shadow: var(--ui-shadow-sm);
+    }
+
+    .ui-filter-bar-search {
+        @apply w-full sm:max-w-xs;
+    }
+
+    .ui-filter-bar-fields {
+        @apply flex flex-1 flex-wrap items-center gap-3;
+    }
+
+    .ui-filter-bar-actions {
+        @apply flex shrink-0 flex-wrap items-center gap-2 sm:ml-auto;
+    }
+
+    /* Empty state, reused instead of table.blade.php one-off markup. */
+    .ui-empty-state {
+        @apply flex flex-col items-center gap-3 rounded-2xl border border-dashed px-6 py-12 text-center;
+        border-color: var(--ui-border-strong);
+        background: var(--ui-surface-muted);
+    }
+
+    .ui-empty-state-icon {
+        @apply flex h-12 w-12 items-center justify-center rounded-full;
+        color: var(--ui-text-subtle);
+        background: var(--ui-surface);
+    }
+
+    .ui-empty-state-title {
+        @apply text-sm font-bold;
+        color: var(--ui-text);
+    }
+
+    .ui-empty-state-description {
+        @apply max-w-sm text-sm leading-6;
+        color: var(--ui-text-muted);
+    }
+
+    /* Pagination: mirrors the Data Table previous/next language for server pagination. */
+    .ui-pagination {
+        @apply flex flex-wrap items-center justify-between gap-3 border-t pt-4 text-sm;
+        border-color: var(--ui-border);
+        color: var(--ui-text-muted);
+    }
+
+    .ui-pagination-links {
+        @apply flex flex-wrap items-center gap-1;
+    }
+
+    .ui-pagination-link {
+        @apply inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-2 text-sm font-semibold no-underline transition;
+        color: var(--ui-text-muted);
+    }
+
+    .ui-pagination-link:hover {
+        background: var(--ui-surface-hover);
+        color: var(--ui-text);
+    }
+
+    .ui-pagination-link.is-active {
+        color: var(--ui-primary-text);
+        background: var(--ui-primary-soft);
+    }
+
+    .ui-pagination-link[aria-disabled='true'] {
+        @apply pointer-events-none opacity-40;
+    }
+
+    /* Row actions: compact icon-button group used at the end of table rows. */
+    .ui-row-actions {
+        @apply flex items-center justify-end gap-1;
+    }
+
+    /* Editor toolbar: grouped controls above a rich content / tutorial editor. */
+    .ui-editor-toolbar {
+        @apply flex flex-wrap items-center gap-1 rounded-xl border p-1.5;
+        background: var(--ui-surface-muted);
+        border-color: var(--ui-border);
+    }
+
+    .ui-editor-toolbar-divider {
+        @apply mx-1 h-6 w-px shrink-0;
+        background: var(--ui-border);
+    }
 }
 
 @media (max-width: 767px) {
@@ -2000,7 +2123,7 @@ body {
     }
 
     .ui-breadcrumb a {
-        color: var(--g-primary);
+        color: var(--ui-primary);
         text-decoration: none;
     }
 
@@ -2009,12 +2132,12 @@ body {
     }
 
     .ui-breadcrumb span[aria-current='page'] {
-        color: var(--g-text-muted);
+        color: var(--ui-text-muted);
         font-weight: 600;
     }
 
     .ui-breadcrumb-separator {
-        color: #94a3b8;
+        color: var(--ui-text-subtle);
         font-size: 0.78rem;
         user-select: none;
     }
@@ -3044,6 +3167,76 @@ body {
         box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2); /* Novo primary */
     }
 
+    /* Confirmação destrutiva do Layout System: usada por x-ui.confirm-button / data-ui-confirm. */
+    .ui-swal-popup {
+        border-radius: 20px;
+        border: 1px solid var(--ui-border);
+        background: var(--ui-surface);
+        box-shadow: var(--ui-shadow-lg);
+        padding: 1.45rem;
+        font-family: var(--font-body), sans-serif;
+    }
+
+    .ui-swal-title {
+        color: var(--ui-text);
+        font-size: 1.35rem;
+        line-height: 1.9rem;
+        font-weight: 700;
+    }
+
+    .ui-swal-body {
+        color: var(--ui-text-muted);
+        font-size: 0.96rem;
+        line-height: 1.5rem;
+    }
+
+    .ui-swal-actions {
+        margin-top: 1.2rem;
+        gap: 0.65rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .ui-swal-confirm,
+    .ui-swal-cancel {
+        border-radius: 0.75rem;
+        border: 1px solid transparent;
+        font-size: 0.88rem;
+        font-weight: 700;
+        line-height: 1;
+        padding: 0.7rem 1.25rem;
+        transition: all 160ms ease;
+    }
+
+    .ui-swal-confirm {
+        background: var(--ui-danger);
+        color: var(--ui-on-danger);
+    }
+
+    .ui-swal-confirm:hover {
+        background: var(--ui-danger-hover);
+    }
+
+    .ui-swal-confirm:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px var(--ui-focus);
+    }
+
+    .ui-swal-cancel {
+        background: transparent;
+        border-color: var(--ui-border-strong);
+        color: var(--ui-text);
+    }
+
+    .ui-swal-cancel:hover {
+        background: var(--ui-surface-hover);
+    }
+
+    .ui-swal-cancel:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px var(--ui-focus);
+    }
+
     .select2-container--default .select2-selection--multiple {
         display: flex;
         flex-wrap: wrap;
@@ -3156,54 +3349,54 @@ body {
         background: var(--ui-surface-muted) !important;
     }
 
-    .ds-shell .select2-container--default .select2-selection--single {
+    .ui-shell .select2-container--default .select2-selection--single {
         color: var(--ui-text);
         background: var(--ui-surface);
         border-color: var(--ui-border-strong) !important;
     }
 
-    .ds-shell .select2-container--default .select2-selection--single .select2-selection__rendered,
-    .ds-shell .select2-results__option {
+    .ui-shell .select2-container--default .select2-selection--single .select2-selection__rendered,
+    .ui-shell .select2-results__option {
         color: var(--ui-text);
     }
 
-    .ds-shell .select2-container--default .select2-selection--single .select2-selection__placeholder,
-    .ds-shell .select2-results__message {
+    .ui-shell .select2-container--default .select2-selection--single .select2-selection__placeholder,
+    .ui-shell .select2-results__message {
         color: var(--ui-text-subtle);
     }
 
-    .ds-shell .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    .ui-shell .select2-container--default .select2-selection--single .select2-selection__arrow b {
         border-color: var(--ui-text-muted) transparent transparent transparent;
     }
 
-    .ds-shell .select2-container--default.select2-container--focus .select2-selection--single,
-    .ds-shell .select2-container--default.select2-container--open .select2-selection--single {
+    .ui-shell .select2-container--default.select2-container--focus .select2-selection--single,
+    .ui-shell .select2-container--default.select2-container--open .select2-selection--single {
         border-color: var(--ui-primary) !important;
         box-shadow: 0 0 0 3px var(--ui-focus);
     }
 
-    .ds-shell .select2-dropdown,
-    .ds-shell .select2-results > .select2-results__options,
-    .ds-shell .select2-container--default .select2-results__option--disabled,
-    .ds-shell .select2-container--default .select2-results__message {
+    .ui-shell .select2-dropdown,
+    .ui-shell .select2-results > .select2-results__options,
+    .ui-shell .select2-container--default .select2-results__option--disabled,
+    .ui-shell .select2-container--default .select2-results__message {
         color: var(--ui-text);
         background: var(--ui-surface-raised) !important;
         border-color: var(--ui-border-strong) !important;
     }
 
-    .ds-shell .select2-container--default .select2-search--dropdown .select2-search__field {
+    .ui-shell .select2-container--default .select2-search--dropdown .select2-search__field {
         color: var(--ui-text);
         background: var(--ui-surface);
         border-color: var(--ui-border-strong);
     }
 
-    .ds-shell .select2-container--default .select2-results__option--selected,
-    .ds-shell .select2-container--default .select2-results__option--selectable:hover {
+    .ui-shell .select2-container--default .select2-results__option--selected,
+    .ui-shell .select2-container--default .select2-results__option--selectable:hover {
         color: var(--ui-text);
         background: var(--ui-surface-muted);
     }
 
-    .ds-shell .select2-container--default .select2-results__option--selected {
+    .ui-shell .select2-container--default .select2-results__option--selected {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -3229,7 +3422,7 @@ body {
         height: 100%;
     }
 
-    .ds-shell .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+    .ui-shell .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
         color: var(--ui-primary-text);
         background: var(--ui-primary-soft);
     }

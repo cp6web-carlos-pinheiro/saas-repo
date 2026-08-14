@@ -711,6 +711,72 @@ for (const form of adminDeleteForms) {
 	});
 }
 
+// Generic destructive-confirmation for the Layout System: any form or link carrying
+// data-ui-confirm shows an accessible SweetAlert2 dialog themed with --ui-* tokens
+// before it submits/navigates. Replaces one-off confirm() calls and admin-only variants.
+const uiConfirmForms = document.querySelectorAll('form[data-ui-confirm]');
+
+for (const form of uiConfirmForms) {
+	form.addEventListener('submit', async (event) => {
+		if (form.dataset.uiConfirmed === 'true') {
+			return;
+		}
+
+		event.preventDefault();
+
+		const result = await Swal.fire({
+			title: form.dataset.uiConfirm || 'Confirmar ação',
+			text: form.dataset.uiConfirmText || '',
+			icon: form.dataset.uiConfirmIcon || 'warning',
+			showCancelButton: true,
+			focusCancel: true,
+			confirmButtonText: form.dataset.uiConfirmConfirm || 'Confirmar',
+			cancelButtonText: form.dataset.uiConfirmCancel || 'Cancelar',
+			customClass: {
+				popup: 'ui-swal-popup',
+				title: 'ui-swal-title',
+				htmlContainer: 'ui-swal-body',
+				actions: 'ui-swal-actions',
+				confirmButton: 'ui-swal-confirm',
+				cancelButton: 'ui-swal-cancel',
+			},
+			buttonsStyling: false,
+		});
+
+		if (result.isConfirmed) {
+			form.dataset.uiConfirmed = 'true';
+			HTMLFormElement.prototype.submit.call(form);
+		}
+	});
+}
+
+// x-ui.field wires label, hint and error to its control via aria-describedby without
+// requiring every view to repeat the id manually. Error ids are already appended by
+// x-ui.input/select/textarea when the field name has a validation error; this covers
+// the hint id, which has no equivalent server-side signal to hook into.
+for (const field of document.querySelectorAll('[data-ui-field][data-for]')) {
+	const forId = field.getAttribute('data-for');
+	const control = forId ? document.getElementById(forId) : null;
+
+	if (!(control instanceof HTMLElement)) {
+		continue;
+	}
+
+	const describedIds = new Set((control.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));
+
+	if (field.querySelector(`#${CSS.escape(forId)}-hint`)) {
+		describedIds.add(`${forId}-hint`);
+	}
+
+	if (field.querySelector(`#${CSS.escape(forId)}-error`)) {
+		describedIds.add(`${forId}-error`);
+	}
+
+	if (describedIds.size > 0) {
+		control.setAttribute('aria-describedby', [...describedIds].join(' '));
+	}
+}
+
 const closeUiDropdown = (dropdown, restoreFocus = false) => {
 	const trigger = dropdown?.querySelector('[data-ui-dropdown-trigger]');
 	const menu = dropdown?.querySelector('[data-ui-dropdown-menu]');

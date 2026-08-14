@@ -11,6 +11,19 @@
 ])
 
 @php
+    // Mapeamento de variantes legadas para as variantes semânticas aprovadas no Layout System.
+    // As classes legadas abaixo continuam funcionando (telas antigas ainda as usam), mas todo
+    // novo código deve usar a variante semântica correspondente; remover apenas quando não
+    // houver mais nenhum uso das legadas (ver doc/11-design-system.md).
+    //
+    // brand-primary     -> primary
+    // material-edit     -> primary
+    // material-remove   -> danger
+    // material-versions -> info
+    // material-back     -> outline
+    // surface-muted     -> secondary
+    // danger-outline    -> danger (outline)
+    // inverse-outline   -> outline (sobre fundos escuros/coloridos)
     $variantClasses = [
         'primary' => 'ui-button-primary',
         'neutral' => 'ui-button-neutral',

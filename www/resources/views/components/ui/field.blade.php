@@ -6,7 +6,7 @@
     'required' => false,
 ])
 
-<div {{ $attributes->class(['ui-field']) }}>
+<div {{ $attributes->class(['ui-field'])->merge(['data-ui-field' => true, 'data-for' => $for]) }}>
     <label @if($for) for="{{ $for }}" @endif class="ui-field-label">
         {{ $label }}
         @if ($required)

@@ -1120,6 +1120,181 @@
                     @endforeach
                 </div>
             </section>
+
+            <section id="fundacao" class="scroll-mt-24">
+                <div class="mb-6 max-w-3xl">
+                    <p class="text-xs font-bold uppercase tracking-[0.16em] text-[var(--ui-primary)]">11 · Fundação de página</p>
+                    <h2 class="mt-2 font-display text-3xl font-bold text-[var(--ui-text)] sm:text-4xl">Container, cabeçalho, filtros e estados</h2>
+                    <p class="mt-3 leading-7 text-[var(--ui-text-muted)]">Padrões compartilhados por qualquer listagem ou tela de detalhe: shell reutilizável, cabeçalho com breadcrumb e ações, barra de filtros, estado vazio, paginação, ações de linha e confirmação destrutiva.</p>
+                </div>
+
+                <x-ui.panel padding="p-6 sm:p-8" class="mb-6">
+                    <h3 class="font-display text-xl font-bold text-[var(--ui-text)]">Shell reutilizável</h3>
+                    <p class="mt-2 text-sm leading-6 text-[var(--ui-text-muted)]">Este próprio catálogo é renderizado por <code class="text-[var(--ui-primary)]">&lt;x-ui.app-shell&gt;</code>: o mesmo componente que a área cliente e o Global Admin passam a usar, cada um informando sua própria navegação.</p>
+                    <x-ui.code-example class="mt-4" title="Como usar o shell">
+@verbatim
+<x-ui.app-shell
+    :navigation="$sidebarItems"
+    :brand-href="route('domains.dashboard', ['domain' => 'engineering'])"
+    brand-subtitle="Minha Empresa Ltda"
+    header-title="Planejamento da produção"
+>
+    <x-slot:sidebarFooter>
+        <form method="POST" action="{{ route('logout') }}">@csrf
+            <button type="submit" class="ds-sidebar-link w-full">
+                <x-ui.icon name="logout" /> Sair
+            </button>
+        </form>
+    </x-slot:sidebarFooter>
+
+    <x-ui.page-heading title="Planejamento da produção" />
+    <x-ui.panel>Conteúdo da página</x-ui.panel>
+</x-ui.app-shell>
+@endverbatim
+                    </x-ui.code-example>
+                </x-ui.panel>
+
+                <x-ui.panel padding="p-6 sm:p-8" class="mb-6">
+                    <h3 class="font-display text-xl font-bold text-[var(--ui-text)]">Cabeçalho de página com breadcrumb e ações</h3>
+                    <x-ui.page-heading
+                        class="mt-4"
+                        eyebrow="Compras"
+                        title="Pedidos de compra"
+                        subtitle="Acompanhe cotações, aprovações e recebimentos."
+                        :breadcrumbs="[['label' => 'Compras', 'href' => '#fundacao'], ['label' => 'Pedidos']]"
+                    >
+                        <x-slot:actions>
+                            <x-ui.button variant="outline"><x-ui.icon name="download" size="sm" /> Exportar</x-ui.button>
+                            <x-ui.button variant="primary"><x-ui.icon name="plus" size="sm" /> Novo pedido</x-ui.button>
+                        </x-slot:actions>
+                    </x-ui.page-heading>
+                    <x-ui.code-example title="Como usar">
+@verbatim
+<x-ui.page-heading
+    eyebrow="Compras"
+    title="Pedidos de compra"
+    subtitle="Acompanhe cotações, aprovações e recebimentos."
+    :breadcrumbs="[['label' => 'Compras', 'href' => route('purchasing.orders.index')], ['label' => 'Pedidos']]"
+>
+    <x-slot:actions>
+        <x-ui.button variant="outline"><x-ui.icon name="download" size="sm" /> Exportar</x-ui.button>
+        <x-ui.button variant="primary"><x-ui.icon name="plus" size="sm" /> Novo pedido</x-ui.button>
+    </x-slot:actions>
+</x-ui.page-heading>
+@endverbatim
+                    </x-ui.code-example>
+                </x-ui.panel>
+
+                <x-ui.panel padding="p-6 sm:p-8" class="mb-6">
+                    <h3 class="font-display text-xl font-bold text-[var(--ui-text)]">Barra de filtros</h3>
+                    <x-ui.filter-bar class="mt-4" search-placeholder="Buscar por número ou fornecedor...">
+                        <x-slot:fields>
+                            <x-ui.select :select2="false" class="w-40">
+                                <option>Todos os status</option>
+                                <option>Aberto</option>
+                                <option>Aprovado</option>
+                            </x-ui.select>
+                        </x-slot:fields>
+                        <x-slot:actions>
+                            <x-ui.button variant="primary"><x-ui.icon name="plus" size="sm" /> Novo pedido</x-ui.button>
+                        </x-slot:actions>
+                    </x-ui.filter-bar>
+                    <x-ui.code-example class="mt-4" title="Como usar">
+@verbatim
+<x-ui.filter-bar search-name="search" :search-value="request('search')" search-placeholder="Buscar por número ou fornecedor...">
+    <x-slot:fields>
+        <x-ui.select name="status" :select2="false">
+            <option value="">Todos os status</option>
+            <option value="open">Aberto</option>
+        </x-ui.select>
+    </x-slot:fields>
+    <x-slot:actions>
+        <x-ui.button :href="route('purchasing.orders.create')" variant="primary">
+            <x-ui.icon name="plus" size="sm" /> Novo pedido
+        </x-ui.button>
+    </x-slot:actions>
+</x-ui.filter-bar>
+@endverbatim
+                    </x-ui.code-example>
+                </x-ui.panel>
+
+                <div class="mb-6 grid gap-4 lg:grid-cols-2">
+                    <x-ui.panel padding="p-6 sm:p-8">
+                        <h3 class="font-display text-xl font-bold text-[var(--ui-text)]">Estado vazio</h3>
+                        <x-ui.empty-state
+                            class="mt-4"
+                            icon="package"
+                            title="Nenhum pedido encontrado"
+                            description="Ajuste os filtros ou crie um novo pedido de compra."
+                        >
+                            <x-slot:actions>
+                                <x-ui.button variant="primary" size="sm"><x-ui.icon name="plus" size="sm" /> Novo pedido</x-ui.button>
+                            </x-slot:actions>
+                        </x-ui.empty-state>
+                        <x-ui.code-example class="mt-4" title="Como usar">
+@verbatim
+<x-ui.empty-state
+    icon="package"
+    title="Nenhum pedido encontrado"
+    description="Ajuste os filtros ou crie um novo pedido de compra."
+>
+    <x-slot:actions>
+        <x-ui.button :href="route('purchasing.orders.create')" variant="primary" size="sm">
+            <x-ui.icon name="plus" size="sm" /> Novo pedido
+        </x-ui.button>
+    </x-slot:actions>
+</x-ui.empty-state>
+@endverbatim
+                        </x-ui.code-example>
+                    </x-ui.panel>
+
+                    <x-ui.panel padding="p-6 sm:p-8">
+                        <h3 class="font-display text-xl font-bold text-[var(--ui-text)]">Ações de linha e confirmação destrutiva</h3>
+                        <div class="mt-4 flex items-center justify-between rounded-xl border border-[var(--ui-border)] p-3">
+                            <span class="text-sm text-[var(--ui-text)]">PC-2048 · Cabos Elétricos LTDA</span>
+                            <x-ui.row-actions>
+                                <x-ui.icon-button icon="pencil" label="Editar pedido" />
+                                <x-ui.icon-button icon="trash" label="Excluir pedido" variant="danger" />
+                            </x-ui.row-actions>
+                        </div>
+                        <x-ui.code-example class="mt-4" title="Como usar">
+@verbatim
+<x-ui.row-actions ariaLabel="Ações do pedido PC-2048">
+    <x-ui.icon-button :href="route('purchasing.orders.edit', $order)" icon="pencil" label="Editar pedido" />
+    <x-ui.confirm-button
+        :action="route('purchasing.orders.destroy', $order)"
+        icon-only
+        icon="trash"
+        label="Excluir pedido"
+        confirm-title="Excluir pedido PC-2048?"
+        confirm-text="Esta ação não pode ser desfeita."
+    />
+</x-ui.row-actions>
+@endverbatim
+                        </x-ui.code-example>
+                    </x-ui.panel>
+                </div>
+
+                <x-ui.panel padding="p-6 sm:p-8">
+                    <h3 class="font-display text-xl font-bold text-[var(--ui-text)]">Paginação</h3>
+                    <p class="mt-2 text-sm leading-6 text-[var(--ui-text-muted)]">Toda chamada existente a <code class="text-[var(--ui-primary)]">$items-&gt;links()</code> já usa este componente — não é preciso alterar controllers, filtros ou query string.</p>
+                    <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--ui-border)] pt-4 text-sm text-[var(--ui-text-muted)]">
+                        <p class="text-xs">Mostrando <span class="font-semibold">1</span> a <span class="font-semibold">10</span> de <span class="font-semibold">42</span> resultados</p>
+                        <div class="ui-pagination-links">
+                            <span class="ui-pagination-link" aria-disabled="true"><x-ui.icon name="chevron-left" size="sm" /></span>
+                            <span class="ui-pagination-link is-active" aria-current="page">1</span>
+                            <a href="#fundacao" class="ui-pagination-link">2</a>
+                            <a href="#fundacao" class="ui-pagination-link">3</a>
+                            <a href="#fundacao" class="ui-pagination-link"><x-ui.icon name="chevron-left" size="sm" class="rotate-180" /></a>
+                        </div>
+                    </div>
+                    <x-ui.code-example class="mt-4" title="Como usar">
+@verbatim
+{{ $orders->links() }}
+@endverbatim
+                    </x-ui.code-example>
+                </x-ui.panel>
+            </section>
         </div>
     </div>
 @endsection

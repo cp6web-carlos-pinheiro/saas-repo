@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('bodyClass', 'ds-shell min-h-screen')
+@section('bodyClass', 'ui-shell min-h-screen')
 
 @section('head-preload')
     <script>
@@ -63,113 +63,34 @@
         ];
     @endphp
 
-    <div class="ds-app-shell" data-ds-sidebar-shell>
-        <aside id="ds-app-sidebar" class="ds-app-sidebar" data-ds-sidebar aria-label="{{ __('ui.modules') }}">
-            <div class="ds-sidebar-brand">
-                <a href="{{ route('global-admin.home') }}" class="ds-sidebar-brand-link" aria-label="{{ __('ui.app_name') }}" title="{{ __('ui.app_name') }}">
-                    <span class="ds-sidebar-brand-mark" aria-hidden="true">B</span>
-                    <span class="min-w-0" data-ds-sidebar-label>
-                        <strong class="block truncate text-sm text-[var(--ui-text)]">{{ __('ui.app_name') }}</strong>
-                        <small class="block truncate text-xs text-[var(--ui-text-muted)]">Layout System</small>
-                    </span>
-                </a>
-                <button
-                    type="button"
-                    class="ds-sidebar-toggle"
-                    data-ds-sidebar-toggle
-                    aria-expanded="true"
-                    aria-controls="ds-app-sidebar"
-                    aria-label="{{ __('ui.collapse_sidebar') }}"
-                    title="{{ __('ui.toggle_sidebar') }}"
-                    data-collapse-label="{{ __('ui.collapse_sidebar') }}"
-                    data-expand-label="{{ __('ui.expand_sidebar') }}"
-                >
-                    <x-ui.icon name="chevron-left" data-ds-sidebar-toggle-icon />
+    <x-ui.app-shell
+        :navigation="$sidebarItems"
+        :brand-href="route('global-admin.home')"
+        :brand-subtitle="'Layout System'"
+        header-title="Layout System"
+        header-subtitle="Modelo de página do produto"
+    >
+        <x-slot:sidebarFooter>
+            <form method="POST" action="{{ route('global-admin.logout') }}">
+                @csrf
+                <button type="submit" class="ds-sidebar-link w-full" aria-label="{{ __('ui.logout') }}" title="{{ __('ui.logout') }}">
+                    <x-ui.icon name="logout" />
+                    <span data-ds-sidebar-label>{{ __('ui.logout') }}</span>
                 </button>
-            </div>
+            </form>
+        </x-slot:sidebarFooter>
 
-            <nav class="ds-sidebar-nav" aria-label="{{ __('ui.modules') }}">
-                <p class="ds-sidebar-eyebrow" data-ds-sidebar-label>{{ __('ui.modules') }}</p>
-                @foreach ($sidebarItems as $item)
-                    @if(!empty($item['children']))
-                        @php($submenuId = 'ds-submenu-'.$loop->index)
-                        <div class="ds-sidebar-group" data-ds-sidebar-group>
-                            <button
-                                type="button"
-                                class="ds-sidebar-link w-full"
-                                aria-expanded="false"
-                                aria-controls="{{ $submenuId }}"
-                                aria-label="{{ $item['label'] }}"
-                                title="{{ $item['label'] }}"
-                                data-ds-sidebar-submenu-toggle
-                            >
-                                <x-ui.icon :name="$item['icon']" />
-                                <span class="min-w-0 flex-1 truncate text-left" data-ds-sidebar-label>{{ $item['label'] }}</span>
-                                <x-ui.icon name="chevron-down" size="sm" class="ds-sidebar-submenu-chevron" data-ds-sidebar-label />
-                            </button>
-                            <div id="{{ $submenuId }}" class="ds-sidebar-submenu hidden" data-ds-sidebar-submenu>
-                                @foreach($item['children'] as $child)
-                                    <a href="{{ $child['href'] }}" class="ds-sidebar-submenu-link" data-ds-sidebar-link>
-                                        <span class="ds-sidebar-submenu-dot" aria-hidden="true"></span>
-                                        <span>{{ $child['label'] }}</span>
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @else
-                        <a
-                            href="{{ $item['href'] }}"
-                            aria-label="{{ $item['label'] }}"
-                            title="{{ $item['label'] }}"
-                            data-ds-sidebar-link
-                            @class(['ds-sidebar-link', 'is-active' => $item['active'] ?? false])
-                            @if($item['active'] ?? false) aria-current="page" @endif
-                        >
-                            <x-ui.icon :name="$item['icon']" />
-                            <span data-ds-sidebar-label>{{ $item['label'] }}</span>
-                        </a>
-                    @endif
-                @endforeach
-            </nav>
+        <x-slot:headerActions>
+            <button type="button" class="ui-icon-button" data-ui-modal-open="ds-tutorial-panel" aria-label="{{ __('ui.tutorial_help') }}" title="{{ __('ui.tutorial_help') }}">
+                <x-ui.icon name="help-circle" />
+            </button>
+            <button type="button" class="ui-icon-button" data-ui-modal-open="ds-preferences-panel" aria-label="{{ __('ui.settings_panel_title') }}" title="{{ __('ui.settings_panel_title') }}">
+                <x-ui.icon name="settings" />
+            </button>
+        </x-slot:headerActions>
 
-            <div class="ds-sidebar-footer">
-                <form method="POST" action="{{ route('global-admin.logout') }}">
-                    @csrf
-                    <button type="submit" class="ds-sidebar-link w-full" aria-label="{{ __('ui.logout') }}" title="{{ __('ui.logout') }}">
-                        <x-ui.icon name="logout" />
-                        <span data-ds-sidebar-label>{{ __('ui.logout') }}</span>
-                    </button>
-                </form>
-            </div>
-        </aside>
-
-        <button type="button" class="ds-sidebar-overlay" data-ds-sidebar-overlay aria-label="Fechar menu"></button>
-
-        <div class="ds-app-main">
-            <header class="ds-app-header">
-                <div class="flex min-w-0 items-center gap-3">
-                    <button type="button" class="ui-icon-button md:hidden" data-ds-sidebar-mobile-toggle aria-controls="ds-app-sidebar" aria-expanded="false" aria-label="{{ __('ui.open_menu') }}">
-                        <x-ui.icon name="menu-2" />
-                    </button>
-                    <div class="min-w-0">
-                        <strong class="block truncate text-sm text-[var(--ui-text)]">Layout System</strong>
-                        <span class="block truncate text-xs text-[var(--ui-text-muted)]">Modelo de página do produto</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-1">
-                    <button type="button" class="ui-icon-button" data-ui-modal-open="ds-tutorial-panel" aria-label="{{ __('ui.tutorial_help') }}" title="{{ __('ui.tutorial_help') }}">
-                        <x-ui.icon name="help-circle" />
-                    </button>
-                    <button type="button" class="ui-icon-button" data-ui-modal-open="ds-preferences-panel" aria-label="{{ __('ui.settings_panel_title') }}" title="{{ __('ui.settings_panel_title') }}">
-                        <x-ui.icon name="settings" />
-                    </button>
-                </div>
-            </header>
-
-            <main class="min-w-0">@yield('design-system-content')</main>
-        </div>
-    </div>
+        @yield('design-system-content')
+    </x-ui.app-shell>
 
     <x-ui.modal id="ds-tutorial-panel" size="sheet" title="{{ __('ui.tutorial_panel_title') }}" description="Orientações para a página atual.">
         <div class="space-y-5">
