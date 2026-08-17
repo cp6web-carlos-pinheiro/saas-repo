@@ -4,43 +4,43 @@
 @section('admin-content-container-class', 'w-full')
 @section('admin-content')
 <div class="w-full">
-    <x-ui.breadcrumb :items="[['label' => __('global_tutorial.title'), 'href' => route('global-admin.tutorials.index')], ['label' => $editing ? __('global_tutorial.edit') : __('global_tutorial.create')]]"/>
+    <x-ui.page-heading
+        :title="$editing ? __('global_tutorial.edit') : __('global_tutorial.create')"
+        :breadcrumbs="[['label' => __('global_tutorial.title'), 'href' => route('global-admin.tutorials.index')], ['label' => $editing ? __('global_tutorial.edit') : __('global_tutorial.create')]]"
+    />
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
-        <h1 class="font-display text-3xl font-bold">{{ $editing ? __('global_tutorial.edit') : __('global_tutorial.create') }}</h1>
-
+    <x-ui.panel class="mt-6" padding="p-6 md:p-8">
         @if ($errors->any())
-            <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
+            <x-ui.alert class="mb-5" variant="error">{{ $errors->first() }}</x-ui.alert>
         @endif
 
-        <form method="POST" action="{{ $editing ? route('global-admin.tutorials.update', $tutorial) : route('global-admin.tutorials.store') }}" class="mt-6 space-y-5">
+        <form method="POST" action="{{ $editing ? route('global-admin.tutorials.update', $tutorial) : route('global-admin.tutorials.store') }}" class="space-y-5">
             @csrf
             @if ($editing)
                 @method('PUT')
             @endif
 
-            <label class="block text-sm font-medium">
-                {{ __('global_tutorial.route_name') }}
-                <x-ui.input name="route_name" :value="old('route_name', $tutorial?->route_name)" required @class(['mt-2', 'border-red-500' => $errors->has('route_name'), 'border-[#dadce0]' => ! $errors->has('route_name')]) />
-                @error('route_name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field :label="__('global_tutorial.route_name')" for="route_name" required :error="$errors->first('route_name')">
+                <x-ui.input id="route_name" name="route_name" :value="old('route_name', $tutorial?->route_name)" required />
+            </x-ui.field>
 
-            <label class="block text-sm font-medium">
-                {{ __('global_tutorial.content_html') }}
-                <div @class(['ind-html-editor mt-2 min-h-[26rem]', 'border-red-500' => $errors->has('content_html'), 'border-[#dadce0]' => ! $errors->has('content_html')]) data-global-tutorial-html-editor>
-                    <div class="ind-html-editor-toolbar" role="toolbar" aria-label="{{ __('global_tutorial.content_html') }}">
-                        <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="P" title="Parágrafo">P</button>
-                        <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="H2" title="Título">H2</button>
-                        <button type="button" class="ind-html-editor-button" data-editor-command="bold" title="Negrito"><strong>B</strong></button>
-                        <button type="button" class="ind-html-editor-button" data-editor-command="italic" title="Itálico"><em>I</em></button>
-                        <button type="button" class="ind-html-editor-button" data-editor-command="underline" title="Sublinhado"><u>U</u></button>
-                        <button type="button" class="ind-html-editor-button" data-editor-command="insertUnorderedList" title="Lista">• Lista</button>
-                        <button type="button" class="ind-html-editor-button" data-editor-command="createLink" title="Link">Link</button>
-                        <button type="button" class="ind-html-editor-button" data-editor-command="removeFormat" title="Limpar formatação">Limpar</button>
-                    </div>
+            <x-ui.field :label="__('global_tutorial.content_html')" :error="$errors->first('content_html')">
+                <div class="ui-editor-frame" data-global-tutorial-html-editor @if($errors->has('content_html')) aria-invalid="true" @endif>
+                    <x-ui.editor-toolbar :aria-label="__('global_tutorial.content_html')">
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="formatBlock" data-editor-value="P" title="Parágrafo">P</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="formatBlock" data-editor-value="H2" title="Título">H2</button>
+                        <span class="ui-editor-toolbar-divider"></span>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="bold" title="Negrito"><strong>B</strong></button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="italic" title="Itálico"><em>I</em></button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="underline" title="Sublinhado"><u>U</u></button>
+                        <span class="ui-editor-toolbar-divider"></span>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="insertUnorderedList" title="Lista">• Lista</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="createLink" title="Link">Link</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="removeFormat" title="Limpar formatação">Limpar</button>
+                    </x-ui.editor-toolbar>
 
                     <div
-                        class="ind-html-editor-surface"
+                        class="ui-editor-surface"
                         contenteditable="true"
                         data-editor-surface
                         aria-label="{{ __('global_tutorial.content_html') }}"
@@ -53,15 +53,14 @@
                         data-editor-source
                     >{!! old('content_html', $tutorial?->content_html) !!}</x-ui.textarea>
                 </div>
-                @error('content_html')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
-            </label>
+            </x-ui.field>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('global-admin.tutorials.show', $tutorial) : route('global-admin.tutorials.index')" variant="surface-muted" class="rounded-full" :full="true">
+                <x-ui.button :href="$editing ? route('global-admin.tutorials.show', $tutorial) : route('global-admin.tutorials.index')" variant="secondary" class="rounded-full" :full="true">
                     {{ __('ui.back') }}
                 </x-ui.button>
 
-                <x-ui.button type="submit" variant="brand-primary" :full="true" class="rounded-full">
+                <x-ui.button type="submit" variant="primary" :full="true" class="rounded-full">
                     {{ $editing ? __('global_tutorial.save') : __('global_tutorial.create') }}
                 </x-ui.button>
             </div>

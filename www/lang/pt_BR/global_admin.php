@@ -2,6 +2,7 @@
 return [
     'title' => 'Administração Global',
     'home' => 'Início',
+    'welcome_title' => 'Bem-vindo à área de Administração',
     'eyebrow' => 'Acesso restrito',
     'search' => 'Buscar por nome ou e-mail',
     'filter' => 'Buscar',

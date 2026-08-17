@@ -3,55 +3,47 @@
 @section('admin-content-container-class', 'w-full')
 @section('admin-content')
 <div class="w-full">
-    <x-ui.breadcrumb :items="[['label' => __('global_tutorial.title'), 'href' => route('global-admin.tutorials.index')], ['label' => $tutorial->title ?: $tutorial->route_name]]"/>
+    <x-ui.page-heading
+        :title="$tutorial->route_name"
+        :subtitle="__('global_tutorial.details')"
+        :breadcrumbs="[['label' => __('global_tutorial.title'), 'href' => route('global-admin.tutorials.index')], ['label' => $tutorial->title ?: $tutorial->route_name]]"
+    />
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <p class="text-sm text-[#5f6368]">{{ __('global_tutorial.details') }}</p>
-                <h1 class="font-display text-3xl font-bold">{{ $tutorial->route_name }}</h1>
-            </div>
-        </div>
+    <x-ui.panel class="mt-6" padding="p-6 md:p-8">
+        <x-ui.definition-grid cols="sm:grid-cols-2 xl:grid-cols-3">
+            <x-ui.definition-item label="ID">{{ $tutorial->id }}</x-ui.definition-item>
+            <x-ui.definition-item-date :label="__('global_tutorial.created_at')" :value="$tutorial->created_at" />
+            <x-ui.definition-item-date :label="__('global_tutorial.updated_at')" :value="$tutorial->updated_at" />
+        </x-ui.definition-grid>
 
-        <dl class="mt-8 divide-y divide-[#dadce0]">
-            <div class="flex justify-between gap-4 py-3">
-                <dt class="text-[#5f6368]">ID</dt>
-                <dd class="font-medium">{{ $tutorial->id }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-3">
-                <dt class="text-[#5f6368]">{{ __('global_tutorial.created_at') }}</dt>
-                <dd class="font-medium">{{ optional($tutorial->created_at)->format('d/m/Y H:i') ?: '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 py-3">
-                <dt class="text-[#5f6368]">{{ __('global_tutorial.updated_at') }}</dt>
-                <dd class="font-medium">{{ optional($tutorial->updated_at)->format('d/m/Y H:i') ?: '—' }}</dd>
-            </div>
-        </dl>
-
-        <div class="mt-8 rounded-2xl border border-[#dadce0] bg-white p-4">
-            <div class="prose prose-slate mt-3 max-w-none text-sm">
+        <x-ui.panel class="mt-8" padding="p-4">
+            <div class="prose prose-sm mt-3 max-w-none text-[var(--ui-text)]">
                 {!! $tutorial->content_html !!}
             </div>
-        </div>
+        </x-ui.panel>
 
         <div class="mt-8 flex flex-wrap gap-3">
-            <x-ui.button :href="route('global-admin.tutorials.index')" variant="surface-muted" class="rounded-full">
+            <x-ui.button :href="route('global-admin.tutorials.index')" variant="secondary" class="rounded-full">
                 {{ __('ui.back') }}
             </x-ui.button>
 
-            <x-ui.button :href="route('global-admin.tutorials.edit', $tutorial)" variant="brand-primary" class="rounded-full">
-                {{ __('global_tutorial.edit') }}
+            <x-ui.button :href="route('global-admin.tutorials.edit', $tutorial)" variant="primary" class="rounded-full">
+                <x-ui.icon name="pencil" size="sm" /> {{ __('global_tutorial.edit') }}
             </x-ui.button>
 
-            <form method="POST" action="{{ route('global-admin.tutorials.destroy', $tutorial) }}" data-admin-delete-confirm data-admin-name="{{ $tutorial->route_name }}" data-confirm-title="{{ __('global_tutorial.confirm_delete_title') }}" data-confirm-text="{{ __('global_tutorial.confirm_delete_text') }}" data-confirm-confirm="{{ __('global_tutorial.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('global_tutorial.confirm_delete_cancel') }}">
-                @csrf
-                @method('DELETE')
-                <x-ui.button type="submit" variant="danger-outline" class="rounded-full">{{ __('global_tutorial.remove') }}</x-ui.button>
-            </form>
+            <x-ui.confirm-button
+                :action="route('global-admin.tutorials.destroy', $tutorial)"
+                :label="__('global_tutorial.remove')"
+                :confirm-title="__('global_tutorial.confirm_delete_title')"
+                :confirm-text="__('global_tutorial.confirm_delete_text', ['name' => $tutorial->route_name])"
+                :confirm-label="__('global_tutorial.confirm_delete_confirm')"
+                :cancel-label="__('global_tutorial.confirm_delete_cancel')"
+                class="rounded-full"
+            />
         </div>
     </x-ui.panel>
 </div>

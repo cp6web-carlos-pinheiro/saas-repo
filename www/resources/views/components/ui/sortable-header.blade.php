@@ -19,7 +19,7 @@
 @endphp
 
 <th {{ $attributes->class(['px-3 py-3']) }} aria-sort="{{ $ariaSort }}">
-    <a href="{{ $url }}" class="inline-flex items-center gap-1 hover:text-[#1a73e8]" title="{{ __('ui.sort_by', ['column' => $label]) }}">
+    <a href="{{ $url }}" class="inline-flex items-center gap-1 hover:text-[var(--ui-primary)]" title="{{ __('ui.sort_by', ['column' => $label]) }}">
         <span>{{ $label }}</span>
         <span aria-hidden="true">{{ $icon }}</span>
         <span class="sr-only">{{ $isActive ? ($currentDirection === 'asc' ? __('ui.sorted_ascending') : __('ui.sorted_descending')) : __('ui.activate_sort') }}</span>

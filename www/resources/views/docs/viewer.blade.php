@@ -11,13 +11,13 @@
 
     <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <section class="min-w-0">
-            <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+            <x-ui.panel padding="p-6 md:p-8">
                 <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
                     <div>
-                        <h1 class="font-display text-3xl font-bold">{{ $currentTitle }}</h1>
-                        <p class="mt-2 text-sm text-[#5f6368]">{{ __('ui.documentation_subtitle') }}</p>
+                        <h1 class="font-display text-3xl font-bold text-[var(--ui-text)]">{{ $currentTitle }}</h1>
+                        <p class="mt-2 text-sm text-[var(--ui-text-muted)]">{{ __('ui.documentation_subtitle') }}</p>
                     </div>
-                    <x-ui.button :href="$backUrl" variant="surface-muted" class="rounded-full">{{ __('ui.back_to_dashboard') }}</x-ui.button>
+                    <x-ui.button :href="$backUrl" variant="secondary" class="rounded-full">{{ __('ui.back_to_dashboard') }}</x-ui.button>
                 </div>
 
                 <article class="docs-article markdown-body border-0 p-0 text-sm">
@@ -27,8 +27,8 @@
         </section>
 
         <aside class="xl:sticky xl:top-8 xl:self-start">
-            <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5">
-                <h2 class="font-display text-lg font-semibold">{{ __('ui.documentation') }}</h2>
+            <x-ui.panel padding="p-5">
+                <h2 class="font-display text-lg font-semibold text-[var(--ui-text)]">{{ __('ui.documentation') }}</h2>
 
                 <x-ui.menu variant="docs" :aria-label="__('ui.documentation')" class="mt-4">
                     @foreach ($documents as $document)

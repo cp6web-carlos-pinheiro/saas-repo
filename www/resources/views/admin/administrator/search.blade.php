@@ -2,64 +2,81 @@
 @section('title', __('global_admin.modules.administrators').' | '.__('ui.app_name'))
 @section('admin-content-container-class', 'w-full')
 @section('admin-content')
-  <div class="flex flex-wrap items-end justify-between gap-4">
-    <x-ui.page-heading :title="__('global_admin.modules.administrators')" :subtitle="__('global_admin.eyebrow')" />
-    <x-ui.button
-      :href="route('global-admin.administrators.create')"
-      variant="brand-primary"
-      size="lg"
-      class="rounded-full"
-    >
-      {{ __('global_admin.create') }}
-    </x-ui.button>
-  </div>
+  <x-ui.page-heading :title="__('global_admin.modules.administrators')" :subtitle="__('global_admin.eyebrow')">
+    <x-slot:actions>
+      <x-ui.button :href="route('global-admin.administrators.create')" variant="primary" class="rounded-full">
+        <x-ui.icon name="plus" size="sm" /> {{ __('global_admin.create') }}
+      </x-ui.button>
+    </x-slot:actions>
+  </x-ui.page-heading>
 
   @if (session('status'))
     <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
   @endif
 
-  <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
-    <form class="flex gap-3" method="GET">
-      <x-ui.input name="search" :value="$search" class="min-w-0 flex-1" placeholder="{{ __('global_admin.search') }}" />
-      <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('global_admin.filter') }}</x-ui.button>
-    </form>
+  <form method="GET" id="admin-administrator-search">
+    <x-ui.filter-bar class="mt-6" search-name="search" :search-value="$search" :search-placeholder="__('global_admin.search')" :search-label="__('global_admin.search')">
+      <x-slot:actions>
+        <x-ui.button type="submit" variant="secondary" class="rounded-xl">{{ __('global_admin.filter') }}</x-ui.button>
+      </x-slot:actions>
+    </x-ui.filter-bar>
+  </form>
 
-    @php($sortUrl = fn ($column) => route('global-admin.administrators.index', ['search' => $search, 'sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
+  @php($sortUrl = fn ($column) => route('global-admin.administrators.index', ['search' => $search, 'sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
 
-    <div class="mt-6 overflow-x-auto">
-      <table class="min-w-full text-sm">
+  <x-ui.panel class="mt-6" padding="p-5 md:p-6">
+    @if ($administrators->isEmpty())
+      <x-ui.empty-state
+        icon="users"
+        :title="__('global_admin.empty')"
+        :description="__('global_admin.eyebrow')"
+      >
+        <x-slot:actions>
+          <x-ui.button :href="route('global-admin.administrators.create')" variant="primary" size="sm">
+            <x-ui.icon name="plus" size="sm" /> {{ __('global_admin.create') }}
+          </x-ui.button>
+        </x-slot:actions>
+      </x-ui.empty-state>
+    @else
+      <x-ui.table :caption="__('global_admin.modules.administrators')">
         <thead>
-          <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+          <tr>
             <x-ui.sortable-header column="name" :label="__('global_admin.name')" :sort="$sort" :direction="$direction" />
             <x-ui.sortable-header column="email" :label="__('global_admin.email')" :sort="$sort" :direction="$direction" />
             <x-ui.sortable-header column="is_active" :label="__('global_admin.status')" :sort="$sort" :direction="$direction" />
             <x-ui.sortable-header column="created_at" :label="__('global_admin.created_at')" :sort="$sort" :direction="$direction" />
+            <x-ui.table.head align="right"><span class="sr-only">{{ __('ui.actions') }}</span></x-ui.table.head>
           </tr>
         </thead>
         <tbody>
-          @forelse ($administrators as $administrator)
-            <tr class="cursor-pointer border-b border-[#f1f3f4] transition hover:bg-[#f8fafd]" onclick="window.location='{{ route('global-admin.administrators.show', $administrator) }}'">
-              <td class="px-3 py-4 font-semibold">{{ $administrator->name }}</td>
-              <td class="px-3 py-4 text-[#5f6368]">{{ $administrator->email }}</td>
-              <td class="px-3 py-4">
+          @foreach ($administrators as $administrator)
+            <x-ui.table.row>
+              <x-ui.table.cell>
+                <a href="{{ route('global-admin.administrators.show', $administrator) }}" class="font-semibold text-[var(--ui-text)] hover:text-[var(--ui-primary)]">
+                  {{ $administrator->name }}
+                </a>
+              </x-ui.table.cell>
+              <x-ui.table.cell class="text-[var(--ui-text-muted)]">{{ $administrator->email }}</x-ui.table.cell>
+              <x-ui.table.cell>
                 <x-ui.definition-item-status
                   :label="__('global_admin.status')"
                   :value="$administrator->is_active ? __('global_admin.active') : __('global_admin.inactive')"
                   :tone="$administrator->is_active ? 'success' : 'neutral'"
                   inline
                 />
-              </td>
-              <td class="px-3 py-4 text-[#5f6368]">{{ $administrator->created_at->format('d/m/Y') }}</td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="4" class="px-3 py-10 text-center text-[#5f6368]">{{ __('global_admin.empty') }}</td>
-            </tr>
-          @endforelse
+              </x-ui.table.cell>
+              <x-ui.table.cell class="text-[var(--ui-text-muted)]">{{ $administrator->created_at->format('d/m/Y') }}</x-ui.table.cell>
+              <x-ui.table.cell align="right">
+                <x-ui.row-actions :aria-label="__('ui.row_actions_for', ['name' => $administrator->name])">
+                  <x-ui.icon-button :href="route('global-admin.administrators.show', $administrator)" icon="search" :label="__('ui.view')" />
+                </x-ui.row-actions>
+              </x-ui.table.cell>
+            </x-ui.table.row>
+          @endforeach
         </tbody>
-      </table>
-    </div>
+      </x-ui.table>
 
-    <div class="mt-6">{{ $administrators->links() }}</div>
+      <div class="mt-6">{{ $administrators->links() }}</div>
+    @endif
   </x-ui.panel>
 @endsection

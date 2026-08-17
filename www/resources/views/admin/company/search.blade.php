@@ -2,35 +2,41 @@
 @section('title', __('global_company.title').' | '.__('ui.app_name'))
 @section('admin-content-container-class', 'w-full')
 @section('admin-content')
-  <div class="flex flex-wrap items-end justify-between gap-4">
-    <x-ui.page-heading :title="__('global_company.title')" :subtitle="__('global_company.eyebrow')" />
-    <x-ui.button
-      :href="route('global-admin.companies.create')"
-      variant="brand-primary"
-      size="lg"
-      class="rounded-full"
-    >
-      {{ __('global_company.create') }}
-    </x-ui.button>
-  </div>
+  <x-ui.page-heading :title="__('global_company.title')" :subtitle="__('global_company.eyebrow')">
+    <x-slot:actions>
+      <x-ui.button :href="route('global-admin.companies.create')" variant="primary" class="rounded-full">
+        <x-ui.icon name="plus" size="sm" /> {{ __('global_company.create') }}
+      </x-ui.button>
+    </x-slot:actions>
+  </x-ui.page-heading>
 
   @if (session('status'))
     <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
   @endif
 
-  <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
-    <form class="flex gap-3" method="GET">
-      <label for="company-search" class="sr-only">{{ __('global_company.search') }}</label>
-      <x-ui.input id="company-search" name="search" :value="$search" class="min-w-0 flex-1" placeholder="{{ __('global_company.search') }}" />
-      <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('global_company.filter') }}</x-ui.button>
-    </form>
+  <form method="GET">
+    <x-ui.filter-bar class="mt-6" search-name="search" :search-value="$search" :search-placeholder="__('global_company.search')" :search-label="__('global_company.search')">
+      <x-slot:actions>
+        <x-ui.button type="submit" variant="secondary" class="rounded-xl">{{ __('global_company.filter') }}</x-ui.button>
+      </x-slot:actions>
+    </x-ui.filter-bar>
+  </form>
 
-    @php($sortUrl = fn ($column) => route('global-admin.companies.index', ['search' => $search, 'sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
+  @php($sortUrl = fn ($column) => route('global-admin.companies.index', ['search' => $search, 'sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
 
-    <div class="mt-6 overflow-x-auto">
-      <table class="min-w-full text-sm">
+  <x-ui.panel class="mt-6" padding="p-5 md:p-6">
+    @if ($companies->isEmpty())
+      <x-ui.empty-state icon="building-factory" :title="__('global_company.empty')">
+        <x-slot:actions>
+          <x-ui.button :href="route('global-admin.companies.create')" variant="primary" size="sm">
+            <x-ui.icon name="plus" size="sm" /> {{ __('global_company.create') }}
+          </x-ui.button>
+        </x-slot:actions>
+      </x-ui.empty-state>
+    @else
+      <x-ui.table :caption="__('global_company.title')">
         <thead>
-          <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+          <tr>
             <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
             <x-ui.sortable-header column="name" :label="__('global_company.name')" :sort="$sort" :direction="$direction" />
             <x-ui.sortable-header column="code" :label="__('global_company.code')" :sort="$sort" :direction="$direction" />
@@ -38,40 +44,41 @@
             <x-ui.sortable-header column="users_count" :label="__('global_company.users_count')" :sort="$sort" :direction="$direction" />
             <x-ui.sortable-header column="is_active" :label="__('global_company.status')" :sort="$sort" :direction="$direction" />
             <x-ui.sortable-header column="created_at" :label="__('global_company.created_at')" :sort="$sort" :direction="$direction" />
+            <x-ui.table.head align="right"><span class="sr-only">{{ __('ui.actions') }}</span></x-ui.table.head>
           </tr>
         </thead>
         <tbody>
-          @forelse ($companies as $company)
-            <tr
-              class="cursor-pointer border-b border-[#f1f3f4] transition hover:bg-[#f8fafd]"
-              tabindex="0"
-              onclick="window.location='{{ route('global-admin.companies.show', $company) }}'"
-              onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('global-admin.companies.show', $company) }}'; }"
-            >
-              <td class="px-3 py-4 text-[#5f6368]">{{ $company->id }}</td>
-              <td class="px-3 py-4 font-semibold">{{ $company->name }}</td>
-              <td class="px-3 py-4 text-[#5f6368]">{{ $company->code }}</td>
-              <td class="px-3 py-4 text-[#5f6368]">{{ $company->active_plan_label ?? __('global_company.no_active_plan') }}</td>
-              <td class="px-3 py-4 text-[#5f6368]">{{ $company->users_count }}</td>
-              <td class="px-3 py-4">
+          @foreach ($companies as $company)
+            <x-ui.table.row>
+              <x-ui.table.cell class="text-[var(--ui-text-muted)]">{{ $company->id }}</x-ui.table.cell>
+              <x-ui.table.cell>
+                <a href="{{ route('global-admin.companies.show', $company) }}" class="font-semibold text-[var(--ui-text)] hover:text-[var(--ui-primary)]">
+                  {{ $company->name }}
+                </a>
+              </x-ui.table.cell>
+              <x-ui.table.cell class="text-[var(--ui-text-muted)]">{{ $company->code }}</x-ui.table.cell>
+              <x-ui.table.cell class="text-[var(--ui-text-muted)]">{{ $company->active_plan_label ?? __('global_company.no_active_plan') }}</x-ui.table.cell>
+              <x-ui.table.cell class="text-[var(--ui-text-muted)]">{{ $company->users_count }}</x-ui.table.cell>
+              <x-ui.table.cell>
                 <x-ui.definition-item-status
                   :label="__('global_company.status')"
                   :value="$company->is_active ? __('global_company.active') : __('global_company.inactive')"
                   :tone="$company->is_active ? 'success' : 'neutral'"
                   inline
                 />
-              </td>
-              <td class="px-3 py-4 text-[#5f6368]">{{ $company->created_at->format('d/m/Y') }}</td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="7" class="px-3 py-10 text-center text-[#5f6368]">{{ __('global_company.empty') }}</td>
-            </tr>
-          @endforelse
+              </x-ui.table.cell>
+              <x-ui.table.cell class="text-[var(--ui-text-muted)]">{{ $company->created_at->format('d/m/Y') }}</x-ui.table.cell>
+              <x-ui.table.cell align="right">
+                <x-ui.row-actions :aria-label="__('ui.row_actions_for', ['name' => $company->name])">
+                  <x-ui.icon-button :href="route('global-admin.companies.show', $company)" icon="search" :label="__('ui.view')" />
+                </x-ui.row-actions>
+              </x-ui.table.cell>
+            </x-ui.table.row>
+          @endforeach
         </tbody>
-      </table>
-    </div>
+      </x-ui.table>
 
-    <div class="mt-6">{{ $companies->links() }}</div>
+      <div class="mt-6">{{ $companies->links() }}</div>
+    @endif
   </x-ui.panel>
 @endsection

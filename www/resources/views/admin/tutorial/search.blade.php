@@ -2,56 +2,68 @@
 @section('title', __('global_tutorial.title').' | '.__('ui.app_name'))
 @section('admin-content-container-class', 'w-full')
 @section('admin-content')
-  <div class="flex flex-wrap items-end justify-between gap-4">
-    <x-ui.page-heading :title="__('global_tutorial.title')" :subtitle="__('global_tutorial.eyebrow')" />
-    <x-ui.button :href="route('global-admin.tutorials.create')" variant="brand-primary" size="lg" class="rounded-full">
-      {{ __('global_tutorial.create') }}
-    </x-ui.button>
-  </div>
+  <x-ui.page-heading :title="__('global_tutorial.title')" :subtitle="__('global_tutorial.eyebrow')">
+    <x-slot:actions>
+      <x-ui.button :href="route('global-admin.tutorials.create')" variant="primary" class="rounded-full">
+        <x-ui.icon name="plus" size="sm" /> {{ __('global_tutorial.create') }}
+      </x-ui.button>
+    </x-slot:actions>
+  </x-ui.page-heading>
 
   @if (session('status'))
     <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
   @endif
 
-  <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
-    <form class="flex gap-3" method="GET">
-      <label for="tutorial-search" class="sr-only">{{ __('global_tutorial.search') }}</label>
-      <x-ui.input id="tutorial-search" name="search" :value="$search" class="min-w-0 flex-1" placeholder="{{ __('global_tutorial.search') }}" />
-      <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('global_tutorial.filter') }}</x-ui.button>
-    </form>
+  <form method="GET">
+    <x-ui.filter-bar class="mt-6" search-name="search" :search-value="$search" :search-placeholder="__('global_tutorial.search')" :search-label="__('global_tutorial.search')">
+      <x-slot:actions>
+        <x-ui.button type="submit" variant="secondary" class="rounded-xl">{{ __('global_tutorial.filter') }}</x-ui.button>
+      </x-slot:actions>
+    </x-ui.filter-bar>
+  </form>
 
-    @php($sortUrl = fn ($column) => route('global-admin.tutorials.index', ['search' => $search, 'sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
+  @php($sortUrl = fn ($column) => route('global-admin.tutorials.index', ['search' => $search, 'sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
 
-    <div class="mt-6 overflow-x-auto">
-      <table class="min-w-full text-sm">
+  <x-ui.panel class="mt-6" padding="p-5 md:p-6">
+    @if ($tutorials->isEmpty())
+      <x-ui.empty-state icon="help-circle" :title="__('global_tutorial.empty')">
+        <x-slot:actions>
+          <x-ui.button :href="route('global-admin.tutorials.create')" variant="primary" size="sm">
+            <x-ui.icon name="plus" size="sm" /> {{ __('global_tutorial.create') }}
+          </x-ui.button>
+        </x-slot:actions>
+      </x-ui.empty-state>
+    @else
+      <x-ui.table :caption="__('global_tutorial.title')">
         <thead>
-          <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+          <tr>
             <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
             <x-ui.sortable-header column="route_name" :label="__('global_tutorial.route_name')" :sort="$sort" :direction="$direction" />
             <x-ui.sortable-header column="updated_at" :label="__('global_tutorial.updated_at')" :sort="$sort" :direction="$direction" />
+            <x-ui.table.head align="right"><span class="sr-only">{{ __('ui.actions') }}</span></x-ui.table.head>
           </tr>
         </thead>
         <tbody>
-          @forelse ($tutorials as $tutorial)
-            <tr
-              class="cursor-pointer border-b border-[#f1f3f4] transition hover:bg-[#f8fafd]"
-              tabindex="0"
-              onclick="window.location='{{ route('global-admin.tutorials.show', $tutorial) }}'"
-              onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('global-admin.tutorials.show', $tutorial) }}'; }"
-            >
-              <td class="px-3 py-4 text-[#5f6368]">{{ $tutorial->id }}</td>
-              <td class="px-3 py-4 font-mono text-xs md:text-sm">{{ $tutorial->route_name }}</td>
-              <td class="px-3 py-4 text-[#5f6368]">{{ optional($tutorial->updated_at)->format('d/m/Y H:i') ?: '—' }}</td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="4" class="px-3 py-10 text-center text-[#5f6368]">{{ __('global_tutorial.empty') }}</td>
-            </tr>
-          @endforelse
+          @foreach ($tutorials as $tutorial)
+            <x-ui.table.row>
+              <x-ui.table.cell class="text-[var(--ui-text-muted)]">{{ $tutorial->id }}</x-ui.table.cell>
+              <x-ui.table.cell class="font-mono text-xs md:text-sm">
+                <a href="{{ route('global-admin.tutorials.show', $tutorial) }}" class="text-[var(--ui-text)] hover:text-[var(--ui-primary)]">
+                  {{ $tutorial->route_name }}
+                </a>
+              </x-ui.table.cell>
+              <x-ui.table.cell class="text-[var(--ui-text-muted)]">{{ optional($tutorial->updated_at)->format('d/m/Y H:i') ?: '—' }}</x-ui.table.cell>
+              <x-ui.table.cell align="right">
+                <x-ui.row-actions :aria-label="__('ui.row_actions_for', ['name' => $tutorial->route_name])">
+                  <x-ui.icon-button :href="route('global-admin.tutorials.show', $tutorial)" icon="search" :label="__('ui.view')" />
+                </x-ui.row-actions>
+              </x-ui.table.cell>
+            </x-ui.table.row>
+          @endforeach
         </tbody>
-      </table>
-    </div>
+      </x-ui.table>
 
-    <div class="mt-6">{{ $tutorials->links() }}</div>
+      <div class="mt-6">{{ $tutorials->links() }}</div>
+    @endif
   </x-ui.panel>
 @endsection
