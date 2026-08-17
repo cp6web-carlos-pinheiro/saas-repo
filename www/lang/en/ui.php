@@ -7,6 +7,7 @@ return [
     'modules' => 'System modules',
     'logout' => 'Sign out',
     'open_menu' => 'Open menu',
+    'close_menu' => 'Close menu',
     'toggle_sidebar' => 'Toggle sidebar',
     'collapse_sidebar' => 'Collapse sidebar',
     'expand_sidebar' => 'Expand sidebar',

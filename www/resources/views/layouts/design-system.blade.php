@@ -3,25 +3,7 @@
 @section('bodyClass', 'ui-shell min-h-screen')
 
 @section('head-preload')
-    <script>
-        (() => {
-            const storageKey = 'beyond-mrp.theme';
-            let preference = 'system';
-
-            try {
-                const stored = window.localStorage.getItem(storageKey);
-                if (stored === 'light' || stored === 'dark' || stored === 'system') preference = stored;
-            } catch (_) {}
-
-            const resolved = preference === 'system'
-                ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-                : preference;
-
-            document.documentElement.dataset.theme = resolved;
-            document.documentElement.dataset.themePreference = preference;
-            document.documentElement.style.colorScheme = resolved;
-        })();
-    </script>
+    @include('partials.theme-preload')
 @endsection
 
 @section('content')

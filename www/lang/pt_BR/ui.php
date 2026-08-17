@@ -7,6 +7,7 @@ return [
     'modules' => 'Módulos do sistema',
     'logout' => 'Sair',
     'open_menu' => 'Abrir menu',
+    'close_menu' => 'Fechar menu',
     'toggle_sidebar' => 'Alternar menu lateral',
     'collapse_sidebar' => 'Recolher menu lateral',
     'expand_sidebar' => 'Expandir menu lateral',

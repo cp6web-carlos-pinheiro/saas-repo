@@ -40,13 +40,13 @@
 
             <label class="block text-sm font-medium">
                 {{ $editing ? __('company_access.new_password') : __('company_access.password') }}
-                <x-ui.input name="password" type="password" @required(! $editing) @class(['mt-2', 'border-red-500' => $errors->has('password'), 'border-[#dadce0]' => ! $errors->has('password')]) />
+                <x-ui.input name="password" type="password" :required="! $editing" @class(['mt-2', 'border-red-500' => $errors->has('password'), 'border-[#dadce0]' => ! $errors->has('password')]) />
                 @error('password')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
             </label>
 
             <label class="block text-sm font-medium">
                 {{ __('company_access.password_confirmation') }}
-                <x-ui.input name="password_confirmation" type="password" @required(! $editing) class="mt-2" />
+                <x-ui.input name="password_confirmation" type="password" :required="! $editing" class="mt-2" />
             </label>
 
             <fieldset class="rounded-2xl border border-[#dadce0] p-5">
