@@ -8,11 +8,11 @@
   <main class="mx-auto flex min-h-screen w-full max-w-md items-center justify-center">
     <section class="auth-card p-8" aria-labelledby="mfa-heading">
       <div class="mb-6 text-center">
-        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1a73e8]/10 text-[#1a73e8]">
-          <x-heroicon-o-shield-check class="h-7 w-7" />
+        <div class="auth-hero-icon">
+          <x-ui.icon name="shield-check" size="lg" />
         </div>
-        <h1 id="mfa-heading" class="mt-4 text-3xl font-semibold tracking-tight text-slate-900">{{ __('messages.mfa_challenge_title') }}</h1>
-        <p class="mt-2 text-sm text-slate-600">{{ __('messages.mfa_challenge_subtitle', ['email' => $email]) }}</p>
+        <h1 id="mfa-heading" class="auth-heading mt-4 text-3xl">{{ __('messages.mfa_challenge_title') }}</h1>
+        <p class="auth-muted mt-2 text-sm">{{ __('messages.mfa_challenge_subtitle', ['email' => $email]) }}</p>
       </div>
 
       @if (session('status'))
@@ -25,8 +25,7 @@
 
       <form method="POST" action="{{ route('mfa.challenge.store') }}" class="mt-6 space-y-4" novalidate>
         @csrf
-        <div>
-          <label class="auth-label" for="code">{{ __('messages.mfa_code_label') }}</label>
+        <x-ui.field :label="__('messages.mfa_code_label')" for="code" :required="true">
           <x-ui.input
             id="code"
             name="code"
@@ -36,20 +35,18 @@
             maxlength="8"
             required
             autocomplete="one-time-code"
-            class="auth-input"
-            unstyled
             placeholder="000000"
           />
-        </div>
+        </x-ui.field>
 
-        <x-ui.button type="submit" variant="brand-primary" :full="true" size="lg" class="rounded-full">
+        <x-ui.button type="submit" variant="primary" :full="true" size="lg" class="rounded-full">
           {{ __('messages.mfa_verify_button') }}
         </x-ui.button>
       </form>
 
       <form method="POST" action="{{ route('mfa.challenge.resend') }}" class="mt-4 text-center">
         @csrf
-        <button type="submit" class="font-medium text-[#1a73e8] hover:underline">{{ __('messages.mfa_resend_button') }}</button>
+        <button type="submit" class="auth-link">{{ __('messages.mfa_resend_button') }}</button>
       </form>
     </section>
   </main>
