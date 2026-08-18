@@ -674,6 +674,15 @@ html[data-theme='dark'] {
         border-color: var(--ui-danger);
     }
 
+    .ui-input[type='number'] {
+        color-scheme: light;
+    }
+    
+
+    html[data-theme='dark'] .ui-input[type='number'] {
+        color-scheme: dark;
+    }
+
     .ui-input-group {
         @apply flex min-h-12 w-full items-stretch overflow-hidden rounded-xl border transition;
         color: var(--ui-text);
@@ -1192,8 +1201,22 @@ html[data-theme='dark'] {
     }
 
     .ui-choice {
-        @apply mt-0.5 h-4 w-4 shrink-0 cursor-pointer;
-        accent-color: var(--ui-primary);
+        @apply relative mt-0.5 h-[18px] w-[18px] shrink-0 cursor-pointer appearance-none rounded-[4px] border transition;
+        border-color: var(--ui-border-strong);
+        background: var(--ui-surface);
+    }
+    
+    .ui-choice:hover:not(:disabled) {
+        border-color: var(--ui-primary);
+    }
+    
+    .ui-choice:checked {
+        border-color: var(--ui-primary);
+        background-color: var(--ui-primary);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.25 8.25 6.5 11.5 12.75 4.75' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 13px 13px;
     }
 
     .ui-choice:focus-visible {

@@ -70,6 +70,22 @@
         header-title="{{ __('global_admin.title') }}"
     >
         <x-slot:sidebarFooter>
+            {{-- Acesso ao Layout System: fica no rodapé do menu, separado por divisor, para
+                 permanecer identificável sem se misturar aos módulos operacionais acima. --}}
+            <a
+                href="{{ route('global-admin.design-system') }}"
+                target="_blank"
+                rel="noopener"
+                class="ds-sidebar-link"
+                aria-label="{{ __('global_admin.layout_system') }}"
+                title="{{ __('global_admin.layout_system') }}"
+            >
+                <x-ui.icon name="palette" />
+                <span data-ds-sidebar-label>{{ __('global_admin.layout_system') }}</span>
+            </a>
+
+            <div class="my-2 border-t border-[var(--ui-border)]" data-ds-sidebar-label aria-hidden="true"></div>
+
             <form method="POST" action="{{ route('global-admin.logout') }}">
                 @csrf
                 <x-ui.button type="submit" variant="secondary" :full="true" size="lg" class="justify-start gap-2" data-admin-sidebar-logout>

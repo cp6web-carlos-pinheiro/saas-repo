@@ -30,6 +30,7 @@ return [
     'removed' => 'Administrador excluído com sucesso.',
     'last_admin' => 'A plataforma deve manter ao menos um administrador ativo.',
     'management' => 'Gerenciamento',
+    'layout_system' => 'Layout System',
     'toggle_sidebar' => 'Alternar menu lateral',
     'collapse_sidebar' => 'Recolher menu lateral',
     'expand_sidebar' => 'Expandir menu lateral',
