@@ -16,9 +16,7 @@ use Illuminate\Http\Request;
 
 final class InventoryController
 {
-    public function __construct(private readonly InventoryService $service)
-    {
-    }
+    public function __construct(private readonly InventoryService $service) {}
 
     public function index(Request $request): JsonResponse
     {

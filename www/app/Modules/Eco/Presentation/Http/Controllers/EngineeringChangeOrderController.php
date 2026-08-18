@@ -15,9 +15,7 @@ use Illuminate\Http\Request;
 
 final class EngineeringChangeOrderController
 {
-    public function __construct(private readonly EngineeringChangeOrderService $service)
-    {
-    }
+    public function __construct(private readonly EngineeringChangeOrderService $service) {}
 
     public function index(Request $request): JsonResponse
     {

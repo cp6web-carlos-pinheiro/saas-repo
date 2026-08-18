@@ -38,7 +38,7 @@ trait HandlesTenantAuthorization
     }
 
     /**
-     * @param list<string> $permissions
+     * @param  list<string>  $permissions
      */
     private function ensureAnyPermission(Request $request, int $companyId, array $permissions): void
     {

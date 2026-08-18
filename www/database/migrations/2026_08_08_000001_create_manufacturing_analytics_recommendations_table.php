@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-return new class extends Migration {
+
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('manufacturing_analytics_recommendations', function (Blueprint $table): void {
@@ -28,5 +31,9 @@ return new class extends Migration {
             $table->index(['company_id', 'status', 'created_at'], 'ix_analytics_recommendation_status');
         });
     }
-    public function down(): void { Schema::dropIfExists('manufacturing_analytics_recommendations'); }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('manufacturing_analytics_recommendations');
+    }
 };

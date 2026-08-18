@@ -318,10 +318,9 @@ final class DomainDashboardController extends Controller
     }
 
     /**
-    * @param list<array{label: string, count: int, severity: string, severity_label: string}> $pendingItems
-    * @param list<array{label: string, count: int, severity: string, severity_label: string}> $inProgressItems
-     * @param list<array{label: string, href: string}> $shortcuts
-     *
+     * @param  list<array{label: string, count: int, severity: string, severity_label: string}>  $pendingItems
+     * @param  list<array{label: string, count: int, severity: string, severity_label: string}>  $inProgressItems
+     * @param  list<array{label: string, href: string}>  $shortcuts
      * @return array<string, mixed>
      */
     private function compose(

@@ -12,6 +12,5 @@ abstract class BaseEvent
         public readonly string $eventId,
         public readonly DateTimeImmutable $occurredAt,
         public readonly array $payload = []
-    ) {
-    }
+    ) {}
 }

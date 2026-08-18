@@ -17,9 +17,7 @@ use Illuminate\Http\Request;
 
 final class ProductController
 {
-    public function __construct(private readonly ProductService $service)
-    {
-    }
+    public function __construct(private readonly ProductService $service) {}
 
     public function index(Request $request): JsonResponse
     {

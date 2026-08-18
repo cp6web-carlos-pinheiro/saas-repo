@@ -16,8 +16,8 @@ use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Services\SaaS\AuditLogService;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -384,7 +384,7 @@ final class PurchaseReceiptController extends Controller
     }
 
     /**
-     * @param array<int, array{purchase_order_line_id: int|null, product_id: int, warehouse_id: int, quantity_received: float, lot_number: string|null, notes: string|null}> $items
+     * @param  array<int, array{purchase_order_line_id: int|null, product_id: int, warehouse_id: int, quantity_received: float, lot_number: string|null, notes: string|null}>  $items
      */
     private function syncLines(PurchaseReceipt $receipt, array $items): void
     {
@@ -485,7 +485,7 @@ final class PurchaseReceiptController extends Controller
     }
 
     /**
-     * @param array<int, mixed> $fallback
+     * @param  array<int, mixed>  $fallback
      * @return array<int, mixed>
      */
     private function oldItemRows(Request $request, array $fallback): array
@@ -496,7 +496,7 @@ final class PurchaseReceiptController extends Controller
     }
 
     /**
-     * @param array<int, array<string, mixed>> $lineRows
+     * @param  array<int, array<string, mixed>>  $lineRows
      * @return array<int, int>
      */
     private function selectedProductIdsFromLineRows(array $lineRows): array
@@ -511,7 +511,7 @@ final class PurchaseReceiptController extends Controller
     }
 
     /**
-     * @param array<int, array<string, mixed>> $lineRows
+     * @param  array<int, array<string, mixed>>  $lineRows
      * @return array<int, int>
      */
     private function selectedWarehouseIdsFromLineRows(array $lineRows): array
@@ -526,7 +526,7 @@ final class PurchaseReceiptController extends Controller
     }
 
     /**
-     * @param array<int, int> $ids
+     * @param  array<int, int>  $ids
      */
     private function productOptionsByIds(Company $company, array $ids): Collection
     {
@@ -538,7 +538,7 @@ final class PurchaseReceiptController extends Controller
     }
 
     /**
-     * @param array<int, int> $ids
+     * @param  array<int, int>  $ids
      */
     private function warehouseOptionsByIds(Company $company, array $ids): Collection
     {

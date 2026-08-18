@@ -226,7 +226,6 @@ final class SupplierController extends Controller
         return $code;
     }
 
-
     /**
      * @param  array<int, string>  $searchTerms
      */

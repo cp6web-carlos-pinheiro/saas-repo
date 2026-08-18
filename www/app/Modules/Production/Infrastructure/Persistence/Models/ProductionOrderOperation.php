@@ -60,7 +60,18 @@ final class ProductionOrderOperation extends TenantModel
         return $this->belongsTo(ProductionResource::class, 'production_resource_id');
     }
 
-    public function events(): HasMany { return $this->hasMany(ProductionOperationEvent::class, 'production_order_operation_id')->orderBy('occurred_at'); }
-    public function outputs(): HasMany { return $this->hasMany(ProductionOperationOutput::class, 'production_order_operation_id'); }
-    public function qualityRecords(): HasMany { return $this->hasMany(ProductionQualityRecord::class, 'production_order_operation_id'); }
+    public function events(): HasMany
+    {
+        return $this->hasMany(ProductionOperationEvent::class, 'production_order_operation_id')->orderBy('occurred_at');
+    }
+
+    public function outputs(): HasMany
+    {
+        return $this->hasMany(ProductionOperationOutput::class, 'production_order_operation_id');
+    }
+
+    public function qualityRecords(): HasMany
+    {
+        return $this->hasMany(ProductionQualityRecord::class, 'production_order_operation_id');
+    }
 }

@@ -18,13 +18,14 @@ final class ProductionWorkCenterController extends Controller
     use HandlesTenantAuthorization;
 
     private const READ_PERMISSION = 'work-centers.read';
+
     private const CREATE_PERMISSION = 'work-centers.create';
+
     private const UPDATE_PERMISSION = 'work-centers.update';
+
     private const SHIFT_CREATE_PERMISSION = 'work-centers.shifts.create';
 
-    public function __construct(private readonly WorkCenterService $service)
-    {
-    }
+    public function __construct(private readonly WorkCenterService $service) {}
 
     public function index(Request $request): View
     {

@@ -12,9 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 final class PurchasingIntegrationService
 {
-    public function __construct(private readonly InventoryService $inventoryService)
-    {
-    }
+    public function __construct(private readonly InventoryService $inventoryService) {}
 
     public function postReceiptToInventory(PurchaseReceipt $receipt, ?int $userId): void
     {
@@ -100,5 +98,4 @@ final class PurchasingIntegrationService
             }
         });
     }
-
 }

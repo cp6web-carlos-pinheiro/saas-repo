@@ -12,6 +12,5 @@ final class ApproveProductVersionDTO extends BaseDTO
         public readonly ?string $effective_from = null,
         public readonly ?string $effective_to = null,
         public readonly ?string $change_summary = null,
-    ) {
-    }
+    ) {}
 }

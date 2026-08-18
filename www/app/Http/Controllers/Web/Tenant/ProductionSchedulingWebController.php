@@ -21,9 +21,7 @@ final class ProductionSchedulingWebController extends Controller
 
     private const RUN_PERMISSION = 'production-scheduling.run';
 
-    public function __construct(private readonly ProductionSchedulingService $service)
-    {
-    }
+    public function __construct(private readonly ProductionSchedulingService $service) {}
 
     public function index(Request $request): View
     {

@@ -19,7 +19,7 @@ return new class extends Migration
         // SQLite can fail dropping an indexed column unless the index is removed first.
         try {
             DB::statement('DROP INDEX IF EXISTS ix_plants_company_branch');
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Ignore: index may not exist depending on environment/history.
         }
 
@@ -103,7 +103,7 @@ return new class extends Migration
             Schema::table($table, function (Blueprint $blueprint) use ($indexName): void {
                 $blueprint->dropIndex($indexName);
             });
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Ignore: index may not exist for this column in some environments.
         }
 

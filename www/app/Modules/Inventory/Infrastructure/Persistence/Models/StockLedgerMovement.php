@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Inventory\Infrastructure\Persistence\Models;
 
+use App\Modules\Inventory\Infrastructure\Persistence\Models\StockLedgerAllocation as StockLedgerAllocationModel;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
-use App\Modules\Inventory\Infrastructure\Persistence\Models\StockLedgerAllocation as StockLedgerAllocationModel;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

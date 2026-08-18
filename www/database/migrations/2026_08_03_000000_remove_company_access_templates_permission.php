@@ -12,7 +12,7 @@ return new class extends Migration
 
     public function up(): void
     {
-        if (!Schema::hasTable('permissions')) {
+        if (! Schema::hasTable('permissions')) {
             return;
         }
 
@@ -43,7 +43,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (!Schema::hasTable('permissions')) {
+        if (! Schema::hasTable('permissions')) {
             return;
         }
 

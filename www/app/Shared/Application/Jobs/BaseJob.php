@@ -18,6 +18,7 @@ abstract class BaseJob implements ShouldQueue
     use SerializesModels;
 
     public int $tries = 3;
+
     public int $timeout = 120;
 
     abstract public function handle(): void;

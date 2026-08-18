@@ -13,8 +13,7 @@ final class RecalculateMrpPlanJob extends BaseJob
         private readonly array $payload,
         private readonly ?int $createdBy = null,
         private readonly ?string $idempotencyKey = null
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {

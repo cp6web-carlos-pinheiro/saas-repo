@@ -12,9 +12,7 @@ use Illuminate\Http\Request;
 
 final class GenealogyController
 {
-    public function __construct(private readonly GenealogyService $service)
-    {
-    }
+    public function __construct(private readonly GenealogyService $service) {}
 
     public function trace(TraceGenealogyRequest $request): JsonResponse
     {

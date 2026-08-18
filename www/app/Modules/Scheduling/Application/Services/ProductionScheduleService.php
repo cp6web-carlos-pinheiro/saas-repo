@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Scheduling\Application\Services;
 
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOperation;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\ProductionSchedule;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\ProductionScheduleLine;
@@ -22,7 +21,9 @@ final class ProductionScheduleService extends BaseService
         TransactionManager $transaction,
         CacheManager $cache,
         AppLogger $logger
-    ) { parent::__construct($transaction, $cache, $logger); }
+    ) {
+        parent::__construct($transaction, $cache, $logger);
+    }
 
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
@@ -52,7 +53,9 @@ final class ProductionScheduleService extends BaseService
             ]);
             foreach ($result['orders'] as $orderResult) {
                 foreach ($orderResult['operations'] as $line) {
-                    if (empty($line['production_order_operation_id'])) continue;
+                    if (empty($line['production_order_operation_id'])) {
+                        continue;
+                    }
                     ProductionScheduleLine::query()->create([
                         'production_schedule_id' => $schedule->id,
                         'production_order_id' => $orderResult['production_order_id'],
@@ -70,33 +73,46 @@ final class ProductionScheduleService extends BaseService
                     ]);
                 }
             }
+
             return $schedule;
         });
+
         return $schedule->load('lines')->toArray();
     }
 
     public function publish(int $id, ?int $userId = null, ?string $reason = null): array
     {
         $schedule = ProductionSchedule::query()->with('lines')->findOrFail($id);
-        if ($schedule->status === 'PUBLISHED') return $schedule->load('lines')->toArray();
-        if ($schedule->status === 'CANCELLED') throw new DomainException('Cancelled schedule cannot be published', 422);
+        if ($schedule->status === 'PUBLISHED') {
+            return $schedule->load('lines')->toArray();
+        }
+        if ($schedule->status === 'CANCELLED') {
+            throw new DomainException('Cancelled schedule cannot be published', 422);
+        }
         $updated = $this->inTransaction(function () use ($schedule, $userId, $reason) {
             foreach ($schedule->lines as $line) {
                 $operation = ProductionOrderOperation::query()->findOrFail($line->production_order_operation_id);
-                if (in_array($operation->status, ['COMPLETED', 'CANCELLED'], true)) throw new DomainException('Schedule contains a closed operation', 422);
+                if (in_array($operation->status, ['COMPLETED', 'CANCELLED'], true)) {
+                    throw new DomainException('Schedule contains a closed operation', 422);
+                }
                 $operation->update(['planned_start_at' => $line->planned_start_at, 'planned_end_at' => $line->planned_end_at, 'production_resource_id' => $line->production_resource_id, 'status' => 'SCHEDULED']);
             }
             $schedule->update(['status' => 'PUBLISHED', 'approved_by' => $userId, 'approved_at' => now(), 'published_by' => $userId, 'published_at' => now(), 'change_reason' => $reason]);
+
             return $schedule;
         });
+
         return $updated->load('lines')->toArray();
     }
 
     public function cancel(int $id, ?int $userId = null, ?string $reason = null): array
     {
         $schedule = ProductionSchedule::query()->findOrFail($id);
-        if ($schedule->status === 'PUBLISHED') throw new DomainException('Published schedule must be superseded, not cancelled', 422);
+        if ($schedule->status === 'PUBLISHED') {
+            throw new DomainException('Published schedule must be superseded, not cancelled', 422);
+        }
         $schedule->update(['status' => 'CANCELLED', 'change_reason' => $reason, 'approved_by' => $userId]);
+
         return $schedule->toArray();
     }
 
@@ -105,6 +121,7 @@ final class ProductionScheduleService extends BaseService
         $left = ProductionScheduleLine::query()->where('production_schedule_id', $id)->get()->keyBy('production_order_operation_id');
         $right = ProductionScheduleLine::query()->where('production_schedule_id', $otherId)->get()->keyBy('production_order_operation_id');
         $keys = $left->keys()->merge($right->keys())->unique();
+
         return $keys->map(fn ($key) => ['production_order_operation_id' => $key, 'current' => $left->get($key)?->toArray(), 'other' => $right->get($key)?->toArray()])->values()->all();
     }
 

@@ -27,7 +27,5 @@ class ArchitectureServiceProvider extends ServiceProvider
         $this->app->bind(ProductVersionRepository::class, EloquentProductVersionRepository::class);
     }
 
-    public function boot(): void
-    {
-    }
+    public function boot(): void {}
 }

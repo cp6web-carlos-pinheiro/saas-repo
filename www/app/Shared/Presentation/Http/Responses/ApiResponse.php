@@ -52,8 +52,7 @@ final class ApiResponse
         int $status = 400,
         ?array $errors = null,
         string $code = 'API_ERROR'
-    ): JsonResponse
-    {
+    ): JsonResponse {
         return response()->json([
             'success' => false,
             'message' => $message,

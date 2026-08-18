@@ -263,7 +263,7 @@ final class ProductVersionService extends BaseService
     }
 
     /**
-     * @param array<string, array<int, string>> $axes
+     * @param  array<string, array<int, string>>  $axes
      * @return array<int, array<string, mixed>>
      */
     private function buildVariantItems(string $baseSku, array $axes): array

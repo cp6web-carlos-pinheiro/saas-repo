@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Genealogy\Infrastructure\Persistence\Models;
 
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\StockLedgerMovement;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

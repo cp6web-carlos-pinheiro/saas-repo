@@ -249,8 +249,8 @@ final class PageTutorialSeeder extends Seeder
     }
 
     /**
-     * @param array<int, string> $routes
-     * @param array<int, string> $fields
+     * @param  array<int, string>  $routes
+     * @param  array<int, string>  $fields
      * @return array{title: string, summary: string, routes: array<int, string>, fields: array<int, string>}
      */
     private function definition(string $title, string $summary, array $routes, array $fields): array
@@ -264,7 +264,7 @@ final class PageTutorialSeeder extends Seeder
     }
 
     /**
-     * @param array<int, string> $fields
+     * @param  array<int, string>  $fields
      */
     private function buildHtml(string $summary, array $fields): string
     {

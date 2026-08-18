@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 final class PlantController extends Controller
@@ -191,7 +190,7 @@ final class PlantController extends Controller
     }
 
     /**
-    * @return array{name: string, timezone: string, is_active?: bool}
+     * @return array{name: string, timezone: string, is_active?: bool}
      */
     private function validatePlant(Request $request, Company $company, ?Plant $plant = null): array
     {

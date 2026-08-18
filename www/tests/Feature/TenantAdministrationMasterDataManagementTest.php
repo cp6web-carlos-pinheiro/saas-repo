@@ -20,6 +20,7 @@ use App\Modules\Tenant\Infrastructure\Persistence\Models\ProductCategory;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 final class TenantAdministrationMasterDataManagementTest extends TestCase
@@ -205,7 +206,7 @@ final class TenantAdministrationMasterDataManagementTest extends TestCase
     {
         ['user' => $user] = $this->contextWithRole('viewer');
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(HttpException::class);
 
         $this->actingAs($user, 'web')
             ->get(route('admin-data.units.index'));

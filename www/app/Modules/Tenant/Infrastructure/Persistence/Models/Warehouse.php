@@ -35,5 +35,4 @@ final class Warehouse extends TenantModel
     {
         return $this->belongsTo(Plant::class);
     }
-
 }

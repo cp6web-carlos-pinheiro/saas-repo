@@ -13,9 +13,7 @@ use Illuminate\Http\Request;
 
 final class ProductionCalendarController
 {
-    public function __construct(private readonly ProductionCalendarService $service)
-    {
-    }
+    public function __construct(private readonly ProductionCalendarService $service) {}
 
     public function index(Request $request, int $workCenterId): JsonResponse
     {

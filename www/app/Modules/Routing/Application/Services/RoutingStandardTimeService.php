@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 final class RoutingStandardTimeService extends BaseService
 {
     private const TIME_BASES = ['PER_PROCESS', 'PER_UNIT', 'PER_BATCH'];
+
     private const STATUSES = ['DRAFT', 'APPROVED', 'OBSOLETE'];
 
     public function __construct(TransactionManager $transaction, CacheManager $cache, AppLogger $logger)

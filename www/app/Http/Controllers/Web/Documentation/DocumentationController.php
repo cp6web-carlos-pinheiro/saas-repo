@@ -54,8 +54,7 @@ final class DocumentationController extends Controller
         string $showRouteName,
         string $showDevRouteName,
         string $backUrl,
-    ): View
-    {
+    ): View {
         $files = $this->docFiles();
         $devFiles = $this->docFiles('dev');
 
@@ -138,7 +137,7 @@ final class DocumentationController extends Controller
     }
 
     /**
-     * @param list<string> $availableFiles
+     * @param  list<string>  $availableFiles
      */
     private function resolveFile(string $requestedFile, array $availableFiles): ?string
     {
@@ -152,7 +151,7 @@ final class DocumentationController extends Controller
     }
 
     /**
-     * @param list<string> $availableFiles
+     * @param  list<string>  $availableFiles
      */
     private function rewriteLocalMarkdownLinks(
         string $markdown,
@@ -161,8 +160,7 @@ final class DocumentationController extends Controller
         string $currentScope,
         string $showRouteName,
         string $showDevRouteName,
-    ): string
-    {
+    ): string {
         return (string) preg_replace_callback(
             '/\[([^\]]+)\]\(([^)]+)\)/',
             fn (array $matches): string => $this->rewriteSingleMarkdownLink(
@@ -178,8 +176,8 @@ final class DocumentationController extends Controller
     }
 
     /**
-     * @param list<string> $availableFiles
-     * @param list<string> $availableDevFiles
+     * @param  list<string>  $availableFiles
+     * @param  list<string>  $availableDevFiles
      */
     private function rewriteSingleMarkdownLink(
         array $matches,
@@ -188,8 +186,7 @@ final class DocumentationController extends Controller
         string $currentScope,
         string $showRouteName,
         string $showDevRouteName,
-    ): string
-    {
+    ): string {
         $label = (string) ($matches[1] ?? '');
         $target = trim((string) ($matches[2] ?? ''));
         $result = (string) ($matches[0] ?? '');

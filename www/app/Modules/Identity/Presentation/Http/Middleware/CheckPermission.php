@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Identity\Presentation\Http\Middleware;
 
-use App\Shared\Presentation\Http\Responses\ApiResponse;
 use App\Shared\Infrastructure\Tenancy\TenantContext;
+use App\Shared\Presentation\Http\Responses\ApiResponse;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;

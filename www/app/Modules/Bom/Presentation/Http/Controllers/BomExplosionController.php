@@ -11,9 +11,7 @@ use Illuminate\Http\JsonResponse;
 
 final class BomExplosionController
 {
-    public function __construct(private readonly BomExplosionService $service)
-    {
-    }
+    public function __construct(private readonly BomExplosionService $service) {}
 
     public function __invoke(ExplodeBomRequest $request): JsonResponse
     {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Tenant\Infrastructure\Persistence\Models;
 
-use App\Shared\Infrastructure\Tenancy\TenantModel;
 use App\Shared\Infrastructure\Tenancy\TenantContext;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 final class Unit extends TenantModel
@@ -34,7 +34,7 @@ final class Unit extends TenantModel
 
     protected static function booted(): void
     {
-        static::creating(function (Model $model): void {
+        self::creating(function (Model $model): void {
             $tenant = app(TenantContext::class);
 
             if ($tenant->hasTenant() && empty($model->company_id)) {
@@ -42,7 +42,7 @@ final class Unit extends TenantModel
             }
         });
 
-        static::addGlobalScope('tenant', static function (Builder $builder): void {
+        self::addGlobalScope('tenant', static function (Builder $builder): void {
             $tenant = app(TenantContext::class);
 
             if (! $tenant->hasTenant()) {

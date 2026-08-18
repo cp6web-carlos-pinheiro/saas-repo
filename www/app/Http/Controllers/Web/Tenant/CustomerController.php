@@ -220,7 +220,6 @@ final class CustomerController extends Controller
         return $code;
     }
 
-
     /**
      * @param  array<int, string>  $searchTerms
      */

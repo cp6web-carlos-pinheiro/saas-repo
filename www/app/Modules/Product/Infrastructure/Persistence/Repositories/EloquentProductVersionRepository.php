@@ -11,9 +11,7 @@ use Illuminate\Support\Collection;
 
 final class EloquentProductVersionRepository implements ProductVersionRepository
 {
-    public function __construct(private readonly ProductVersion $model)
-    {
-    }
+    public function __construct(private readonly ProductVersion $model) {}
 
     public function nextVersionNumber(int $productId): int
     {
@@ -35,7 +33,7 @@ final class EloquentProductVersionRepository implements ProductVersionRepository
             ->first();
 
         if (! $entity) {
-            throw (new ModelNotFoundException())->setModel(ProductVersion::class, [$versionId]);
+            throw (new ModelNotFoundException)->setModel(ProductVersion::class, [$versionId]);
         }
 
         return $entity;

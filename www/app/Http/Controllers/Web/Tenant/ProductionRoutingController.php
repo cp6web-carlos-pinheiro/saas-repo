@@ -20,14 +20,16 @@ final class ProductionRoutingController extends Controller
     use HandlesTenantAuthorization;
 
     private const READ_PERMISSION = 'routing-versions.read';
+
     private const CREATE_PERMISSION = 'routing-versions.create';
+
     private const UPDATE_PERMISSION = 'routing-versions.update';
+
     private const APPROVE_PERMISSION = 'routing-versions.approve';
+
     private const OPERATION_CREATE_PERMISSION = 'routing-operations.create';
 
-    public function __construct(private readonly RoutingService $service)
-    {
-    }
+    public function __construct(private readonly RoutingService $service) {}
 
     public function index(Request $request): View
     {

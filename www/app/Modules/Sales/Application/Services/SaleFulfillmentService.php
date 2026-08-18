@@ -13,7 +13,6 @@ use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Production\Application\Services\ProductionOrderService;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Sales\Infrastructure\Persistence\Models\Sale;
-use App\Modules\Sales\Infrastructure\Persistence\Models\SaleLine;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
@@ -258,8 +257,7 @@ final class SaleFulfillmentService extends BaseService
     }
 
     /**
-     * @param array<string, mixed> $metadata
-     *
+     * @param  array<string, mixed>  $metadata
      * @return array{quantity: float, reservation_ids: list<int>}
      */
     private function reserveAvailable(

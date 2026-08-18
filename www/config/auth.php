@@ -1,7 +1,7 @@
 <?php
 
-use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Models\Admin;
+use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 
 return [
 

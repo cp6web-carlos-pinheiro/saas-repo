@@ -11,9 +11,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 abstract class BaseRepository
 {
-    public function __construct(protected Model $model)
-    {
-    }
+    public function __construct(protected Model $model) {}
 
     public function query(): Builder
     {
@@ -25,7 +23,7 @@ abstract class BaseRepository
         $entity = $this->query()->find($id);
 
         if (! $entity) {
-            throw (new ModelNotFoundException())->setModel($this->model::class, [(string) $id]);
+            throw (new ModelNotFoundException)->setModel($this->model::class, [(string) $id]);
         }
 
         return $entity;

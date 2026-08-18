@@ -13,9 +13,9 @@ use App\Modules\Product\Application\Services\ProductVersionService;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
 use App\Modules\Product\Infrastructure\Persistence\Models\ProductVersion;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
-use App\Shared\Presentation\Exceptions\DomainException;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
+use App\Shared\Presentation\Exceptions\DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -99,7 +99,7 @@ final class ProductVersionController extends Controller
             'product' => $product,
             'version' => null,
             'editing' => false,
-            'payloadJson' => "{}",
+            'payloadJson' => '{}',
             'company' => $company,
         ]);
     }

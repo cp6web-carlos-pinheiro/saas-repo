@@ -13,9 +13,7 @@ use Illuminate\Http\Request;
 
 final class LotSerialTrackingController
 {
-    public function __construct(private readonly \App\Modules\Inventory\Application\Services\LotSerialTrackingService $service)
-    {
-    }
+    public function __construct(private readonly LotSerialTrackingService $service) {}
 
     public function lots(Request $request): JsonResponse
     {
@@ -31,7 +29,7 @@ final class LotSerialTrackingController
         return ApiResponse::paginated($this->service->paginateLots($filters, $perPage), 'Inventory lots list');
     }
 
-    public function storeLot(\App\Modules\Inventory\Presentation\Http\Requests\StoreInventoryLotRequest $request): JsonResponse
+    public function storeLot(StoreInventoryLotRequest $request): JsonResponse
     {
         return ApiResponse::success($this->service->createLot($request->validated()), 'Inventory lot created', 201);
     }
@@ -63,7 +61,7 @@ final class LotSerialTrackingController
         return ApiResponse::paginated($this->service->paginateSerials($filters, $perPage), 'Inventory serials list');
     }
 
-    public function storeSerial(\App\Modules\Inventory\Presentation\Http\Requests\StoreInventorySerialRequest $request): JsonResponse
+    public function storeSerial(StoreInventorySerialRequest $request): JsonResponse
     {
         return ApiResponse::success($this->service->createSerial($request->validated()), 'Inventory serial created', 201);
     }

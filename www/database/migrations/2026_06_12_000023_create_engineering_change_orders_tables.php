@@ -6,10 +6,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
-        if (!Schema::hasTable('engineering_change_orders')) {
+        if (! Schema::hasTable('engineering_change_orders')) {
             Schema::create('engineering_change_orders', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
@@ -39,7 +40,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::hasTable('engineering_change_order_lines')) {
+        if (! Schema::hasTable('engineering_change_order_lines')) {
             Schema::create('engineering_change_order_lines', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();

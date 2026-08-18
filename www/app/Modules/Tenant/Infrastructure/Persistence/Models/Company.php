@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Tenant\Infrastructure\Persistence\Models;
 
-use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Models\SaaS\AccountInvitation;
 use App\Models\SaaS\OnboardingProfile;
 use App\Models\SaaS\Subscription;
 use App\Models\SaaS\Trial;
+use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;

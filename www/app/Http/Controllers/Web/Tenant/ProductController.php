@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Product\Application\Services\ProductService;
 use App\Modules\Product\Application\Services\ProductSpreadsheetService;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
@@ -15,7 +16,7 @@ use App\Modules\Tenant\Infrastructure\Persistence\Models\ProductCategory;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Services\SaaS\AuditLogService;
 use App\Services\SaaS\CompanyUserAccessService;
-use App\Modules\Identity\Infrastructure\Persistence\Models\User;
+use App\Shared\Presentation\Exceptions\DomainException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -258,7 +259,7 @@ final class ProductController extends Controller
             $result = $spreadsheetService->import($company, $request->file('file'));
         } catch (ValidationException $exception) {
             throw $exception;
-        } catch (\App\Shared\Presentation\Exceptions\DomainException $exception) {
+        } catch (DomainException $exception) {
             throw ValidationException::withMessages([
                 'file' => $exception->getMessage(),
             ]);
@@ -421,7 +422,7 @@ final class ProductController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     private function resolveUnitCode(Company $company, int $unitId): string
     {

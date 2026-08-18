@@ -10,7 +10,6 @@ use App\Modules\Routing\Application\Services\RoutingStandardTimeService;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperation;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersion;
 use App\Modules\Scheduling\Application\Services\ProductionResourceService;
-use App\Modules\Scheduling\Infrastructure\Persistence\Models\ProductionResource;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Plant;

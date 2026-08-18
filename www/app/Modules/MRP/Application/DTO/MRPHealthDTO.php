@@ -12,6 +12,5 @@ final class MRPHealthDTO extends BaseDTO
         public readonly string $module,
         public readonly string $status,
         public readonly string $timestamp
-    ) {
-    }
+    ) {}
 }

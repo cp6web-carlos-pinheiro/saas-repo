@@ -315,6 +315,7 @@ final class MrpPlanningService extends BaseService
                 $aggregated[$aggregationKey]['quantity_gross'] = round((float) $requirement['quantity_gross'], 6);
                 $aggregated[$aggregationKey]['quantity_covered'] = 0.0;
                 $aggregated[$aggregationKey]['quantity_net'] = 0.0;
+
                 continue;
             }
 
@@ -804,6 +805,7 @@ final class MrpPlanningService extends BaseService
 
                 if ($availableUnits <= 0.0) {
                     $currentDate = Carbon::parse($currentDate)->addDay()->toDateString();
+
                     continue;
                 }
 

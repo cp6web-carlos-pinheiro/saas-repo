@@ -16,9 +16,7 @@ use Illuminate\Http\Request;
 
 final class RoutingController
 {
-    public function __construct(private readonly RoutingService $service)
-    {
-    }
+    public function __construct(private readonly RoutingService $service) {}
 
     public function indexVersions(Request $request): JsonResponse
     {

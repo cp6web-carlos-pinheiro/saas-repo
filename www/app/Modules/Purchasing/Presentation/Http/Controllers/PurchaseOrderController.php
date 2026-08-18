@@ -11,9 +11,7 @@ use Illuminate\Http\Request;
 
 final class PurchaseOrderController
 {
-    public function __construct(private readonly PurchasingService $service)
-    {
-    }
+    public function __construct(private readonly PurchasingService $service) {}
 
     public function index(Request $request): JsonResponse
     {

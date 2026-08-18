@@ -13,8 +13,8 @@ use App\Modules\Purchasing\Infrastructure\Persistence\Models\PurchaseRequisition
 use App\Modules\Purchasing\Infrastructure\Persistence\Models\Supplier;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AuditLogService;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -290,7 +290,7 @@ final class PurchaseQuotationController extends Controller
     }
 
     /**
-     * @param array<int, array{unit_price: float, quantity: float}> $items
+     * @param  array<int, array{unit_price: float, quantity: float}>  $items
      */
     private function sumItemsAmountCents(array $items): int
     {
@@ -298,7 +298,7 @@ final class PurchaseQuotationController extends Controller
     }
 
     /**
-     * @param array<int, array{product_id: int, quantity: float, unit_price: float, notes: string|null}> $items
+     * @param  array<int, array{product_id: int, quantity: float, unit_price: float, notes: string|null}>  $items
      */
     private function syncLines(PurchaseQuotation $quotation, array $items): void
     {
@@ -391,7 +391,7 @@ final class PurchaseQuotationController extends Controller
     }
 
     /**
-     * @param array<int, mixed> $fallback
+     * @param  array<int, mixed>  $fallback
      * @return array<int, mixed>
      */
     private function oldItemRows(Request $request, array $fallback): array
@@ -402,7 +402,7 @@ final class PurchaseQuotationController extends Controller
     }
 
     /**
-     * @param array<int, array<string, mixed>> $lineRows
+     * @param  array<int, array<string, mixed>>  $lineRows
      * @return array<int, int>
      */
     private function selectedProductIdsFromLineRows(array $lineRows): array
@@ -417,7 +417,7 @@ final class PurchaseQuotationController extends Controller
     }
 
     /**
-     * @param array<int, int> $ids
+     * @param  array<int, int>  $ids
      */
     private function productOptionsByIds(Company $company, array $ids): Collection
     {

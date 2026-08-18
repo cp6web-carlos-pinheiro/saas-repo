@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Identity\Infrastructure\Persistence\Models;
 
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,7 +25,7 @@ final class Role extends TenantModel
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(\App\Modules\Tenant\Infrastructure\Persistence\Models\Company::class);
+        return $this->belongsTo(Company::class);
     }
 
     public function users(): BelongsToMany

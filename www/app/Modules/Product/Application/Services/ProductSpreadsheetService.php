@@ -34,7 +34,7 @@ final class ProductSpreadsheetService
 
     public function export(iterable $products, string $companyName): string
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Products');
         $sheet->fromArray([self::HEADERS], null, 'A1');
@@ -155,7 +155,7 @@ final class ProductSpreadsheetService
     }
 
     /**
-     * @param array<string, mixed> $headerRow
+     * @param  array<string, mixed>  $headerRow
      * @return array<string, string>
      */
     private function normalizeHeaders(array $headerRow): array
@@ -170,7 +170,7 @@ final class ProductSpreadsheetService
     }
 
     /**
-     * @param array<string, string> $headers
+     * @param  array<string, string>  $headers
      */
     private function assertHeaders(array $headers): void
     {
@@ -188,8 +188,8 @@ final class ProductSpreadsheetService
     }
 
     /**
-     * @param array<string, string> $headers
-     * @param array<string, mixed> $row
+     * @param  array<string, string>  $headers
+     * @param  array<string, mixed>  $row
      * @return array<string, mixed>
      */
     private function normalizeRow(array $headers, array $row, int $rowNumber): array
@@ -280,7 +280,7 @@ final class ProductSpreadsheetService
     }
 
     /**
-     * @param array<string, mixed> $row
+     * @param  array<string, mixed>  $row
      */
     private function isEmptyRow(array $row): bool
     {

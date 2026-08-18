@@ -14,9 +14,7 @@ use Illuminate\Http\Request;
 
 final class WorkCenterController
 {
-    public function __construct(private readonly WorkCenterService $service)
-    {
-    }
+    public function __construct(private readonly WorkCenterService $service) {}
 
     public function index(Request $request): JsonResponse
     {

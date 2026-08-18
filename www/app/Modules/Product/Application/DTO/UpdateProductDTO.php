@@ -18,6 +18,5 @@ final class UpdateProductDTO extends BaseDTO
         public readonly bool $lot_control,
         public readonly bool $serial_control,
         public readonly bool $is_active = true,
-    ) {
-    }
+    ) {}
 }

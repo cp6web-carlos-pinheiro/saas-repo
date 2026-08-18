@@ -11,6 +11,6 @@ class TenancyServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->scoped(TenantContext::class, fn (): TenantContext => new TenantContext());
+        $this->app->scoped(TenantContext::class, fn (): TenantContext => new TenantContext);
     }
 }

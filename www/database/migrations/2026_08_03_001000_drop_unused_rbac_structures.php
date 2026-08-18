@@ -64,7 +64,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (!Schema::hasTable('role_templates')) {
+        if (! Schema::hasTable('role_templates')) {
             Schema::create('role_templates', function (Blueprint $table): void {
                 $table->id();
                 $table->string('key', 120)->unique();
@@ -76,7 +76,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('role_template_versions')) {
+        if (! Schema::hasTable('role_template_versions')) {
             Schema::create('role_template_versions', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('role_template_id')->constrained('role_templates')->cascadeOnDelete();
@@ -92,7 +92,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('company_role_template_versions')) {
+        if (! Schema::hasTable('company_role_template_versions')) {
             Schema::create('company_role_template_versions', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
@@ -107,7 +107,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('rbac_change_requests')) {
+        if (! Schema::hasTable('rbac_change_requests')) {
             Schema::create('rbac_change_requests', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();

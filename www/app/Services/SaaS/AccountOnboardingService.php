@@ -11,8 +11,8 @@ use App\Models\SaaS\OnboardingProfile;
 use App\Models\SaaS\Plan;
 use App\Models\SaaS\Subscription;
 use App\Models\SaaS\Trial;
-use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\Permission;
+use App\Modules\Identity\Infrastructure\Persistence\Models\Role;
 use App\Modules\Identity\Infrastructure\Persistence\Models\User;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use Carbon\CarbonInterface;
@@ -541,7 +541,7 @@ final class AccountOnboardingService
 
         $invitations = collect();
 
-        DB::transaction(function () use ($normalizedEmails, $user, $company, $companyId, $request, &$invitations): void {
+        DB::transaction(function () use ($normalizedEmails, $user, $companyId, $request, &$invitations): void {
             foreach ($normalizedEmails as $email) {
                 if ($email === mb_strtolower((string) $user->email)) {
                     continue;

@@ -13,7 +13,6 @@ use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
 use App\Shared\Application\Transactions\TransactionManager;
 use App\Shared\Infrastructure\Logging\AppLogger;
-use App\Shared\Presentation\Exceptions\DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class LotSerialTrackingService extends BaseService

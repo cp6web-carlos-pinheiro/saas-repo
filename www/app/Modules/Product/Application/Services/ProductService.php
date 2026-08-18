@@ -24,8 +24,7 @@ final class ProductService extends BaseService
         TransactionManager $transaction,
         CacheManager $cache,
         AppLogger $logger
-    )
-    {
+    ) {
         parent::__construct($transaction, $cache, $logger);
     }
 
@@ -156,7 +155,7 @@ final class ProductService extends BaseService
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
     private function resolveUnitPayload(array $payload): array
@@ -180,6 +179,7 @@ final class ProductService extends BaseService
         }
 
         $payload['unit_id'] = $unit->id;
+
         return $payload;
     }
 }

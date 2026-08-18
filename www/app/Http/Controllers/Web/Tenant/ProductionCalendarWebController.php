@@ -18,13 +18,14 @@ final class ProductionCalendarWebController extends Controller
     use HandlesTenantAuthorization;
 
     private const READ_PERMISSION = 'production-calendar.read';
+
     private const CREATE_PERMISSION = 'production-calendar.update';
+
     private const UPDATE_PERMISSION = 'production-calendar.update';
+
     private const GENERATE_PERMISSION = 'production-calendar.generate';
 
-    public function __construct(private readonly ProductionCalendarService $service)
-    {
-    }
+    public function __construct(private readonly ProductionCalendarService $service) {}
 
     public function index(Request $request): View
     {

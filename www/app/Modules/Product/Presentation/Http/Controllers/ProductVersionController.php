@@ -17,9 +17,7 @@ use Illuminate\Http\Request;
 
 final class ProductVersionController
 {
-    public function __construct(private readonly ProductVersionService $service)
-    {
-    }
+    public function __construct(private readonly ProductVersionService $service) {}
 
     public function store(StoreProductVersionRequest $request, int $productId): JsonResponse
     {

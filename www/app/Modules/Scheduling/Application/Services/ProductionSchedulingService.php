@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Scheduling\Application\Services;
 
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Application\Services\ProductionOrderOperationPlanningService;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOperation;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\ProductionCalendarDay;
+use App\Modules\Scheduling\Infrastructure\Persistence\Models\ProductionResource;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenterShift;
-use App\Modules\Scheduling\Infrastructure\Persistence\Models\ProductionResource;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
 use App\Shared\Application\Transactions\TransactionManager;
@@ -196,6 +197,7 @@ final class ProductionSchedulingService extends BaseService
 
             if ($available <= 0) {
                 $current = $this->nextWorkingDayStart($workCenterId, $current->copy()->addDay(), $scheduleState);
+
                 continue;
             }
 
@@ -265,6 +267,7 @@ final class ProductionSchedulingService extends BaseService
 
             if ($available <= 0) {
                 $current = $this->previousWorkingDayEnd($workCenterId, $current->copy()->subDay(), $scheduleState);
+
                 continue;
             }
 
@@ -332,9 +335,10 @@ final class ProductionSchedulingService extends BaseService
         } else {
             $endAt = $endAt->copy()->addMinutes($leadTimeMinutes);
         }
+
         return [
             'operation_no' => (int) $operation->operation_no,
-            'production_order_operation_id' => isset($operation->id) && $operation instanceof \App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderOperation ? (int) $operation->id : null,
+            'production_order_operation_id' => isset($operation->id) && $operation instanceof ProductionOrderOperation ? (int) $operation->id : null,
             'operation_code' => (string) $operation->operation_code,
             'operation_name' => (string) $operation->operation_name,
             'sequence' => (int) $operation->sequence,
@@ -369,8 +373,11 @@ final class ProductionSchedulingService extends BaseService
         $workCenter = WorkCenter::query()->findOrFail($workCenterId);
         if ($resourceId) {
             $resource = ProductionResource::query()->where('id', $resourceId)->where('work_center_id', $workCenterId)->where('status', 'ACTIVE')->first();
-            if (! $resource) return 0;
+            if (! $resource) {
+                return 0;
+            }
             $resourceCapacity = (float) ($resource->capacity_per_day ?: $workCenter->capacity_per_day);
+
             return max(0, (int) round($resourceCapacity * ((float) $resource->efficiency_factor / 100) * 60));
         }
         $shiftCapacityHours = (float) WorkCenterShift::query()

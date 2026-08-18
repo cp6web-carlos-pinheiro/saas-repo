@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Web\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Web\Tenant\Concerns\HandlesTenantAuthorization;
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -58,7 +58,7 @@ final class ProductionAnalyticsController extends Controller
         ];
 
         $scrapByDay = ProductionOperationOutput::query()
-            ->selectRaw("DATE(reported_at) as day, SUM(quantity_scrapped) as total_scrap")
+            ->selectRaw('DATE(reported_at) as day, SUM(quantity_scrapped) as total_scrap')
             ->where('reported_at', '>=', $from)
             ->groupBy('day')
             ->orderBy('day')

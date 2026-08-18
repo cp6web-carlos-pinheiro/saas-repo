@@ -11,7 +11,7 @@ final class JsonLogFormatter
     public function __invoke($logger): void
     {
         foreach ($logger->getHandlers() as $handler) {
-            $handler->setFormatter(new JsonFormatter());
+            $handler->setFormatter(new JsonFormatter);
         }
     }
 }

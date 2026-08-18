@@ -1,4 +1,5 @@
 <?php
+
 return [
     'title' => 'Administração Global',
     'home' => 'Início',
@@ -34,13 +35,13 @@ return [
     'toggle_sidebar' => 'Alternar menu lateral',
     'collapse_sidebar' => 'Recolher menu lateral',
     'expand_sidebar' => 'Expandir menu lateral',
-    'modules'=>[
+    'modules' => [
         'customers' => 'Clientes',
         'companies' => 'Empresas',
         'plans' => 'Planos',
         'documentation' => 'Documentação',
         'tutorials' => 'Tutoriais',
-        'administrators' => 'Administradores'
+        'administrators' => 'Administradores',
     ],
-    'module_coming_soon' => 'Este módulo será disponibilizado em breve.'
+    'module_coming_soon' => 'Este módulo será disponibilizado em breve.',
 ];

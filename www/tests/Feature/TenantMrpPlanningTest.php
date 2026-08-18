@@ -97,12 +97,12 @@ final class TenantMrpPlanningTest extends TestCase
             'description' => 'Materia-prima critica',
             'product_type' => 'RAW',
             'uom' => 'KG',
-                'unit_id' => Unit::query()->create([
-                    'company_id' => $company->id,
-                    'code' => 'KG',
-                    'name' => 'Quilograma',
-                    'is_active' => true,
-                ])->id,
+            'unit_id' => Unit::query()->create([
+                'company_id' => $company->id,
+                'code' => 'KG',
+                'name' => 'Quilograma',
+                'is_active' => true,
+            ])->id,
             'safety_stock' => 10,
             'lead_time_days' => 5,
             'lot_control' => false,

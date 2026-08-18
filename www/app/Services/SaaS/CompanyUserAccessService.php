@@ -238,7 +238,7 @@ final class CompanyUserAccessService
                             ->orWhere('roles.slug', 'like', self::ROLE_SLUG_PREFIX.'%-'.self::ADMINISTRATOR_PROFILE);
                     });
             })
-                ->when($excludeUserId !== null, static fn ($query) => $query->where('users.id', '!=', $excludeUserId))
+            ->when($excludeUserId !== null, static fn ($query) => $query->where('users.id', '!=', $excludeUserId))
             ->count();
     }
 

@@ -12,9 +12,7 @@ use Illuminate\Http\Request;
 
 final class RoutingStandardTimeController
 {
-    public function __construct(private readonly RoutingStandardTimeService $service)
-    {
-    }
+    public function __construct(private readonly RoutingStandardTimeService $service) {}
 
     public function index(Request $request, int $routingOperationId): JsonResponse
     {

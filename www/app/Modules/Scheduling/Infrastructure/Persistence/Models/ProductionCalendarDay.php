@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Scheduling\Infrastructure\Persistence\Models;
 
-use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

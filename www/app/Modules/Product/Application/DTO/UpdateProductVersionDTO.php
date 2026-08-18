@@ -14,6 +14,5 @@ final class UpdateProductVersionDTO extends BaseDTO
         public readonly string $compatibility_rule,
         public readonly ?string $change_summary,
         public readonly array $payload,
-    ) {
-    }
+    ) {}
 }

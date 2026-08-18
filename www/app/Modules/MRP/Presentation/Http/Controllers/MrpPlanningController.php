@@ -12,9 +12,7 @@ use Illuminate\Http\JsonResponse;
 
 final class MrpPlanningController
 {
-    public function __construct(private readonly MrpPlanningService $service, private readonly MrpSuggestionWorkflowService $workflow)
-    {
-    }
+    public function __construct(private readonly MrpPlanningService $service, private readonly MrpSuggestionWorkflowService $workflow) {}
 
     public function run(RunMrpPlanRequest $request): JsonResponse
     {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Bom\Infrastructure\Persistence\Repositories;
 
 use App\Modules\Bom\Domain\Repositories\BomExplosionRepository;
+use App\Shared\Infrastructure\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -22,7 +23,7 @@ final class MySqlBomExplosionRepository implements BomExplosionRepository
             throw new RuntimeException('BOM explosion recursive CTE is implemented for MySQL driver.');
         }
 
-        $companyId = (int) app(\App\Shared\Infrastructure\Tenancy\TenantContext::class)->companyId();
+        $companyId = (int) app(TenantContext::class)->companyId();
 
         $rootHeader = $this->resolveRootHeader($companyId, $productId, $referenceDate, $versionNumber);
 

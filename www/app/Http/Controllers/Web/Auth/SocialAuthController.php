@@ -11,7 +11,6 @@ use App\Services\SaaS\AccountOnboardingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 final class SocialAuthController extends Controller

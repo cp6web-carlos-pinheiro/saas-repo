@@ -14,8 +14,7 @@ abstract class BaseService
         protected TransactionManager $transaction,
         protected CacheManager $cache,
         protected AppLogger $logger
-    ) {
-    }
+    ) {}
 
     protected function inTransaction(callable $callback, int $attempts = 1): mixed
     {

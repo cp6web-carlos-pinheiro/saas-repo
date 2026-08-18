@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Models\SaaS\Subscription;
+use App\Modules\Tenant\Infrastructure\Persistence\Models\Company;
 use App\Services\SaaS\AccountOnboardingService;
 use App\Services\SaaS\AuditLogService;
 use Illuminate\Http\RedirectResponse;

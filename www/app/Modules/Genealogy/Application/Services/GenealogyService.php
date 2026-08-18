@@ -8,16 +8,16 @@ use App\Modules\Genealogy\Infrastructure\Persistence\Models\GenealogyNode;
 use App\Modules\Genealogy\Infrastructure\Persistence\Models\GenealogyRelation;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\InventoryLot;
 use App\Modules\Inventory\Infrastructure\Persistence\Models\InventorySerial;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
 use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrderMaterialConsumption;
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
 use App\Shared\Application\Transactions\TransactionManager;
 use App\Shared\Infrastructure\Logging\AppLogger;
+use App\Shared\Infrastructure\Tenancy\TenantContext;
 use App\Shared\Presentation\Exceptions\DomainException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
 
 final class GenealogyService extends BaseService
 {
@@ -249,7 +249,7 @@ final class GenealogyService extends BaseService
             throw new DomainException('Genealogy trace requires the MySQL driver for recursive CTE support', 422);
         }
 
-        $companyId = (int) app(\App\Shared\Infrastructure\Tenancy\TenantContext::class)->companyId();
+        $companyId = (int) app(TenantContext::class)->companyId();
         $direction = strtolower($direction);
 
         $rows = DB::select(

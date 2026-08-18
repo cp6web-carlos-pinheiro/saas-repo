@@ -257,7 +257,7 @@ final class TenantPurchasingCrudManagementTest extends TestCase
     }
 
     /**
-    * @return array{company: Company, user: User, supplier: Supplier, warehouse: Warehouse, product: Product}
+     * @return array{company: Company, user: User, supplier: Supplier, warehouse: Warehouse, product: Product}
      */
     private function purchasingContext(): array
     {

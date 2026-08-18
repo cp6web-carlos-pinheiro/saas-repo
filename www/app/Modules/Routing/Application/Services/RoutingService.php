@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Routing\Application\Services;
 
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperation;
-use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperationStandardTime;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperationSnapshot;
-use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersionSnapshot;
+use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingOperationStandardTime;
 use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersion;
+use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersionSnapshot;
 use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;
@@ -173,7 +173,7 @@ final class RoutingService extends BaseService
 
         $approvedAt = now();
 
-        $snapshot = $this->inTransaction(function () use ($routingVersion, $payload, $userId, $effectiveFrom, $effectiveTo, $approvedAt, $standardTimesByOperation) {
+        $snapshot = $this->inTransaction(function () use ($routingVersion, $userId, $effectiveFrom, $effectiveTo, $approvedAt, $standardTimesByOperation) {
             $updated = RoutingVersion::query()->whereKey($routingVersion->id)->firstOrFail();
             $updated->fill([
                 'status' => 'APPROVED',

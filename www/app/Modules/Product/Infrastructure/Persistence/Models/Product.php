@@ -8,8 +8,8 @@ use App\Modules\Bom\Infrastructure\Persistence\Models\BomHeader;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Unit;
 use App\Shared\Infrastructure\Tenancy\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\ValidationException;
 
 final class Product extends TenantModel
@@ -56,7 +56,7 @@ final class Product extends TenantModel
     {
         parent::booted();
 
-        static::saving(function (self $product): void {
+        self::saving(function (self $product): void {
             $unitId = (int) ($product->unit_id ?? 0);
 
             if ($unitId <= 0) {

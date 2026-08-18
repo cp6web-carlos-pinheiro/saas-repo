@@ -6,13 +6,10 @@ namespace App\Modules\Production\Application\Services;
 
 use App\Modules\Bom\Application\Services\FreezeBomSnapshotService;
 use App\Modules\Inventory\Application\Services\InventoryService;
-use App\Modules\Production\Application\Services\FreezeProductionOrderSnapshotService;
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
-use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
-use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersion;
-use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersionSnapshot;
-use App\Modules\Scheduling\Infrastructure\Persistence\Models\WorkCenter;
 use App\Modules\Product\Infrastructure\Persistence\Models\Product;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOperationOutput;
+use App\Modules\Production\Infrastructure\Persistence\Models\ProductionOrder;
+use App\Modules\Routing\Infrastructure\Persistence\Models\RoutingVersion;
 use App\Modules\Tenant\Infrastructure\Persistence\Models\Warehouse;
 use App\Shared\Application\Cache\CacheManager;
 use App\Shared\Application\Services\BaseService;

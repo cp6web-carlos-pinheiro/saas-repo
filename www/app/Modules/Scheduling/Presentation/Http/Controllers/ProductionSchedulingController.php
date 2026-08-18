@@ -11,9 +11,7 @@ use Illuminate\Http\JsonResponse;
 
 final class ProductionSchedulingController
 {
-    public function __construct(private readonly ProductionSchedulingService $service)
-    {
-    }
+    public function __construct(private readonly ProductionSchedulingService $service) {}
 
     public function run(RunProductionSchedulingRequest $request): JsonResponse
     {
