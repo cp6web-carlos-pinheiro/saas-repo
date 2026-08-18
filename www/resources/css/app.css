@@ -2287,6 +2287,7 @@ body {
         box-shadow: inset 0 0 0 1px rgba(255, 136, 0, 0.3);
     }
 
+    /* Documentação — tokens --ui-* (light/dark) */
     .docs-layout {
         display: grid;
         grid-template-columns: 300px 1fr;
@@ -2294,8 +2295,8 @@ body {
     }
 
     .docs-sidebar {
-        background: var(--g-surface);
-        border-right: 1px solid var(--g-line);
+        background: var(--ui-surface);
+        border-right: 1px solid var(--ui-border);
         padding: 1rem;
         position: sticky;
         top: 0;
@@ -2304,17 +2305,19 @@ body {
         flex-direction: column;
         overflow: hidden;
         min-height: 0;
+        color: var(--ui-text);
     }
 
     .docs-sidebar h1 {
         margin: 0;
         font-size: 1rem;
         font-weight: 700;
+        color: var(--ui-text);
     }
 
     .docs-sidebar p {
         margin: 0.35rem 0 0.8rem;
-        color: var(--g-text-muted);
+        color: var(--ui-text-muted);
         font-size: 0.85rem;
     }
 
@@ -2323,7 +2326,7 @@ body {
         align-items: center;
         gap: 0.4rem;
         text-decoration: none;
-        color: var(--g-primary);
+        color: var(--ui-primary);
         font-size: 0.86rem;
         margin-bottom: 0.8rem;
     }
@@ -2342,14 +2345,14 @@ body {
 
     .docs-folder {
         margin-top: 0.8rem;
-        border-top: 1px solid var(--g-line);
+        border-top: 1px solid var(--ui-border);
         padding-top: 0.6rem;
     }
 
     .docs-folder summary {
         cursor: pointer;
         list-style: none;
-        color: var(--g-text-muted);
+        color: var(--ui-text-muted);
         font-size: 0.86rem;
         font-weight: 500;
         padding: 0.35rem 0.2rem;
@@ -2363,7 +2366,7 @@ body {
     .docs-folder summary::before {
         content: '\25B8';
         margin-right: 0.35rem;
-        color: var(--g-text-muted);
+        color: var(--ui-text-muted);
     }
 
     .docs-folder[open] summary::before {
@@ -2373,26 +2376,32 @@ body {
     .docs-list-nested {
         margin-top: 0.25rem;
         padding-left: 0.55rem;
-        border-left: 2px solid var(--g-surface-muted);
+        border-left: 2px solid var(--ui-border);
     }
 
-    .docs-list a {
+    .docs-list a,
+    .docs-menu-item {
+        display: block;
         text-decoration: none;
-        color: var(--g-text);
+        color: var(--ui-text-muted);
         padding: 0.5rem 0.7rem;
         border-radius: 10px;
         font-size: 0.9rem;
         transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .docs-list a:hover {
-        background: var(--g-surface-muted);
+    .docs-list a:hover,
+    .docs-menu-item:hover {
+        background: var(--ui-surface-hover);
+        color: var(--ui-text);
     }
 
-    .docs-list a.is-active {
-        background: var(--g-primary-soft);
-        color: var(--g-primary);
-        font-weight: 500;
+    .docs-list a.is-active,
+    .docs-menu-item.is-active,
+    .docs-menu-item[aria-current='page'] {
+        background: var(--ui-primary-soft);
+        color: var(--ui-primary-text);
+        font-weight: 600;
     }
 
     .docs-content-wrap {
@@ -2402,17 +2411,18 @@ body {
 
     .docs-article {
         max-width: 100%;
-        background: var(--g-surface);
-        border: 1px solid var(--g-line);
-        border-radius: 16px;
-        padding: 1.4rem;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        color: var(--ui-text);
     }
 
     .docs-article h1,
     .docs-article h2,
     .docs-article h3,
     .docs-article h4 {
-        color: var(--g-text);
+        color: var(--ui-text);
         margin-top: 1.25em;
         margin-bottom: 0.55em;
     }
@@ -2424,20 +2434,26 @@ body {
     .docs-article p,
     .docs-article li {
         line-height: 1.6;
-        color: #2b2e31;
+        color: var(--ui-text-muted);
+    }
+
+    .docs-article strong {
+        color: var(--ui-text);
     }
 
     .docs-article code {
-        background: #e1e5e7; /* Novo surface muted */
-        border: 1px solid #CFD8DC; /* Novo line */
+        background: var(--ui-surface-muted);
+        border: 1px solid var(--ui-border);
         border-radius: 6px;
         padding: 0.08rem 0.3rem;
         font-size: 0.88em;
+        color: var(--ui-text);
     }
 
     .docs-article pre {
-        background: #263238; /* Novo g-text */
-        color: #CFD8DC;     /* Novo line */
+        background: var(--ui-surface-muted);
+        color: var(--ui-text);
+        border: 1px solid var(--ui-border);
         border-radius: 10px;
         padding: 0.9rem;
         overflow: auto;
@@ -2451,7 +2467,11 @@ body {
     }
 
     .docs-article a {
-        color: var(--g-primary);
+        color: var(--ui-primary);
+    }
+
+    .docs-article a:hover {
+        color: var(--ui-primary-hover);
     }
 
     .docs-article table {
@@ -2461,9 +2481,15 @@ body {
 
     .docs-article th,
     .docs-article td {
-        border: 1px solid var(--g-line);
+        border: 1px solid var(--ui-border);
         padding: 0.45rem 0.55rem;
         text-align: left;
+        color: var(--ui-text);
+    }
+
+    .docs-article th {
+        background: var(--ui-surface-muted);
+        color: var(--ui-text);
     }
 
     .docs-article th:last-child,
@@ -2472,6 +2498,21 @@ body {
     .docs-article td:first-child {
         overflow-wrap: anywhere;
         word-break: break-word;
+    }
+
+    .docs-article hr {
+        border: 0;
+        border-top: 1px solid var(--ui-border);
+        margin: 1.5rem 0;
+    }
+
+    .docs-article blockquote {
+        margin: 1rem 0;
+        padding: 0.5rem 1rem;
+        border-left: 3px solid var(--ui-border-strong);
+        color: var(--ui-text-muted);
+        background: var(--ui-surface-muted);
+        border-radius: 0 0.5rem 0.5rem 0;
     }
 
     .ind-page {
