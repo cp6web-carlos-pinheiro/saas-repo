@@ -13,7 +13,7 @@
 
 <x-ui.definition-item :label="$label" {{ $attributes }}>
     @if ($normalizedItems->isEmpty())
-        <span class="text-[#5f6368]">{{ $emptyText }}</span>
+        <span class="text-[var(--ui-text-muted)]">{{ $emptyText }}</span>
     @else
         <ul class="space-y-1">
             @foreach ($normalizedItems as $item)

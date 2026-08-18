@@ -37,7 +37,7 @@
             </x-ui.field>
 
             @if ($editing)
-                <x-ui.checkbox name="is_active" value="1" :checked="old('is_active', $administrator->is_active)" :label="__('global_admin.active')" />
+                <x-ui.checkbox name="is_active" value="1" :checked="old('is_active', $administrator->is_active)">{{ __('global_admin.active') }}</x-ui.checkbox>
             @endif
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
