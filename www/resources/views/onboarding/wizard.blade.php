@@ -2,22 +2,18 @@
 
 @section('title', __('onboarding.title').' | '.__('ui.app_name'))
 
-@section('head')
-@endsection
-
-@section('bodyClass', 'bg-slate-100 min-h-screen p-6 text-slate-900')
+@section('bodyClass', 'auth-shell p-6')
 
 @section('content')
-  <main class="max-w-6xl mx-auto">
-
+  <main class="mx-auto max-w-6xl">
     <x-ui.panel padding="p-6 md:p-10">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p class="text-sm text-slate-500">{{ __('onboarding.account_onboarding') }}</p>
-          <h1 class="font-display text-3xl font-bold">{{ __('onboarding.build_account') }}</h1>
+          <p class="auth-muted text-sm">{{ __('onboarding.account_onboarding') }}</p>
+          <h1 class="auth-heading font-display text-3xl font-bold">{{ __('onboarding.build_account') }}</h1>
         </div>
         <div class="flex flex-wrap items-center justify-end gap-2">
-          <div class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600">
+          <div class="rounded-full border px-4 py-2 text-sm auth-muted" style="border-color: var(--ui-border); background: var(--ui-surface-muted);">
             {{ __('onboarding.step_of', ['step' => $step]) }}
           </div>
           <form method="POST" action="{{ route('logout') }}">
@@ -37,11 +33,11 @@
         </div>
       </div>
 
-      <div class="mt-6 grid gap-3 sm:grid-cols-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-        <div class="rounded-2xl px-4 py-3 {{ $step >= 2 ? 'bg-slate-900 text-white' : 'bg-slate-100' }}">{{ __('onboarding.user') }}</div>
-        <div class="rounded-2xl px-4 py-3 {{ $step >= 2 ? 'bg-slate-900 text-white' : 'bg-slate-100' }}">{{ __('onboarding.company') }}</div>
-        <div class="rounded-2xl px-4 py-3 {{ $step >= 3 ? 'bg-slate-900 text-white' : 'bg-slate-100' }}">{{ __('onboarding.plan') }}</div>
-        <div class="rounded-2xl px-4 py-3 {{ $step >= 4 ? 'bg-slate-900 text-white' : 'bg-slate-100' }}">{{ __('onboarding.invites') }}</div>
+      <div class="mt-6 grid gap-3 text-xs font-semibold uppercase tracking-[0.18em] sm:grid-cols-4" style="color: var(--ui-text-subtle);">
+        <div class="rounded-2xl px-4 py-3" style="{{ $step >= 2 ? 'background: var(--ui-text); color: var(--ui-surface);' : 'background: var(--ui-surface-muted);' }}">{{ __('onboarding.user') }}</div>
+        <div class="rounded-2xl px-4 py-3" style="{{ $step >= 2 ? 'background: var(--ui-text); color: var(--ui-surface);' : 'background: var(--ui-surface-muted);' }}">{{ __('onboarding.company') }}</div>
+        <div class="rounded-2xl px-4 py-3" style="{{ $step >= 3 ? 'background: var(--ui-text); color: var(--ui-surface);' : 'background: var(--ui-surface-muted);' }}">{{ __('onboarding.plan') }}</div>
+        <div class="rounded-2xl px-4 py-3" style="{{ $step >= 4 ? 'background: var(--ui-text); color: var(--ui-surface);' : 'background: var(--ui-surface-muted);' }}">{{ __('onboarding.invites') }}</div>
       </div>
 
       @if (session('status'))
@@ -50,7 +46,7 @@
 
       @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">
-          <ul class="list-disc ml-5">
+          <ul class="ml-5 list-disc">
             @foreach ($errors->all() as $error)
               <li>{{ $error }}</li>
             @endforeach
@@ -59,38 +55,33 @@
       @endif
 
       @if ($step === 2)
-        <div class="mt-8 grid lg:grid-cols-[1.3fr_0.7fr] gap-6">
+        <div class="mt-8 grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
           <form method="POST" action="{{ route('onboarding.store') }}" class="space-y-4">
             @csrf
-            <div class="grid md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium mb-2" for="company_name">{{ __('onboarding.company_name') }}</label>
+            <div class="grid gap-4 md:grid-cols-2">
+              <x-ui.field :label="__('onboarding.company_name')" for="company_name" :required="true">
                 <x-ui.input id="company_name" name="company_name" type="text" :value="old('company_name', $organization?->name)" required />
-              </div>
-              <div>
-                <label class="block text-sm font-medium mb-2" for="company_domain">{{ __('onboarding.company_domain') }}</label>
+              </x-ui.field>
+              <x-ui.field :label="__('onboarding.company_domain')" for="company_domain">
                 <x-ui.input id="company_domain" name="company_domain" type="text" :value="old('company_domain', $organization?->domain)" placeholder="{{ __('onboarding.company_domain_placeholder') }}" />
-              </div>
+              </x-ui.field>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium mb-2" for="segment">{{ __('onboarding.segment') }}</label>
+            <div class="grid gap-4 md:grid-cols-2">
+              <x-ui.field :label="__('onboarding.segment')" for="segment">
                 <x-ui.input id="segment" name="segment" type="text" :value="old('segment', $profile?->segment)" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium mb-2" for="operation_size">{{ __('onboarding.operation_size') }}</label>
-                <x-ui.select id="operation_size" name="operation_size" class="w-full rounded-xl border border-slate-300 px-4 py-3">
+              </x-ui.field>
+              <x-ui.field :label="__('onboarding.operation_size')" for="operation_size">
+                <x-ui.select id="operation_size" name="operation_size">
                   <option value="">{{ __('onboarding.select') }}</option>
                   <option value="small" @selected(old('operation_size', $profile?->operation_size) === 'small')>{{ __('onboarding.small') }}</option>
                   <option value="mid" @selected(old('operation_size', $profile?->operation_size) === 'mid')>{{ __('onboarding.mid') }}</option>
                   <option value="large" @selected(old('operation_size', $profile?->operation_size) === 'large')>{{ __('onboarding.large') }}</option>
                 </x-ui.select>
-              </div>
+              </x-ui.field>
             </div>
 
-            <div>
-              <label class="block text-sm font-medium mb-2" for="timezone">{{ __('onboarding.timezone') }}</label>
+            <x-ui.field :label="__('onboarding.timezone')" for="timezone" :required="true">
               @php
                 $selectedTimezone = old('timezone', $profile?->timezone ?? 'UTC');
                 $shouldDetectTimezone = old('timezone') === null && $profile?->timezone === null;
@@ -98,7 +89,6 @@
               <x-ui.select
                 id="timezone"
                 name="timezone"
-                class="w-full rounded-xl border border-slate-300 px-4 py-3"
                 data-search="on"
                 :data-detect-timezone="$shouldDetectTimezone ? 'true' : 'false'"
                 required
@@ -107,83 +97,84 @@
                   <option value="{{ $timezone }}" @selected($selectedTimezone === $timezone)>{{ $timezone }}</option>
                 @endforeach
               </x-ui.select>
-            </div>
+            </x-ui.field>
 
             <div class="pt-2">
-              <x-ui.button type="submit" variant="brand-primary" size="lg" class="rounded-full">{{ __('onboarding.save_company_continue') }}</x-ui.button>
+              <x-ui.button type="submit" variant="primary" size="lg" class="rounded-full">{{ __('onboarding.save_company_continue') }}</x-ui.button>
             </div>
           </form>
 
-          <aside class="rounded-3xl bg-slate-950 text-white p-6" aria-label="{{ __('onboarding.company_step_summary') }}">
-            <p class="text-xs uppercase tracking-[0.2em] text-mist">{{ __('onboarding.step_two') }}</p>
+          <aside class="rounded-3xl p-6 text-white" style="background: #0f172a;" aria-label="{{ __('onboarding.company_step_summary') }}">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/70">{{ __('onboarding.step_two') }}</p>
             <h2 class="mt-3 text-2xl font-bold">{{ __('onboarding.account_base') }}</h2>
-            <p class="mt-3 text-sm text-slate-300">{{ __('onboarding.account_base_description') }}</p>
+            <p class="mt-3 text-sm text-white/80">{{ __('onboarding.account_base_description') }}</p>
           </aside>
         </div>
       @elseif ($step === 3)
         <div class="mt-8 grid gap-4 lg:grid-cols-3">
           @foreach ($plans as $planCode => $plan)
-            <form method="POST" action="{{ route('onboarding.store') }}" class="rounded-3xl border border-slate-200 p-6 bg-slate-50 flex flex-col">
+            <form method="POST" action="{{ route('onboarding.store') }}" class="flex flex-col rounded-3xl border p-6" style="border-color: var(--ui-border); background: var(--ui-surface-muted);">
               @csrf
               <x-ui.input type="hidden" name="plan_code" :value="$planCode" unstyled />
               <div class="flex items-center justify-between gap-3">
-                <h2 class="text-2xl font-bold">{{ $plan['label'] }}</h2>
-                <span class="rounded-full bg-slate-900 text-white px-3 py-1 text-xs font-semibold uppercase">{{ $planCode }}</span>
+                <h2 class="text-2xl font-bold" style="color: var(--ui-text);">{{ $plan['label'] }}</h2>
+                <span class="rounded-full px-3 py-1 text-xs font-semibold uppercase" style="background: var(--ui-text); color: var(--ui-surface);">{{ $planCode }}</span>
               </div>
-              <p class="mt-3 text-sm text-slate-600">{{ $plan['description'] }}</p>
-              <div class="mt-6 rounded-2xl bg-white border border-slate-200 p-4 text-sm text-slate-600">
-                <p class="text-lg font-bold text-slate-900">R$ {{ number_format(($plan['amount_cents'] ?? 0) / 100, 2, ',', '.') }}</p>
-                <p class="font-semibold text-slate-900">{{ $plan['billing_cycle_label'] }}</p>
+              <p class="auth-muted mt-3 text-sm">{{ $plan['description'] }}</p>
+              <div class="mt-6 rounded-2xl border p-4 text-sm" style="border-color: var(--ui-border); background: var(--ui-surface); color: var(--ui-text-muted);">
+                <p class="text-lg font-bold" style="color: var(--ui-text);">R$ {{ number_format(($plan['amount_cents'] ?? 0) / 100, 2, ',', '.') }}</p>
+                <p class="font-semibold" style="color: var(--ui-text);">{{ $plan['billing_cycle_label'] }}</p>
                 <p class="mt-1">{{ __('ui.payment_method') }}: {{ $plan['payment_method'] }}</p>
                 @if (isset($plan['trial_days']))
-                  <p class="mt-3 text-xs text-slate-500">{{ __('onboarding.trial_days_activation', ['days' => $plan['trial_days']]) }}</p>
+                  <p class="auth-muted mt-3 text-xs">{{ __('onboarding.trial_days_activation', ['days' => $plan['trial_days']]) }}</p>
                 @endif
               </div>
               <div class="mt-auto pt-6">
-                <x-ui.button type="submit" variant="brand-primary" size="lg" :full="true" class="rounded-full">{{ __('onboarding.select_plan', ['plan' => $plan['label']]) }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" size="lg" :full="true" class="rounded-full">{{ __('onboarding.select_plan', ['plan' => $plan['label']]) }}</x-ui.button>
               </div>
             </form>
           @endforeach
         </div>
       @elseif ($step === 4)
-        <div class="mt-8 grid lg:grid-cols-[1.1fr_0.9fr] gap-6">
+        <div class="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <form method="POST" action="{{ route('onboarding.store') }}" class="space-y-4">
             @csrf
-            <div>
-              <label class="block text-sm font-medium mb-2" for="emails">{{ __('onboarding.emails_invites') }}</label>
+            <x-ui.field :label="__('onboarding.emails_invites')" for="emails">
               <x-ui.textarea id="emails" name="emails" rows="8" class="rounded-2xl" placeholder="{{ __('onboarding.emails_invites_placeholder') }}">{{ old('emails') }}</x-ui.textarea>
-            </div>
-            <p class="text-sm text-slate-500">{{ __('onboarding.emails_invites_help') }}</p>
+            </x-ui.field>
+            <p class="auth-muted text-sm">{{ __('onboarding.emails_invites_help') }}</p>
             <div class="pt-2">
-              <x-ui.button type="submit" variant="brand-primary" size="lg" class="rounded-full">{{ __('onboarding.send_invites_finish') }}</x-ui.button>
+              <x-ui.button type="submit" variant="primary" size="lg" class="rounded-full">{{ __('onboarding.send_invites_finish') }}</x-ui.button>
             </div>
           </form>
 
-          <aside class="rounded-3xl bg-white border border-slate-200 p-6" aria-label="{{ __('onboarding.account_summary') }}">
-            <h2 class="text-2xl font-bold">{{ __('onboarding.account_summary') }}</h2>
+          <aside class="rounded-3xl border p-6" style="border-color: var(--ui-border); background: var(--ui-surface);" aria-label="{{ __('onboarding.account_summary') }}">
+            <h2 class="auth-heading text-2xl font-bold">{{ __('onboarding.account_summary') }}</h2>
             <dl class="mt-5 space-y-4 text-sm">
               <div>
-                <dt class="text-slate-500">{{ __('onboarding.company') }}</dt>
-                <dd class="font-semibold text-slate-900">{{ $organization?->name ?? '-' }}</dd>
+                <dt class="auth-muted">{{ __('onboarding.company') }}</dt>
+                <dd class="font-semibold" style="color: var(--ui-text);">{{ $organization?->name ?? '-' }}</dd>
               </div>
               <div>
-                <dt class="text-slate-500">{{ __('onboarding.plan') }}</dt>
-                <dd class="font-semibold text-slate-900">{{ data_get($plans, ($subscription?->plan_code ?? '').'.label', $subscription?->plan_code ?? '-') }}</dd>
+                <dt class="auth-muted">{{ __('onboarding.plan') }}</dt>
+                <dd class="font-semibold" style="color: var(--ui-text);">{{ data_get($plans, ($subscription?->plan_code ?? '').'.label', $subscription?->plan_code ?? '-') }}</dd>
               </div>
               <div>
-                <dt class="text-slate-500">{{ __('onboarding.sent_invites') }}</dt>
-                <dd class="font-semibold text-slate-900">{{ $invitationsSent->count() }}</dd>
+                <dt class="auth-muted">{{ __('onboarding.sent_invites') }}</dt>
+                <dd class="font-semibold" style="color: var(--ui-text);">{{ $invitationsSent->count() }}</dd>
               </div>
             </dl>
 
             @if ($invitationsSent->isNotEmpty())
-              <div class="mt-6 border-t border-slate-200 pt-4">
-                <p class="text-sm font-semibold text-slate-900">{{ __('onboarding.latest_invites') }}</p>
-                <ul class="mt-3 space-y-2 text-sm text-slate-600">
+              <div class="mt-6 border-t pt-4" style="border-color: var(--ui-border);">
+                <p class="text-sm font-semibold" style="color: var(--ui-text);">{{ __('onboarding.latest_invites') }}</p>
+                <ul class="mt-3 space-y-2 text-sm auth-muted">
                   @foreach ($invitationsSent->take(5) as $invitation)
                     <li class="flex items-center justify-between gap-3">
                       <span>{{ $invitation->email }}</span>
-                      <span class="text-xs uppercase tracking-wide {{ $invitation->accepted_at ? 'text-emerald-600' : 'text-amber-600' }}">{{ $invitation->accepted_at ? __('onboarding.accepted') : __('onboarding.pending') }}</span>
+                      <span class="text-xs uppercase tracking-wide" style="color: {{ $invitation->accepted_at ? 'var(--ui-success)' : 'var(--ui-warning-text)' }};">
+                        {{ $invitation->accepted_at ? __('onboarding.accepted') : __('onboarding.pending') }}
+                      </span>
                     </li>
                   @endforeach
                 </ul>
@@ -192,11 +183,11 @@
           </aside>
         </div>
       @else
-        <div class="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-6">
-          <h2 class="text-2xl font-bold">{{ __('onboarding.account_ready') }}</h2>
-          <p class="mt-3 text-sm text-slate-600">{{ __('onboarding.account_ready_description') }}</p>
+        <div class="mt-8 rounded-3xl border p-6" style="border-color: var(--ui-border); background: var(--ui-surface-muted);">
+          <h2 class="auth-heading text-2xl font-bold">{{ __('onboarding.account_ready') }}</h2>
+          <p class="auth-muted mt-3 text-sm">{{ __('onboarding.account_ready_description') }}</p>
           <div class="mt-6">
-            <x-ui.button :href="route('dashboard.industrial')" variant="brand-primary" size="lg" class="rounded-full">{{ __('onboarding.go_to_dashboard') }}</x-ui.button>
+            <x-ui.button :href="route('dashboard.industrial')" variant="primary" size="lg" class="rounded-full">{{ __('onboarding.go_to_dashboard') }}</x-ui.button>
           </div>
         </div>
       @endif

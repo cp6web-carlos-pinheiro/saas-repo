@@ -2,55 +2,53 @@
 
 @section('title', __('payment.title').' | '.__('ui.app_name'))
 
-@section('bodyClass', 'bg-slate-100 min-h-screen p-6 text-slate-900')
+@section('bodyClass', 'auth-shell p-6')
 
 @section('content')
   <main class="mx-auto max-w-3xl">
     <x-ui.panel padding="p-6 md:p-10">
       <section id="payment-form-panel">
-        <p class="text-sm text-slate-500">{{ __('payment.secure_payment') }}</p>
-        <h1 class="mt-1 font-display text-3xl font-bold">{{ __('payment.title') }}</h1>
-        <p class="mt-3 text-sm text-slate-600">{{ __('payment.plan_summary', ['plan' => $plan['label']]) }}</p>
+        <p class="auth-muted text-sm">{{ __('payment.secure_payment') }}</p>
+        <h1 class="auth-heading mt-1 font-display text-3xl font-bold">{{ __('payment.title') }}</h1>
+        <p class="auth-muted mt-3 text-sm">{{ __('payment.plan_summary', ['plan' => $plan['label']]) }}</p>
 
         @if ($amount > 0)
-          <p class="mt-2 text-lg font-bold text-slate-900">{{ __('payment.amount', ['amount' => 'R$ '.number_format($amount / 100, 2, ',', '.')]) }}</p>
+          <p class="mt-2 text-lg font-bold" style="color: var(--ui-text);">{{ __('payment.amount', ['amount' => 'R$ '.number_format($amount / 100, 2, ',', '.')]) }}</p>
         @endif
 
-        <div id="payment-errors" class="mt-5 hidden rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert"></div>
+        <div id="payment-errors" class="mt-5 hidden rounded-2xl border p-4 text-sm" role="alert" style="border-color: var(--ui-danger); background: var(--ui-danger-soft); color: var(--ui-danger);"></div>
 
         <form id="payment-form" class="mt-7 space-y-5" novalidate>
           @csrf
-          <div>
-            <label class="mb-2 block text-sm font-medium" for="card_holder_name">{{ __('payment.card_holder') }}</label>
+          <x-ui.field :label="__('payment.card_holder')" for="card_holder_name" :required="true">
             <x-ui.input id="card_holder_name" name="card_holder_name" type="text" autocomplete="cc-name" required />
-          </div>
-          <div>
-            <label class="mb-2 block text-sm font-medium" for="card_number">{{ __('payment.card_number') }}</label>
+          </x-ui.field>
+
+          <x-ui.field :label="__('payment.card_number')" for="card_number" :required="true">
             <x-ui.input id="card_number" name="card_number" inputmode="numeric" autocomplete="cc-number" maxlength="23" required placeholder="0000 0000 0000 0000" />
-          </div>
+          </x-ui.field>
+
           <div class="grid grid-cols-3 gap-4">
-            <div>
-              <label class="mb-2 block text-sm font-medium" for="card_exp_month">{{ __('payment.exp_month') }}</label>
+            <x-ui.field :label="__('payment.exp_month')" for="card_exp_month" :required="true">
               <x-ui.input id="card_exp_month" name="card_exp_month" type="text" inputmode="numeric" autocomplete="cc-exp-month" maxlength="2" required placeholder="MM" />
-            </div>
-            <div>
-              <label class="mb-2 block text-sm font-medium" for="card_exp_year">{{ __('payment.exp_year') }}</label>
+            </x-ui.field>
+            <x-ui.field :label="__('payment.exp_year')" for="card_exp_year" :required="true">
               <x-ui.input id="card_exp_year" name="card_exp_year" type="text" inputmode="numeric" autocomplete="cc-exp-year" maxlength="4" required placeholder="AAAA" />
-            </div>
-            <div>
-              <label class="mb-2 block text-sm font-medium" for="card_cvv">{{ __('payment.cvv') }}</label>
+            </x-ui.field>
+            <x-ui.field :label="__('payment.cvv')" for="card_cvv" :required="true">
               <x-ui.input id="card_cvv" name="card_cvv" type="password" inputmode="numeric" autocomplete="cc-csc" maxlength="4" required placeholder="***" />
-            </div>
+            </x-ui.field>
           </div>
-          <p class="text-xs text-slate-500">{{ __('payment.security_notice') }}</p>
-          <x-ui.button id="pay-button" type="submit" variant="brand-primary" :full="true" size="lg" class="rounded-full">{{ __('payment.pay') }}</x-ui.button>
+
+          <p class="auth-muted text-xs">{{ __('payment.security_notice') }}</p>
+          <x-ui.button id="pay-button" type="submit" variant="primary" :full="true" size="lg" class="rounded-full">{{ __('payment.pay') }}</x-ui.button>
         </form>
       </section>
 
       <section id="processing-panel" class="hidden py-16 text-center" aria-live="polite">
-        <div class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-coral"></div>
-        <h1 class="mt-6 font-display text-3xl font-bold">{{ __('payment.processing_title') }}</h1>
-        <p class="mt-3 text-sm text-slate-600">{{ __('payment.processing_description') }}</p>
+        <div class="mx-auto h-12 w-12 animate-spin rounded-full border-4" style="border-color: var(--ui-border); border-top-color: var(--ui-primary);"></div>
+        <h1 class="auth-heading mt-6 font-display text-3xl font-bold">{{ __('payment.processing_title') }}</h1>
+        <p class="auth-muted mt-3 text-sm">{{ __('payment.processing_description') }}</p>
       </section>
     </x-ui.panel>
   </main>
