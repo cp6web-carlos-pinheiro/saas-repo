@@ -65,7 +65,7 @@
                     <x-ui.input type="hidden" name="access_profile" value="administrator" unstyled />
                 @else
                     <x-ui.field class="mt-2" :label="__('global_customer.access_profile')" for="access_profile" required :hint="__('global_customer.access_profile_help')">
-                        <x-ui.select id="access_profile" name="access_profile" required data-search="off">
+                        <x-ui.select id="access_profile" name="access_profile" required data-search="off" aria-describedby="access_profile-hint">
                             <option value="administrator" @selected($selectedProfile === 'administrator')>{{ __('global_customer.profile_administrator') }}</option>
                             <option value="custom" @selected($selectedProfile === 'custom')>{{ __('global_customer.profile_custom') }}</option>
                         </x-ui.select>

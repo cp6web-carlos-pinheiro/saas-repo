@@ -4,13 +4,12 @@
 
 @section('head')
   <meta name="description" content="{{ __('landing.description') }}" />
-  <meta name="theme-color" content="#0A1224" />
 @endsection
 
 @section('bodyClass', '')
 
 @section('content')
-  <main class="min-h-screen" style="background: linear-gradient(to bottom, #081021, #0c1731 45%, var(--ui-canvas));">
+  <main class="ui-brand-landing min-h-screen">
     <section class="mx-auto max-w-6xl px-6 py-6 text-white lg:px-10 lg:py-8">
       <div class="flex items-center justify-between gap-4">
         <div>

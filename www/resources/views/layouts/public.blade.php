@@ -41,6 +41,10 @@
 </head>
 <body class="ui-shell antialiased @yield('bodyClass')">
     @yield('content')
+    @hasSection('themeSwitcherHandled')
+    @else
+        <x-ui.theme-switcher class="fixed bottom-4 right-4 z-50 shadow-lg" />
+    @endif
     @yield('scripts')
 </body>
 </html>

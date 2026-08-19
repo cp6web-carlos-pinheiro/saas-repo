@@ -104,7 +104,7 @@
             </div>
           </form>
 
-          <aside class="rounded-3xl p-6 text-white" style="background: #0f172a;" aria-label="{{ __('onboarding.company_step_summary') }}">
+          <aside class="ui-brand-hero rounded-3xl p-6" aria-label="{{ __('onboarding.company_step_summary') }}">
             <p class="text-xs uppercase tracking-[0.2em] text-white/70">{{ __('onboarding.step_two') }}</p>
             <h2 class="mt-3 text-2xl font-bold">{{ __('onboarding.account_base') }}</h2>
             <p class="mt-3 text-sm text-white/80">{{ __('onboarding.account_base_description') }}</p>

@@ -3,9 +3,8 @@
     incorreto. Compartilhado entre todas as áreas que usam o Layout System (catálogo,
     Global Admin, área cliente, páginas públicas) — ver doc/11-design-system.md.
 
-    Nota: este script só resolve e aplica a preferência já salva. A alternância em tempo
-    de execução (o botão de light/dark/system) ainda não existe em nenhuma área, incluindo
-    o catálogo — ver observação na PR do item 2.
+    Este script resolve e aplica a preferência salva antes do carregamento do controle
+    compartilhado, que permite alterná-la em tempo de execução.
 --}}
 <script>
     (() => {

@@ -12,7 +12,7 @@ final class ManufacturingMetricCalculator
             return null;
         }
 
-return min(100.0, round(($standardMinutes > 0 ? $standardMinutes : $actualMinutes) / $actualMinutes * 100, 2));
+        return min(100.0, round(($standardMinutes > 0 ? $standardMinutes : $actualMinutes) / $actualMinutes * 100, 2));
     }
 
     public static function oee(float $productive, float $pause, float $planned, float $good, float $processed): array

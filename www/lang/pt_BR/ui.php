@@ -185,4 +185,9 @@ return [
     'sorted_ascending' => 'Ordenado em ordem crescente',
     'sorted_descending' => 'Ordenado em ordem decrescente',
     'activate_sort' => 'Ativar ordenação',
+    'required' => 'Obrigatório',
+    'theme' => 'Tema',
+    'theme_light' => 'Claro',
+    'theme_system' => 'Sistema',
+    'theme_dark' => 'Escuro',
 ];

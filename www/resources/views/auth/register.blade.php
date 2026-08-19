@@ -6,7 +6,7 @@
 
 @section('content')
   <main class="grid min-h-screen lg:grid-cols-2">
-    <section class="relative hidden overflow-hidden p-12 text-white lg:flex" style="background: #0f172a;">
+    <section class="ui-brand-hero relative hidden overflow-hidden p-12 lg:flex">
       <div class="absolute inset-0" style="background: radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--ui-primary) 35%, transparent), transparent 35%), radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--ui-primary) 25%, transparent), transparent 40%);"></div>
       <div class="relative max-w-md">
         <p class="text-xs uppercase tracking-[0.2em] text-white/80">{{ __('ui.app_name') }}</p>

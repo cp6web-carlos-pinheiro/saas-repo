@@ -1,5 +1,7 @@
 @extends('layouts.public')
 
+@section('themeSwitcherHandled', 'true')
+
 @section('bodyClass', 'ui-shell min-h-screen')
 
 @section('head-preload')

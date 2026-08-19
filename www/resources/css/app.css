@@ -150,6 +150,10 @@
     --ui-neutral: #334155;
     --ui-neutral-hover: #1e293b;
     --ui-on-neutral: #ffffff;
+    --ui-brand-hero: #0f172a;
+    --ui-brand-gradient-start: #081021;
+    --ui-brand-gradient-end: #0c1731;
+    --ui-on-brand: #ffffff;
     --ui-focus: rgba(37, 99, 235, 0.35);
     --ui-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
     --ui-shadow-lg: 0 22px 70px rgba(15, 23, 42, 0.12);
@@ -188,6 +192,10 @@ html[data-theme='dark'] {
     --ui-neutral: #cbd5e1;
     --ui-neutral-hover: #e2e8f0;
     --ui-on-neutral: #0f172a;
+    --ui-brand-hero: #0f172a;
+    --ui-brand-gradient-start: #081021;
+    --ui-brand-gradient-end: #0c1731;
+    --ui-on-brand: #ffffff;
     --ui-focus: rgba(96, 165, 250, 0.42);
     --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
     --ui-shadow-lg: 0 22px 70px rgba(0, 0, 0, 0.4);
@@ -1897,6 +1905,52 @@ body {
             radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--ui-primary) 14%, transparent), transparent 36%),
             radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--ui-primary) 10%, transparent), transparent 34%),
             var(--ui-canvas);
+    }
+
+    .ui-brand-hero {
+        color: var(--ui-on-brand);
+        background: var(--ui-brand-hero);
+    }
+
+    .ui-brand-landing {
+        color: var(--ui-on-brand);
+        background: linear-gradient(
+            to bottom,
+            var(--ui-brand-gradient-start),
+            var(--ui-brand-gradient-end) 45%,
+            var(--ui-canvas)
+        );
+    }
+
+    .ui-theme-switcher {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        border: 1px solid var(--ui-border);
+        border-radius: 9999px;
+        padding: 0.375rem 0.625rem;
+        color: var(--ui-text);
+        background: var(--ui-surface-raised);
+        box-shadow: var(--ui-shadow-sm);
+    }
+
+    .ui-theme-switcher:focus-within {
+        border-color: var(--ui-primary);
+        box-shadow: 0 0 0 3px var(--ui-focus);
+    }
+
+    .ui-theme-switcher-select {
+        border: 0;
+        outline: 0;
+        color: inherit;
+        background: transparent;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .ui-theme-switcher-select option {
+        color: var(--ui-text);
+        background: var(--ui-surface);
     }
 
     .auth-card {

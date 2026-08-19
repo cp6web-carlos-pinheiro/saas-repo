@@ -11,7 +11,7 @@
         {{ $label }}
         @if ($required)
             <span class="text-[var(--ui-danger)]" aria-hidden="true">*</span>
-            <span class="sr-only">obrigatório</span>
+            <span class="sr-only">{{ __('ui.required') }}</span>
         @endif
     </label>
     <div class="mt-2">{{ $slot }}</div>

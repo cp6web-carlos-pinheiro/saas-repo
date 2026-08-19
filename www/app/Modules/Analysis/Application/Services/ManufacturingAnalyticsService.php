@@ -53,7 +53,7 @@ final class ManufacturingAnalyticsService extends BaseService
             $rows[] = ['operation_key' => $key, 'operation_code' => $items->first()['operation_code'], 'sample_size' => $sample, 'average_minutes' => round($avg, 2), 'median_minutes' => round($this->percentile($values, .5), 2), 'p90_minutes' => round($this->percentile($values, .9), 2), 'min_minutes' => round((float) $values->min(), 2), 'max_minutes' => round((float) $values->max(), 2), 'outliers' => $values->filter(fn ($v) => $avg > 0 && abs($v - $avg) / $avg > .3)->values()->all(), 'eligible_for_recommendation' => $sample >= $minimumSample];
         }
 
-return ['contract_version' => 'ANA-004.v1', 'minimum_sample' => $minimumSample, 'rows' => $rows];
+        return ['contract_version' => 'ANA-004.v1', 'minimum_sample' => $minimumSample, 'rows' => $rows];
     }
 
     public function createRecommendation(array $filters = [], int $minimumSample = 5, ?int $userId = null): array
@@ -69,7 +69,7 @@ return ['contract_version' => 'ANA-004.v1', 'minimum_sample' => $minimumSample, 
             }$created[] = ManufacturingAnalyticsRecommendation::query()->create(['production_order_operation_id' => $operation->id, 'standard_time_id' => $operation->standard_time_id, 'standard_time_version' => $operation->standard_time_version, 'status' => 'PENDING', 'current_time_minutes' => $operation->productive_time_minutes, 'suggested_time_minutes' => $row['median_minutes'], 'sample_size' => $row['sample_size'], 'statistics' => $row, 'filters' => $filters])->toArray();
         }
 
-return ['evidence' => $evidence, 'recommendations' => $created, 'created_by' => $userId];
+        return ['evidence' => $evidence, 'recommendations' => $created, 'created_by' => $userId];
     }
 
     public function decideRecommendation(int $id, string $status, ?string $reason, ?int $userId = null): array
@@ -101,7 +101,7 @@ return ['evidence' => $evidence, 'recommendations' => $created, 'created_by' => 
             $query->whereDate('actual_completed_at', '<=', $filters['date_to']);
         }
 
-return $query->get()->map(function (ProductionOrderOperation $op): array {
+        return $query->get()->map(function (ProductionOrderOperation $op): array {
             $planned = (float) $op->productive_time_minutes;
             $actual = (float) $op->actual_productive_minutes;
 
@@ -155,15 +155,15 @@ return $query->get()->map(function (ProductionOrderOperation $op): array {
                 $row['availability_percent'] = $a === null ? null : round($a * 100, 2);
                 $row['performance_percent'] = $p === null ? null : round($p * 100, 2);
                 $row['quality_percent'] = $q === null ? null : round($q * 100, 2);
-                $row['oee_percent'] = ($a !== null && $p !== null && $q !== null) ? round($a * $p * $q * 100,2) : null;
+                $row['oee_percent'] = ($a !== null && $p !== null && $q !== null) ? round($a * $p * $q * 100, 2) : null;
             }
 
-return $row;
+            return $row;
         })->values()->all();
     }
 
-    private function percentile(Collection $values,float $percentile): float
+    private function percentile(Collection $values, float $percentile): float
     {
-        return ManufacturingMetricCalculator::percentile($values->all(),$percentile);
+        return ManufacturingMetricCalculator::percentile($values->all(), $percentile);
     }
 }

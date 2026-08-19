@@ -36,6 +36,37 @@ for (const input of currencyMaskedInputs) {
 	});
 }
 
+// Shared light/dark/system preference control used by public and application layouts.
+{
+	const storageKey = 'beyond-mrp.theme';
+	const media = window.matchMedia('(prefers-color-scheme: dark)');
+	const selectors = [...document.querySelectorAll('[data-ui-theme-select]')];
+
+	const applyTheme = (preference, persist = true) => {
+		const normalized = ['light', 'dark', 'system'].includes(preference) ? preference : 'system';
+		const resolved = normalized === 'system' ? (media.matches ? 'dark' : 'light') : normalized;
+
+		document.documentElement.dataset.theme = resolved;
+		document.documentElement.dataset.themePreference = normalized;
+		document.documentElement.style.colorScheme = resolved;
+		selectors.forEach((selector) => { selector.value = normalized; });
+
+		if (persist) {
+			try { window.localStorage.setItem(storageKey, normalized); } catch (_) {}
+		}
+	};
+
+	selectors.forEach((selector) => {
+		selector.addEventListener('change', () => applyTheme(selector.value));
+	});
+
+	media.addEventListener('change', () => {
+		if (document.documentElement.dataset.themePreference === 'system') applyTheme('system', false);
+	});
+
+	applyTheme(document.documentElement.dataset.themePreference ?? 'system', false);
+}
+
 const durationMaskedInputs = document.querySelectorAll('input[data-duration-mask="true"]');
 
 const formatMinutesToDuration = (minutes) => {
