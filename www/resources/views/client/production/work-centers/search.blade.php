@@ -7,31 +7,31 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ __('ui.work_centers') }}</h1>
-        <x-ui.button :href="route('production.work-centers.create')" variant="brand-primary" class="rounded-full">{{ __('production.work_centers.new_short') }}</x-ui.button>
+        <x-ui.button :href="route('production.work-centers.create')" variant="primary" class="rounded-full">{{ __('production.work_centers.new_short') }}</x-ui.button>
     </div>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <form class="flex gap-3" method="GET">
             <x-ui.input name="search" :value="$search" class="min-w-0 flex-1" :placeholder="__('production.work_centers.search')" />
-            <input type="hidden" name="status" value="{{ $status }}">
-            <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('production.filter') }}</x-ui.button>
+            <x-ui.input type="hidden" name="status" :value="$status" unstyled />
+            <x-ui.button type="submit" variant="secondary" class="rounded-xl">{{ __('production.filter') }}</x-ui.button>
         </form>
 
         @php($filterUrl = fn ($overrides = []) => route('production.work-centers.index', array_merge(['search' => $search, 'status' => $status], $overrides)))
         <div class="mt-4 flex flex-wrap gap-2 text-sm">
-            <a href="{{ $filterUrl(['status' => '']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === '' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('production.all') }}</a>
-            <a href="{{ $filterUrl(['status' => 'ACTIVE']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'ACTIVE' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('production.active') }}</a>
-            <a href="{{ $filterUrl(['status' => 'INACTIVE']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'INACTIVE' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('production.inactive') }}</a>
+            <a href="{{ $filterUrl(['status' => '']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === '' ? 'border-[var(--ui-primary)] bg-[var(--ui-primary-soft)] text-[var(--ui-primary-text)]' : 'border-[var(--ui-border)] text-[var(--ui-text-muted)] hover:bg-[var(--ui-surface-hover)]'])>{{ __('production.all') }}</a>
+            <a href="{{ $filterUrl(['status' => 'ACTIVE']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'ACTIVE' ? 'border-[var(--ui-primary)] bg-[var(--ui-primary-soft)] text-[var(--ui-primary-text)]' : 'border-[var(--ui-border)] text-[var(--ui-text-muted)] hover:bg-[var(--ui-surface-hover)]'])>{{ __('production.active') }}</a>
+            <a href="{{ $filterUrl(['status' => 'INACTIVE']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'INACTIVE' ? 'border-[var(--ui-primary)] bg-[var(--ui-primary-soft)] text-[var(--ui-primary-text)]' : 'border-[var(--ui-border)] text-[var(--ui-text-muted)] hover:bg-[var(--ui-surface-hover)]'])>{{ __('production.inactive') }}</a>
         </div>
 
         <div class="mt-6 overflow-x-auto">
-            <table class="min-w-full text-sm">
+            <x-ui.table :caption="__('ui.work_centers')">
                 <thead>
-                    <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                    <tr class="border-b border-[var(--ui-border)] text-left text-[var(--ui-text-muted)]">
                         <x-ui.sortable-header class="py-2" column="code" :label="__('production.code')" :sort="$sort" :direction="$direction" />
                         <x-ui.sortable-header class="py-2" column="name" :label="__('production.name')" :sort="$sort" :direction="$direction" />
                         <x-ui.sortable-header class="py-2" column="plant" :label="__('production.plant')" :sort="$sort" :direction="$direction" />
@@ -43,7 +43,7 @@
                 </thead>
                 <tbody>
                     @forelse ($centers as $center)
-                        <tr class="cursor-pointer border-b border-[#f1f3f4] transition hover:bg-[#f8fafd]" tabindex="0"
+                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0"
                             onclick="window.location='{{ route('production.work-centers.show', $center) }}'"
                             onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('production.work-centers.show', $center) }}'; }"
                         >
@@ -56,10 +56,10 @@
                             <td class="px-3 py-2">{{ $center->is_active ? __('production.active') : __('production.inactive') }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="px-3 py-6 text-center text-[#5f6368]">{{ __('production.work_centers.empty') }}</td></tr>
+                        <tr><td colspan="7" class="px-3 py-6 text-center text-[var(--ui-text-muted)]">{{ __('production.work_centers.empty') }}</td></tr>
                     @endforelse
                 </tbody>
-            </table>
+            </x-ui.table>
         </div>
 
         <div class="mt-6">{{ $centers->links() }}</div>

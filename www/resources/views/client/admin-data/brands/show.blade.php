@@ -8,12 +8,12 @@
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ $brand->name }}</h1>
         <div class="flex flex-wrap gap-3">
-            <x-ui.button :href="route('admin-data.brands.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
-            <x-ui.button :href="route('admin-data.brands.edit', $brand)" variant="material-edit" class="rounded-full">{{ __('admin_data_brands.edit') }}</x-ui.button>
+            <x-ui.button :href="route('admin-data.brands.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+            <x-ui.button :href="route('admin-data.brands.edit', $brand)" variant="primary" class="rounded-full">{{ __('admin_data_brands.edit') }}</x-ui.button>
             <form method="POST" action="{{ route('admin-data.brands.destroy', $brand) }}" data-admin-delete-confirm data-admin-name="{{ $brand->name }}" data-confirm-title="{{ __('admin_data.confirm_delete_title') }}" data-confirm-text="{{ __('admin_data.confirm_delete_text') }}" data-confirm-confirm="{{ __('admin_data.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('admin_data.confirm_delete_cancel') }}">
                 @csrf
                 @method('DELETE')
-                <x-ui.button type="submit" variant="material-remove" class="rounded-full">{{ __('admin_data_brands.remove') }}</x-ui.button>
+                <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('admin_data_brands.remove') }}</x-ui.button>
             </form>
         </div>
     </div>
@@ -22,7 +22,7 @@
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('admin_data.reference')">#{{ $brand->id }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('admin_data.name')">{{ $brand->name }}</x-ui.definition-item>

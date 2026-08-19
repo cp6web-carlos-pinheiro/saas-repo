@@ -15,14 +15,14 @@
         <div>
             <h1 class="font-display text-3xl font-bold">{{ $editing ? __('bom.edit') : __('bom.create') }}</h1>
         </div>
-        <x-ui.button :href="$editing ? route('bom.material-lists.show', $bom) : route('bom.material-lists.index')" variant="material-back" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('bom.material-lists.show', $bom) : route('bom.material-lists.index')" variant="secondary" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ $editing ? route('bom.material-lists.update', $bom) : route('bom.material-lists.store') }}" class="space-y-8">
             @csrf
             @if ($editing)
@@ -32,13 +32,13 @@
             @if ($editing)
                 <x-ui.input type="hidden" name="product_id" :value="old('product_id', $bom->product_id)" unstyled />
 
-                <div class="rounded-2xl border border-[#dadce0] bg-white p-4">
+                <div class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-4">
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold">{{ $bom->product?->sku }}</h2>
-                            <p class="text-sm text-[#5f6368]">{{ $bom->product?->description ?? '—' }}</p>
+                            <p class="text-sm text-[var(--ui-text-muted)]">{{ $bom->product?->description ?? '—' }}</p>
                         </div>
-                        <span class="rounded-full px-3 py-1 text-xs {{ $bom->status === 'DRAFT' ? 'bg-slate-100 text-slate-600' : ($bom->status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700') }}">
+                        <span class="rounded-full px-3 py-1 text-xs {{ $bom->status === 'DRAFT' ? 'bg-[var(--ui-surface-muted)] text-[var(--ui-text-muted)]' : ($bom->status === 'APPROVED' ? 'bg-[var(--ui-success-soft)] text-[var(--ui-success)]' : 'bg-[var(--ui-warning-soft)] text-[var(--ui-warning-text)]') }}">
                             {{ __('bom.status_'.$bom->status) }}
                         </span>
                     </div>
@@ -46,7 +46,7 @@
             @else
                 <div class="grid gap-5 md:grid-cols-2">
                     <div class="md:col-span-2">
-                        <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="product_id">{{ __('bom.select_product') }}</label>
+                        <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="product_id">{{ __('bom.select_product') }}</label>
                         <x-ui.select id="product_id" name="product_id" required data-search="on" data-placeholder="{{ __('bom.select_product') }}" data-ajax-url="{{ route('products.search') }}" data-minimum-input-length="1">
                             <option value="">{{ __('bom.select_product') }}</option>
                             @if ($selectedProductId !== null && $productsById->has((int) $selectedProductId))
@@ -55,39 +55,39 @@
                                 </option>
                             @endif
                         </x-ui.select>
-                        <p class="mt-2 text-sm text-[#5f6368]">{{ __('bom.product_hint') }}</p>
-                        @error('product_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                        <p class="mt-2 text-sm text-[var(--ui-text-muted)]">{{ __('bom.product_hint') }}</p>
+                        @error('product_id')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
                     </div>
                 </div>
             @endif
 
             <div class="grid gap-5 md:grid-cols-3">
                 <div>
-                    <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="status">{{ __('bom.status') }}</label>
+                    <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="status">{{ __('bom.status') }}</label>
                     <x-ui.select id="status" name="status" required data-search="off">
                         <option value="DRAFT" @selected($selectedStatus === 'DRAFT')>{{ __('bom.status_DRAFT') }}</option>
                         <option value="APPROVED" @selected($selectedStatus === 'APPROVED')>{{ __('bom.status_APPROVED') }}</option>
                         <option value="OBSOLETE" @selected($selectedStatus === 'OBSOLETE')>{{ __('bom.status_OBSOLETE') }}</option>
                     </x-ui.select>
-                    @error('status')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                    @error('status')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="effective_from">{{ __('bom.effective_from') }}</label>
+                    <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="effective_from">{{ __('bom.effective_from') }}</label>
                     <x-ui.input id="effective_from" type="date" name="effective_from" :value="old('effective_from', $bom?->effective_from?->format('Y-m-d'))" />
-                    @error('effective_from')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                    @error('effective_from')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="effective_to">{{ __('bom.effective_to') }}</label>
+                    <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="effective_to">{{ __('bom.effective_to') }}</label>
                     <x-ui.input id="effective_to" type="date" name="effective_to" :value="old('effective_to', $bom?->effective_to?->format('Y-m-d'))" />
-                    @error('effective_to')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                    @error('effective_to')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
                 </div>
 
                 <div class="md:col-span-3">
-                    <label class="mb-2 block text-sm font-medium text-[#5f6368]" for="description">{{ __('bom.description') }}</label>
+                    <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="description">{{ __('bom.description') }}</label>
                     <x-ui.input id="description" name="description" :value="old('description', $bom?->description ?? '')" maxlength="255" />
-                    @error('description')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                    @error('description')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
                 </div>
             </div>
 
@@ -95,14 +95,17 @@
                 <div class="flex flex-wrap items-end justify-between gap-3">
                     <div>
                         <h2 class="text-xl font-semibold">{{ __('bom.items') }}</h2>
-                        <p class="text-sm text-[#5f6368]">{{ __('bom.product_hint') }}</p>
+                        <p class="text-sm text-[var(--ui-text-muted)]">{{ __('bom.product_hint') }}</p>
                     </div>
-                    <button type="button" class="rounded-full border border-[#dadce0] px-4 py-2 text-sm font-medium" data-bom-add-item>{{ __('bom.add_item') }}</button>
+                    <x-ui.button type="button" variant="outline" class="rounded-full" data-bom-add-item>
+                        <x-ui.icon name="plus" size="sm" />
+                        {{ __('bom.add_item') }}
+                    </x-ui.button>
                 </div>
 
                 <div class="overflow-x-auto">
                     <div class="min-w-[920px]">
-                        <div class="grid grid-cols-[2fr_1fr_1fr_auto] gap-4 border-b border-[#dadce0] pb-2 text-xs font-semibold uppercase tracking-wide text-[#5f6368]">
+                        <div class="grid grid-cols-[2fr_1fr_1fr_auto] gap-4 border-b border-[var(--ui-border)] pb-2 text-xs font-semibold uppercase tracking-wide text-[var(--ui-text-muted)]">
                             <span>{{ __('bom.component_product') }}</span>
                             <span>{{ __('bom.quantity_per') }}</span>
                             <span>{{ __('bom.uom') }}</span>
@@ -128,7 +131,7 @@
                                                 </option>
                                             @endif
                                         </x-ui.select>
-                                        @error('items.'.$index.'.component_product_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                                        @error('items.'.$index.'.component_product_id')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
                                     </div>
 
                                     <div>
@@ -138,20 +141,11 @@
                                     <div>
                                         <x-ui.input type="hidden" name="items[{{ $index }}][unit_id]" :value="$selectedUnitId > 0 ? (string) $selectedUnitId : ''" data-bom-unit-id unstyled />
                                         <x-ui.input type="text" :value="$selectedUnitLabel" data-bom-unit-label readonly />
-                                        @error('items.'.$index.'.unit_id')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                                        @error('items.'.$index.'.unit_id')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
                                     </div>
 
                                     <div class="flex justify-end">
-                                        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-bom-remove-item aria-label="{{ __('bom.remove_item') }}" title="{{ __('bom.remove_item') }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                <path d="M3 6h18" />
-                                                <path d="M8 6V4h8v2" />
-                                                <path d="M19 6l-1 14H6L5 6" />
-                                                <path d="M10 11v6" />
-                                                <path d="M14 11v6" />
-                                            </svg>
-                                            <span class="sr-only">{{ __('bom.remove_item') }}</span>
-                                        </button>
+                                        <x-ui.icon-button type="button" icon="trash" variant="danger" data-bom-remove-item :label="__('bom.remove_item')" />
                                     </div>
                                 </div>
                             @endforeach
@@ -159,12 +153,12 @@
                     </div>
                 </div>
 
-                @error('items')<p class="text-sm text-red-600">{{ $message }}</p>@enderror
+                @error('items')<p class="text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
             </section>
 
             <div class="flex flex-wrap gap-3">
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full">{{ __('bom.save') }}</x-ui.button>
-                <x-ui.button :href="$editing ? route('bom.material-lists.show', $bom) : route('bom.material-lists.index')" variant="material-back" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" class="rounded-full">{{ __('bom.save') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('bom.material-lists.show', $bom) : route('bom.material-lists.index')" variant="secondary" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>
@@ -188,16 +182,7 @@
         </div>
 
         <div class="flex justify-end">
-            <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-bom-remove-item aria-label="{{ __('bom.remove_item') }}" title="{{ __('bom.remove_item') }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M3 6h18" />
-                    <path d="M8 6V4h8v2" />
-                    <path d="M19 6l-1 14H6L5 6" />
-                    <path d="M10 11v6" />
-                    <path d="M14 11v6" />
-                </svg>
-                <span class="sr-only">{{ __('bom.remove_item') }}</span>
-            </button>
+            <x-ui.icon-button type="button" icon="trash" variant="danger" data-bom-remove-item :label="__('bom.remove_item')" />
         </div>
     </div>
 </template>

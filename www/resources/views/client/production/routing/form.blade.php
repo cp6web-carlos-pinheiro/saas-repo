@@ -9,14 +9,14 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ $editing ? __('production.routing.edit') : __('production.routing.new') }}</h1>
-        <x-ui.button :href="$editing ? route('production.routing.show', $version) : route('production.routing.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('production.routing.show', $version) : route('production.routing.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ $editing ? route('production.routing.update', $version) : route('production.routing.store') }}" class="space-y-5">
             @csrf
             @if ($editing)
@@ -49,8 +49,8 @@
             </label>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('production.routing.show', $version) : route('production.routing.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('production.save') : __('production.routing.create') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('production.routing.show', $version) : route('production.routing.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" class="rounded-full" :full="true">{{ $editing ? __('production.save') : __('production.routing.create') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>

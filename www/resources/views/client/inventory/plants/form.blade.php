@@ -9,14 +9,14 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ $editing ? __('plant.edit') : __('plant.create') }}</h1>
-        <x-ui.button :href="$editing ? route('inventory.plants.show', $plant) : route('inventory.plants.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('inventory.plants.show', $plant) : route('inventory.plants.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ $editing ? route('inventory.plants.update', $plant) : route('inventory.plants.store') }}" class="space-y-5">
             @csrf
             @if ($editing)
@@ -26,14 +26,14 @@
             <label class="block text-sm font-medium">
                 {{ __('plant.name') }}
                 <x-ui.input name="name" :value="old('name', $plant?->name)" class="mt-2" required />
-                @error('name')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                @error('name')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
             </label>
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <label class="block text-sm font-medium">
                     {{ __('plant.timezone') }}
                     <x-ui.input name="timezone" :value="old('timezone', $plant?->timezone ?? 'UTC')" class="mt-2" required maxlength="50" />
-                    @error('timezone')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('timezone')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
@@ -42,13 +42,13 @@
                         <option value="1" @selected((string) old('is_active', $plant?->is_active ?? true) === '1')>{{ __('plant.active') }}</option>
                         <option value="0" @selected((string) old('is_active', $plant?->is_active ?? true) === '0')>{{ __('plant.inactive') }}</option>
                     </x-ui.select>
-                    @error('is_active')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('is_active')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
             </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('inventory.plants.show', $plant) : route('inventory.plants.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('plant.save') : __('plant.create') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('inventory.plants.show', $plant) : route('inventory.plants.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" class="rounded-full" :full="true">{{ $editing ? __('plant.save') : __('plant.create') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>

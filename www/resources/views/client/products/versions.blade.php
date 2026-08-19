@@ -11,7 +11,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-3">
             @if ($selectedProduct !== null)
-                <x-ui.button :href="route('products.versions.create', $selectedProduct)" variant="brand-primary" class="rounded-full">{{ __('product.version_create') }}</x-ui.button>
+                <x-ui.button :href="route('products.versions.create', $selectedProduct)" variant="primary" class="rounded-full">{{ __('product.version_create') }}</x-ui.button>
             @endif
         </div>
     </div>
@@ -20,10 +20,10 @@
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <form class="grid gap-4 md:grid-cols-[1fr_auto] md:items-end" method="GET">
             <div>
-                <label for="product_id" class="mb-2 block text-sm font-medium text-[#5f6368]">{{ __('product.choose_product') }}</label>
+                <label for="product_id" class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]">{{ __('product.choose_product') }}</label>
                 <x-ui.select
                     id="product_id"
                     name="product_id"
@@ -40,15 +40,15 @@
                     @endif
                 </x-ui.select>
             </div>
-            <x-ui.button type="submit" variant="brand-primary" class="rounded-full">{{ __('product.filter') }}</x-ui.button>
+            <x-ui.button type="submit" variant="primary" class="rounded-full">{{ __('product.filter') }}</x-ui.button>
         </form>
 
         @if ($selectedProduct !== null)
-            <div class="mt-6 rounded-2xl border border-[#dadce0] bg-white p-4">
+            <div class="mt-6 rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-4">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold">{{ $selectedProduct->sku }}</h2>
-                        <p class="text-sm text-[#5f6368]">{{ $selectedProduct->description ?? '—' }}</p>
+                        <p class="text-sm text-[var(--ui-text-muted)]">{{ $selectedProduct->description ?? '—' }}</p>
                     </div>
                     <x-ui.definition-item-status
                         :label="__('product.status')"
@@ -59,9 +59,9 @@
                 </div>
 
                 <div class="mt-5 overflow-x-auto">
-                    <table class="min-w-full text-sm">
+                    <x-ui.table :caption="__('product.versions_title')">
                         <thead>
-                            <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                            <tr class="border-b border-[var(--ui-border)] text-left text-[var(--ui-text-muted)]">
                                 <x-ui.sortable-header column="version_number" :label="__('product.version')" :sort="$sort" :direction="$direction" />
                                 <x-ui.sortable-header column="status" :label="__('product.status')" :sort="$sort" :direction="$direction" />
                                 <x-ui.sortable-header column="effective_from" :label="__('product.effective_from')" :sort="$sort" :direction="$direction" />
@@ -72,7 +72,7 @@
                         </thead>
                         <tbody>
                             @forelse ($versions as $version)
-                                <tr class="cursor-pointer border-b border-[#f1f3f4] transition hover:bg-[#f8fafd]" tabindex="0" onclick="window.location='{{ route('products.versions.show', [$selectedProduct, $version]) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('products.versions.show', [$selectedProduct, $version]) }}'; }">
+                                <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0" onclick="window.location='{{ route('products.versions.show', [$selectedProduct, $version]) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('products.versions.show', [$selectedProduct, $version]) }}'; }">
                                     <td class="px-3 py-4 font-semibold">{{ $version->version_number }}</td>
                                     <td class="px-3 py-4">
                                         <x-ui.definition-item-status
@@ -82,22 +82,22 @@
                                             inline
                                         />
                                     </td>
-                                    <td class="px-3 py-4 text-[#5f6368]">{{ $version->effective_from?->format('d/m/Y') ?? '—' }}</td>
-                                    <td class="px-3 py-4 text-[#5f6368]">{{ $version->effective_to?->format('d/m/Y') ?? '—' }}</td>
-                                    <td class="px-3 py-4 text-[#5f6368]">{{ $version->compatibility_rule }}</td>
-                                    <td class="px-3 py-4 text-[#5f6368]">{{ $version->change_summary ?? '—' }}</td>
+                                    <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $version->effective_from?->format('d/m/Y') ?? '—' }}</td>
+                                    <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $version->effective_to?->format('d/m/Y') ?? '—' }}</td>
+                                    <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $version->compatibility_rule }}</td>
+                                    <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $version->change_summary ?? '—' }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-3 py-10 text-center text-[#5f6368]">{{ __('product.no_versions') }}</td>
+                                    <td colspan="6" class="px-3 py-10 text-center text-[var(--ui-text-muted)]">{{ __('product.no_versions') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
-                    </table>
+                    </x-ui.table>
                 </div>
             </div>
         @else
-            <div class="mt-6 rounded-2xl border border-dashed border-[#dadce0] bg-[#f8fafd] p-6 text-sm text-[#5f6368]">
+            <div class="mt-6 rounded-2xl border border-dashed border-[var(--ui-border)] bg-[var(--ui-surface-muted)] p-6 text-sm text-[var(--ui-text-muted)]">
                 {{ __('product.choose_product_hint') }}
             </div>
         @endif

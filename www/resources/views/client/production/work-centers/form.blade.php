@@ -9,14 +9,14 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ $editing ? __('production.work_centers.edit') : __('production.work_centers.new') }}</h1>
-        <x-ui.button :href="$editing ? route('production.work-centers.show', $workCenter) : route('production.work-centers.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('production.work-centers.show', $workCenter) : route('production.work-centers.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ $editing ? route('production.work-centers.update', $workCenter) : route('production.work-centers.store') }}" class="space-y-5">
             @csrf
             @if ($editing)
@@ -54,15 +54,15 @@
                 <label class="block text-sm font-medium">{{ __('production.efficiency') }} (%)
                     <x-ui.input class="mt-2" name="efficiency_factor" type="number" step="0.01" min="0" max="1000" :value="old('efficiency_factor', $workCenter?->efficiency_factor)" required />
                 </label>
-                <label class="inline-flex items-center gap-2 self-end pb-2 text-sm">
-                    <input type="hidden" name="is_active" value="0" />
-                    <input type="checkbox" name="is_active" value="1" @checked((bool) old('is_active', $workCenter?->is_active ?? true)) /> {{ __('production.active') }}
-                </label>
+                <div class="self-end pb-2">
+                    <x-ui.input type="hidden" name="is_active" value="0" unstyled />
+                    <x-ui.checkbox name="is_active" value="1" :checked="(bool) old('is_active', $workCenter?->is_active ?? true)">{{ __('production.active') }}</x-ui.checkbox>
+                </div>
             </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('production.work-centers.show', $workCenter) : route('production.work-centers.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('production.save') : __('production.work_centers.create') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('production.work-centers.show', $workCenter) : route('production.work-centers.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" class="rounded-full" :full="true">{{ $editing ? __('production.save') : __('production.work_centers.create') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>
