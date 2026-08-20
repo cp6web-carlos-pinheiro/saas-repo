@@ -27,16 +27,16 @@
             <x-ui.field :label="__('global_tutorial.content_html')" :error="$errors->first('content_html')">
                 <div class="ui-editor-frame" data-global-tutorial-html-editor @if($errors->has('content_html')) aria-invalid="true" @endif>
                     <x-ui.editor-toolbar :aria-label="__('global_tutorial.content_html')">
-                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="formatBlock" data-editor-value="P" title="Parágrafo">P</button>
-                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="formatBlock" data-editor-value="H2" title="Título">H2</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="formatBlock" data-editor-value="P" title="{{ __('global_tutorial.toolbar.paragraph') }}">P</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="formatBlock" data-editor-value="H2" title="{{ __('global_tutorial.toolbar.heading') }}">H2</button>
                         <span class="ui-editor-toolbar-divider"></span>
-                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="bold" title="Negrito"><strong>B</strong></button>
-                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="italic" title="Itálico"><em>I</em></button>
-                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="underline" title="Sublinhado"><u>U</u></button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="bold" title="{{ __('global_tutorial.toolbar.bold') }}"><strong>B</strong></button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="italic" title="{{ __('global_tutorial.toolbar.italic') }}"><em>I</em></button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="underline" title="{{ __('global_tutorial.toolbar.underline') }}"><u>U</u></button>
                         <span class="ui-editor-toolbar-divider"></span>
-                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="insertUnorderedList" title="Lista">• Lista</button>
-                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="createLink" title="Link">Link</button>
-                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="removeFormat" title="Limpar formatação">Limpar</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="insertUnorderedList" title="{{ __('global_tutorial.toolbar.list') }}">• {{ __('global_tutorial.toolbar.list') }}</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="createLink" title="{{ __('global_tutorial.toolbar.link') }}">{{ __('global_tutorial.toolbar.link') }}</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="removeFormat" title="{{ __('global_tutorial.toolbar.clear_formatting') }}">{{ __('global_tutorial.toolbar.clear') }}</button>
                     </x-ui.editor-toolbar>
 
                     <div

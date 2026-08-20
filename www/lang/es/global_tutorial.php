@@ -24,4 +24,9 @@ return [
     'confirm_delete_text' => 'Está a punto de eliminar el tutorial de la ruta :name. Esta acción no se puede deshacer.',
     'confirm_delete_confirm' => 'Sí, eliminar',
     'confirm_delete_cancel' => 'Cancelar',
+    'toolbar' => [
+        'paragraph' => 'Párrafo', 'heading' => 'Título', 'bold' => 'Negrita',
+        'italic' => 'Cursiva', 'underline' => 'Subrayado', 'list' => 'Lista',
+        'link' => 'Enlace', 'clear_formatting' => 'Limpiar formato', 'clear' => 'Limpiar',
+    ],
 ];

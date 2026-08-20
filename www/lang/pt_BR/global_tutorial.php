@@ -24,4 +24,9 @@ return [
     'confirm_delete_text' => 'Você está prestes a excluir o tutorial da rota :name. Essa ação não pode ser desfeita.',
     'confirm_delete_confirm' => 'Sim, excluir',
     'confirm_delete_cancel' => 'Cancelar',
+    'toolbar' => [
+        'paragraph' => 'Parágrafo', 'heading' => 'Título', 'bold' => 'Negrito',
+        'italic' => 'Itálico', 'underline' => 'Sublinhado', 'list' => 'Lista',
+        'link' => 'Link', 'clear_formatting' => 'Limpar formatação', 'clear' => 'Limpar',
+    ],
 ];

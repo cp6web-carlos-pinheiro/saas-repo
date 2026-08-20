@@ -24,4 +24,9 @@ return [
     'confirm_delete_text' => 'You are about to delete the tutorial for route :name. This action cannot be undone.',
     'confirm_delete_confirm' => 'Yes, delete',
     'confirm_delete_cancel' => 'Cancel',
+    'toolbar' => [
+        'paragraph' => 'Paragraph', 'heading' => 'Heading', 'bold' => 'Bold',
+        'italic' => 'Italic', 'underline' => 'Underline', 'list' => 'List',
+        'link' => 'Link', 'clear_formatting' => 'Clear formatting', 'clear' => 'Clear',
+    ],
 ];
