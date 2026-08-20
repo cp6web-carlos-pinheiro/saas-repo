@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('bodyClass', 'ind-page')
+@section('bodyClass', 'ui-shell')
 
 @section('content')
     @php
@@ -157,198 +157,61 @@
             && app(\App\Services\SaaS\CompanyUserAccessService::class)->isCompanyAdministrator($user, $company);
     @endphp
 
-    <div class="ind-layout" data-client-sidebar-shell>
-        <x-ui.sidebar id="sidebar" variant="industrial" aria-label="{{ __('ui.modules') }}" data-client-sidebar>
-            <x-slot:header>
-                <div class="ind-brand-title" data-client-sidebar-content>
-                    <strong>{{ __('ui.app_name') }}</strong>
-                    <span class="mt-1 block text-xs font-medium text-[#5f6368]">{{ $activeCompanyName }}</span>
-                </div>
-                <button
-                    type="button"
-                    class="ind-sidebar-toggle"
-                    data-client-sidebar-toggle
-                    aria-expanded="true"
-                    aria-label="{{ __('ui.collapse_sidebar') }}"
-                    title="{{ __('ui.toggle_sidebar') }}"
-                    data-collapse-label="{{ __('ui.collapse_sidebar') }}"
-                    data-expand-label="{{ __('ui.expand_sidebar') }}"
-                >
-                    <span aria-hidden="true" data-client-sidebar-toggle-icon>←</span>
-                </button>
-            </x-slot:header>
+    @php
+        $clientNavigation = collect($availableModules)
+            ->filter(fn (string $module): bool => $module !== 'administration' || $canManageAccesses)
+            ->map(fn (string $module): array => [
+                'label' => $moduleLabels[$module] ?? ucfirst($module),
+                'icon' => [
+                    'engineering' => 'package',
+                    'planning' => 'calendar',
+                    'shop_floor' => 'building-factory',
+                    'analysis' => 'chart-bar',
+                    'administration' => 'users',
+                    'inventory' => 'building-factory',
+                    'purchasing' => 'shopping-cart',
+                    'sales' => 'receipt',
+                ][$module] ?? 'package',
+                'active' => collect($moduleSubitems[$module] ?? [])->contains(fn (array $item): bool => (bool) ($item['active'] ?? false)),
+                'children' => $moduleSubitems[$module] ?? [],
+            ])
+            ->values()
+            ->all();
+    @endphp
 
-            <x-ui.menu variant="industrial" :aria-label="__('ui.modules')" data-client-sidebar-content>
-                @forelse ($availableModules as $module)
-                    @if (isset($moduleLabels[$module]))
-                        @php
-                            $subitems = $moduleSubitems[$module] ?? [];
-                            $hasActiveSubitem = collect($subitems)->contains(static fn (array $item): bool => (bool) ($item['active'] ?? false));
-                            $moduleActive = $hasActiveSubitem || (empty($subitems) && $loop->first);
-                        @endphp
+    <x-ui.app-shell
+        :navigation="$clientNavigation"
+        navigation-label="{{ __('ui.modules') }}"
+        brand-name="{{ __('ui.app_name') }}"
+        brand-href="{{ route('dashboard.industrial') }}"
+        :brand-subtitle="$activeCompanyName"
+        :header-title="$currentPageTitle"
+    >
+        <x-slot:headerActions>
+            <x-ui.icon-button id="tutorialToggle" type="button" icon="help-circle" variant="ghost" :label="__('ui.tutorial_help')" aria-controls="tutorialPanel" aria-expanded="false" aria-pressed="false" />
+            <x-ui.icon-button id="settingsToggle" type="button" icon="settings" variant="ghost" :label="__('ui.settings')" aria-controls="settingsPanel" aria-expanded="false" aria-pressed="false" />
+        </x-slot:headerActions>
 
-                        <div @class(['ind-module-group', 'is-open' => $hasActiveSubitem]) data-module-group>
-                            @if ($subitems !== [])
-                                <button
-                                    type="button"
-                                    @class(['ind-module-parent', 'ind-module-parent-toggle', 'is-active' => $moduleActive])
-                                    data-module-toggle
-                                    aria-expanded="{{ $hasActiveSubitem ? 'true' : 'false' }}"
-                                >
-                                    <span class="inline-flex items-center gap-2">
-                                        <span class="inline-flex h-4 w-4 items-center justify-center text-[#5f6368]" aria-hidden="true">
-                                            @switch($moduleIcons[$module] ?? null)
-                                                @case('production_mrp')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 19h18M5 19V9l4-3 4 3v10M13 19V5h6v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @case('inventory')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 7.5 12 3l9 4.5-9 4.5-9-4.5Zm0 4.5L12 16.5 21 12M3 16.5 12 21l9-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @case('purchasing')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 5h2l2 10h10l2-7H7M9 19a1 1 0 1 0 0 .01M17 19a1 1 0 1 0 0 .01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @case('sales')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 18V6m5 12V10m5 8V8m5 10V4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 20h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                                    @break
-                                                @case('products')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                                    @break
-                                                @case('suppliers')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 20V8l8-4 8 4v12" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 20v-4h6v4M9 10h1M14 10h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                                    @break
-                                                @case('customers')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M16 19a4 4 0 0 0-8 0M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm9 6a4 4 0 0 0-3-3.87M18 4.13A3 3 0 0 1 18 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @case('financial')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M8 14h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                                    @break
-                                                @case('reports')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 20h12M8 20V8m4 12V4m4 16v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                                    @break
-                                                @case('audit')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3 5 6v6c0 4.4 3 8.4 7 9 4-0.6 7-4.6 7-9V6l-7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @case('users')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M16 19a4 4 0 0 0-8 0M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @default
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/></svg>
-                                            @endswitch
-                                        </span>
-                                        <span>{{ $moduleLabels[$module] }}</span>
-                                    </span>
-                                    <span class="ind-module-caret" aria-hidden="true">▾</span>
-                                </button>
+        <x-slot:sidebarFooter>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <x-ui.button type="submit" variant="secondary" :full="true" size="lg" class="justify-start gap-2">
+                    <x-ui.icon name="logout" size="sm" />
+                    <span data-ds-sidebar-label>{{ __('ui.logout') }}</span>
+                </x-ui.button>
+            </form>
+        </x-slot:sidebarFooter>
 
-                                <div class="ind-module-subitems" data-module-panel>
-                                    @foreach ($subitems as $subitem)
-                                        @if (! empty($subitem['href']))
-                                            <a href="{{ $subitem['href'] }}" @class(['ind-module-subitem', 'is-active' => (bool) ($subitem['active'] ?? false)])>
-                                                {{ $subitem['label'] }}
-                                            </a>
-                                        @else
-                                            <span class="ind-module-subitem is-disabled">{{ $subitem['label'] }}</span>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            @else
-                                <x-ui.menu-item
-                                    variant="industrial"
-                                    href="#"
-                                    data-client-sidebar-link
-                                    :active="$moduleActive"
-                                    class="ind-module-parent"
-                                >
-                                    <span class="inline-flex items-center gap-2">
-                                        <span class="inline-flex h-4 w-4 items-center justify-center text-[#5f6368]" aria-hidden="true">
-                                            @switch($moduleIcons[$module] ?? null)
-                                                @case('production_mrp')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 19h18M5 19V9l4-3 4 3v10M13 19V5h6v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @case('inventory')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 7.5 12 3l9 4.5-9 4.5-9-4.5Zm0 4.5L12 16.5 21 12M3 16.5 12 21l9-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @case('purchasing')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M3 5h2l2 10h10l2-7H7M9 19a1 1 0 1 0 0 .01M17 19a1 1 0 1 0 0 .01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @case('sales')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 18V6m5 12V10m5 8V8m5 10V4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 20h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                                    @break
-                                                @case('products')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                                    @break
-                                                @case('suppliers')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M4 20V8l8-4 8 4v12" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 20v-4h6v4M9 10h1M14 10h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                                    @break
-                                                @case('customers')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M16 19a4 4 0 0 0-8 0M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm9 6a4 4 0 0 0-3-3.87M18 4.13A3 3 0 0 1 18 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @case('financial')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M8 14h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                                    @break
-                                                @case('reports')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M6 20h12M8 20V8m4 12V4m4 16v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                                    @break
-                                                @case('audit')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M12 3 5 6v6c0 4.4 3 8.4 7 9 4-0.6 7-4.6 7-9V6l-7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @case('users')
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M16 19a4 4 0 0 0-8 0M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                    @break
-                                                @default
-                                                    <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/></svg>
-                                            @endswitch
-                                        </span>
-                                        <span>{{ $moduleLabels[$module] }}</span>
-                                    </span>
-                                </x-ui.menu-item>
-                            @endif
-                        </div>
-                    @endif
-                @empty
-                    <x-ui.menu-item variant="industrial" href="#" class="text-muted">{{ __('ui.modules') }}</x-ui.menu-item>
-                @endforelse
-            </x-ui.menu>
+        @yield('client-content')
+    </x-ui.app-shell>
 
-            <x-slot:footer>
-                <form method="POST" action="{{ route('logout') }}" data-client-sidebar-content>
-                    @csrf
-                    <button class="ind-logout-button" type="submit">{{ __('ui.logout') }}</button>
-                </form>
-            </x-slot:footer>
-        </x-ui.sidebar>
-
-        <div class="ind-main-area">
-            <header class="ind-topbar">
-                <div class="ind-topbar-left">
-                </div>
-
-                <div class="ind-topbar-right">
-                    <button id="tutorialToggle" class="ind-icon-button" type="button" aria-label="{{ __('ui.tutorial_help') }}" aria-controls="tutorialPanel" aria-expanded="false" aria-pressed="false" title="{{ __('ui.tutorial_help') }}">
-                        <span class="ind-help-icon" aria-hidden="true">?</span>
-                    </button>
-                    <button id="settingsToggle" class="ind-icon-button" type="button" aria-label="{{ __('ui.settings') }}" aria-controls="settingsPanel" aria-expanded="false" aria-pressed="false">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z" stroke="currentColor" stroke-width="2"/>
-                            <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.2 1.2 0 0 1 0 1.7l-1 1a1.2 1.2 0 0 1-1.7 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a1.2 1.2 0 0 1-1.2 1.2h-1.4A1.2 1.2 0 0 1 11.4 20v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.2 1.2 0 0 1-1.7 0l-1-1a1.2 1.2 0 0 1 0-1.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H6A1.2 1.2 0 0 1 4.8 13v-1.4A1.2 1.2 0 0 1 6 10.4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1.2 1.2 0 0 1 0-1.7l1-1a1.2 1.2 0 0 1 1.7 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4A1.2 1.2 0 0 1 12.6 2.8H14A1.2 1.2 0 0 1 15.2 4v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.2 1.2 0 0 1 1.7 0l1 1a1.2 1.2 0 0 1 0 1.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2A1.2 1.2 0 0 1 21.2 11.6V13a1.2 1.2 0 0 1-1.2 1.2h-.2a1 1 0 0 0-.9.8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-                </div>
-            </header>
-
-            <main>
-                @yield('client-content')
-            </main>
-        </div>
-    </div>
-
-    <div id="tutorialOverlay" class="ind-settings-overlay" aria-hidden="true"></div>
-    <aside id="tutorialPanel" class="ind-settings-panel ind-tutorial-panel" aria-hidden="true" aria-label="{{ __('ui.tutorial_panel_title') }}">
-        <div class="ind-settings-panel-header">
+    <div id="tutorialOverlay" class="ui-client-settings-overlay" aria-hidden="true"></div>
+    <aside id="tutorialPanel" class="ui-client-settings-panel ui-client-tutorial-panel" aria-hidden="true" aria-label="{{ __('ui.tutorial_panel_title') }}">
+        <div class="ui-client-settings-panel-header">
             <div>
                 <h2>{{ __('ui.tutorial_panel_title') }}</h2>
             </div>
-            <button id="tutorialClose" class="ind-settings-close" type="button">{{ __('ui.close') }}</button>
+            <button id="tutorialClose" class="ui-client-settings-close" type="button">{{ __('ui.close') }}</button>
         </div>
 
         @if ($canEditTutorial)
@@ -357,21 +220,21 @@
                     @csrf
                     <input type="hidden" name="route_name" value="{{ $tutorialRouteName }}" />
 
-                    <div class="ind-html-editor" data-html-editor>
-                        <div class="ind-html-editor-toolbar" role="toolbar" aria-label="{{ __('ui.tutorial_content_html') }}">
-                            <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="P" title="{{ __('ui.editor_paragraph') }}">P</button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="formatBlock" data-editor-value="H2" title="{{ __('ui.editor_title') }}">H2</button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="bold" title="{{ __('ui.editor_bold') }}"><strong>B</strong></button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="italic" title="{{ __('ui.editor_italic') }}"><em>I</em></button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="underline" title="{{ __('ui.editor_underline') }}"><u>U</u></button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="insertUnorderedList" title="{{ __('ui.editor_list') }}">• {{ __('ui.editor_list') }}</button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="createLink" title="{{ __('ui.editor_link') }}">{{ __('ui.editor_link') }}</button>
-                            <button type="button" class="ind-html-editor-button" data-editor-command="removeFormat" title="{{ __('ui.editor_clear_formatting') }}">{{ __('ui.editor_clear') }}</button>
+                    <div class="ui-client-html-editor" data-html-editor>
+                        <div class="ui-client-html-editor-toolbar" role="toolbar" aria-label="{{ __('ui.tutorial_content_html') }}">
+                            <button type="button" class="ui-client-html-editor-button" data-editor-command="formatBlock" data-editor-value="P" title="{{ __('ui.editor_paragraph') }}">P</button>
+                            <button type="button" class="ui-client-html-editor-button" data-editor-command="formatBlock" data-editor-value="H2" title="{{ __('ui.editor_title') }}">H2</button>
+                            <button type="button" class="ui-client-html-editor-button" data-editor-command="bold" title="{{ __('ui.editor_bold') }}"><strong>B</strong></button>
+                            <button type="button" class="ui-client-html-editor-button" data-editor-command="italic" title="{{ __('ui.editor_italic') }}"><em>I</em></button>
+                            <button type="button" class="ui-client-html-editor-button" data-editor-command="underline" title="{{ __('ui.editor_underline') }}"><u>U</u></button>
+                            <button type="button" class="ui-client-html-editor-button" data-editor-command="insertUnorderedList" title="{{ __('ui.editor_list') }}">• {{ __('ui.editor_list') }}</button>
+                            <button type="button" class="ui-client-html-editor-button" data-editor-command="createLink" title="{{ __('ui.editor_link') }}">{{ __('ui.editor_link') }}</button>
+                            <button type="button" class="ui-client-html-editor-button" data-editor-command="removeFormat" title="{{ __('ui.editor_clear_formatting') }}">{{ __('ui.editor_clear') }}</button>
                         </div>
 
                         <div
                             id="tutorialContentEditor"
-                            class="ind-html-editor-surface"
+                            class="ui-client-html-editor-surface"
                             contenteditable="true"
                             data-editor-surface
                             aria-label="{{ __('ui.tutorial_content_html') }}"
@@ -380,13 +243,13 @@
                         <x-ui.textarea id="tutorialContent" name="content_html" rows="12" class="hidden" data-editor-source>{!! old('content_html', $pageTutorial?->content_html ?? '') !!}</x-ui.textarea>
                     </div>
 
-                    <div class="ind-settings-actions">
-                        <button class="ind-settings-save" type="submit">{{ __('ui.save') }}</button>
+                    <div class="ui-client-settings-actions">
+                        <button class="ui-client-settings-save" type="submit">{{ __('ui.save') }}</button>
                     </div>
                 </form>
         @else
             @if ($pageTutorial !== null)
-                <article class="ind-tutorial-content">
+                <article class="ui-client-tutorial-content">
                     {!! $pageTutorial->content_html !!}
                 </article>
             @else
@@ -395,8 +258,8 @@
         @endif
     </aside>
 
-    <div id="settingsOverlay" class="ind-settings-overlay" aria-hidden="true"></div>
-    <aside id="settingsPanel" class="ind-settings-panel" aria-hidden="true" aria-label="{{ __('ui.settings_panel_title') }}">
+    <div id="settingsOverlay" class="ui-client-settings-overlay" aria-hidden="true"></div>
+    <aside id="settingsPanel" class="ui-client-settings-panel" aria-hidden="true" aria-label="{{ __('ui.settings_panel_title') }}">
         @php
             $subscriptionPlanName = $subscriptionPlan['label'] ?? ($subscription?->plan_code ?? __('ui.no_subscription'));
             $subscriptionAmount = 'R$ '.number_format((($subscriptionPlan['amount_cents'] ?? 0) / 100), 2, ',', '.');
@@ -404,55 +267,55 @@
             $subscriptionDueDate = $subscription?->ends_at?->format('d/m/Y') ?? __('ui.no_due_date');
         @endphp
 
-        <div class="ind-settings-panel-header">
+        <div class="ui-client-settings-panel-header">
             <h2>{{ __('ui.settings_panel_title') }}</h2>
-            <button id="settingsClose" class="ind-settings-close" type="button">{{ __('ui.close') }}</button>
+            <button id="settingsClose" class="ui-client-settings-close" type="button">{{ __('ui.close') }}</button>
         </div>
 
         @php($currentLocale = auth()->user()?->preferred_locale ?? app()->getLocale())
-        <form method="POST" action="{{ route('preferences.language.update') }}" class="ind-settings-section ind-settings-field">
+        <form method="POST" action="{{ route('preferences.language.update') }}" class="ui-client-settings-section ui-client-settings-field">
             @csrf
             <label for="preferredLocale">{{ __('ui.language') }}</label>
-            <div class="ind-settings-language-row flex items-start justify-between gap-3">
+            <div class="ui-client-settings-language-row flex items-start justify-between gap-3">
                 <x-ui.select id="preferredLocale" name="preferred_locale" required>
                     <option value="pt_BR" @selected($currentLocale === 'pt_BR')>{{ __('ui.portuguese') }}</option>
                     <option value="en" @selected($currentLocale === 'en')>{{ __('ui.english') }}</option>
                     <option value="es" @selected($currentLocale === 'es')>{{ __('ui.spanish') }}</option>
                 </x-ui.select>
-                <div class="ind-settings-actions">
-                    <button class="ind-settings-save" type="submit">{{ __('ui.save') }}</button>
+                <div class="ui-client-settings-actions">
+                    <button class="ui-client-settings-save" type="submit">{{ __('ui.save') }}</button>
                 </div>
             </div>
         </form>
 
-        <section class="ind-settings-section ind-subscription-card">
-            <div class="ind-subscription-heading">
+        <section class="ui-client-settings-section ui-client-subscription-card">
+            <div class="ui-client-subscription-heading">
                 <div>
                     <h3>{{ __('ui.subscription_section_title') }}</h3>
                     <p>{{ __('ui.subscription_section_description') }}</p>
                 </div>
             </div>
 
-            <dl class="ind-subscription-details">
-                <div class="ind-subscription-detail">
+            <dl class="ui-client-subscription-details">
+                <div class="ui-client-subscription-detail">
                     <dt>{{ __('ui.current_plan') }}</dt>
                     <dd>{{ $subscriptionPlanName }}</dd>
                 </div>
-                <div class="ind-subscription-detail">
+                <div class="ui-client-subscription-detail">
                     <dt>{{ __('global_plan.amount_short') }}</dt>
                     <dd>{{ $subscriptionAmount }}</dd>
                 </div>
-                <div class="ind-subscription-detail">
+                <div class="ui-client-subscription-detail">
                     <dt>{{ __('ui.payment_method') }}</dt>
                     <dd>{{ $subscriptionPaymentMethod }}</dd>
                 </div>
-                <div class="ind-subscription-detail">
+                <div class="ui-client-subscription-detail">
                     <dt>{{ __('ui.due_date') }}</dt>
                     <dd>{{ $subscriptionDueDate }}</dd>
                 </div>
             </dl>
 
-            <a href="{{ route('billing.subscription.show') }}" class="ind-subscription-action">{{ __('ui.renew_or_change_plan') }}</a>
+            <a href="{{ route('billing.subscription.show') }}" class="ui-client-subscription-action">{{ __('ui.renew_or_change_plan') }}</a>
         </section>
     </aside>
 @endsection

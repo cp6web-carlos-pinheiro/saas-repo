@@ -11,14 +11,14 @@
         <div>
             <h1 class="font-display text-3xl font-bold">{{ $editing ? __('rbac.update') : __('rbac.create') }}</h1>
         </div>
-        <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.roles.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.roles.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ $editing ? route('company-access.rbac.roles.update', $role) : route('company-access.rbac.roles.store') }}" class="space-y-6">
             @csrf
             @if ($editing)
@@ -47,23 +47,19 @@
                 <div class="mt-4 space-y-4">
                     @php($checkedPermissionIds = array_map('strval', old('permission_ids', $selectedPermissionIds)))
                     @foreach ($permissionsByModule as $module => $permissions)
-                        <fieldset class="rounded-xl border border-[#dadce0] p-4" data-module-permissions>
+                        <fieldset class="rounded-xl border border-[var(--ui-border)] p-4" data-module-permissions>
                             <div class="mb-3 flex items-center justify-between gap-2">
                                 <legend class="text-sm font-semibold">{{ \App\Modules\Identity\Infrastructure\Persistence\Models\Permission::moduleLabel($module) }}</legend>
-                                <button type="button" class="text-xs text-[#1a73e8]" data-select-module>{{ __('rbac.select_all_module') }}</button>
+                                <x-ui.button type="button" variant="ghost" size="sm" data-select-module>{{ __('rbac.select_all_module') }}</x-ui.button>
                             </div>
 
                             <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 @foreach ($permissions->unique('slug')->values() as $permission)
                                     @php($permissionLabel = $permission->label())
                                     @php($permissionDescription = $permission->description())
-                                    <label for="permission_{{ $permission->id }}" class="flex items-start gap-2 rounded-lg border border-[#f1f3f4] p-2 text-sm">
-                                        <input id="permission_{{ $permission->id }}" type="checkbox" name="permission_ids[]" value="{{ $permission->id }}" @checked(in_array((string) $permission->id, $checkedPermissionIds, true)) class="mt-1 h-4 w-4 cursor-pointer appearance-auto rounded border-slate-300 accent-[#1a73e8]" />
-                                        <span title="{{ $permission->slug }}">
-                                            <span class="block font-medium">{{ $permissionLabel }}</span>
-                                            <span class="block text-xs text-[#5f6368]">{{ $permissionDescription !== $permissionLabel ? $permissionDescription : $permission->slug }}</span>
-                                        </span>
-                                    </label>
+                                    <div class="rounded-lg border border-[var(--ui-border)] p-2" title="{{ $permission->slug }}">
+                                        <x-ui.checkbox id="permission_{{ $permission->id }}" name="permission_ids[]" :value="$permission->id" :checked="in_array((string) $permission->id, $checkedPermissionIds, true)" :description="$permissionDescription !== $permissionLabel ? $permissionDescription : $permission->slug">{{ $permissionLabel }}</x-ui.checkbox>
+                                    </div>
                                 @endforeach
                             </div>
                         </fieldset>
@@ -72,8 +68,8 @@
             </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.roles.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('rbac.update') : __('rbac.create') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('company-access.rbac.roles.show', $role) : route('company-access.rbac.roles.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" class="rounded-full" :full="true">{{ $editing ? __('rbac.update') : __('rbac.create') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>

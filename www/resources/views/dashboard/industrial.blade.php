@@ -4,11 +4,11 @@
 @section('client-page-title', __('ui.dashboard'))
 
 @section('client-content')
-<div class="ind-content">
+<div class="w-full p-5 md:p-8">
     @if (session('status'))
-        <div class="ind-status-banner">{{ session('status') }}</div>
+        <x-ui.alert class="mb-5" variant="success">{{ session('status') }}</x-ui.alert>
     @endif
 
-    <h1 class="ind-welcome">{{ __('ui.welcome') }}</h1>
+    <x-ui.page-heading :title="__('ui.welcome')" :subtitle="__('ui.dashboard')" />
 </div>
 @endsection

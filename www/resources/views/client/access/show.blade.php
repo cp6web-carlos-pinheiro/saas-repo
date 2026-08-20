@@ -10,13 +10,13 @@
             <h1 class="font-display text-3xl font-bold">{{ $customer->name }}</h1>
         </div>
         <div class="flex flex-wrap gap-3">
-            <x-ui.button :href="route('company-access.users.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
-            <x-ui.button :href="route('company-access.users.edit', $customer)" variant="material-edit" class="rounded-full">{{ __('company_access.edit') }}</x-ui.button>
+            <x-ui.button :href="route('company-access.users.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+            <x-ui.button :href="route('company-access.users.edit', $customer)" variant="primary" class="rounded-full">{{ __('company_access.edit') }}</x-ui.button>
 
             <form method="POST" action="{{ route('company-access.users.destroy', $customer) }}" data-admin-delete-confirm data-admin-name="{{ $customer->name }}" data-confirm-title="{{ __('company_access.confirm_delete_title') }}" data-confirm-text="{{ __('company_access.confirm_delete_text') }}" data-confirm-confirm="{{ __('company_access.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('company_access.confirm_delete_cancel') }}">
                 @csrf
                 @method('DELETE')
-                <x-ui.button type="submit" variant="material-remove" class="rounded-full">{{ __('company_access.remove') }}</x-ui.button>
+                <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('company_access.remove') }}</x-ui.button>
             </form>
         </div>
     </div>
@@ -25,7 +25,7 @@
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first('customer') }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('company_access.email')">{{ $customer->email }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('company_access.access_role')">{{ $companyAccess['role_name'] ?? '—' }}</x-ui.definition-item>

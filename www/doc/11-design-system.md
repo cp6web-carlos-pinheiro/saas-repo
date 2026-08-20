@@ -1,6 +1,6 @@
 # Design System
 
-> Status: primeira versão aprovada para evolução incremental.
+> Status: contrato consolidado e aplicado às interfaces ativas do produto.
 
 ## Objetivo
 
@@ -68,7 +68,7 @@ Para a construção naval, prefira o vocabulário já agrupado no catálogo: emb
   - `x-ui.editor-toolbar` — toolbar para editores de conteúdo (ex.: tutoriais).
   - `x-ui.confirm-button` — ação destrutiva com formulário + confirmação acessível (`data-ui-confirm`, tratado com SweetAlert2 e classes `.ui-swal-*` em tokens semânticos; substitui o padrão anterior restrito a `data-admin-delete-confirm`/`.g-swal-*`, que continua funcionando).
   - Paginação: `resources/views/vendor/pagination/ui.blade.php`, registrada em `AppServiceProvider` via `Paginator::defaultView()`. Toda chamada existente a `$paginator->links()` passa a usar o componente `.ui-pagination` automaticamente, sem alterar controllers, filtros ou query string.
-- Mapeamento de variantes legadas de botão para as variantes semânticas (mantidas temporariamente, ver comentário em `resources/views/components/ui/button.blade.php`):
+- Mapeamento usado durante a migração das variantes antigas para as variantes semânticas:
 
   | Variante legada | Variante semântica |
   | --- | --- |
@@ -81,4 +81,12 @@ Para a construção naval, prefira o vocabulário já agrupado no catálogo: emb
   | `danger-outline` | `danger` (estilo outline) |
   | `inverse-outline` | `outline` (sobre fundos escuros) |
 
-- Ainda não migrados nesta onda (fica para as ondas de Global Admin, área cliente e páginas públicas do plano de entrega): troca efetiva de `layouts.client-area` e `layouts.global-admin` para `<x-ui.app-shell>`, remoção das cores fixas e variantes legadas das telas, e migração dos ícones inline/Heroicons para `x-ui.icon`.
+- As variantes antigas foram removidas de `x-ui.button` depois da última onda. Código novo deve usar somente `primary`, `secondary`, `outline`, `ghost`, `danger`, `success`, `warning`, `info`, `neutral` ou `inverse-outline` quando estiver sobre fundo escuro.
+
+## Consolidação das interfaces
+
+- Global Admin, área cliente, catálogo e páginas públicas compartilham os tokens `--ui-*`, tema persistido e shell responsivo. A área cliente preserva a filtragem por empresa, contrato, módulo, papel e permissão ao montar a navegação entregue ao `x-ui.app-shell`.
+- Listagens ativas usam `x-ui.table`, com caption acessível, paginação do servidor preservada e scroll responsivo. Formulários dinâmicos de BOM, compras e vendas mantêm seus nomes de campos e hooks `data-*`, usando `x-ui.button` e `x-ui.icon-button` para adicionar e remover linhas.
+- Não há mais variantes Material, classes `ind-*`, Heroicons nem SVGs inline nas views funcionais. Cores específicas aparecem somente na definição dos tokens e na amostra visual do catálogo.
+- Os templates legados `admin/administrator/edit.blade.php`, `admin/module-placeholder.blade.php` e `dashboard/trial.blade.php` foram removidos após validação de rotas, controllers, testes e referências. O caminho `/trial/dashboard` continua como redirect para `/dashboard`.
+- O visualizador de documentação e este documento refletem o contrato usado pelas telas reais, incluindo light, dark e system, navegação móvel, foco visível, estados semânticos e ações destrutivas acessíveis.

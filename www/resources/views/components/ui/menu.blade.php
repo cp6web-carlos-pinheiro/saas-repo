@@ -6,9 +6,7 @@
 @php
     $variantClasses = [
         'base' => 'ui-menu',
-        'industrial' => 'ui-menu ind-module-list',
         'docs' => 'ui-menu docs-list',
-        'admin' => 'ui-menu space-y-2 text-xl',
     ];
 
     $resolvedClass = $variantClasses[$variant] ?? $variantClasses['base'];

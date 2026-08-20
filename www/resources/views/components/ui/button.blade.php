@@ -11,19 +11,6 @@
 ])
 
 @php
-    // Mapeamento de variantes legadas para as variantes semânticas aprovadas no Layout System.
-    // As classes legadas abaixo continuam funcionando (telas antigas ainda as usam), mas todo
-    // novo código deve usar a variante semântica correspondente; remover apenas quando não
-    // houver mais nenhum uso das legadas (ver doc/11-design-system.md).
-    //
-    // brand-primary     -> primary
-    // material-edit     -> primary
-    // material-remove   -> danger
-    // material-versions -> info
-    // material-back     -> outline
-    // surface-muted     -> secondary
-    // danger-outline    -> danger (outline)
-    // inverse-outline   -> outline (sobre fundos escuros/coloridos)
     $variantClasses = [
         'primary' => 'ui-button-primary',
         'neutral' => 'ui-button-neutral',
@@ -35,13 +22,6 @@
         'danger' => 'ui-button-danger',
         'ghost' => 'ui-button-ghost',
         'inverse-outline' => 'border border-white/30 text-white hover:bg-white/10',
-        'brand-primary' => 'bg-[#1a73e8] text-white hover:-translate-y-px hover:bg-[#0f4fa1] hover:shadow-md',
-        'surface-muted' => 'bg-[#f1f3f4] text-[#202124] hover:bg-[#e8eaed]',
-        'danger-outline' => 'border border-red-300 text-red-800 hover:border-[#d93025] hover:bg-[#fce8e6]',
-        'material-back' => 'border border-[#c7cacf] bg-white text-[#3c4043] hover:bg-[#f8f9fa] hover:border-[#9aa0a6]',
-        'material-versions' => 'border border-[#8ab4f8] bg-[#e8f0fe] text-[#174ea6] hover:bg-[#d2e3fc] hover:border-[#669df6]',
-        'material-edit' => 'bg-[#1a73e8] text-white hover:-translate-y-px hover:bg-[#1557b0] hover:shadow-md',
-        'material-remove' => 'bg-[#d93025] text-white hover:bg-[#b3261e] hover:shadow-md',
     ];
 
     $sizeClasses = [

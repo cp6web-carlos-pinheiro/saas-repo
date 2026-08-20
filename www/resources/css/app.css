@@ -2569,31 +2569,31 @@ body {
         border-radius: 0 0.5rem 0.5rem 0;
     }
 
-    .ind-page {
+    .ui-client-page {
         background:
             radial-gradient(circle at 100% 0%, #FFEFCF 0%, rgba(255, 239, 207, 0) 34%), /* Sucesso (Laranja) */
             radial-gradient(circle at 0% 100%, #ffebee 0%, rgba(255, 235, 238, 0) 30%), /* Perigo (Vermelho) */
             var(--g-bg);
     }
 
-    .ind-layout {
+    .ui-client-layout {
         display: grid;
         grid-template-columns: 280px 1fr;
         min-height: 100vh;
         transition: grid-template-columns 0.25s ease;
     }
 
-    .ind-layout.is-collapsed {
+    .ui-client-layout.is-collapsed {
         grid-template-columns: 56px 1fr;
     }
 
-    .ind-main-area {
+    .ui-client-main-area {
         display: grid;
         grid-template-rows: auto 1fr;
         min-width: 0;
     }
 
-    .ind-topbar {
+    .ui-client-topbar {
         height: 64px;
         background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(8px);
@@ -2604,14 +2604,14 @@ body {
         padding: 0 0.9rem;
     }
 
-    .ind-topbar-left,
-    .ind-topbar-right {
+    .ui-client-topbar-left,
+    .ui-client-topbar-right {
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
 
-    .ind-icon-button {
+    .ui-client-icon-button {
         width: 40px;
         height: 40px;
         border: none;
@@ -2625,17 +2625,17 @@ body {
         transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .ind-icon-button:hover {
+    .ui-client-icon-button:hover {
         background: var(--g-surface-muted);
         color: var(--g-text);
     }
 
-    .ind-icon-button:focus-visible {
+    .ui-client-icon-button:focus-visible {
         outline: none;
         box-shadow: 0 0 0 3px color-mix(in oklab, var(--g-primary) 30%, transparent);
     }
 
-    .ind-help-icon {
+    .ui-client-help-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -2648,13 +2648,13 @@ body {
         line-height: 1;
     }
 
-    .ind-topbar-title {
+    .ui-client-topbar-title {
         font-size: 0.95rem;
         font-weight: 500;
         color: var(--g-text-muted);
     }
 
-    .ind-sidebar {
+    .ui-client-sidebar {
         background: var(--g-surface);
         border-right: 1px solid var(--g-line);
         padding: 1.1rem;
@@ -2668,13 +2668,13 @@ body {
         transition: padding 0.2s ease;
     }
 
-    .ind-sidebar.is-collapsed {
+    .ui-client-sidebar.is-collapsed {
         padding: 0;
         align-items: center;
         gap: 0;
     }
 
-    .ind-brand {
+    .ui-client-brand {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -2683,7 +2683,7 @@ body {
         border-bottom: 1px solid var(--g-line);
     }
 
-    .ind-sidebar.is-collapsed .ind-brand {
+    .ui-client-sidebar.is-collapsed .ui-client-brand {
         flex: 1;
         width: 100%;
         justify-content: center;
@@ -2692,21 +2692,21 @@ body {
         border-bottom: none;
     }
 
-    .ind-sidebar.is-collapsed .ind-module-subitems {
+    .ui-client-sidebar.is-collapsed .ui-client-module-subitems {
         display: none;
     }
 
-    .ind-brand-title {
+    .ui-client-brand-title {
         min-width: 0;
     }
 
-    .ind-brand strong {
+    .ui-client-brand strong {
         font-size: 1.02rem;
         font-weight: 700;
         color: var(--g-text);
     }
 
-    .ind-sidebar-toggle {
+    .ui-client-sidebar-toggle {
         width: 36px;
         height: 36px;
         border: none;
@@ -2720,22 +2720,22 @@ body {
         transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .ind-sidebar-toggle:hover {
+    .ui-client-sidebar-toggle:hover {
         background: var(--g-surface-muted);
         color: var(--g-text);
     }
 
-    .ind-sidebar-toggle:focus-visible {
+    .ui-client-sidebar-toggle:focus-visible {
         outline: none;
         box-shadow: 0 0 0 3px color-mix(in oklab, var(--g-primary) 30%, transparent);
     }
 
-    .ind-brand span {
+    .ui-client-brand span {
         font-size: 0.82rem;
         color: var(--g-text-muted);
     }
 
-    .ind-module-list {
+    .ui-client-module-list {
         display: grid;
         gap: 0.25rem;
         padding-right: 0.2rem;
@@ -2744,12 +2744,12 @@ body {
         align-content: start;
     }
 
-    .ind-module-group {
+    .ui-client-module-group {
         display: grid;
         gap: 0.2rem;
     }
 
-    .ind-module-parent-toggle {
+    .ui-client-module-parent-toggle {
         box-sizing: border-box;
         width: 100%;
         border: none;
@@ -2763,17 +2763,17 @@ body {
         line-height: inherit;
     }
 
-    .ind-module-caret {
+    .ui-client-module-caret {
         font-size: 0.74rem;
         transition: transform 0.2s ease;
         transform: rotate(-90deg);
     }
 
-    .ind-module-group.is-open .ind-module-caret {
+    .ui-client-module-group.is-open .ui-client-module-caret {
         transform: rotate(0deg);
     }
 
-    .ind-module-subitems {
+    .ui-client-module-subitems {
         display: grid;
         gap: 0.15rem;
         margin-left: 0.85rem;
@@ -2787,13 +2787,13 @@ body {
         transition: max-height 0.24s ease, opacity 0.2s ease;
     }
 
-    .ind-module-group.is-open .ind-module-subitems {
+    .ui-client-module-group.is-open .ui-client-module-subitems {
         max-height: 900px;
         opacity: 1;
         pointer-events: auto;
     }
 
-    .ind-module-list .ind-module-subitem {
+    .ui-client-module-list .ui-client-module-subitem {
         display: block;
         border-radius: 999px;
         padding: 0.35rem 0.7rem;
@@ -2804,36 +2804,36 @@ body {
         transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .ind-module-list .ind-module-subitem:hover {
+    .ui-client-module-list .ui-client-module-subitem:hover {
         background: var(--g-surface-muted);
         color: var(--g-text);
     }
 
-    .ind-module-list .ind-module-subitem:focus-visible,
-    .ind-module-list .ind-module-parent-toggle:focus-visible,
-    .ind-module-list a:focus-visible {
+    .ui-client-module-list .ui-client-module-subitem:focus-visible,
+    .ui-client-module-list .ui-client-module-parent-toggle:focus-visible,
+    .ui-client-module-list a:focus-visible {
         outline: none;
         box-shadow: 0 0 0 3px color-mix(in oklab, var(--g-primary) 28%, transparent);
     }
 
-    .ind-module-list .ind-module-subitem.is-active {
+    .ui-client-module-list .ui-client-module-subitem.is-active {
         background: var(--g-primary-soft);
         color: var(--g-primary);
         font-weight: 600;
     }
 
-    .ind-module-list .ind-module-subitem.is-disabled {
+    .ui-client-module-list .ui-client-module-subitem.is-disabled {
         opacity: 0.62;
         cursor: default;
     }
 
-    .ind-module-list .ind-module-subitem.is-disabled:hover {
+    .ui-client-module-list .ui-client-module-subitem.is-disabled:hover {
         background: transparent;
         color: var(--g-text-muted);
     }
 
-    .ind-module-list a,
-    .ind-module-list .ind-module-parent-toggle {
+    .ui-client-module-list a,
+    .ui-client-module-list .ui-client-module-parent-toggle {
         text-decoration: none;
         color: var(--g-text);
         font-size: 0.9rem;
@@ -2842,26 +2842,26 @@ body {
         transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .ind-module-list a:hover,
-    .ind-module-list .ind-module-parent-toggle:hover {
+    .ui-client-module-list a:hover,
+    .ui-client-module-list .ui-client-module-parent-toggle:hover {
         background: var(--g-primary-soft);
         color: var(--g-primary);
     }
 
-    .ind-module-list a.is-active,
-    .ind-module-list .ind-module-parent-toggle.is-active {
+    .ui-client-module-list a.is-active,
+    .ui-client-module-list .ui-client-module-parent-toggle.is-active {
         background: var(--g-primary-soft);
         color: var(--g-primary);
         font-weight: 600;
     }
 
-    .ind-logout-area {
+    .ui-client-logout-area {
         margin-top: auto;
         padding-top: 0.6rem;
         border-top: 1px solid var(--g-line);
     }
 
-    .ind-logout-button {
+    .ui-client-logout-button {
         width: 100%;
         border: 1px solid #f6aea9;
         background: #ffebee; /* Perigo soft */
@@ -2874,11 +2874,11 @@ body {
         transition: filter 0.2s ease;
     }
 
-    .ind-logout-button:hover {
+    .ui-client-logout-button:hover {
         filter: brightness(0.98);
     }
 
-    .ind-content {
+    .ui-client-content {
         display: flex;
         flex-direction: column;
         gap: 1rem;
@@ -2888,7 +2888,7 @@ body {
         text-align: center;
     }
 
-    .ind-status-banner {
+    .ui-client-status-banner {
         width: min(620px, 100%);
         border: 1px solid var(--g-success-line);
         background: var(--g-success-soft);
@@ -2898,13 +2898,13 @@ body {
         font-size: 0.92rem;
     }
 
-    .ind-welcome {
+    .ui-client-welcome {
         font-size: clamp(1.8rem, 4vw, 2.8rem);
         font-weight: 500;
         color: var(--g-text);
     }
 
-    .ind-settings-overlay {
+    .ui-client-settings-overlay {
         position: fixed;
         inset: 0;
         background: rgba(38, 50, 56, 0.24); /* g-text */
@@ -2914,12 +2914,12 @@ body {
         z-index: 24;
     }
 
-    .ind-settings-overlay.is-open {
+    .ui-client-settings-overlay.is-open {
         opacity: 1;
         pointer-events: auto;
     }
 
-    .ind-settings-panel {
+    .ui-client-settings-panel {
         position: fixed;
         top: 12px;
         right: 12px;
@@ -2939,37 +2939,37 @@ body {
         overflow-y: auto;
     }
 
-    .ind-settings-panel.is-open {
+    .ui-client-settings-panel.is-open {
         transform: translateX(0);
     }
 
-    .ind-settings-panel-header {
+    .ui-client-settings-panel-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
     }
 
-    .ind-settings-panel h2 {
+    .ui-client-settings-panel h2 {
         margin: 0;
         font-size: 1.4rem;
         font-weight: 500;
         letter-spacing: -0.01em;
     }
 
-    .ind-settings-panel p {
+    .ui-client-settings-panel p {
         margin: 0;
         color: var(--g-text-muted);
         font-size: 0.875rem;
         line-height: 1.4;
     }
 
-    .ind-tutorial-panel {
+    .ui-client-tutorial-panel {
         width: min(560px, calc(100% - 24px));
         gap: 1rem;
     }
 
-    .ind-tutorial-panel > form {
+    .ui-client-tutorial-panel > form {
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
@@ -2977,7 +2977,7 @@ body {
         min-height: 0;
     }
 
-    .ind-tutorial-content {
+    .ui-client-tutorial-content {
         border: 1px solid var(--g-line);
         border-radius: 16px;
         background: var(--g-surface);
@@ -2987,26 +2987,26 @@ body {
 
     }
 
-    .ind-tutorial-content :first-child {
+    .ui-client-tutorial-content :first-child {
         margin-top: 0;
     }
 
-    .ind-tutorial-content :last-child {
+    .ui-client-tutorial-content :last-child {
         margin-bottom: 0;
     }
 
-    .ind-tutorial-editor {
+    .ui-client-tutorial-editor {
         border-top: 1px solid var(--g-line);
         padding-top: 1rem;
     }
 
-    .ind-tutorial-editor h3 {
+    .ui-client-tutorial-editor h3 {
         margin: 0;
         font-size: 1rem;
         font-weight: 600;
     }
 
-    .ind-html-editor {
+    .ui-client-html-editor {
         border: 1px solid var(--g-line);
         border-radius: 12px;
         background: #fff;
@@ -3018,7 +3018,7 @@ body {
         height: 100%;
     }
 
-    .ind-html-editor-toolbar {
+    .ui-client-html-editor-toolbar {
         display: flex;
         flex-wrap: wrap;
         gap: 0.35rem;
@@ -3027,7 +3027,7 @@ body {
         background: var(--g-surface-muted);
     }
 
-    .ind-html-editor-button {
+    .ui-client-html-editor-button {
         border: 1px solid var(--g-line);
         background: #fff;
         color: var(--g-text);
@@ -3037,11 +3037,11 @@ body {
         cursor: pointer;
     }
 
-    .ind-html-editor-button:hover {
+    .ui-client-html-editor-button:hover {
         background: #f7f9fa;
     }
 
-    .ind-html-editor-surface {
+    .ui-client-html-editor-surface {
         min-height: 0;
         max-height: none;
         flex: 1;
@@ -3052,40 +3052,40 @@ body {
         color: var(--g-text);
     }
 
-    .ind-html-editor-surface:focus {
+    .ui-client-html-editor-surface:focus {
         outline: 2px solid color-mix(in oklab, var(--g-primary) 25%, transparent);
         outline-offset: -2px;
     }
 
-    .ind-tutorial-hint {
+    .ui-client-tutorial-hint {
         margin: 0;
         color: var(--g-text-muted);
         font-size: 0.85rem;
     }
 
-    .ind-settings-intro {
+    .ui-client-settings-intro {
         padding-bottom: 0.25rem;
     }
 
-    .ind-settings-section {
+    .ui-client-settings-section {
         border: 1px solid #dbe3ef;
         border-radius: 20px;
         background: var(--g-surface);
         padding: 1rem;
     }
 
-    .ind-settings-field {
+    .ui-client-settings-field {
         display: grid;
         gap: 0.5rem;
         align-content: start;
     }
 
-    .ind-settings-field label {
+    .ui-client-settings-field label {
         font-size: 0.88rem;
         color: var(--g-text-muted);
     }
 
-    .ind-settings-field select {
+    .ui-client-settings-field select {
         width: 100%;
         border: 1px solid var(--g-line);
         background: var(--g-surface);
@@ -3096,17 +3096,17 @@ body {
         font-size: 0.92rem;
     }
 
-    .ind-settings-language-row select {
+    .ui-client-settings-language-row select {
         flex: 1;
         width: auto;
     }
 
-    .ind-settings-language-row .ind-settings-actions {
+    .ui-client-settings-language-row .ui-client-settings-actions {
         margin-top: 0;
         flex: none;
     }
 
-    .ind-settings-actions {
+    .ui-client-settings-actions {
         display: flex;
         justify-content: flex-end;
         align-items: center;
@@ -3114,7 +3114,7 @@ body {
         margin-top: 0.8rem;
     }
 
-    .ind-tutorial-panel .ind-settings-actions {
+    .ui-client-tutorial-panel .ui-client-settings-actions {
         position: sticky;
         bottom: 0;
         margin-top: auto;
@@ -3123,7 +3123,7 @@ body {
         background: linear-gradient(to top, var(--g-bg) 70%, transparent);
     }
 
-    .ind-settings-save {
+    .ui-client-settings-save {
         border: none;
         border-radius: 999px;
         min-height: 40px;
@@ -3136,21 +3136,21 @@ body {
         transition: background 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .ind-settings-save:hover {
+    .ui-client-settings-save:hover {
         background: #0052A3; /* Hover primário escurecido */
         box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
     }
 
-    .ind-settings-save:focus-visible,
-    .ind-settings-close:focus-visible,
-    .ind-settings-nav-link:focus-visible,
-    .ind-subscription-action:focus-visible,
-    .ind-settings-field select:focus-visible {
+    .ui-client-settings-save:focus-visible,
+    .ui-client-settings-close:focus-visible,
+    .ui-client-settings-nav-link:focus-visible,
+    .ui-client-subscription-action:focus-visible,
+    .ui-client-settings-field select:focus-visible {
         outline: 3px solid color-mix(in oklab, var(--g-primary) 30%, transparent);
         outline-offset: 2px;
     }
 
-    .ind-settings-close {
+    .ui-client-settings-close {
         width: 40px;
         height: 40px;
         border: 0;
@@ -3162,18 +3162,18 @@ body {
         cursor: pointer;
     }
 
-    .ind-settings-close::before {
+    .ui-client-settings-close::before {
         content: '×';
         font-size: 1.75rem;
         font-weight: 300;
         line-height: 1;
     }
 
-    .ind-settings-close:hover {
+    .ui-client-settings-close:hover {
         background: var(--g-surface-muted);
     }
 
-    .ind-settings-nav-link {
+    .ui-client-settings-nav-link {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -3188,39 +3188,39 @@ body {
         transition: background 0.2s ease;
     }
 
-    .ind-settings-nav-link:hover {
+    .ui-client-settings-nav-link:hover {
         background: #C4E3FF;
     }
 
-    .ind-settings-nav-link svg {
+    .ui-client-settings-nav-link svg {
         flex: none;
     }
 
-    .ind-subscription-card {
+    .ui-client-subscription-card {
         display: grid;
         gap: 1rem;
         background: var(--g-surface-muted);
         border-color: transparent;
     }
 
-    .ind-subscription-heading h3 {
+    .ui-client-subscription-heading h3 {
         margin: 0;
         color: var(--g-text);
         font-size: 1rem;
         font-weight: 600;
     }
 
-    .ind-subscription-heading p {
+    .ui-client-subscription-heading p {
         margin-top: 0.3rem;
     }
 
-    .ind-subscription-details {
+    .ui-client-subscription-details {
         display: grid;
         margin: 0;
         border-top: 1px solid #dadddf;
     }
 
-    .ind-subscription-detail {
+    .ui-client-subscription-detail {
         display: flex;
         align-items: baseline;
         justify-content: space-between;
@@ -3229,12 +3229,12 @@ body {
         border-bottom: 1px solid #dadddf;
     }
 
-    .ind-subscription-detail dt {
+    .ui-client-subscription-detail dt {
         color: var(--g-text-muted);
         font-size: 0.8125rem;
     }
 
-    .ind-subscription-detail dd {
+    .ui-client-subscription-detail dd {
         margin: 0;
         color: var(--g-text);
         font-size: 0.875rem;
@@ -3242,7 +3242,7 @@ body {
         text-align: right;
     }
 
-    .ind-subscription-action {
+    .ui-client-subscription-action {
         display: inline-flex;
         min-height: 40px;
         align-items: center;
@@ -3257,7 +3257,7 @@ body {
         transition: background 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .ind-subscription-action:hover {
+    .ui-client-subscription-action:hover {
         background: #E0F0FF; /* Primary soft */
         box-shadow: 0 1px 2px rgba(60, 64, 67, 0.2);
     }
@@ -3282,15 +3282,15 @@ body {
     }
 
     @media (max-width: 920px) {
-        .ind-layout {
+        .ui-client-layout {
             grid-template-columns: 1fr;
         }
 
-        .ind-layout.is-collapsed {
+        .ui-client-layout.is-collapsed {
             grid-template-columns: 1fr;
         }
 
-        .ind-sidebar {
+        .ui-client-sidebar {
             position: fixed;
             top: 64px;
             left: 0;
@@ -3303,20 +3303,20 @@ body {
             height: auto;
         }
 
-        .ind-sidebar.is-collapsed {
+        .ui-client-sidebar.is-collapsed {
             padding: 1.1rem;
             align-items: stretch;
         }
 
-        .ind-sidebar.is-open {
+        .ui-client-sidebar.is-open {
             transform: translateX(0);
         }
 
-        .ind-content {
+        .ui-client-content {
             padding-top: 1.5rem;
         }
 
-        .ind-welcome {
+        .ui-client-welcome {
             width: 100%;
             max-width: 480px;
         }

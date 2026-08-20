@@ -15,23 +15,11 @@
             'content' => '',
             'footer' => '',
         ],
-        'industrial' => [
-            'container' => 'ind-sidebar',
-            'header' => 'ind-brand',
-            'content' => 'ind-module-list',
-            'footer' => 'ind-logout-area',
-        ],
         'docs' => [
             'container' => 'docs-sidebar',
             'header' => '',
             'content' => 'docs-sidebar-scroll',
             'footer' => '',
-        ],
-        'admin' => [
-            'container' => 'w-72 shrink-0 bg-slate-50 border-r border-slate-200 text-slate-900 p-6 flex flex-col',
-            'header' => '',
-            'content' => 'mt-8',
-            'footer' => 'mt-auto pt-6',
         ],
     ];
 

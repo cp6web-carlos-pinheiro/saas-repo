@@ -10,7 +10,7 @@
             <h1 class="font-display text-3xl font-bold">{{ __('company_access.title') }}</h1>
         </div>
         <div class="flex flex-wrap items-center gap-3">
-            <x-ui.button :href="route('company-access.users.create')" variant="brand-primary" class="rounded-full">{{ __('company_access.create') }}</x-ui.button>
+            <x-ui.button :href="route('company-access.users.create')" variant="primary" class="rounded-full">{{ __('company_access.create') }}</x-ui.button>
         </div>
     </div>
 
@@ -22,19 +22,19 @@
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first('customer') }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <form class="flex gap-3" method="GET">
             <label for="customer-search" class="sr-only">{{ __('company_access.search') }}</label>
             <x-ui.input id="customer-search" name="search" :value="$search" class="min-w-0 flex-1" placeholder="{{ __('company_access.search') }}" />
-            <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('company_access.filter') }}</x-ui.button>
+            <x-ui.button type="submit" variant="secondary" class="rounded-xl">{{ __('company_access.filter') }}</x-ui.button>
         </form>
 
         @php($sortUrl = fn ($column) => route('company-access.users.index', ['search' => $search, 'sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
 
         <div class="mt-6 overflow-x-auto">
-            <table class="min-w-full text-sm">
+            <x-ui.table :caption="__('company_access.title')">
                 <thead>
-                    <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                    <tr class="border-b border-[var(--ui-border)] text-left text-[var(--ui-text-muted)]">
                         <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
                         <x-ui.sortable-header column="name" :label="__('company_access.name')" :sort="$sort" :direction="$direction" />
                         <x-ui.sortable-header column="email" :label="__('company_access.email')" :sort="$sort" :direction="$direction" />
@@ -45,14 +45,14 @@
                 <tbody>
                     @forelse ($customers as $customer)
                         <tr
-                            class="cursor-pointer border-b border-[#f1f3f4] transition hover:bg-[#f8fafd]"
+                            class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                             tabindex="0"
                             onclick="window.location='{{ route('company-access.users.show', $customer) }}'"
                             onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('company-access.users.show', $customer) }}'; }"
                         >
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $customer->id }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $customer->id }}</td>
                             <td class="px-3 py-4 font-semibold">{{ $customer->name }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $customer->email }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $customer->email }}</td>
                             <td class="px-3 py-4">
                                 <x-ui.definition-item-status
                                     :label="__('company_access.status')"
@@ -61,15 +61,15 @@
                                     inline
                                 />
                             </td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $customer->created_at->format('d/m/Y') }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $customer->created_at->format('d/m/Y') }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-3 py-10 text-center text-[#5f6368]">{{ __('company_access.empty') }}</td>
+                            <td colspan="5" class="px-3 py-10 text-center text-[var(--ui-text-muted)]">{{ __('company_access.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
+            </x-ui.table>
         </div>
 
         <div class="mt-6">{{ $customers->links() }}</div>
