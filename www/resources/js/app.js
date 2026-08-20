@@ -41,6 +41,7 @@ for (const input of currencyMaskedInputs) {
 	const storageKey = 'beyond-mrp.theme';
 	const media = window.matchMedia('(prefers-color-scheme: dark)');
 	const selectors = [...document.querySelectorAll('[data-ui-theme-select]')];
+	const options = [...document.querySelectorAll('[data-theme-option]')];
 
 	const applyTheme = (preference, persist = true) => {
 		const normalized = ['light', 'dark', 'system'].includes(preference) ? preference : 'system';
@@ -50,6 +51,9 @@ for (const input of currencyMaskedInputs) {
 		document.documentElement.dataset.themePreference = normalized;
 		document.documentElement.style.colorScheme = resolved;
 		selectors.forEach((selector) => { selector.value = normalized; });
+		options.forEach((option) => {
+			option.setAttribute('aria-pressed', String(option.dataset.themeOption === normalized));
+		});
 
 		if (persist) {
 			try { window.localStorage.setItem(storageKey, normalized); } catch (_) {}
@@ -58,6 +62,9 @@ for (const input of currencyMaskedInputs) {
 
 	selectors.forEach((selector) => {
 		selector.addEventListener('change', () => applyTheme(selector.value));
+	});
+	options.forEach((option) => {
+		option.addEventListener('click', () => applyTheme(option.dataset.themeOption ?? 'system'));
 	});
 
 	media.addEventListener('change', () => {

@@ -2964,25 +2964,12 @@ body {
         line-height: 1.4;
     }
 
-    .ui-client-tutorial-panel {
-        width: min(560px, calc(100% - 24px));
-        gap: 1rem;
-    }
-
-    .ui-client-tutorial-panel > form {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        flex: 1;
-        min-height: 0;
-    }
-
     .ui-client-tutorial-content {
-        border: 1px solid var(--g-line);
+        border: 1px solid var(--ui-border);
         border-radius: 16px;
-        background: var(--g-surface);
+        background: var(--ui-surface);
         padding: 1rem;
-        color: var(--g-text);
+        color: var(--ui-text);
         line-height: 1.5;
 
     }
@@ -3007,38 +2994,15 @@ body {
     }
 
     .ui-client-html-editor {
-        border: 1px solid var(--g-line);
+        border: 1px solid var(--ui-border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--ui-surface);
         overflow: hidden;
         display: flex;
         flex-direction: column;
         flex: 1;
         min-height: 0;
         height: 100%;
-    }
-
-    .ui-client-html-editor-toolbar {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.35rem;
-        padding: 0.5rem;
-        border-bottom: 1px solid var(--g-line);
-        background: var(--g-surface-muted);
-    }
-
-    .ui-client-html-editor-button {
-        border: 1px solid var(--g-line);
-        background: #fff;
-        color: var(--g-text);
-        border-radius: 8px;
-        font-size: 0.78rem;
-        padding: 0.25rem 0.5rem;
-        cursor: pointer;
-    }
-
-    .ui-client-html-editor-button:hover {
-        background: #f7f9fa;
     }
 
     .ui-client-html-editor-surface {
@@ -3049,11 +3013,11 @@ body {
         padding: 0.85rem;
         font-size: 0.9rem;
         line-height: 1.5;
-        color: var(--g-text);
+        color: var(--ui-text);
     }
 
     .ui-client-html-editor-surface:focus {
-        outline: 2px solid color-mix(in oklab, var(--g-primary) 25%, transparent);
+        outline: 2px solid color-mix(in oklab, var(--ui-focus) 25%, transparent);
         outline-offset: -2px;
     }
 
@@ -3114,15 +3078,6 @@ body {
         margin-top: 0.8rem;
     }
 
-    .ui-client-tutorial-panel .ui-client-settings-actions {
-        position: sticky;
-        bottom: 0;
-        margin-top: auto;
-        padding-top: 0.75rem;
-        padding-bottom: 0.25rem;
-        background: linear-gradient(to top, var(--g-bg) 70%, transparent);
-    }
-
     .ui-client-settings-save {
         border: none;
         border-radius: 999px;
@@ -3144,7 +3099,6 @@ body {
     .ui-client-settings-save:focus-visible,
     .ui-client-settings-close:focus-visible,
     .ui-client-settings-nav-link:focus-visible,
-    .ui-client-subscription-action:focus-visible,
     .ui-client-settings-field select:focus-visible {
         outline: 3px solid color-mix(in oklab, var(--g-primary) 30%, transparent);
         outline-offset: 2px;
@@ -3194,72 +3148,6 @@ body {
 
     .ui-client-settings-nav-link svg {
         flex: none;
-    }
-
-    .ui-client-subscription-card {
-        display: grid;
-        gap: 1rem;
-        background: var(--g-surface-muted);
-        border-color: transparent;
-    }
-
-    .ui-client-subscription-heading h3 {
-        margin: 0;
-        color: var(--g-text);
-        font-size: 1rem;
-        font-weight: 600;
-    }
-
-    .ui-client-subscription-heading p {
-        margin-top: 0.3rem;
-    }
-
-    .ui-client-subscription-details {
-        display: grid;
-        margin: 0;
-        border-top: 1px solid #dadddf;
-    }
-
-    .ui-client-subscription-detail {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 0.7rem 0;
-        border-bottom: 1px solid #dadddf;
-    }
-
-    .ui-client-subscription-detail dt {
-        color: var(--g-text-muted);
-        font-size: 0.8125rem;
-    }
-
-    .ui-client-subscription-detail dd {
-        margin: 0;
-        color: var(--g-text);
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-align: right;
-    }
-
-    .ui-client-subscription-action {
-        display: inline-flex;
-        min-height: 40px;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #747775;
-        border-radius: 999px;
-        padding: 0.55rem 1rem;
-        color: #0066CC; /* g-primary */
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: background 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .ui-client-subscription-action:hover {
-        background: #E0F0FF; /* Primary soft */
-        box-shadow: 0 1px 2px rgba(60, 64, 67, 0.2);
     }
 
     @media (max-width: 980px) {

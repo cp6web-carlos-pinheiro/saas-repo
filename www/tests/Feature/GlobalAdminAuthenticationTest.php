@@ -56,6 +56,15 @@ final class GlobalAdminAuthenticationTest extends TestCase
                 ->get($url.'?'.http_build_query(['sort' => $sort, 'direction' => 'desc']))
                 ->assertOk();
         }
+
+        $this->actingAs($admin, 'admin')
+            ->get(route('global-admin.administrators.index'))
+            ->assertOk()
+            ->assertSee('data-ui-modal-open="globalAdminHelpPanel"', false)
+            ->assertSee('data-ui-modal-open="globalAdminSettingsPanel"', false)
+            ->assertSee('data-theme-option="light"', false)
+            ->assertSee('data-theme-option="system"', false)
+            ->assertSee('data-theme-option="dark"', false);
     }
 
     public function test_authenticated_web_user_can_still_view_global_admin_login(): void

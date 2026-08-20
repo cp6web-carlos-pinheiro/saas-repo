@@ -1,6 +1,7 @@
 @extends('layouts.public')
 
 @section('bodyClass', 'ui-shell')
+@section('themeSwitcherHandled', 'true')
 
 @section('content')
     @php
@@ -188,14 +189,14 @@
         :header-title="$currentPageTitle"
     >
         <x-slot:headerActions>
-            <x-ui.icon-button id="tutorialToggle" type="button" icon="help-circle" variant="ghost" :label="__('ui.tutorial_help')" aria-controls="tutorialPanel" aria-expanded="false" aria-pressed="false" />
-            <x-ui.icon-button id="settingsToggle" type="button" icon="settings" variant="ghost" :label="__('ui.settings')" aria-controls="settingsPanel" aria-expanded="false" aria-pressed="false" />
+            <x-ui.icon-button type="button" icon="help-circle" variant="ghost" :label="__('ui.tutorial_help')" data-ui-modal-open="tutorialPanel" aria-controls="tutorialPanel" />
+            <x-ui.icon-button type="button" icon="settings" variant="ghost" :label="__('ui.settings')" data-ui-modal-open="settingsPanel" aria-controls="settingsPanel" />
         </x-slot:headerActions>
 
         <x-slot:sidebarFooter>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <x-ui.button type="submit" variant="secondary" :full="true" size="lg" class="justify-start gap-2">
+                <x-ui.button type="submit" variant="ghost" :full="true" size="lg" class="justify-start gap-2">
                     <x-ui.icon name="logout" size="sm" />
                     <span data-ds-sidebar-label>{{ __('ui.logout') }}</span>
                 </x-ui.button>
@@ -205,48 +206,39 @@
         @yield('client-content')
     </x-ui.app-shell>
 
-    <div id="tutorialOverlay" class="ui-client-settings-overlay" aria-hidden="true"></div>
-    <aside id="tutorialPanel" class="ui-client-settings-panel ui-client-tutorial-panel" aria-hidden="true" aria-label="{{ __('ui.tutorial_panel_title') }}">
-        <div class="ui-client-settings-panel-header">
-            <div>
-                <h2>{{ __('ui.tutorial_panel_title') }}</h2>
-            </div>
-            <button id="tutorialClose" class="ui-client-settings-close" type="button">{{ __('ui.close') }}</button>
-        </div>
-
+    <x-ui.modal id="tutorialPanel" size="sheet" :title="__('ui.tutorial_panel_title')" :close-label="__('ui.close')">
         @if ($canEditTutorial)
+            <form method="POST" action="{{ route('page-tutorials.upsert') }}" class="space-y-3">
+                @csrf
+                <input type="hidden" name="route_name" value="{{ $tutorialRouteName }}" />
 
-                <form method="POST" action="{{ route('page-tutorials.upsert') }}" class="space-y-3">
-                    @csrf
-                    <input type="hidden" name="route_name" value="{{ $tutorialRouteName }}" />
+                <div class="ui-client-html-editor" data-html-editor>
+                    <x-ui.editor-toolbar :aria-label="__('ui.tutorial_content_html')">
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="formatBlock" data-editor-value="P" title="{{ __('ui.editor_paragraph') }}">P</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="formatBlock" data-editor-value="H2" title="{{ __('ui.editor_title') }}">H2</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="bold" title="{{ __('ui.editor_bold') }}"><strong>B</strong></button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="italic" title="{{ __('ui.editor_italic') }}"><em>I</em></button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="underline" title="{{ __('ui.editor_underline') }}"><u>U</u></button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="insertUnorderedList" title="{{ __('ui.editor_list') }}">• {{ __('ui.editor_list') }}</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="createLink" title="{{ __('ui.editor_link') }}">{{ __('ui.editor_link') }}</button>
+                        <button type="button" class="ui-editor-toolbar-button" data-editor-command="removeFormat" title="{{ __('ui.editor_clear_formatting') }}">{{ __('ui.editor_clear') }}</button>
+                    </x-ui.editor-toolbar>
 
-                    <div class="ui-client-html-editor" data-html-editor>
-                        <div class="ui-client-html-editor-toolbar" role="toolbar" aria-label="{{ __('ui.tutorial_content_html') }}">
-                            <button type="button" class="ui-client-html-editor-button" data-editor-command="formatBlock" data-editor-value="P" title="{{ __('ui.editor_paragraph') }}">P</button>
-                            <button type="button" class="ui-client-html-editor-button" data-editor-command="formatBlock" data-editor-value="H2" title="{{ __('ui.editor_title') }}">H2</button>
-                            <button type="button" class="ui-client-html-editor-button" data-editor-command="bold" title="{{ __('ui.editor_bold') }}"><strong>B</strong></button>
-                            <button type="button" class="ui-client-html-editor-button" data-editor-command="italic" title="{{ __('ui.editor_italic') }}"><em>I</em></button>
-                            <button type="button" class="ui-client-html-editor-button" data-editor-command="underline" title="{{ __('ui.editor_underline') }}"><u>U</u></button>
-                            <button type="button" class="ui-client-html-editor-button" data-editor-command="insertUnorderedList" title="{{ __('ui.editor_list') }}">• {{ __('ui.editor_list') }}</button>
-                            <button type="button" class="ui-client-html-editor-button" data-editor-command="createLink" title="{{ __('ui.editor_link') }}">{{ __('ui.editor_link') }}</button>
-                            <button type="button" class="ui-client-html-editor-button" data-editor-command="removeFormat" title="{{ __('ui.editor_clear_formatting') }}">{{ __('ui.editor_clear') }}</button>
-                        </div>
+                    <div
+                        id="tutorialContentEditor"
+                        class="ui-client-html-editor-surface"
+                        contenteditable="true"
+                        data-editor-surface
+                        aria-label="{{ __('ui.tutorial_content_html') }}"
+                    >{!! old('content_html', $pageTutorial?->content_html ?? '') !!}</div>
 
-                        <div
-                            id="tutorialContentEditor"
-                            class="ui-client-html-editor-surface"
-                            contenteditable="true"
-                            data-editor-surface
-                            aria-label="{{ __('ui.tutorial_content_html') }}"
-                        >{!! old('content_html', $pageTutorial?->content_html ?? '') !!}</div>
+                    <x-ui.textarea id="tutorialContent" name="content_html" rows="12" class="hidden" data-editor-source>{!! old('content_html', $pageTutorial?->content_html ?? '') !!}</x-ui.textarea>
+                </div>
 
-                        <x-ui.textarea id="tutorialContent" name="content_html" rows="12" class="hidden" data-editor-source>{!! old('content_html', $pageTutorial?->content_html ?? '') !!}</x-ui.textarea>
-                    </div>
-
-                    <div class="ui-client-settings-actions">
-                        <button class="ui-client-settings-save" type="submit">{{ __('ui.save') }}</button>
-                    </div>
-                </form>
+                <div class="flex justify-end">
+                    <x-ui.button type="submit" variant="primary">{{ __('ui.save') }}</x-ui.button>
+                </div>
+            </form>
         @else
             @if ($pageTutorial !== null)
                 <article class="ui-client-tutorial-content">
@@ -256,10 +248,12 @@
                 <x-ui.alert variant="warning">{{ __('ui.tutorial_empty') }}</x-ui.alert>
             @endif
         @endif
-    </aside>
+        <x-slot:footer>
+            <x-ui.button variant="primary" data-ui-modal-close>{{ __('ui.close') }}</x-ui.button>
+        </x-slot:footer>
+    </x-ui.modal>
 
-    <div id="settingsOverlay" class="ui-client-settings-overlay" aria-hidden="true"></div>
-    <aside id="settingsPanel" class="ui-client-settings-panel" aria-hidden="true" aria-label="{{ __('ui.settings_panel_title') }}">
+    <x-ui.modal id="settingsPanel" size="sheet" :title="__('ui.settings_panel_title')" :close-label="__('ui.close')">
         @php
             $subscriptionPlanName = $subscriptionPlan['label'] ?? ($subscription?->plan_code ?? __('ui.no_subscription'));
             $subscriptionAmount = 'R$ '.number_format((($subscriptionPlan['amount_cents'] ?? 0) / 100), 2, ',', '.');
@@ -267,57 +261,56 @@
             $subscriptionDueDate = $subscription?->ends_at?->format('d/m/Y') ?? __('ui.no_due_date');
         @endphp
 
-        <div class="ui-client-settings-panel-header">
-            <h2>{{ __('ui.settings_panel_title') }}</h2>
-            <button id="settingsClose" class="ui-client-settings-close" type="button">{{ __('ui.close') }}</button>
-        </div>
+        <div class="space-y-6">
+            <x-ui.theme-picker />
 
-        @php($currentLocale = auth()->user()?->preferred_locale ?? app()->getLocale())
-        <form method="POST" action="{{ route('preferences.language.update') }}" class="ui-client-settings-section ui-client-settings-field">
-            @csrf
-            <label for="preferredLocale">{{ __('ui.language') }}</label>
-            <div class="ui-client-settings-language-row flex items-start justify-between gap-3">
-                <x-ui.select id="preferredLocale" name="preferred_locale" required>
-                    <option value="pt_BR" @selected($currentLocale === 'pt_BR')>{{ __('ui.portuguese') }}</option>
-                    <option value="en" @selected($currentLocale === 'en')>{{ __('ui.english') }}</option>
-                    <option value="es" @selected($currentLocale === 'es')>{{ __('ui.spanish') }}</option>
-                </x-ui.select>
-                <div class="ui-client-settings-actions">
-                    <button class="ui-client-settings-save" type="submit">{{ __('ui.save') }}</button>
-                </div>
-            </div>
-        </form>
+            @php($currentLocale = auth()->user()?->preferred_locale ?? app()->getLocale())
+            <form method="POST" action="{{ route('preferences.language.update') }}" class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-4">
+                @csrf
+                <x-ui.field :label="__('ui.language')" for="preferredLocale" :required="true" :error="$errors->first('preferred_locale')">
+                    <div class="flex items-end gap-3">
+                        <x-ui.select id="preferredLocale" name="preferred_locale" required :aria-describedby="$errors->has('preferred_locale') ? 'preferredLocale-error' : null">
+                            <option value="pt_BR" @selected($currentLocale === 'pt_BR')>{{ __('ui.portuguese') }}</option>
+                            <option value="en" @selected($currentLocale === 'en')>{{ __('ui.english') }}</option>
+                            <option value="es" @selected($currentLocale === 'es')>{{ __('ui.spanish') }}</option>
+                        </x-ui.select>
+                        <x-ui.button type="submit" variant="primary">{{ __('ui.save') }}</x-ui.button>
+                    </div>
+                </x-ui.field>
+            </form>
 
-        <section class="ui-client-settings-section ui-client-subscription-card">
-            <div class="ui-client-subscription-heading">
-                <div>
-                    <h3>{{ __('ui.subscription_section_title') }}</h3>
-                    <p>{{ __('ui.subscription_section_description') }}</p>
-                </div>
+        <section class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-4">
+            <div>
+                <h3 class="font-semibold text-[var(--ui-text)]">{{ __('ui.subscription_section_title') }}</h3>
+                <p class="mt-1 text-sm leading-6 text-[var(--ui-text-muted)]">{{ __('ui.subscription_section_description') }}</p>
             </div>
 
-            <dl class="ui-client-subscription-details">
-                <div class="ui-client-subscription-detail">
-                    <dt>{{ __('ui.current_plan') }}</dt>
-                    <dd>{{ $subscriptionPlanName }}</dd>
+            <dl class="mt-4 divide-y divide-[var(--ui-border)] border-y border-[var(--ui-border)]">
+                <div class="flex items-baseline justify-between gap-4 py-3">
+                    <dt class="text-xs text-[var(--ui-text-muted)]">{{ __('ui.current_plan') }}</dt>
+                    <dd class="text-right text-sm font-semibold text-[var(--ui-text)]">{{ $subscriptionPlanName }}</dd>
                 </div>
-                <div class="ui-client-subscription-detail">
-                    <dt>{{ __('global_plan.amount_short') }}</dt>
-                    <dd>{{ $subscriptionAmount }}</dd>
+                <div class="flex items-baseline justify-between gap-4 py-3">
+                    <dt class="text-xs text-[var(--ui-text-muted)]">{{ __('global_plan.amount_short') }}</dt>
+                    <dd class="text-right text-sm font-semibold text-[var(--ui-text)]">{{ $subscriptionAmount }}</dd>
                 </div>
-                <div class="ui-client-subscription-detail">
-                    <dt>{{ __('ui.payment_method') }}</dt>
-                    <dd>{{ $subscriptionPaymentMethod }}</dd>
+                <div class="flex items-baseline justify-between gap-4 py-3">
+                    <dt class="text-xs text-[var(--ui-text-muted)]">{{ __('ui.payment_method') }}</dt>
+                    <dd class="text-right text-sm font-semibold text-[var(--ui-text)]">{{ $subscriptionPaymentMethod }}</dd>
                 </div>
-                <div class="ui-client-subscription-detail">
-                    <dt>{{ __('ui.due_date') }}</dt>
-                    <dd>{{ $subscriptionDueDate }}</dd>
+                <div class="flex items-baseline justify-between gap-4 py-3">
+                    <dt class="text-xs text-[var(--ui-text-muted)]">{{ __('ui.due_date') }}</dt>
+                    <dd class="text-right text-sm font-semibold text-[var(--ui-text)]">{{ $subscriptionDueDate }}</dd>
                 </div>
             </dl>
 
-            <a href="{{ route('billing.subscription.show') }}" class="ui-client-subscription-action">{{ __('ui.renew_or_change_plan') }}</a>
+            <x-ui.button class="mt-4" :href="route('billing.subscription.show')" variant="outline" :full="true">{{ __('ui.renew_or_change_plan') }}</x-ui.button>
         </section>
-    </aside>
+        </div>
+        <x-slot:footer>
+            <x-ui.button variant="primary" data-ui-modal-close>{{ __('ui.close') }}</x-ui.button>
+        </x-slot:footer>
+    </x-ui.modal>
 @endsection
 
 @section('scripts')
@@ -325,14 +318,6 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarShell = document.querySelector('[data-client-sidebar-shell]');
         const sidebarCollapseToggle = document.querySelector('[data-client-sidebar-toggle]');
-        const settingsToggle = document.getElementById('settingsToggle');
-        const settingsPanel = document.getElementById('settingsPanel');
-        const settingsOverlay = document.getElementById('settingsOverlay');
-        const settingsClose = document.getElementById('settingsClose');
-        const tutorialToggle = document.getElementById('tutorialToggle');
-        const tutorialPanel = document.getElementById('tutorialPanel');
-        const tutorialOverlay = document.getElementById('tutorialOverlay');
-        const tutorialClose = document.getElementById('tutorialClose');
 
         if (sidebarShell && sidebar && sidebarCollapseToggle) {
             const storageKey = 'client.sidebar-collapsed';
@@ -414,63 +399,6 @@
             }
         }
 
-        const setSettingsState = (isOpen) => {
-            if (isOpen) {
-                setTutorialState(false);
-            }
-
-            settingsPanel?.classList.toggle('is-open', isOpen);
-            settingsOverlay?.classList.toggle('is-open', isOpen);
-            settingsPanel?.setAttribute('aria-hidden', String(!isOpen));
-            settingsOverlay?.setAttribute('aria-hidden', String(!isOpen));
-            settingsToggle?.setAttribute('aria-expanded', String(isOpen));
-            settingsToggle?.setAttribute('aria-pressed', String(isOpen));
-        };
-
-        const setTutorialState = (isOpen) => {
-            tutorialPanel?.classList.toggle('is-open', isOpen);
-            tutorialOverlay?.classList.toggle('is-open', isOpen);
-            tutorialPanel?.setAttribute('aria-hidden', String(!isOpen));
-            tutorialOverlay?.setAttribute('aria-hidden', String(!isOpen));
-            tutorialToggle?.setAttribute('aria-expanded', String(isOpen));
-            tutorialToggle?.setAttribute('aria-pressed', String(isOpen));
-
-            if (isOpen) {
-                settingsPanel?.classList.remove('is-open');
-                settingsOverlay?.classList.remove('is-open');
-                settingsPanel?.setAttribute('aria-hidden', 'true');
-                settingsOverlay?.setAttribute('aria-hidden', 'true');
-                settingsToggle?.setAttribute('aria-expanded', 'false');
-                settingsToggle?.setAttribute('aria-pressed', 'false');
-            }
-        };
-
-        settingsToggle?.addEventListener('click', function () {
-            const isOpen = settingsPanel?.classList.contains('is-open') ?? false;
-            setSettingsState(!isOpen);
-        });
-
-        settingsClose?.addEventListener('click', function () {
-            setSettingsState(false);
-        });
-
-        settingsOverlay?.addEventListener('click', function () {
-            setSettingsState(false);
-        });
-
-        tutorialToggle?.addEventListener('click', function () {
-            const isOpen = tutorialPanel?.classList.contains('is-open') ?? false;
-            setTutorialState(!isOpen);
-        });
-
-        tutorialClose?.addEventListener('click', function () {
-            setTutorialState(false);
-        });
-
-        tutorialOverlay?.addEventListener('click', function () {
-            setTutorialState(false);
-        });
-
         const htmlEditor = document.querySelector('[data-html-editor]');
 
         if (htmlEditor) {
@@ -519,13 +447,6 @@
 
             editorForm?.addEventListener('submit', syncEditorToSource);
         }
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                setSettingsState(false);
-                setTutorialState(false);
-            }
-        });
 
         window.addEventListener('load', function () {
             if (typeof window.initializeUiSelects === 'function') {
