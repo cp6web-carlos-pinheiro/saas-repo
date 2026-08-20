@@ -5,11 +5,8 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ $product->sku }}</h1>
-            <p class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ $product->description }}</p>
-        </div>
+    <x-ui.page-heading title="{{ $product->sku }}" subtitle="{{ $product->description }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('products.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             <x-ui.button :href="route('products.versions', ['product_id' => $product->id])" variant="info" class="rounded-full">{{ __('ui.product_versions') }}</x-ui.button>
@@ -21,7 +18,8 @@
                 <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('product.remove') }}</x-ui.button>
             </form>
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>

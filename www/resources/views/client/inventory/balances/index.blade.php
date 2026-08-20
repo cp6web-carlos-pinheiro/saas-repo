@@ -5,13 +5,11 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ __('inventory_web.balances') }}</h1>
-            <p class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ __('inventory_web.balances_description') }}</p>
-        </div>
+    <x-ui.page-heading title="{{ __('inventory_web.balances') }}" subtitle="{{ __('inventory_web.balances_description') }}">
+        <x-slot:actions>
         <x-ui.button :href="route('inventory.movements.create')" variant="primary" class="rounded-full">{{ __('inventory_web.new_movement') }}</x-ui.button>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>

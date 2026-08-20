@@ -7,10 +7,11 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ $editing ? __('production.scheduling.edit') : __('production.scheduling.new') }}</h1>
+    <x-ui.page-heading title="{{ $editing ? __('production.scheduling.edit') : __('production.scheduling.new') }}">
+        <x-slot:actions>
         <x-ui.button :href="$editing ? route('production.scheduling.show', ['run' => $runKey]) : route('production.scheduling.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>

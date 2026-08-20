@@ -6,11 +6,8 @@
 @section('client-content')
 @php($isAdministratorRole = app(\App\Services\SaaS\CompanyUserAccessService::class)->isAdministratorRoleSlug((string) $role->slug))
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ $role->name }}</h1>
-            <p class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ $role->slug }}</p>
-        </div>
+    <x-ui.page-heading title="{{ $role->name }}" subtitle="{{ $role->slug }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('company-access.rbac.roles.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             @unless($isAdministratorRole)
@@ -22,7 +19,8 @@
                 </form>
             @endunless
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>

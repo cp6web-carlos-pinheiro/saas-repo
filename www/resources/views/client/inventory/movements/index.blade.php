@@ -5,7 +5,9 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4"><div><h1 class="font-display text-3xl font-bold">{{ __('inventory_web.movements') }}</h1><p class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ __('inventory_web.movements_description') }}</p></div><x-ui.button :href="route('inventory.movements.create')" variant="primary" class="rounded-full">{{ __('inventory_web.new_movement') }}</x-ui.button></div>
+    <x-ui.page-heading :title="__('inventory_web.movements')" :subtitle="__('inventory_web.movements_description')">
+        <x-slot:actions><x-ui.button :href="route('inventory.movements.create')" variant="primary" class="rounded-full">{{ __('inventory_web.new_movement') }}</x-ui.button></x-slot:actions>
+    </x-ui.page-heading>
     @if (session('status'))<x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>@endif
     <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <form method="GET" class="grid gap-3 md:grid-cols-4"><x-ui.select name="warehouse_id" select2="false"><option value="">{{ __('inventory_web.all_warehouses') }}</option>@foreach ($warehouses as $warehouse)<option value="{{ $warehouse->id }}" @selected($warehouseId === $warehouse->id)>{{ $warehouse->code }} — {{ $warehouse->name }}</option>@endforeach</x-ui.select><x-ui.select name="product_id" select2="false"><option value="">{{ __('inventory_web.all_products') }}</option>@foreach ($products as $product)<option value="{{ $product->id }}" @selected($productId === $product->id)>{{ $product->sku }} — {{ $product->description }}</option>@endforeach</x-ui.select><x-ui.select name="movement_type" select2="false"><option value="">{{ __('inventory_web.all_types') }}</option>@foreach ($movementTypes as $type => $label)<option value="{{ $type }}" @selected($movementType === $type)>{{ $label }}</option>@endforeach</x-ui.select><x-ui.button type="submit" variant="secondary" class="rounded-xl">{{ __('inventory_web.filter') }}</x-ui.button></form>

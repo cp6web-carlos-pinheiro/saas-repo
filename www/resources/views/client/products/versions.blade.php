@@ -5,16 +5,15 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ __('product.versions_title') }}</h1>
-        </div>
+    <x-ui.page-heading title="{{ __('product.versions_title') }}">
+        <x-slot:actions>
         <div class="flex flex-wrap items-center gap-3">
             @if ($selectedProduct !== null)
                 <x-ui.button :href="route('products.versions.create', $selectedProduct)" variant="primary" class="rounded-full">{{ __('product.version_create') }}</x-ui.button>
             @endif
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>

@@ -5,12 +5,11 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ $editing ? __('product.version_edit') : __('product.version_create') }}</h1>
-        </div>
+    <x-ui.page-heading title="{{ $editing ? __('product.version_edit') : __('product.version_create') }}">
+        <x-slot:actions>
         <x-ui.button :href="route('products.versions', ['product_id' => $product->id])" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <div class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-4">

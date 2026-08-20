@@ -5,11 +5,8 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ __('bom.structures_title') }}</h1>
-        </div>
-    </div>
+    <x-ui.page-heading title="{{ __('bom.structures_title') }}">
+    </x-ui.page-heading>
 
     <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <form class="flex gap-3" method="GET">

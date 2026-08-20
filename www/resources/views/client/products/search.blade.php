@@ -5,15 +5,14 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ __('product.title') }}</h1>
-        </div>
+    <x-ui.page-heading title="{{ __('product.title') }}">
+        <x-slot:actions>
         <div class="flex flex-wrap items-center gap-3">
             <x-ui.button :href="route('products.export', ['search' => $search, 'sort' => $sort, 'direction' => $direction])" variant="secondary" class="rounded-full">{{ __('product.export_xlsx') }}</x-ui.button>
             <x-ui.button :href="route('products.create')" variant="primary" class="rounded-full">{{ __('product.create') }}</x-ui.button>
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <form class="flex gap-3" method="GET">

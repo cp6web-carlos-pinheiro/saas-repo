@@ -49,6 +49,32 @@ final class LayoutSystemComplianceTest extends TestCase
         $this->assertSame([], $violations, implode(PHP_EOL, $violations));
     }
 
+    public function test_client_pages_and_crud_forms_use_shared_structural_components(): void
+    {
+        $headings = [];
+        $fields = [];
+
+        foreach ($this->functionalViews() as $file) {
+            $path = str_replace('\\', '/', $file->getPathname());
+            $contents = file_get_contents($path);
+            $relative = str_replace(resource_path('views').'/', '', $path);
+
+            if ((str_contains($path, '/views/client/') || (str_contains($path, '/views/admin/') && ! str_ends_with($path, '/login.blade.php')))
+                && preg_match('/<h1\b/', $contents) === 1) {
+                $headings[] = $relative;
+            }
+
+            if (str_contains($path, '/views/client/')
+                && (str_ends_with($path, '/form.blade.php') || str_ends_with($path, '-form.blade.php'))
+                && preg_match('/<label\b/', $contents) === 1) {
+                $fields[] = $relative;
+            }
+        }
+
+        $this->assertSame([], $headings, 'Manual page headings: '.implode(', ', $headings));
+        $this->assertSame([], $fields, 'Manual CRUD field labels: '.implode(', ', $fields));
+    }
+
     /** @return list<SplFileInfo> */
     private function functionalViews(): array
     {

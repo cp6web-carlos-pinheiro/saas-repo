@@ -32,8 +32,8 @@
 
     <div>
         <p class="text-sm font-semibold uppercase tracking-wide text-[var(--ui-text-muted)]">{{ __('sale.reference_label', ['id' => $sale->id]) }}</p>
-        <div class="mt-1 flex flex-wrap items-center justify-between gap-4">
-            <h1 class="font-display text-3xl font-bold">{{ __('sale.production_status.title') }}</h1>
+        <x-ui.page-heading title="{{ __('sale.production_status.title') }}">
+            <x-slot:actions>
             <div class="flex flex-wrap items-center justify-end gap-1 print:hidden" role="group" aria-label="{{ __('sale.production_status.report_actions') }}">
                 <a class="ui-icon-button border border-[var(--ui-border)] bg-[var(--ui-surface)]" href="{{ route('sales.production-status.export', [$sale, 'xlsx']) }}" title="{{ __('sale.production_status.export_excel') }}" aria-label="{{ __('sale.production_status.export_excel') }}">
                     <x-ui.icon name="chart-bar" />
@@ -49,7 +49,8 @@
                 <span class="mx-2 h-6 w-px bg-[var(--ui-border)]" aria-hidden="true"></span>
                 <x-ui.button :href="route('sales.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             </div>
-        </div>
+            </x-slot:actions>
+        </x-ui.page-heading>
         <p class="mt-2 text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.subtitle', ['customer' => $sale->customer?->name ?? __('sale.customer_removed')]) }}</p>
     </div>
 

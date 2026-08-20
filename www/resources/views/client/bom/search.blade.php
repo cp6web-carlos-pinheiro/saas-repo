@@ -5,14 +5,13 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ __('ui.bom_revisions') }}</h1>
-        </div>
+    <x-ui.page-heading title="{{ __('ui.bom_revisions') }}">
+        <x-slot:actions>
         <div class="flex flex-wrap items-center gap-3">
             <x-ui.button :href="route('bom.material-lists.create')" variant="primary" class="rounded-full">{{ __('bom.create') }}</x-ui.button>
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>

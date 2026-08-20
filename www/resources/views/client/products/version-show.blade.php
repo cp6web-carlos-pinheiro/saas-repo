@@ -5,11 +5,8 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ __('product.version_details') }}</h1>
-            <p class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ $product->sku }} - {{ $product->description ?? '—' }}</p>
-        </div>
+    <x-ui.page-heading title="{{ __('product.version_details') }}" subtitle="{{ $product->sku }} - {{ $product->description ?? '—' }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('products.versions', ['product_id' => $product->id])" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
 
@@ -25,7 +22,8 @@
                 </form>
             @endif
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>

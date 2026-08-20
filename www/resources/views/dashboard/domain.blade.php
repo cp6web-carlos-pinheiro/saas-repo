@@ -5,14 +5,13 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <p class="text-sm font-semibold uppercase tracking-wide text-[var(--ui-text-muted)]">{{ __('ui.dashboard') }}</p>
-            <h1 class="font-display text-3xl font-bold">{{ $dashboard['title'] ?? __('ui.dashboard') }}</h1>
-            <p class="mt-2 max-w-3xl text-sm text-[var(--ui-text-muted)]">{{ $dashboard['description'] ?? '' }}</p>
-        </div>
-        <x-ui.button :href="route('dashboard.industrial')" variant="secondary" class="rounded-full">{{ __('ui.back_to_dashboard') }}</x-ui.button>
-    </div>
+    <x-ui.page-heading
+        :title="$dashboard['title'] ?? __('ui.dashboard')"
+        :subtitle="$dashboard['description'] ?? ''"
+        :eyebrow="__('ui.dashboard')"
+    >
+        <x-slot:actions><x-ui.button :href="route('dashboard.industrial')" variant="secondary" class="rounded-full">{{ __('ui.back_to_dashboard') }}</x-ui.button></x-slot:actions>
+    </x-ui.page-heading>
 
     <div class="mt-6 grid gap-4 md:grid-cols-2">
         <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">

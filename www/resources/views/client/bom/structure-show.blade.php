@@ -5,17 +5,15 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ $product->sku }}</h1>
-            <p class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ $product->description ?? '—' }}</p>
-        </div>
+    <x-ui.page-heading title="{{ $product->sku }}" subtitle="{{ $product->description ?? '—' }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('bom.structures.index')" variant="secondary" class="rounded-full">{{ __('bom.back') }}</x-ui.button>
             <x-ui.button :href="route('bom.material-lists.index', ['search' => $product->sku])" variant="info" class="rounded-full">{{ __('ui.bom_revisions') }}</x-ui.button>
             <x-ui.button :href="route('bom.material-lists.create', ['product_id' => $product->id])" variant="primary" class="rounded-full">{{ __('bom.create_revision') }}</x-ui.button>
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <div class="overflow-x-auto">

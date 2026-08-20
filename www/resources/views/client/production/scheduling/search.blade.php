@@ -5,10 +5,11 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ __('ui.module_scheduling') }}</h1>
+    <x-ui.page-heading title="{{ __('ui.module_scheduling') }}">
+        <x-slot:actions>
         <x-ui.button :href="route('production.scheduling.create')" variant="primary" class="rounded-full">{{ __('production.scheduling.new') }}</x-ui.button>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6">
         <p class="text-sm text-[var(--ui-text-muted)]">{{ __('production.scheduling.description') }}</p>

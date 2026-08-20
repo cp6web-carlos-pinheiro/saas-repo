@@ -5,8 +5,8 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ $receipt->receipt_number }}</h1>
+    <x-ui.page-heading title="{{ $receipt->receipt_number }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('purchasing.receipts.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             @if ($receipt->status === 'POSTED')
@@ -23,7 +23,8 @@
                 </form>
             @endif
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>

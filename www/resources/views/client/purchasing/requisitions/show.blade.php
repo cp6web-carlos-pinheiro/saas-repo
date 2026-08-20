@@ -5,8 +5,8 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ $requisition->requisition_number }}</h1>
+    <x-ui.page-heading title="{{ $requisition->requisition_number }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('purchasing.requisitions.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             <x-ui.button :href="route('purchasing.requisitions.edit', $requisition)" variant="primary" class="rounded-full">{{ __('purchase_requisition.edit') }}</x-ui.button>
@@ -16,7 +16,8 @@
                 <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('purchase_requisition.remove') }}</x-ui.button>
             </form>
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>

@@ -25,10 +25,8 @@
         };
     @endphp
 
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ __('sale.reference_label', ['id' => $sale->id]) }}</h1>
-        </div>
+    <x-ui.page-heading title="{{ __('sale.reference_label', ['id' => $sale->id]) }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('sales.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
 
@@ -54,7 +52,8 @@
                 </form>
             @endif
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>

@@ -5,8 +5,8 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ $brand->name }}</h1>
+    <x-ui.page-heading title="{{ $brand->name }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('admin-data.brands.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             <x-ui.button :href="route('admin-data.brands.edit', $brand)" variant="primary" class="rounded-full">{{ __('admin_data_brands.edit') }}</x-ui.button>
@@ -16,7 +16,8 @@
                 <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('admin_data_brands.remove') }}</x-ui.button>
             </form>
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>

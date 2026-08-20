@@ -5,10 +5,11 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ __('admin_data_categories.title') }}</h1>
+    <x-ui.page-heading title="{{ __('admin_data_categories.title') }}">
+        <x-slot:actions>
         <x-ui.button :href="route('admin-data.categories.create')" variant="primary" class="rounded-full">{{ __('admin_data_categories.create') }}</x-ui.button>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>

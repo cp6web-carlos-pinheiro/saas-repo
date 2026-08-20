@@ -5,14 +5,13 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ __('customer.title') }}</h1>
-        </div>
+    <x-ui.page-heading title="{{ __('customer.title') }}">
+        <x-slot:actions>
         <div class="flex flex-wrap items-center gap-3">
             <x-ui.button :href="route('customers.create')" variant="primary" class="rounded-full">{{ __('customer.create') }}</x-ui.button>
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>

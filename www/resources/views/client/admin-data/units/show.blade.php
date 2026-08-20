@@ -6,8 +6,8 @@
 @section('client-content')
 <div class="w-full p-5 md:p-8">
     @php($isGlobal = $unit->company_id === null)
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ $unit->code }} - {{ $unit->name }}</h1>
+    <x-ui.page-heading title="{{ $unit->code }} - {{ $unit->name }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('admin-data.units.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             @unless($isGlobal)
@@ -19,7 +19,8 @@
                 </form>
             @endunless
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>

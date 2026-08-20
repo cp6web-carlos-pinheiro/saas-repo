@@ -5,12 +5,13 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ __('production.analytics.title') }}</h1>
+    <x-ui.page-heading title="{{ __('production.analytics.title') }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('production.orders.index')" variant="secondary" class="rounded-full">{{ __('production.analytics.orders') }}</x-ui.button>
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <form method="GET" class="flex flex-wrap items-end gap-3">

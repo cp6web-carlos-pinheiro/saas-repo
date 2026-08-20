@@ -5,13 +5,14 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h1 class="font-display text-3xl font-bold">{{ $order->order_number }}</h1>
+    <x-ui.page-heading title="{{ $order->order_number }}">
+        <x-slot:actions>
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('production.analytics.index')" variant="secondary" class="rounded-full">{{ __('production.orders.analytics') }}</x-ui.button>
             <x-ui.button :href="route('production.orders.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
         </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
