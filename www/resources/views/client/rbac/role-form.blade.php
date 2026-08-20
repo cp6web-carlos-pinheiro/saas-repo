@@ -26,21 +26,18 @@
             @endif
 
             <div class="grid gap-5 md:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('rbac.role_name') }}
-                    <x-ui.input name="name" :value="old('name', $role?->name)" class="mt-2" required />
-                </label>
+                <x-ui.field label="{{ __('rbac.role_name') }}" for="name" :required="true" :error="$errors->first('name')">
+                    <x-ui.input name="name" :value="old('name', $role?->name)" class="mt-2" required  id="name" :aria-describedby="$errors->has('name') ? 'name-error' : null"/>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('rbac.role_slug') }}
-                    <x-ui.input name="slug" :value="old('slug', $role?->slug)" class="mt-2" required />
-                </label>
+                <x-ui.field label="{{ __('rbac.role_slug') }}" for="slug" :required="true" :error="$errors->first('slug')">
+                    <x-ui.input name="slug" :value="old('slug', $role?->slug)" class="mt-2" required  id="slug" :aria-describedby="$errors->has('slug') ? 'slug-error' : null"/>
+                </x-ui.field>
             </div>
 
-            <label class="block text-sm font-medium">
-                {{ __('rbac.role_description') }}
-                <x-ui.input name="description" :value="old('description', $role?->description)" class="mt-2" />
-            </label>
+            <x-ui.field label="{{ __('rbac.role_description') }}" for="description" :error="$errors->first('description')">
+                <x-ui.input name="description" :value="old('description', $role?->description)" class="mt-2"  id="description" :aria-describedby="$errors->has('description') ? 'description-error' : null"/>
+            </x-ui.field>
 
             <div>
                 <h2 class="text-base font-semibold">{{ __('rbac.permission_matrix') }}</h2>

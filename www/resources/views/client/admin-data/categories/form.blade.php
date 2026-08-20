@@ -23,26 +23,20 @@
                 @method('PUT')
             @endif
 
-            <label class="block text-sm font-medium">
-                {{ __('admin_data.name') }}
-                <x-ui.input name="name" :value="old('name', $category?->name)" class="mt-2" required />
-                @error('name')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('admin_data.name') }}" for="name" :required="true" :error="$errors->first('name')">
+                <x-ui.input name="name" :value="old('name', $category?->name)" class="mt-2" required  id="name" :aria-describedby="$errors->has('name') ? 'name-error' : null"/>
+            </x-ui.field>
 
-            <label class="block text-sm font-medium">
-                {{ __('admin_data.description') }}
-                <x-ui.textarea name="description" class="mt-2" rows="5">{{ old('description', $category?->description) }}</x-ui.textarea>
-                @error('description')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('admin_data.description') }}" for="description" :error="$errors->first('description')">
+                <x-ui.textarea name="description" class="mt-2" rows="5" id="description" :aria-describedby="$errors->has('description') ? 'description-error' : null">{{ old('description', $category?->description) }}</x-ui.textarea>
+            </x-ui.field>
 
-            <label class="block text-sm font-medium">
-                {{ __('admin_data.status') }}
-                <x-ui.select name="is_active" class="mt-2" required data-search="off">
+            <x-ui.field label="{{ __('admin_data.status') }}" for="is-active" :required="true" :error="$errors->first('is_active')">
+                <x-ui.select name="is_active" class="mt-2" required data-search="off" id="is-active" :aria-describedby="$errors->has('is_active') ? 'is-active-error' : null">
                     <option value="1" @selected((string) old('is_active', $category?->is_active ?? true) === '1')>{{ __('admin_data.active') }}</option>
                     <option value="0" @selected((string) old('is_active', $category?->is_active ?? true) === '0')>{{ __('admin_data.inactive') }}</option>
                 </x-ui.select>
-                @error('is_active')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            </x-ui.field>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <x-ui.button :href="$editing ? route('admin-data.categories.show', $category) : route('admin-data.categories.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>

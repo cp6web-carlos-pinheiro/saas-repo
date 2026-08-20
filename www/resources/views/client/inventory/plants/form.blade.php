@@ -23,27 +23,21 @@
                 @method('PUT')
             @endif
 
-            <label class="block text-sm font-medium">
-                {{ __('plant.name') }}
-                <x-ui.input name="name" :value="old('name', $plant?->name)" class="mt-2" required />
-                @error('name')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('plant.name') }}" for="name" :required="true" :error="$errors->first('name')">
+                <x-ui.input name="name" :value="old('name', $plant?->name)" class="mt-2" required  id="name" :aria-describedby="$errors->has('name') ? 'name-error' : null"/>
+            </x-ui.field>
 
             <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('plant.timezone') }}
-                    <x-ui.input name="timezone" :value="old('timezone', $plant?->timezone ?? 'UTC')" class="mt-2" required maxlength="50" />
-                    @error('timezone')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                <x-ui.field label="{{ __('plant.timezone') }}" for="timezone" :required="true" :error="$errors->first('timezone')">
+                    <x-ui.input name="timezone" :value="old('timezone', $plant?->timezone ?? 'UTC')" class="mt-2" required maxlength="50"  id="timezone" :aria-describedby="$errors->has('timezone') ? 'timezone-error' : null"/>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('plant.status') }}
-                    <x-ui.select name="is_active" class="mt-2" required data-search="off">
+                <x-ui.field label="{{ __('plant.status') }}" for="is-active" :required="true" :error="$errors->first('is_active')">
+                    <x-ui.select name="is_active" class="mt-2" required data-search="off" id="is-active" :aria-describedby="$errors->has('is_active') ? 'is-active-error' : null">
                         <option value="1" @selected((string) old('is_active', $plant?->is_active ?? true) === '1')>{{ __('plant.active') }}</option>
                         <option value="0" @selected((string) old('is_active', $plant?->is_active ?? true) === '0')>{{ __('plant.inactive') }}</option>
                     </x-ui.select>
-                    @error('is_active')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
             </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">

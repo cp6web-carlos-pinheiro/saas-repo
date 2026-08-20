@@ -34,28 +34,22 @@
             @endif
 
             <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_requisition.required_date') }}
-                    <x-ui.input type="date" name="required_date" :value="old('required_date', $requisition?->required_date?->format('Y-m-d') ?? $initialValues['required_date'])" class="mt-2" />
-                    @error('required_date')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                <x-ui.field label="{{ __('purchase_requisition.required_date') }}" for="required-date" :error="$errors->first('required_date')">
+                    <x-ui.input type="date" name="required_date" :value="old('required_date', $requisition?->required_date?->format('Y-m-d') ?? $initialValues['required_date'])" class="mt-2"  id="required-date" :aria-describedby="$errors->has('required_date') ? 'required-date-error' : null"/>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_requisition.status') }}
-                    <x-ui.select name="status" class="mt-2" required data-search="off">
+                <x-ui.field label="{{ __('purchase_requisition.status') }}" for="status" :required="true" :error="$errors->first('status')">
+                    <x-ui.select name="status" class="mt-2" required data-search="off" id="status" :aria-describedby="$errors->has('status') ? 'status-error' : null">
                         <option value="DRAFT" @selected(old('status', $requisition?->status ?? 'DRAFT') === 'DRAFT')>{{ __('purchase_requisition.status_draft') }}</option>
                         <option value="APPROVED" @selected(old('status', $requisition?->status ?? 'DRAFT') === 'APPROVED')>{{ __('purchase_requisition.status_approved') }}</option>
                         <option value="CANCELLED" @selected(old('status', $requisition?->status ?? 'DRAFT') === 'CANCELLED')>{{ __('purchase_requisition.status_cancelled') }}</option>
                     </x-ui.select>
-                    @error('status')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
             </div>
 
-            <label class="block text-sm font-medium">
-                {{ __('purchase_requisition.source_type') }}
-                <x-ui.input name="source_type" :value="old('source_type', $requisition?->source_type ?? $initialValues['source_type'])" class="mt-2" />
-                @error('source_type')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('purchase_requisition.source_type') }}" for="source-type" :error="$errors->first('source_type')">
+                <x-ui.input name="source_type" :value="old('source_type', $requisition?->source_type ?? $initialValues['source_type'])" class="mt-2"  id="source-type" :aria-describedby="$errors->has('source_type') ? 'source-type-error' : null"/>
+            </x-ui.field>
 
             <section class="space-y-4">
                 <div class="flex flex-wrap items-end justify-between gap-3">
@@ -116,11 +110,9 @@
                 </div>
             </section>
 
-            <label class="block text-sm font-medium">
-                {{ __('purchase_requisition.notes') }}
-                <x-ui.textarea name="notes" class="mt-2" rows="4">{{ old('notes', $requisition?->notes ?? $initialValues['notes']) }}</x-ui.textarea>
-                @error('notes')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('purchase_requisition.notes') }}" for="notes" :error="$errors->first('notes')">
+                <x-ui.textarea name="notes" class="mt-2" rows="4" id="notes" :aria-describedby="$errors->has('notes') ? 'notes-error' : null">{{ old('notes', $requisition?->notes ?? $initialValues['notes']) }}</x-ui.textarea>
+            </x-ui.field>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <x-ui.button :href="$editing ? route('purchasing.requisitions.show', $requisition) : route('purchasing.requisitions.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>

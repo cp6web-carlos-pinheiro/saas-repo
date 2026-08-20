@@ -25,55 +25,41 @@
                 @method('PUT')
             @endif
 
-            <label class="block text-sm font-medium">
-                {{ __('supplier.name') }}
-                <x-ui.input name="name" :value="old('name', $supplier?->name)" required @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('name'), 'border-[var(--ui-border)]' => ! $errors->has('name')]) />
-                @error('name')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('supplier.name') }}" for="name" :required="true" :error="$errors->first('name')">
+                <x-ui.input name="name" :value="old('name', $supplier?->name)" required @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('name'), 'border-[var(--ui-border)]' => ! $errors->has('name')])  id="name" :aria-describedby="$errors->has('name') ? 'name-error' : null"/>
+            </x-ui.field>
 
-            <label class="block text-sm font-medium">
-                {{ __('supplier.person_type') }}
-                <x-ui.select id="supplier-person-type" name="person_type" class="mt-2" required data-search="off">
+            <x-ui.field label="{{ __('supplier.person_type') }}" for="supplier-person-type" :required="true" :error="$errors->first('person_type')">
+                <x-ui.select id="supplier-person-type" name="person_type" class="mt-2" required data-search="off" :aria-describedby="$errors->has('person_type') ? 'supplier-person-type-error' : null">
                     <option value="PJ" @selected(old('person_type', $supplier?->person_type ?? 'PJ') === 'PJ')>{{ __('supplier.person_type_pj') }}</option>
                     <option value="PF" @selected(old('person_type', $supplier?->person_type ?? 'PJ') === 'PF')>{{ __('supplier.person_type_pf') }}</option>
                 </x-ui.select>
-                @error('person_type')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            </x-ui.field>
 
-            <label class="block text-sm font-medium">
-                {{ __('supplier.email') }}
-                <x-ui.input name="email" type="email" :value="old('email', $supplier?->email)" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('email'), 'border-[var(--ui-border)]' => ! $errors->has('email')]) />
-                @error('email')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('supplier.email') }}" for="email" :error="$errors->first('email')">
+                <x-ui.input name="email" type="email" :value="old('email', $supplier?->email)" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('email'), 'border-[var(--ui-border)]' => ! $errors->has('email')])  id="email" :aria-describedby="$errors->has('email') ? 'email-error' : null"/>
+            </x-ui.field>
 
-            <label class="block text-sm font-medium">
-                {{ __('supplier.phone') }}
-                <x-ui.input name="phone" :value="old('phone', $supplier?->phone)" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('phone'), 'border-[var(--ui-border)]' => ! $errors->has('phone')]) />
-                @error('phone')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('supplier.phone') }}" for="phone" :error="$errors->first('phone')">
+                <x-ui.input name="phone" :value="old('phone', $supplier?->phone)" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('phone'), 'border-[var(--ui-border)]' => ! $errors->has('phone')])  id="phone" :aria-describedby="$errors->has('phone') ? 'phone-error' : null"/>
+            </x-ui.field>
 
             <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('supplier.status') }}
-                    <x-ui.select name="status" class="mt-2" required data-search="off">
+                <x-ui.field label="{{ __('supplier.status') }}" for="status" :required="true" :error="$errors->first('status')">
+                    <x-ui.select name="status" class="mt-2" required data-search="off" id="status" :aria-describedby="$errors->has('status') ? 'status-error' : null">
                         <option value="ACTIVE" @selected(old('status', $supplier?->status ?? 'ACTIVE') === 'ACTIVE')>{{ __('supplier.active') }}</option>
                         <option value="INACTIVE" @selected(old('status', $supplier?->status ?? 'ACTIVE') === 'INACTIVE')>{{ __('supplier.inactive') }}</option>
                     </x-ui.select>
-                    @error('status')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('supplier.default_lead_time_days') }}
-                    <x-ui.input name="default_lead_time_days" type="number" min="0" :value="old('default_lead_time_days', $supplier?->default_lead_time_days ?? 0)" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('default_lead_time_days'), 'border-[var(--ui-border)]' => ! $errors->has('default_lead_time_days')]) />
-                    @error('default_lead_time_days')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                <x-ui.field label="{{ __('supplier.default_lead_time_days') }}" for="default-lead-time-days" :error="$errors->first('default_lead_time_days')">
+                    <x-ui.input name="default_lead_time_days" type="number" min="0" :value="old('default_lead_time_days', $supplier?->default_lead_time_days ?? 0)" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('default_lead_time_days'), 'border-[var(--ui-border)]' => ! $errors->has('default_lead_time_days')])  id="default-lead-time-days" :aria-describedby="$errors->has('default_lead_time_days') ? 'default-lead-time-days-error' : null"/>
+                </x-ui.field>
             </div>
 
-            <label class="block text-sm font-medium">
-                {{ __('supplier.payment_terms') }}
-                <x-ui.input name="payment_terms" :value="old('payment_terms', $supplier?->payment_terms)" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('payment_terms'), 'border-[var(--ui-border)]' => ! $errors->has('payment_terms')]) />
-                @error('payment_terms')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('supplier.payment_terms') }}" for="payment-terms" :error="$errors->first('payment_terms')">
+                <x-ui.input name="payment_terms" :value="old('payment_terms', $supplier?->payment_terms)" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('payment_terms'), 'border-[var(--ui-border)]' => ! $errors->has('payment_terms')])  id="payment-terms" :aria-describedby="$errors->has('payment_terms') ? 'payment-terms-error' : null"/>
+            </x-ui.field>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <x-ui.button :href="$editing ? route('purchasing.suppliers.show', $supplier) : route('purchasing.suppliers.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>

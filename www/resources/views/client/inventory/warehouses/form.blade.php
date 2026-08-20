@@ -23,32 +23,26 @@
                 @method('PUT')
             @endif
 
-            <label class="block text-sm font-medium">
-                {{ __('warehouse.name') }}
-                <x-ui.input name="name" :value="old('name', $warehouse?->name)" class="mt-2" required />
-                @error('name')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('warehouse.name') }}" for="name" :required="true" :error="$errors->first('name')">
+                <x-ui.input name="name" :value="old('name', $warehouse?->name)" class="mt-2" required  id="name" :aria-describedby="$errors->has('name') ? 'name-error' : null"/>
+            </x-ui.field>
 
             <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('warehouse.plant') }}
-                    <x-ui.select name="plant_id" class="mt-2" required>
+                <x-ui.field label="{{ __('warehouse.plant') }}" for="plant-id" :required="true" :error="$errors->first('plant_id')">
+                    <x-ui.select name="plant_id" class="mt-2" required id="plant-id" :aria-describedby="$errors->has('plant_id') ? 'plant-id-error' : null">
                         <option value="">{{ __('warehouse.select_plant') }}</option>
                         @foreach ($plants as $id => $label)
                             <option value="{{ $id }}" @selected((string) old('plant_id', $warehouse?->plant_id) === (string) $id)>{{ $label }}</option>
                         @endforeach
                     </x-ui.select>
-                    @error('plant_id')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('warehouse.status') }}
-                    <x-ui.select name="is_active" class="mt-2" required data-search="off">
+                <x-ui.field label="{{ __('warehouse.status') }}" for="is-active" :required="true" :error="$errors->first('is_active')">
+                    <x-ui.select name="is_active" class="mt-2" required data-search="off" id="is-active" :aria-describedby="$errors->has('is_active') ? 'is-active-error' : null">
                         <option value="1" @selected((string) old('is_active', $warehouse?->is_active ?? true) === '1')>{{ __('warehouse.active') }}</option>
                         <option value="0" @selected((string) old('is_active', $warehouse?->is_active ?? true) === '0')>{{ __('warehouse.inactive') }}</option>
                     </x-ui.select>
-                    @error('is_active')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
             </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">

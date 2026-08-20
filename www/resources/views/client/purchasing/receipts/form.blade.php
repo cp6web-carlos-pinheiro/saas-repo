@@ -28,52 +28,42 @@
             @endif
 
             <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_receipt.supplier') }}
-                    <x-ui.select name="supplier_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_receipt.select_supplier') }}" data-ajax-url="{{ route('purchasing.lookups.suppliers') }}" data-minimum-input-length="1">
+                <x-ui.field label="{{ __('purchase_receipt.supplier') }}" for="supplier-id" :error="$errors->first('supplier_id')">
+                    <x-ui.select name="supplier_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_receipt.select_supplier') }}" data-ajax-url="{{ route('purchasing.lookups.suppliers') }}" data-minimum-input-length="1" id="supplier-id" :aria-describedby="$errors->has('supplier_id') ? 'supplier-id-error' : null">
                         <option value="">{{ __('purchase_receipt.select_supplier') }}</option>
                         @foreach ($suppliers as $id => $name)
                             <option value="{{ $id }}" @selected((string) old('supplier_id', $receipt?->supplier_id) === (string) $id)>{{ $name }}</option>
                         @endforeach
                     </x-ui.select>
-                    @error('supplier_id')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_receipt.order') }}
-                    <x-ui.select name="purchase_order_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_receipt.select_order') }}" data-ajax-url="{{ route('purchasing.lookups.orders') }}" data-minimum-input-length="1">
+                <x-ui.field label="{{ __('purchase_receipt.order') }}" for="purchase-order-id" :error="$errors->first('purchase_order_id')">
+                    <x-ui.select name="purchase_order_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_receipt.select_order') }}" data-ajax-url="{{ route('purchasing.lookups.orders') }}" data-minimum-input-length="1" id="purchase-order-id" :aria-describedby="$errors->has('purchase_order_id') ? 'purchase-order-id-error' : null">
                         <option value="">{{ __('purchase_receipt.select_order') }}</option>
                         @foreach ($orders as $id => $number)
                             <option value="{{ $id }}" @selected((string) old('purchase_order_id', $receipt?->purchase_order_id) === (string) $id)>{{ $number }}</option>
                         @endforeach
                     </x-ui.select>
-                    @error('purchase_order_id')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
             </div>
 
             <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_receipt.receipt_date') }}
-                    <x-ui.input type="date" name="receipt_date" :value="old('receipt_date', $receipt?->receipt_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required />
-                    @error('receipt_date')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                <x-ui.field label="{{ __('purchase_receipt.receipt_date') }}" for="receipt-date" :required="true" :error="$errors->first('receipt_date')">
+                    <x-ui.input type="date" name="receipt_date" :value="old('receipt_date', $receipt?->receipt_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required  id="receipt-date" :aria-describedby="$errors->has('receipt_date') ? 'receipt-date-error' : null"/>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_receipt.status') }}
-                    <x-ui.select name="status" class="mt-2" required data-search="off">
+                <x-ui.field label="{{ __('purchase_receipt.status') }}" for="status" :required="true" :error="$errors->first('status')">
+                    <x-ui.select name="status" class="mt-2" required data-search="off" id="status" :aria-describedby="$errors->has('status') ? 'status-error' : null">
                         <option value="DRAFT" @selected(old('status', $receipt?->status ?? 'DRAFT') === 'DRAFT')>{{ __('purchase_receipt.status_draft') }}</option>
                         <option value="POSTED" @selected(old('status', $receipt?->status ?? 'DRAFT') === 'POSTED')>{{ __('purchase_receipt.status_posted') }}</option>
                         <option value="CANCELLED" @selected(old('status', $receipt?->status ?? 'DRAFT') === 'CANCELLED')>{{ __('purchase_receipt.status_cancelled') }}</option>
                     </x-ui.select>
-                    @error('status')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
             </div>
 
-            <label class="block text-sm font-medium">
-                {{ __('purchase_receipt.notes') }}
-                <x-ui.textarea name="notes" class="mt-2" rows="4">{{ old('notes', $receipt?->notes) }}</x-ui.textarea>
-                @error('notes')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('purchase_receipt.notes') }}" for="notes" :error="$errors->first('notes')">
+                <x-ui.textarea name="notes" class="mt-2" rows="4" id="notes" :aria-describedby="$errors->has('notes') ? 'notes-error' : null">{{ old('notes', $receipt?->notes) }}</x-ui.textarea>
+            </x-ui.field>
 
             <section class="space-y-4">
                 <div class="flex flex-wrap items-end justify-between gap-3">

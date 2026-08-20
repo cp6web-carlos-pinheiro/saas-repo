@@ -23,27 +23,27 @@
                 @method('PUT')
             @endif
 
-            <label class="block text-sm font-medium">{{ __('production.work_center') }}
-                <x-ui.select class="mt-2" name="work_center_id" data-search="on" required>
+            <x-ui.field label="{{ __('production.work_center') }}" for="work-center-id" :required="true" :error="$errors->first('work_center_id')">
+                <x-ui.select class="mt-2" name="work_center_id" data-search="on" required id="work-center-id" :aria-describedby="$errors->has('work_center_id') ? 'work-center-id-error' : null">
                     <option value="">{{ __('production.select') }}</option>
                     @foreach ($workCenters as $center)
                         <option value="{{ $center->id }}" @selected((string) old('work_center_id', $day?->work_center_id) === (string) $center->id)>{{ $center->code }} - {{ $center->name }}</option>
                     @endforeach
                 </x-ui.select>
-            </label>
+            </x-ui.field>
 
             <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">{{ __('production.date') }}
-                    <x-ui.input class="mt-2" type="date" name="calendar_date" :value="old('calendar_date', optional($day?->calendar_date)->format('Y-m-d'))" required />
-                </label>
-                <label class="block text-sm font-medium">{{ __('production.calendar.available_capacity') }}
-                    <x-ui.input class="mt-2" type="number" step="0.01" min="0" name="available_capacity" :value="old('available_capacity', $day?->available_capacity)" />
-                </label>
+                <x-ui.field label="{{ __('production.date') }}" for="calendar-date" :required="true" :error="$errors->first('calendar_date')">
+                    <x-ui.input class="mt-2" type="date" name="calendar_date" :value="old('calendar_date', optional($day?->calendar_date)->format('Y-m-d'))" required  id="calendar-date" :aria-describedby="$errors->has('calendar_date') ? 'calendar-date-error' : null"/>
+                </x-ui.field>
+                <x-ui.field label="{{ __('production.calendar.available_capacity') }}" for="available-capacity" :error="$errors->first('available_capacity')">
+                    <x-ui.input class="mt-2" type="number" step="0.01" min="0" name="available_capacity" :value="old('available_capacity', $day?->available_capacity)"  id="available-capacity" :aria-describedby="$errors->has('available_capacity') ? 'available-capacity-error' : null"/>
+                </x-ui.field>
             </div>
 
-            <label class="block text-sm font-medium">{{ __('production.notes') }}
-                <x-ui.input class="mt-2" name="notes" maxlength="255" :value="old('notes', $day?->notes)" />
-            </label>
+            <x-ui.field label="{{ __('production.notes') }}" for="notes" :error="$errors->first('notes')">
+                <x-ui.input class="mt-2" name="notes" maxlength="255" :value="old('notes', $day?->notes)"  id="notes" :aria-describedby="$errors->has('notes') ? 'notes-error' : null"/>
+            </x-ui.field>
 
             <div>
                 <x-ui.input type="hidden" name="is_working_day" value="0" unstyled />

@@ -48,9 +48,8 @@
             @endif
 
             <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium sm:col-span-2">
-                    {{ __('sale.customer') }}
-                    <x-ui.select name="customer_id" class="mt-2" required data-search="on">
+                <x-ui.field label="{{ __('sale.customer') }}" for="customer-id" :required="true" :error="$errors->first('customer_id')">
+                    <x-ui.select name="customer_id" class="mt-2" required data-search="on" id="customer-id" :aria-describedby="$errors->has('customer_id') ? 'customer-id-error' : null">
                         <option value="">{{ __('sale.select_customer') }}</option>
                         @foreach ($customers as $customer)
                             <option value="{{ $customer->id }}" @selected((int) old('customer_id', $sale?->customer_id) === $customer->id)>
@@ -58,24 +57,19 @@
                             </option>
                         @endforeach
                     </x-ui.select>
-                    @error('customer_id')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('sale.sale_date') }}
-                    <x-ui.input name="sale_date" type="date" :value="old('sale_date', $sale?->sale_date?->format('Y-m-d') ?? now()->toDateString())" required @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('sale_date'), 'border-[var(--ui-border)]' => ! $errors->has('sale_date')]) />
-                    @error('sale_date')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                <x-ui.field label="{{ __('sale.sale_date') }}" for="sale-date" :required="true" :error="$errors->first('sale_date')">
+                    <x-ui.input name="sale_date" type="date" :value="old('sale_date', $sale?->sale_date?->format('Y-m-d') ?? now()->toDateString())" required @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('sale_date'), 'border-[var(--ui-border)]' => ! $errors->has('sale_date')])  id="sale-date" :aria-describedby="$errors->has('sale_date') ? 'sale-date-error' : null"/>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('sale.status') }}
-                    <x-ui.select name="status" class="mt-2" required data-search="off">
+                <x-ui.field label="{{ __('sale.status') }}" for="status" :required="true" :error="$errors->first('status')">
+                    <x-ui.select name="status" class="mt-2" required data-search="off" id="status" :aria-describedby="$errors->has('status') ? 'status-error' : null">
                         <option value="DRAFT" @selected(old('status', $sale?->status ?? 'DRAFT') === 'DRAFT')>{{ __('sale.status_draft') }}</option>
                         <option value="CONFIRMED" @selected(old('status', $sale?->status ?? 'DRAFT') === 'CONFIRMED')>{{ __('sale.status_confirmed') }}</option>
                         <option value="CANCELLED" @selected(old('status', $sale?->status ?? 'DRAFT') === 'CANCELLED')>{{ __('sale.status_cancelled') }}</option>
                     </x-ui.select>
-                    @error('status')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
 
                 <div class="sm:col-span-2">
                     <span class="block text-sm font-medium">{{ __('sale.operational_status') }}</span>
@@ -154,11 +148,9 @@
                 @error('items')<span class="block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
 
                 <div class="grid gap-4 rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-surface-muted)] px-4 py-4 md:grid-cols-2">
-                    <label class="block text-sm font-medium">
-                        {{ __('sale.discount_amount') }}
-                        <x-ui.input name="discount_amount" :value="old('discount_amount', $editing ? number_format(($sale?->discount_cents ?? 0) / 100, 2, ',', '.') : '0,00')" class="mt-2" inputmode="decimal" data-currency-mask="brl" data-sale-discount />
-                        @error('discount_amount')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                    </label>
+                    <x-ui.field label="{{ __('sale.discount_amount') }}" for="discount-amount" :error="$errors->first('discount_amount')">
+                        <x-ui.input name="discount_amount" :value="old('discount_amount', $editing ? number_format(($sale?->discount_cents ?? 0) / 100, 2, ',', '.') : '0,00')" class="mt-2" inputmode="decimal" data-currency-mask="brl" data-sale-discount  id="discount-amount" :aria-describedby="$errors->has('discount_amount') ? 'discount-amount-error' : null"/>
+                    </x-ui.field>
 
                     <div class="flex items-center justify-between rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] px-4 py-3">
                         <span class="text-sm font-medium text-[var(--ui-text-muted)]">{{ __('sale.subtotal') }}</span>
@@ -172,19 +164,15 @@
                 </div>
             </section>
 
-            <label class="block text-sm font-medium">
-                {{ __('sale.notes') }}
-                <x-ui.textarea name="notes" rows="5" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('notes'), 'border-[var(--ui-border)]' => ! $errors->has('notes')])>{{ old('notes', $sale?->notes) }}</x-ui.textarea>
-                @error('notes')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('sale.notes') }}" for="notes" :error="$errors->first('notes')">
+                <x-ui.textarea name="notes" rows="5" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('notes'), 'border-[var(--ui-border)]' => ! $errors->has('notes')]) id="notes" :aria-describedby="$errors->has('notes') ? 'notes-error' : null">{{ old('notes', $sale?->notes) }}</x-ui.textarea>
+            </x-ui.field>
 
-            <label class="block text-sm font-medium">
-                {{ __('sale.cancel_reason') }}
-                <x-ui.textarea name="cancel_reason" rows="4" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('cancel_reason') || $errors->has('status'), 'border-[var(--ui-border)]' => ! $errors->has('cancel_reason') && ! $errors->has('status')])>{{ old('cancel_reason', $sale?->cancel_reason) }}</x-ui.textarea>
+            <x-ui.field label="{{ __('sale.cancel_reason') }}" for="cancel-reason" :error="$errors->first('status')">
+                <x-ui.textarea name="cancel_reason" rows="4" @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('cancel_reason') || $errors->has('status'), 'border-[var(--ui-border)]' => ! $errors->has('cancel_reason') && ! $errors->has('status')]) id="cancel-reason" :aria-describedby="$errors->has('status') ? 'cancel-reason-error' : null">{{ old('cancel_reason', $sale?->cancel_reason) }}</x-ui.textarea>
                 <span class="mt-1 block text-xs text-[var(--ui-text-muted)]">{{ __('sale.cancel_reason_hint') }}</span>
                 @error('cancel_reason')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                @error('status')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            </x-ui.field>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <x-ui.button :href="$editing ? route('sales.show', $sale) : route('sales.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>

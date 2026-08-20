@@ -31,40 +31,29 @@
                 @method('PUT')
             @endif
 
-            <div>
-                <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="effective_from">{{ __('product.effective_from') }}</label>
-                <x-ui.input id="effective_from" type="date" name="effective_from" :value="old('effective_from', $version?->effective_from?->format('Y-m-d'))" />
-                @error('effective_from')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
-            </div>
+            <x-ui.field label="{{ __('product.effective_from') }}" for="effective_from" :error="$errors->first('effective_from')">
+                <x-ui.input id="effective_from" type="date" name="effective_from" :value="old('effective_from', $version?->effective_from?->format('Y-m-d'))"  :aria-describedby="$errors->has('effective_from') ? 'effective_from-error' : null"/>
+            </x-ui.field>
 
-            <div>
-                <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="effective_to">{{ __('product.effective_to') }}</label>
-                <x-ui.input id="effective_to" type="date" name="effective_to" :value="old('effective_to', $version?->effective_to?->format('Y-m-d'))" />
-                @error('effective_to')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
-            </div>
+            <x-ui.field label="{{ __('product.effective_to') }}" for="effective_to" :error="$errors->first('effective_to')">
+                <x-ui.input id="effective_to" type="date" name="effective_to" :value="old('effective_to', $version?->effective_to?->format('Y-m-d'))"  :aria-describedby="$errors->has('effective_to') ? 'effective_to-error' : null"/>
+            </x-ui.field>
 
-            <div>
-                <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="compatibility_rule">{{ __('product.compatibility_rule') }}</label>
-                <x-ui.select id="compatibility_rule" name="compatibility_rule" required data-search="off">
+            <x-ui.field label="{{ __('product.compatibility_rule') }}" for="compatibility_rule" :required="true" :error="$errors->first('compatibility_rule')">
+                <x-ui.select id="compatibility_rule" name="compatibility_rule" required data-search="off" :aria-describedby="$errors->has('compatibility_rule') ? 'compatibility_rule-error' : null">
                     @foreach (__('product.compatibility_rules') as $ruleValue => $ruleLabel)
                         <option value="{{ $ruleValue }}" @selected(old('compatibility_rule', $version?->compatibility_rule ?? 'FULL') === $ruleValue)>{{ $ruleLabel }}</option>
                     @endforeach
                 </x-ui.select>
-                @error('compatibility_rule')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
-            </div>
+            </x-ui.field>
 
-            <div class="md:col-span-2">
-                <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="change_summary">{{ __('product.change_summary') }}</label>
-                <x-ui.textarea id="change_summary" name="change_summary" rows="4">{{ old('change_summary', $version?->change_summary ?? '') }}</x-ui.textarea>
-                @error('change_summary')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
-            </div>
+            <x-ui.field class="md:col-span-2" label="{{ __('product.change_summary') }}" for="change_summary" :error="$errors->first('change_summary')">
+                <x-ui.textarea id="change_summary" name="change_summary" rows="4" :aria-describedby="$errors->has('change_summary') ? 'change_summary-error' : null">{{ old('change_summary', $version?->change_summary ?? '') }}</x-ui.textarea>
+            </x-ui.field>
 
-            <div class="md:col-span-2">
-                <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="payload_json">{{ __('product.payload') }}</label>
-                <x-ui.textarea id="payload_json" name="payload_json" rows="12" class="font-mono text-sm">{{ old('payload_json', $payloadJson) }}</x-ui.textarea>
-                <p class="mt-2 text-sm text-[var(--ui-text-muted)]">{{ __('product.payload_hint') }}</p>
-                @error('payload_json')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
-            </div>
+            <x-ui.field class="md:col-span-2" label="{{ __('product.payload') }}" for="payload_json" hint="{{ __('product.payload_hint') }}" :error="$errors->first('payload_json')">
+                <x-ui.textarea id="payload_json" name="payload_json" rows="12" class="font-mono text-sm" :aria-describedby="$errors->has('payload_json') ? 'payload_json-error' : 'payload_json-hint'">{{ old('payload_json', $payloadJson) }}</x-ui.textarea>
+            </x-ui.field>
 
             <div class="flex flex-wrap gap-3 md:col-span-2">
                 <x-ui.button type="submit" variant="primary" class="rounded-full">{{ __('ui.save') }}</x-ui.button>

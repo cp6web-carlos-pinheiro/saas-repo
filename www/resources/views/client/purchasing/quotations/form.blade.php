@@ -27,52 +27,42 @@
             @endif
 
             <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_quotation.supplier') }}
-                    <x-ui.select name="supplier_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_quotation.select_supplier') }}" data-ajax-url="{{ route('purchasing.lookups.suppliers') }}" data-minimum-input-length="1">
+                <x-ui.field label="{{ __('purchase_quotation.supplier') }}" for="supplier-id" :error="$errors->first('supplier_id')">
+                    <x-ui.select name="supplier_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_quotation.select_supplier') }}" data-ajax-url="{{ route('purchasing.lookups.suppliers') }}" data-minimum-input-length="1" id="supplier-id" :aria-describedby="$errors->has('supplier_id') ? 'supplier-id-error' : null">
                         <option value="">{{ __('purchase_quotation.select_supplier') }}</option>
                         @foreach ($suppliers as $id => $name)
                             <option value="{{ $id }}" @selected((string) old('supplier_id', $quotation?->supplier_id) === (string) $id)>{{ $name }}</option>
                         @endforeach
                     </x-ui.select>
-                    @error('supplier_id')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_quotation.requisition') }}
-                    <x-ui.select name="purchase_requisition_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_quotation.select_requisition') }}" data-ajax-url="{{ route('purchasing.lookups.requisitions') }}" data-minimum-input-length="1">
+                <x-ui.field label="{{ __('purchase_quotation.requisition') }}" for="purchase-requisition-id" :error="$errors->first('purchase_requisition_id')">
+                    <x-ui.select name="purchase_requisition_id" class="mt-2" data-search="on" data-placeholder="{{ __('purchase_quotation.select_requisition') }}" data-ajax-url="{{ route('purchasing.lookups.requisitions') }}" data-minimum-input-length="1" id="purchase-requisition-id" :aria-describedby="$errors->has('purchase_requisition_id') ? 'purchase-requisition-id-error' : null">
                         <option value="">{{ __('purchase_quotation.select_requisition') }}</option>
                         @foreach ($requisitions as $id => $number)
                             <option value="{{ $id }}" @selected((string) old('purchase_requisition_id', $quotation?->purchase_requisition_id) === (string) $id)>{{ $number }}</option>
                         @endforeach
                     </x-ui.select>
-                    @error('purchase_requisition_id')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
             </div>
 
             <div class="grid gap-5 sm:grid-cols-3">
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_quotation.quotation_date') }}
-                    <x-ui.input type="date" name="quotation_date" :value="old('quotation_date', $quotation?->quotation_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required />
-                    @error('quotation_date')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                <x-ui.field label="{{ __('purchase_quotation.quotation_date') }}" for="quotation-date" :required="true" :error="$errors->first('quotation_date')">
+                    <x-ui.input type="date" name="quotation_date" :value="old('quotation_date', $quotation?->quotation_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required  id="quotation-date" :aria-describedby="$errors->has('quotation_date') ? 'quotation-date-error' : null"/>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_quotation.valid_until') }}
-                    <x-ui.input type="date" name="valid_until" :value="old('valid_until', $quotation?->valid_until?->format('Y-m-d'))" class="mt-2" />
-                    @error('valid_until')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                <x-ui.field label="{{ __('purchase_quotation.valid_until') }}" for="valid-until" :error="$errors->first('valid_until')">
+                    <x-ui.input type="date" name="valid_until" :value="old('valid_until', $quotation?->valid_until?->format('Y-m-d'))" class="mt-2"  id="valid-until" :aria-describedby="$errors->has('valid_until') ? 'valid-until-error' : null"/>
+                </x-ui.field>
 
-                <label class="block text-sm font-medium">
-                    {{ __('purchase_quotation.status') }}
-                    <x-ui.select name="status" class="mt-2" required data-search="off">
+                <x-ui.field label="{{ __('purchase_quotation.status') }}" for="status" :required="true" :error="$errors->first('status')">
+                    <x-ui.select name="status" class="mt-2" required data-search="off" id="status" :aria-describedby="$errors->has('status') ? 'status-error' : null">
                         <option value="DRAFT" @selected(old('status', $quotation?->status ?? 'DRAFT') === 'DRAFT')>{{ __('purchase_quotation.status_draft') }}</option>
                         <option value="RECEIVED" @selected(old('status', $quotation?->status ?? 'DRAFT') === 'RECEIVED')>{{ __('purchase_quotation.status_received') }}</option>
                         <option value="APPROVED" @selected(old('status', $quotation?->status ?? 'DRAFT') === 'APPROVED')>{{ __('purchase_quotation.status_approved') }}</option>
                         <option value="REJECTED" @selected(old('status', $quotation?->status ?? 'DRAFT') === 'REJECTED')>{{ __('purchase_quotation.status_rejected') }}</option>
                     </x-ui.select>
-                    @error('status')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-                </label>
+                </x-ui.field>
             </div>
 
             <section class="space-y-4">
@@ -113,11 +103,9 @@
                 </div>
             </section>
 
-            <label class="block text-sm font-medium">
-                {{ __('purchase_quotation.notes') }}
-                <x-ui.textarea name="notes" class="mt-2" rows="4">{{ old('notes', $quotation?->notes) }}</x-ui.textarea>
-                @error('notes')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
-            </label>
+            <x-ui.field label="{{ __('purchase_quotation.notes') }}" for="notes" :error="$errors->first('notes')">
+                <x-ui.textarea name="notes" class="mt-2" rows="4" id="notes" :aria-describedby="$errors->has('notes') ? 'notes-error' : null">{{ old('notes', $quotation?->notes) }}</x-ui.textarea>
+            </x-ui.field>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <x-ui.button :href="$editing ? route('purchasing.quotations.show', $quotation) : route('purchasing.quotations.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>

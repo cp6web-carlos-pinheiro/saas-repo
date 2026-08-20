@@ -45,9 +45,8 @@
                 </div>
             @else
                 <div class="grid gap-5 md:grid-cols-2">
-                    <div class="md:col-span-2">
-                        <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="product_id">{{ __('bom.select_product') }}</label>
-                        <x-ui.select id="product_id" name="product_id" required data-search="on" data-placeholder="{{ __('bom.select_product') }}" data-ajax-url="{{ route('products.search') }}" data-minimum-input-length="1">
+                    <x-ui.field class="md:col-span-2" label="{{ __('bom.select_product') }}" for="product_id" :required="true" hint="{{ __('bom.product_hint') }}" :error="$errors->first('product_id')">
+                        <x-ui.select id="product_id" name="product_id" required data-search="on" data-placeholder="{{ __('bom.select_product') }}" data-ajax-url="{{ route('products.search') }}" data-minimum-input-length="1" :aria-describedby="$errors->has('product_id') ? 'product_id-error' : 'product_id-hint'">
                             <option value="">{{ __('bom.select_product') }}</option>
                             @if ($selectedProductId !== null && $productsById->has((int) $selectedProductId))
                                 <option value="{{ $selectedProductId }}" selected>
@@ -55,40 +54,30 @@
                                 </option>
                             @endif
                         </x-ui.select>
-                        <p class="mt-2 text-sm text-[var(--ui-text-muted)]">{{ __('bom.product_hint') }}</p>
-                        @error('product_id')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
-                    </div>
+                    </x-ui.field>
                 </div>
             @endif
 
             <div class="grid gap-5 md:grid-cols-3">
-                <div>
-                    <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="status">{{ __('bom.status') }}</label>
-                    <x-ui.select id="status" name="status" required data-search="off">
+                <x-ui.field label="{{ __('bom.status') }}" for="status" :required="true" :error="$errors->first('status')">
+                    <x-ui.select id="status" name="status" required data-search="off" :aria-describedby="$errors->has('status') ? 'status-error' : null">
                         <option value="DRAFT" @selected($selectedStatus === 'DRAFT')>{{ __('bom.status_DRAFT') }}</option>
                         <option value="APPROVED" @selected($selectedStatus === 'APPROVED')>{{ __('bom.status_APPROVED') }}</option>
                         <option value="OBSOLETE" @selected($selectedStatus === 'OBSOLETE')>{{ __('bom.status_OBSOLETE') }}</option>
                     </x-ui.select>
-                    @error('status')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
-                </div>
+                </x-ui.field>
 
-                <div>
-                    <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="effective_from">{{ __('bom.effective_from') }}</label>
-                    <x-ui.input id="effective_from" type="date" name="effective_from" :value="old('effective_from', $bom?->effective_from?->format('Y-m-d'))" />
-                    @error('effective_from')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
-                </div>
+                <x-ui.field label="{{ __('bom.effective_from') }}" for="effective_from" :error="$errors->first('effective_from')">
+                    <x-ui.input id="effective_from" type="date" name="effective_from" :value="old('effective_from', $bom?->effective_from?->format('Y-m-d'))"  :aria-describedby="$errors->has('effective_from') ? 'effective_from-error' : null"/>
+                </x-ui.field>
 
-                <div>
-                    <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="effective_to">{{ __('bom.effective_to') }}</label>
-                    <x-ui.input id="effective_to" type="date" name="effective_to" :value="old('effective_to', $bom?->effective_to?->format('Y-m-d'))" />
-                    @error('effective_to')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
-                </div>
+                <x-ui.field label="{{ __('bom.effective_to') }}" for="effective_to" :error="$errors->first('effective_to')">
+                    <x-ui.input id="effective_to" type="date" name="effective_to" :value="old('effective_to', $bom?->effective_to?->format('Y-m-d'))"  :aria-describedby="$errors->has('effective_to') ? 'effective_to-error' : null"/>
+                </x-ui.field>
 
-                <div class="md:col-span-3">
-                    <label class="mb-2 block text-sm font-medium text-[var(--ui-text-muted)]" for="description">{{ __('bom.description') }}</label>
-                    <x-ui.input id="description" name="description" :value="old('description', $bom?->description ?? '')" maxlength="255" />
-                    @error('description')<p class="mt-2 text-sm text-[var(--ui-danger)]">{{ $message }}</p>@enderror
-                </div>
+                <x-ui.field class="md:col-span-3" label="{{ __('bom.description') }}" for="description" :error="$errors->first('description')">
+                    <x-ui.input id="description" name="description" :value="old('description', $bom?->description ?? '')" maxlength="255"  :aria-describedby="$errors->has('description') ? 'description-error' : null"/>
+                </x-ui.field>
             </div>
 
             <section class="space-y-4">

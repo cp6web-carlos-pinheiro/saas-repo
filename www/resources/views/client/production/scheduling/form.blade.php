@@ -24,41 +24,41 @@
             @endif
 
             <div class="grid gap-5 lg:grid-cols-4">
-                <label class="block text-sm font-medium">{{ __('ui.scheduling_reference_date') }}
-                    <x-ui.input class="mt-2" type="date" name="reference_date" :value="old('reference_date', $input['reference_date'] ?? now()->toDateString())" />
-                </label>
-                <label class="block text-sm font-medium">{{ __('ui.scheduling_mode') }}
-                    <x-ui.select class="mt-2" name="mode" data-search="off">
+                <x-ui.field label="{{ __('ui.scheduling_reference_date') }}" for="reference-date" :error="$errors->first('reference_date')">
+                    <x-ui.input class="mt-2" type="date" name="reference_date" :value="old('reference_date', $input['reference_date'] ?? now()->toDateString())"  id="reference-date" :aria-describedby="$errors->has('reference_date') ? 'reference-date-error' : null"/>
+                </x-ui.field>
+                <x-ui.field label="{{ __('ui.scheduling_mode') }}" for="mode" :error="$errors->first('mode')">
+                    <x-ui.select class="mt-2" name="mode" data-search="off" id="mode" :aria-describedby="$errors->has('mode') ? 'mode-error' : null">
                         <option value="finite" @selected(old('mode', $input['mode'] ?? 'finite') === 'finite')>{{ __('ui.scheduling_mode_finite') }}</option>
                         <option value="infinite" @selected(old('mode', $input['mode'] ?? 'finite') === 'infinite')>{{ __('ui.scheduling_mode_infinite') }}</option>
                     </x-ui.select>
-                </label>
-                <label class="block text-sm font-medium">{{ __('ui.scheduling_direction') }}
-                    <x-ui.select class="mt-2" name="direction" data-search="off">
+                </x-ui.field>
+                <x-ui.field label="{{ __('ui.scheduling_direction') }}" for="direction" :error="$errors->first('direction')">
+                    <x-ui.select class="mt-2" name="direction" data-search="off" id="direction" :aria-describedby="$errors->has('direction') ? 'direction-error' : null">
                         <option value="forward" @selected(old('direction', $input['direction'] ?? 'forward') === 'forward')>{{ __('ui.scheduling_direction_forward') }}</option>
                         <option value="backward" @selected(old('direction', $input['direction'] ?? 'forward') === 'backward')>{{ __('ui.scheduling_direction_backward') }}</option>
                     </x-ui.select>
-                </label>
-                <label class="block text-sm font-medium">{{ __('ui.scheduling_sequencing_rule') }}
-                    <x-ui.select class="mt-2" name="sequencing_rule" data-search="off">
+                </x-ui.field>
+                <x-ui.field label="{{ __('ui.scheduling_sequencing_rule') }}" for="sequencing-rule" :error="$errors->first('sequencing_rule')">
+                    <x-ui.select class="mt-2" name="sequencing_rule" data-search="off" id="sequencing-rule" :aria-describedby="$errors->has('sequencing_rule') ? 'sequencing-rule-error' : null">
                         <option value="priority_due_date" @selected(old('sequencing_rule', $input['sequencing_rule'] ?? 'priority_due_date') === 'priority_due_date')>{{ __('ui.scheduling_rule_priority_due_date') }}</option>
                         <option value="due_date_priority" @selected(old('sequencing_rule', $input['sequencing_rule'] ?? 'priority_due_date') === 'due_date_priority')>{{ __('ui.scheduling_rule_due_date_priority') }}</option>
                         <option value="release_date_priority" @selected(old('sequencing_rule', $input['sequencing_rule'] ?? 'priority_due_date') === 'release_date_priority')>{{ __('ui.scheduling_rule_release_date_priority') }}</option>
                         <option value="order_number" @selected(old('sequencing_rule', $input['sequencing_rule'] ?? 'priority_due_date') === 'order_number')>{{ __('ui.scheduling_rule_order_number') }}</option>
                     </x-ui.select>
-                </label>
+                </x-ui.field>
             </div>
 
             @php($selectedOrders = collect(old('production_order_ids', $input['production_order_ids'] ?? []))->map(static fn ($id) => (int) $id)->all())
-            <label class="block text-sm font-medium">{{ __('ui.scheduling_production_orders_multi') }}
-                <x-ui.select class="mt-2 w-full" name="production_order_ids[]" multiple size="10" required data-search="on">
+            <x-ui.field :label="__('ui.scheduling_production_orders_multi')" for="production_order_ids" :required="true" :error="$errors->first('production_order_ids')">
+                <x-ui.select id="production_order_ids" class="mt-2 w-full" name="production_order_ids[]" multiple size="10" required data-search="on" :aria-describedby="$errors->has('production_order_ids') ? 'production_order_ids-error' : null">
                     @foreach ($orders as $order)
                         <option value="{{ $order->id }}" @selected(in_array((int) $order->id, $selectedOrders, true))>
                             {{ $order->order_number }} | {{ __('production.scheduling.sale', ['reference' => $order->sales_order_reference ?? '—']) }} | {{ __('ui.production_order_status_'.$order->status) }} | {{ optional($order->scheduled_end_date)->format('d/m/Y') }}
                         </option>
                     @endforeach
                 </x-ui.select>
-            </label>
+            </x-ui.field>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <x-ui.button :href="$editing ? route('production.scheduling.show', ['run' => $runKey]) : route('production.scheduling.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
