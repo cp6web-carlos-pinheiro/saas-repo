@@ -46,12 +46,9 @@
                 <tbody>
                     @forelse ($units as $unit)
                         <tr
-                            class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
-                            tabindex="0"
-                            onclick="window.location='{{ route('admin-data.units.show', $unit) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('admin-data.units.show', $unit) }}'; }"
+                            class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $unit->id }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('admin-data.units.show', $unit) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $unit->id }}</a></td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $unit->code }}</td>
                             <td class="px-3 py-4">{{ $unit->name }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $unit->company_id === null ? __('admin_data_units.global_label') : __('admin_data_units.tenant_label') }}</td>

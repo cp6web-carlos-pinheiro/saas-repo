@@ -46,12 +46,9 @@
                 <tbody>
                     @forelse ($warehouses as $warehouse)
                         <tr
-                            class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
-                            tabindex="0"
-                            onclick="window.location='{{ route('inventory.warehouses.show', $warehouse) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('inventory.warehouses.show', $warehouse) }}'; }"
+                            class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $warehouse->id }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('inventory.warehouses.show', $warehouse) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $warehouse->id }}</a></td>
                             <td class="px-3 py-4">{{ $warehouse->name }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $warehouse->code }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $warehouse->plant?->code }} - {{ $warehouse->plant?->name }}</td>

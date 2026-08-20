@@ -42,11 +42,9 @@
                 </thead>
                 <tbody>
                     @forelse ($versions as $version)
-                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0"
-                            onclick="window.location='{{ route('production.routing.show', $version) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('production.routing.show', $version) }}'; }"
+                        <tr class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-2">{{ $version->id }}</td>
+                            <td class="px-3 py-2"><a href="{{ route('production.routing.show', $version) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $version->id }}</a></td>
                             <td class="px-3 py-2">{{ $version->product?->sku }} - {{ $version->product?->description }}</td>
                             <td class="px-3 py-2">{{ $version->version_number }}</td>
                             <td class="px-3 py-2">{{ __('production.status_labels.'.$version->status) }}</td>

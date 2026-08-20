@@ -46,8 +46,8 @@
                 </thead>
                 <tbody>
                     @forelse ($requisitions as $requisition)
-                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0" onclick="window.location='{{ route('purchasing.requisitions.show', $requisition) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('purchasing.requisitions.show', $requisition) }}'; }">
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $requisition->id }}</td>
+                        <tr class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]">
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('purchasing.requisitions.show', $requisition) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $requisition->id }}</a></td>
                             <td class="px-3 py-4">{{ $requisition->requisition_number }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $requisition->required_date?->format('d/m/Y') ?? '—' }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ __('purchase_requisition.status_'.strtolower($requisition->status)) }}</td>

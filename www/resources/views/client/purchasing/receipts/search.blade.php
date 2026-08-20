@@ -46,8 +46,8 @@
                 </thead>
                 <tbody>
                     @forelse ($receipts as $receipt)
-                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0" onclick="window.location='{{ route('purchasing.receipts.show', $receipt) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('purchasing.receipts.show', $receipt) }}'; }">
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $receipt->id }}</td>
+                        <tr class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]">
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('purchasing.receipts.show', $receipt) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $receipt->id }}</a></td>
                             <td class="px-3 py-4">{{ $receipt->receipt_number }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $receipt->supplier?->name ?? '—' }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $receipt->purchaseOrder?->purchase_order_number ?? '—' }}</td>

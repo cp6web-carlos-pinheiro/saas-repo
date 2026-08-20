@@ -63,12 +63,9 @@
                 <tbody>
                     @forelse ($sales as $sale)
                         <tr
-                            class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
-                            tabindex="0"
-                            onclick="window.location='{{ route('sales.show', $sale) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('sales.show', $sale) }}'; }"
+                            class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-4 font-medium">#{{ $sale->id }}</td>
+                            <td class="px-3 py-4 font-medium"><a href="{{ route('sales.show', $sale) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">#{{ $sale->id }}</a></td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $sale->customer?->name ?? __('sale.customer_removed') }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $sale->sale_date->format('d/m/Y') }}</td>
                             <td class="px-3 py-4 font-semibold">R$ {{ number_format($sale->amount_cents / 100, 2, ',', '.') }}</td>

@@ -62,8 +62,8 @@
                 </thead>
                 <tbody>
                     @forelse ($products as $product)
-                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0" onclick="window.location='{{ route('products.show', $product) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('products.show', $product) }}'; }">
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $product->id }}</td>
+                        <tr class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]">
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('products.show', $product) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $product->id }}</a></td>
                             <td class="px-3 py-4 font-semibold">{{ $product->sku }}</td>
                             <td class="px-3 py-4">{{ $product->description ?? '—' }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ __('product.types.'.$product->product_type) }}</td>

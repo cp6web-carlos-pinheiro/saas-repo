@@ -43,8 +43,8 @@
                 </thead>
                 <tbody>
                     @forelse ($boms as $bom)
-                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0" onclick="window.location='{{ route('bom.material-lists.show', $bom) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('bom.material-lists.show', $bom) }}'; }">
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $bom->id }}</td>
+                        <tr class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]">
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('bom.material-lists.show', $bom) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $bom->id }}</a></td>
                             <td class="px-3 py-4">
                                 <div class="font-semibold">{{ $bom->product?->sku ?? '—' }}</div>
                                 <div class="text-xs text-[var(--ui-text-muted)]">{{ $bom->product?->description ?? '—' }}</div>

@@ -45,12 +45,9 @@
                 <tbody>
                     @forelse ($customers as $customer)
                         <tr
-                            class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
-                            tabindex="0"
-                            onclick="window.location='{{ route('company-access.users.show', $customer) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('company-access.users.show', $customer) }}'; }"
+                            class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $customer->id }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('company-access.users.show', $customer) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $customer->id }}</a></td>
                             <td class="px-3 py-4 font-semibold">{{ $customer->name }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $customer->email }}</td>
                             <td class="px-3 py-4">

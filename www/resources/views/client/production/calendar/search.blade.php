@@ -56,11 +56,9 @@
                 </thead>
                 <tbody>
                     @forelse ($days as $day)
-                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0"
-                            onclick="window.location='{{ route('production.calendar.show', $day) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('production.calendar.show', $day) }}'; }"
+                        <tr class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-2">{{ $day->calendar_date?->format('d/m/Y') }}</td>
+                            <td class="px-3 py-2"><a href="{{ route('production.calendar.show', $day) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $day->calendar_date?->format('d/m/Y') }}</a></td>
                             <td class="px-3 py-2">{{ $day->workCenter?->code }} - {{ $day->workCenter?->name }}</td>
                             <td class="px-3 py-2">{{ $day->is_working_day ? __('production.yes') : __('production.no') }}</td>
                             <td class="px-3 py-2">{{ number_format((float) $day->available_capacity, 2, ',', '.') }}</td>

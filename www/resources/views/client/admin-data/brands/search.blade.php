@@ -44,12 +44,9 @@
                 <tbody>
                     @forelse ($brands as $brand)
                         <tr
-                            class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
-                            tabindex="0"
-                            onclick="window.location='{{ route('admin-data.brands.show', $brand) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('admin-data.brands.show', $brand) }}'; }"
+                            class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $brand->id }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('admin-data.brands.show', $brand) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $brand->id }}</a></td>
                             <td class="px-3 py-4">{{ $brand->name }}</td>
                             <td class="px-3 py-4">
                                 <x-ui.definition-item-status

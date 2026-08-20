@@ -44,12 +44,9 @@
                 <tbody>
                     @forelse ($categories as $category)
                         <tr
-                            class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
-                            tabindex="0"
-                            onclick="window.location='{{ route('admin-data.categories.show', $category) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('admin-data.categories.show', $category) }}'; }"
+                            class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $category->id }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('admin-data.categories.show', $category) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $category->id }}</a></td>
                             <td class="px-3 py-4">{{ $category->name }}</td>
                             <td class="px-3 py-4">
                                 <x-ui.definition-item-status

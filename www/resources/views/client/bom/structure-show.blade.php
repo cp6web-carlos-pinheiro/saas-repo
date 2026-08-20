@@ -32,8 +32,8 @@
                 </thead>
                 <tbody>
                     @forelse ($revisions as $revision)
-                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0" onclick="window.location='{{ route('bom.material-lists.show', $revision) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('bom.material-lists.show', $revision) }}'; }">
-                            <td class="px-3 py-4 font-semibold">{{ $revision->version_number }}</td>
+                        <tr class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]">
+                            <td class="px-3 py-4 font-semibold"><a href="{{ route('bom.material-lists.show', $revision) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $revision->version_number }}</a></td>
                             <td class="px-3 py-4">
                                 <x-ui.definition-item-status
                                     :label="__('bom.status')"

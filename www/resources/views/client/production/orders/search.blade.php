@@ -43,12 +43,9 @@
                 <tbody>
                     @forelse ($orders as $order)
                         <tr
-                            class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
-                            tabindex="0"
-                            onclick="window.location='{{ route('production.orders.show', $order) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('production.orders.show', $order) }}'; }"
+                            class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-4 font-medium text-[var(--ui-primary-text)]">{{ $order->order_number }}</td>
+                            <td class="px-3 py-4 font-medium text-[var(--ui-primary-text)]"><a href="{{ route('production.orders.show', $order) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $order->order_number }}</a></td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $order->sales_order_reference ?? '—' }}</td>
                             <td class="px-3 py-4">
                                 <div>{{ $order->product?->description ?? '—' }}</div>

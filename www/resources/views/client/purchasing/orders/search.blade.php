@@ -47,8 +47,8 @@
                 </thead>
                 <tbody>
                     @forelse ($orders as $order)
-                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0" onclick="window.location='{{ route('purchasing.orders.show', $order) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('purchasing.orders.show', $order) }}'; }">
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $order->id }}</td>
+                        <tr class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]">
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('purchasing.orders.show', $order) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $order->id }}</a></td>
                             <td class="px-3 py-4">{{ $order->purchase_order_number }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $order->supplier?->name ?? '—' }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $order->order_date?->format('d/m/Y') ?? '—' }}</td>

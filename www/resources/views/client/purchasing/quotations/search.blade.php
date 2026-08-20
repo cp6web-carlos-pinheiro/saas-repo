@@ -47,8 +47,8 @@
                 </thead>
                 <tbody>
                     @forelse ($quotations as $quotation)
-                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0" onclick="window.location='{{ route('purchasing.quotations.show', $quotation) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('purchasing.quotations.show', $quotation) }}'; }">
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $quotation->id }}</td>
+                        <tr class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]">
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('purchasing.quotations.show', $quotation) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $quotation->id }}</a></td>
                             <td class="px-3 py-4">{{ $quotation->quotation_number }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $quotation->supplier?->name ?? '—' }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $quotation->quotation_date?->format('d/m/Y') ?? '—' }}</td>

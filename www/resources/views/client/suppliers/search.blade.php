@@ -55,12 +55,9 @@
                 <tbody>
                     @forelse ($suppliers as $supplier)
                         <tr
-                            class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
-                            tabindex="0"
-                            onclick="window.location='{{ route('purchasing.suppliers.show', $supplier) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('purchasing.suppliers.show', $supplier) }}'; }"
+                            class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $supplier->id }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]"><a href="{{ route('purchasing.suppliers.show', $supplier) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $supplier->id }}</a></td>
                             <td class="px-3 py-4">{{ $supplier->name }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $supplier->person_type === 'PF' ? __('supplier.person_type_pf') : __('supplier.person_type_pj') }}</td>
                             <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $supplier->email ?? '—' }}</td>

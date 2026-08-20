@@ -43,11 +43,9 @@
                 </thead>
                 <tbody>
                     @forelse ($centers as $center)
-                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0"
-                            onclick="window.location='{{ route('production.work-centers.show', $center) }}'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('production.work-centers.show', $center) }}'; }"
+                        <tr class="border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]"
                         >
-                            <td class="px-3 py-2">{{ $center->code }}</td>
+                            <td class="px-3 py-2"><a href="{{ route('production.work-centers.show', $center) }}" class="block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-focus)]">{{ $center->code }}</a></td>
                             <td class="px-3 py-2">{{ $center->name }}</td>
                             <td class="px-3 py-2">{{ $center->plant?->code }} - {{ $center->plant?->name }}</td>
                             <td class="px-3 py-2">{{ __('production.work_centers.'.strtolower($center->resource_type)) }}</td>
