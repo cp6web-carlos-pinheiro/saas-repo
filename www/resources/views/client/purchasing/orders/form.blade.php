@@ -13,14 +13,14 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ $editing ? __('purchase_order.edit') : __('purchase_order.create') }}</h1>
-        <x-ui.button :href="$editing ? route('purchasing.orders.show', $order) : route('purchasing.orders.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('purchasing.orders.show', $order) : route('purchasing.orders.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ $editing ? route('purchasing.orders.update', $order) : route('purchasing.orders.store') }}" class="space-y-5">
             @csrf
             @if ($editing)
@@ -36,7 +36,7 @@
                             <option value="{{ $id }}" @selected((string) old('supplier_id', $order?->supplier_id) === (string) $id)>{{ $name }}</option>
                         @endforeach
                     </x-ui.select>
-                    @error('supplier_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('supplier_id')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
@@ -47,7 +47,7 @@
                             <option value="{{ $id }}" @selected((string) old('purchase_requisition_id', $order?->purchase_requisition_id) === (string) $id)>{{ $number }}</option>
                         @endforeach
                     </x-ui.select>
-                    @error('purchase_requisition_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('purchase_requisition_id')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
             </div>
 
@@ -55,13 +55,13 @@
                 <label class="block text-sm font-medium">
                     {{ __('purchase_order.order_date') }}
                     <x-ui.input type="date" name="order_date" :value="old('order_date', $order?->order_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required />
-                    @error('order_date')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('order_date')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
                     {{ __('purchase_order.expected_delivery_date') }}
                     <x-ui.input type="date" name="expected_delivery_date" :value="old('expected_delivery_date', $order?->expected_delivery_date?->format('Y-m-d'))" class="mt-2" />
-                    @error('expected_delivery_date')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('expected_delivery_date')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
@@ -71,25 +71,25 @@
                         <option value="APPROVED" @selected(old('status', $order?->status ?? 'DRAFT') === 'APPROVED')>{{ __('purchase_order.status_approved') }}</option>
                         <option value="CANCELLED" @selected(old('status', $order?->status ?? 'DRAFT') === 'CANCELLED')>{{ __('purchase_order.status_cancelled') }}</option>
                     </x-ui.select>
-                    @error('status')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('status')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
             </div>
 
             <label class="block text-sm font-medium">
                 {{ __('purchase_order.notes') }}
                 <x-ui.textarea name="notes" class="mt-2" rows="4">{{ old('notes', $order?->notes) }}</x-ui.textarea>
-                @error('notes')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                @error('notes')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
             </label>
 
             <section class="space-y-4">
                 <div class="flex flex-wrap items-end justify-between gap-3">
                     <h2 class="text-xl font-semibold">{{ __('purchase_order.items') }}</h2>
-                    <button type="button" class="rounded-full border border-[#dadce0] px-4 py-2 text-sm font-medium" data-po-add-item>{{ __('purchase_order.add_item') }}</button>
+                    <x-ui.button type="button" variant="outline" class="rounded-full" data-po-add-item><x-ui.icon name="plus" size="sm" /> {{ __('purchase_order.add_item') }}</x-ui.button>
                 </div>
 
                 <div class="overflow-x-auto">
                     <div class="min-w-[1100px]">
-                        <div class="grid grid-cols-[2fr_1.4fr_1fr_1fr_1.2fr_1.2fr_auto] gap-4 border-b border-[#dadce0] pb-2 text-xs font-semibold uppercase tracking-wide text-[#5f6368]">
+                        <div class="grid grid-cols-[2fr_1.4fr_1fr_1fr_1.2fr_1.2fr_auto] gap-4 border-b border-[var(--ui-border)] pb-2 text-xs font-semibold uppercase tracking-wide text-[var(--ui-text-muted)]">
                             <span>{{ __('purchase_order.product') }}</span>
                             <span>{{ __('purchase_order.warehouse') }}</span>
                             <span>{{ __('purchase_order.quantity') }}</span>
@@ -123,15 +123,7 @@
                                     <x-ui.input type="date" name="items[{{ $index }}][need_by_date]" :value="old('items.'.$index.'.need_by_date', $item['need_by_date'] ?? '')" />
                                     <x-ui.input type="date" name="items[{{ $index }}][promised_date]" :value="old('items.'.$index.'.promised_date', $item['promised_date'] ?? '')" />
 
-                                    <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-po-remove-item aria-label="{{ __('purchase_order.remove_item') }}" title="{{ __('purchase_order.remove_item') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <path d="M3 6h18" />
-                                            <path d="M8 6V4h8v2" />
-                                            <path d="M19 6l-1 14H6L5 6" />
-                                            <path d="M10 11v6" />
-                                            <path d="M14 11v6" />
-                                        </svg>
-                                    </button>
+                                    <x-ui.icon-button type="button" icon="trash" variant="danger" data-po-remove-item :label="__('purchase_order.remove_item')" />
                                 </div>
                             @endforeach
                         </div>
@@ -140,8 +132,8 @@
             </section>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('purchasing.orders.show', $order) : route('purchasing.orders.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('purchase_order.save') : __('purchase_order.create') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('purchasing.orders.show', $order) : route('purchasing.orders.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" class="rounded-full" :full="true">{{ $editing ? __('purchase_order.save') : __('purchase_order.create') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>
@@ -162,15 +154,7 @@
         <x-ui.input type="text" name="items[__INDEX__][unit_price]" value="0,00" data-currency-mask="brl" inputmode="decimal" />
         <x-ui.input type="date" name="items[__INDEX__][need_by_date]" />
         <x-ui.input type="date" name="items[__INDEX__][promised_date]" />
-        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-po-remove-item aria-label="{{ __('purchase_order.remove_item') }}" title="{{ __('purchase_order.remove_item') }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 6h18" />
-                <path d="M8 6V4h8v2" />
-                <path d="M19 6l-1 14H6L5 6" />
-                <path d="M10 11v6" />
-                <path d="M14 11v6" />
-            </svg>
-        </button>
+        <x-ui.icon-button type="button" icon="trash" variant="danger" data-po-remove-item :label="__('purchase_order.remove_item')" />
     </div>
 </template>
 

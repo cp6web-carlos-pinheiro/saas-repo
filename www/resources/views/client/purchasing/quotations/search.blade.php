@@ -7,36 +7,36 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ __('purchase_quotation.title') }}</h1>
-        <x-ui.button :href="route('purchasing.quotations.create')" variant="brand-primary" class="rounded-full">{{ __('purchase_quotation.create') }}</x-ui.button>
+        <x-ui.button :href="route('purchasing.quotations.create')" variant="primary" class="rounded-full">{{ __('purchase_quotation.create') }}</x-ui.button>
     </div>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <form class="flex gap-3" method="GET">
             <label for="quotation-search" class="sr-only">{{ __('purchase_quotation.search') }}</label>
             <x-ui.input id="quotation-search" name="search" :value="$search" class="min-w-0 flex-1" placeholder="{{ __('purchase_quotation.search') }}" />
-            <input type="hidden" name="status" value="{{ $status }}">
-            <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('purchase_quotation.filter') }}</x-ui.button>
+            <x-ui.input type="hidden" name="status" :value="$status" unstyled />
+            <x-ui.button type="submit" variant="secondary" class="rounded-xl">{{ __('purchase_quotation.filter') }}</x-ui.button>
         </form>
 
         @php($filterUrl = fn ($overrides = []) => route('purchasing.quotations.index', array_merge(['search' => $search, 'sort' => $sort, 'direction' => $direction, 'status' => $status], $overrides)))
         @php($sortUrl = fn ($column) => $filterUrl(['sort' => $column, 'direction' => $sort === $column && $direction === 'asc' ? 'desc' : 'asc']))
 
         <div class="mt-4 flex flex-wrap gap-2 text-sm">
-            <a href="{{ $filterUrl(['status' => '']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === '' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('purchase_quotation.all_statuses') }}</a>
-            <a href="{{ $filterUrl(['status' => 'DRAFT']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'DRAFT' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('purchase_quotation.status_draft') }}</a>
-            <a href="{{ $filterUrl(['status' => 'RECEIVED']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'RECEIVED' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('purchase_quotation.status_received') }}</a>
-            <a href="{{ $filterUrl(['status' => 'APPROVED']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'APPROVED' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('purchase_quotation.status_approved') }}</a>
-            <a href="{{ $filterUrl(['status' => 'REJECTED']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'REJECTED' ? 'border-[#1a73e8] bg-[#e8f0fe] text-[#174ea6]' : 'border-[#dadce0] text-[#5f6368] hover:bg-[#f1f3f4]'])>{{ __('purchase_quotation.status_rejected') }}</a>
+            <a href="{{ $filterUrl(['status' => '']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === '' ? 'border-[var(--ui-primary)] bg-[var(--ui-primary-soft)] text-[var(--ui-primary-text)]' : 'border-[var(--ui-border)] text-[var(--ui-text-muted)] hover:bg-[var(--ui-surface-hover)]'])>{{ __('purchase_quotation.all_statuses') }}</a>
+            <a href="{{ $filterUrl(['status' => 'DRAFT']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'DRAFT' ? 'border-[var(--ui-primary)] bg-[var(--ui-primary-soft)] text-[var(--ui-primary-text)]' : 'border-[var(--ui-border)] text-[var(--ui-text-muted)] hover:bg-[var(--ui-surface-hover)]'])>{{ __('purchase_quotation.status_draft') }}</a>
+            <a href="{{ $filterUrl(['status' => 'RECEIVED']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'RECEIVED' ? 'border-[var(--ui-primary)] bg-[var(--ui-primary-soft)] text-[var(--ui-primary-text)]' : 'border-[var(--ui-border)] text-[var(--ui-text-muted)] hover:bg-[var(--ui-surface-hover)]'])>{{ __('purchase_quotation.status_received') }}</a>
+            <a href="{{ $filterUrl(['status' => 'APPROVED']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'APPROVED' ? 'border-[var(--ui-primary)] bg-[var(--ui-primary-soft)] text-[var(--ui-primary-text)]' : 'border-[var(--ui-border)] text-[var(--ui-text-muted)] hover:bg-[var(--ui-surface-hover)]'])>{{ __('purchase_quotation.status_approved') }}</a>
+            <a href="{{ $filterUrl(['status' => 'REJECTED']) }}" @class(['rounded-full border px-3 py-1.5 no-underline transition', $status === 'REJECTED' ? 'border-[var(--ui-primary)] bg-[var(--ui-primary-soft)] text-[var(--ui-primary-text)]' : 'border-[var(--ui-border)] text-[var(--ui-text-muted)] hover:bg-[var(--ui-surface-hover)]'])>{{ __('purchase_quotation.status_rejected') }}</a>
         </div>
 
         <div class="mt-6 overflow-x-auto">
-            <table class="min-w-full text-sm">
+            <x-ui.table :caption="__('purchase_quotation.title')">
                 <thead>
-                    <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                    <tr class="border-b border-[var(--ui-border)] text-left text-[var(--ui-text-muted)]">
                         <x-ui.sortable-header column="id" label="ID" :sort="$sort" :direction="$direction" />
                         <x-ui.sortable-header column="quotation_number" :label="__('purchase_quotation.number')" :sort="$sort" :direction="$direction" />
                         <x-ui.sortable-header column="supplier" :label="__('purchase_quotation.supplier')" :sort="$sort" :direction="$direction" />
@@ -47,21 +47,21 @@
                 </thead>
                 <tbody>
                     @forelse ($quotations as $quotation)
-                        <tr class="cursor-pointer border-b border-[#f1f3f4] transition hover:bg-[#f8fafd]" tabindex="0" onclick="window.location='{{ route('purchasing.quotations.show', $quotation) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('purchasing.quotations.show', $quotation) }}'; }">
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $quotation->id }}</td>
+                        <tr class="cursor-pointer border-b border-[var(--ui-border)] transition hover:bg-[var(--ui-surface-muted)]" tabindex="0" onclick="window.location='{{ route('purchasing.quotations.show', $quotation) }}'" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location='{{ route('purchasing.quotations.show', $quotation) }}'; }">
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $quotation->id }}</td>
                             <td class="px-3 py-4">{{ $quotation->quotation_number }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $quotation->supplier?->name ?? '—' }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ $quotation->quotation_date?->format('d/m/Y') ?? '—' }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ __('purchase_quotation.status_'.strtolower($quotation->status)) }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ number_format(((int) $quotation->amount_cents) / 100, 2, ',', '.') }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $quotation->supplier?->name ?? '—' }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $quotation->quotation_date?->format('d/m/Y') ?? '—' }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ __('purchase_quotation.status_'.strtolower($quotation->status)) }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ number_format(((int) $quotation->amount_cents) / 100, 2, ',', '.') }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-3 py-10 text-center text-[#5f6368]">{{ __('purchase_quotation.empty') }}</td>
+                            <td colspan="6" class="px-3 py-10 text-center text-[var(--ui-text-muted)]">{{ __('purchase_quotation.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
+            </x-ui.table>
         </div>
 
         <div class="mt-6">{{ $quotations->links() }}</div>

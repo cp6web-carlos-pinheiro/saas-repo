@@ -12,14 +12,14 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ $editing ? __('purchase_quotation.edit') : __('purchase_quotation.create') }}</h1>
-        <x-ui.button :href="$editing ? route('purchasing.quotations.show', $quotation) : route('purchasing.quotations.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('purchasing.quotations.show', $quotation) : route('purchasing.quotations.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ $editing ? route('purchasing.quotations.update', $quotation) : route('purchasing.quotations.store') }}" class="space-y-5">
             @csrf
             @if ($editing)
@@ -35,7 +35,7 @@
                             <option value="{{ $id }}" @selected((string) old('supplier_id', $quotation?->supplier_id) === (string) $id)>{{ $name }}</option>
                         @endforeach
                     </x-ui.select>
-                    @error('supplier_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('supplier_id')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
@@ -46,7 +46,7 @@
                             <option value="{{ $id }}" @selected((string) old('purchase_requisition_id', $quotation?->purchase_requisition_id) === (string) $id)>{{ $number }}</option>
                         @endforeach
                     </x-ui.select>
-                    @error('purchase_requisition_id')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('purchase_requisition_id')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
             </div>
 
@@ -54,13 +54,13 @@
                 <label class="block text-sm font-medium">
                     {{ __('purchase_quotation.quotation_date') }}
                     <x-ui.input type="date" name="quotation_date" :value="old('quotation_date', $quotation?->quotation_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required />
-                    @error('quotation_date')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('quotation_date')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
                     {{ __('purchase_quotation.valid_until') }}
                     <x-ui.input type="date" name="valid_until" :value="old('valid_until', $quotation?->valid_until?->format('Y-m-d'))" class="mt-2" />
-                    @error('valid_until')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('valid_until')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
@@ -71,19 +71,19 @@
                         <option value="APPROVED" @selected(old('status', $quotation?->status ?? 'DRAFT') === 'APPROVED')>{{ __('purchase_quotation.status_approved') }}</option>
                         <option value="REJECTED" @selected(old('status', $quotation?->status ?? 'DRAFT') === 'REJECTED')>{{ __('purchase_quotation.status_rejected') }}</option>
                     </x-ui.select>
-                    @error('status')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('status')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
             </div>
 
             <section class="space-y-4">
                 <div class="flex flex-wrap items-end justify-between gap-3">
                     <h2 class="text-xl font-semibold">{{ __('purchase_quotation.items') }}</h2>
-                    <button type="button" class="rounded-full border border-[#dadce0] px-4 py-2 text-sm font-medium" data-pq-add-item>{{ __('purchase_quotation.add_item') }}</button>
+                    <x-ui.button type="button" variant="outline" class="rounded-full" data-pq-add-item><x-ui.icon name="plus" size="sm" /> {{ __('purchase_quotation.add_item') }}</x-ui.button>
                 </div>
 
                 <div class="overflow-x-auto">
                     <div class="min-w-[920px]">
-                        <div class="grid grid-cols-[2.2fr_1fr_1fr_1.6fr_auto] gap-4 border-b border-[#dadce0] pb-2 text-xs font-semibold uppercase tracking-wide text-[#5f6368]">
+                        <div class="grid grid-cols-[2.2fr_1fr_1fr_1.6fr_auto] gap-4 border-b border-[var(--ui-border)] pb-2 text-xs font-semibold uppercase tracking-wide text-[var(--ui-text-muted)]">
                             <span>{{ __('purchase_quotation.product') }}</span>
                             <span>{{ __('purchase_quotation.quantity') }}</span>
                             <span>{{ __('purchase_quotation.unit_price') }}</span>
@@ -105,15 +105,7 @@
                                     <x-ui.input type="number" step="0.000001" min="0.000001" name="items[{{ $index }}][quantity]" :value="old('items.'.$index.'.quantity', $item['quantity'] ?? 1)" required />
                                     <x-ui.input name="items[{{ $index }}][unit_price]" :value="old('items.'.$index.'.unit_price', $item['unit_price'] ?? '0,00')" data-currency-mask="brl" inputmode="decimal" required />
                                     <x-ui.input name="items[{{ $index }}][notes]" :value="old('items.'.$index.'.notes', $item['notes'] ?? null)" />
-                                    <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-pq-remove-item aria-label="{{ __('purchase_quotation.remove_item') }}" title="{{ __('purchase_quotation.remove_item') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <path d="M3 6h18" />
-                                            <path d="M8 6V4h8v2" />
-                                            <path d="M19 6l-1 14H6L5 6" />
-                                            <path d="M10 11v6" />
-                                            <path d="M14 11v6" />
-                                        </svg>
-                                    </button>
+                                    <x-ui.icon-button type="button" icon="trash" variant="danger" data-pq-remove-item :label="__('purchase_quotation.remove_item')" />
                                 </div>
                             @endforeach
                         </div>
@@ -124,12 +116,12 @@
             <label class="block text-sm font-medium">
                 {{ __('purchase_quotation.notes') }}
                 <x-ui.textarea name="notes" class="mt-2" rows="4">{{ old('notes', $quotation?->notes) }}</x-ui.textarea>
-                @error('notes')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                @error('notes')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
             </label>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('purchasing.quotations.show', $quotation) : route('purchasing.quotations.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('purchase_quotation.save') : __('purchase_quotation.create') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('purchasing.quotations.show', $quotation) : route('purchasing.quotations.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" class="rounded-full" :full="true">{{ $editing ? __('purchase_quotation.save') : __('purchase_quotation.create') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>
@@ -143,15 +135,7 @@
         <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity]" value="1" required />
         <x-ui.input name="items[__INDEX__][unit_price]" value="0,00" data-currency-mask="brl" inputmode="decimal" required />
         <x-ui.input name="items[__INDEX__][notes]" />
-        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-pq-remove-item aria-label="{{ __('purchase_quotation.remove_item') }}" title="{{ __('purchase_quotation.remove_item') }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 6h18" />
-                <path d="M8 6V4h8v2" />
-                <path d="M19 6l-1 14H6L5 6" />
-                <path d="M10 11v6" />
-                <path d="M14 11v6" />
-            </svg>
-        </button>
+        <x-ui.icon-button type="button" icon="trash" variant="danger" data-pq-remove-item :label="__('purchase_quotation.remove_item')" />
     </div>
 </template>
 

@@ -14,22 +14,22 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ $editing ? __('purchase_requisition.edit') : __('purchase_requisition.create') }}</h1>
-        <x-ui.button :href="$editing ? route('purchasing.requisitions.show', $requisition) : route('purchasing.requisitions.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('purchasing.requisitions.show', $requisition) : route('purchasing.requisitions.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ $editing ? route('purchasing.requisitions.update', $requisition) : route('purchasing.requisitions.store') }}" class="space-y-5">
             @csrf
             @if ($editing)
                 @method('PUT')
             @endif
             @if (! $editing && $creationContext)
-                <input type="hidden" name="source_reference_id" value="{{ $creationContext['sale_id'] }}">
-                <input type="hidden" name="source_reference_type" value="sale">
+                <x-ui.input type="hidden" name="source_reference_id" :value="$creationContext['sale_id']" unstyled />
+                <x-ui.input type="hidden" name="source_reference_type" value="sale" unstyled />
                 <x-ui.alert variant="info">{{ __('purchase_requisition.sale_context', ['sale' => $creationContext['sale_id']]) }}</x-ui.alert>
             @endif
 
@@ -37,7 +37,7 @@
                 <label class="block text-sm font-medium">
                     {{ __('purchase_requisition.required_date') }}
                     <x-ui.input type="date" name="required_date" :value="old('required_date', $requisition?->required_date?->format('Y-m-d') ?? $initialValues['required_date'])" class="mt-2" />
-                    @error('required_date')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('required_date')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
 
                 <label class="block text-sm font-medium">
@@ -47,14 +47,14 @@
                         <option value="APPROVED" @selected(old('status', $requisition?->status ?? 'DRAFT') === 'APPROVED')>{{ __('purchase_requisition.status_approved') }}</option>
                         <option value="CANCELLED" @selected(old('status', $requisition?->status ?? 'DRAFT') === 'CANCELLED')>{{ __('purchase_requisition.status_cancelled') }}</option>
                     </x-ui.select>
-                    @error('status')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                    @error('status')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
                 </label>
             </div>
 
             <label class="block text-sm font-medium">
                 {{ __('purchase_requisition.source_type') }}
                 <x-ui.input name="source_type" :value="old('source_type', $requisition?->source_type ?? $initialValues['source_type'])" class="mt-2" />
-                @error('source_type')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                @error('source_type')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
             </label>
 
             <section class="space-y-4">
@@ -62,12 +62,12 @@
                     <div>
                         <h2 class="text-xl font-semibold">{{ __('purchase_requisition.items') }}</h2>
                     </div>
-                    <button type="button" class="rounded-full border border-[#dadce0] px-4 py-2 text-sm font-medium" data-pr-add-item>{{ __('purchase_requisition.add_item') }}</button>
+                    <x-ui.button type="button" variant="outline" class="rounded-full" data-pr-add-item><x-ui.icon name="plus" size="sm" /> {{ __('purchase_requisition.add_item') }}</x-ui.button>
                 </div>
 
                 <div class="overflow-x-auto">
                     <div class="min-w-[1100px]">
-                        <div class="grid grid-cols-[2fr_1.5fr_1.5fr_1fr_1.2fr_1.2fr_auto] gap-4 border-b border-[#dadce0] pb-2 text-xs font-semibold uppercase tracking-wide text-[#5f6368]">
+                        <div class="grid grid-cols-[2fr_1.5fr_1.5fr_1fr_1.2fr_1.2fr_auto] gap-4 border-b border-[var(--ui-border)] pb-2 text-xs font-semibold uppercase tracking-wide text-[var(--ui-text-muted)]">
                             <span>{{ __('purchase_requisition.product') }}</span>
                             <span>{{ __('purchase_requisition.warehouse') }}</span>
                             <span>{{ __('purchase_requisition.supplier') }}</span>
@@ -108,15 +108,7 @@
                                     <x-ui.input type="date" name="items[{{ $index }}][need_by_date]" :value="old('items.'.$index.'.need_by_date', $item['need_by_date'] ?? now()->addDays(7)->toDateString())" required />
                                     <x-ui.input type="date" name="items[{{ $index }}][order_date]" :value="old('items.'.$index.'.order_date', $item['order_date'] ?? now()->toDateString())" required />
 
-                                    <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-pr-remove-item aria-label="{{ __('purchase_requisition.remove_item') }}" title="{{ __('purchase_requisition.remove_item') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <path d="M3 6h18" />
-                                            <path d="M8 6V4h8v2" />
-                                            <path d="M19 6l-1 14H6L5 6" />
-                                            <path d="M10 11v6" />
-                                            <path d="M14 11v6" />
-                                        </svg>
-                                    </button>
+                                    <x-ui.icon-button type="button" icon="trash" variant="danger" data-pr-remove-item :label="__('purchase_requisition.remove_item')" />
                                 </div>
                             @endforeach
                         </div>
@@ -127,12 +119,12 @@
             <label class="block text-sm font-medium">
                 {{ __('purchase_requisition.notes') }}
                 <x-ui.textarea name="notes" class="mt-2" rows="4">{{ old('notes', $requisition?->notes ?? $initialValues['notes']) }}</x-ui.textarea>
-                @error('notes')<span class="mt-1 block text-sm text-red-700">{{ $message }}</span>@enderror
+                @error('notes')<span class="mt-1 block text-sm text-[var(--ui-danger)]">{{ $message }}</span>@enderror
             </label>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('purchasing.requisitions.show', $requisition) : route('purchasing.requisitions.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('purchase_requisition.save') : __('purchase_requisition.create') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('purchasing.requisitions.show', $requisition) : route('purchasing.requisitions.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" class="rounded-full" :full="true">{{ $editing ? __('purchase_requisition.save') : __('purchase_requisition.create') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>
@@ -158,15 +150,7 @@
         <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity]" value="1" required />
         <x-ui.input type="date" name="items[__INDEX__][need_by_date]" value="{{ now()->addDays(7)->toDateString() }}" required />
         <x-ui.input type="date" name="items[__INDEX__][order_date]" value="{{ now()->toDateString() }}" required />
-        <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#dadce0] text-red-600 transition hover:bg-red-50" data-pr-remove-item aria-label="{{ __('purchase_requisition.remove_item') }}" title="{{ __('purchase_requisition.remove_item') }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 6h18" />
-                <path d="M8 6V4h8v2" />
-                <path d="M19 6l-1 14H6L5 6" />
-                <path d="M10 11v6" />
-                <path d="M14 11v6" />
-            </svg>
-        </button>
+        <x-ui.icon-button type="button" icon="trash" variant="danger" data-pr-remove-item :label="__('purchase_requisition.remove_item')" />
     </div>
 </template>
 

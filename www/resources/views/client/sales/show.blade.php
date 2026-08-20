@@ -30,19 +30,19 @@
             <h1 class="font-display text-3xl font-bold">{{ __('sale.reference_label', ['id' => $sale->id]) }}</h1>
         </div>
         <div class="flex flex-wrap gap-3">
-            <x-ui.button :href="route('sales.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+            <x-ui.button :href="route('sales.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
 
-            <x-ui.button :href="route('sales.production-status', $sale)" variant="material-versions" class="rounded-full">{{ __('sale.production_status.view') }}</x-ui.button>
+            <x-ui.button :href="route('sales.production-status', $sale)" variant="info" class="rounded-full">{{ __('sale.production_status.view') }}</x-ui.button>
 
             @if (! $isLockedForEditing)
-                <x-ui.button :href="route('sales.edit', $sale)" variant="material-edit" class="rounded-full">{{ __('sale.edit') }}</x-ui.button>
+                <x-ui.button :href="route('sales.edit', $sale)" variant="primary" class="rounded-full">{{ __('sale.edit') }}</x-ui.button>
             @endif
 
             @if ($nextOperationalStatus !== null)
                 <form method="POST" action="{{ route('sales.transition', $sale) }}">
                     @csrf
-                    <input type="hidden" name="next_operational_status" value="{{ $nextOperationalStatus }}">
-                    <x-ui.button type="submit" variant="brand-primary" class="rounded-full">{{ __('sale.advance_to', ['status' => $nextOperationalStatusLabel]) }}</x-ui.button>
+                    <x-ui.input type="hidden" name="next_operational_status" :value="$nextOperationalStatus" unstyled />
+                    <x-ui.button type="submit" variant="primary" class="rounded-full">{{ __('sale.advance_to', ['status' => $nextOperationalStatusLabel]) }}</x-ui.button>
                 </form>
             @endif
 
@@ -50,7 +50,7 @@
                 <form method="POST" action="{{ route('sales.destroy', $sale) }}" data-admin-delete-confirm data-admin-name="{{ __('sale.reference_label', ['id' => $sale->id]) }}" data-confirm-title="{{ __('sale.confirm_delete_title') }}" data-confirm-text="{{ __('sale.confirm_delete_text') }}" data-confirm-confirm="{{ __('sale.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('sale.confirm_delete_cancel') }}">
                     @csrf
                     @method('DELETE')
-                    <x-ui.button type="submit" variant="material-remove" class="rounded-full">{{ __('sale.remove') }}</x-ui.button>
+                    <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('sale.remove') }}</x-ui.button>
                 </form>
             @endif
         </div>
@@ -64,7 +64,7 @@
         <x-ui.alert class="mt-5" variant="error">{{ session('error') }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('sale.reference')">#{{ $sale->id }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('sale.customer')">{{ $sale->customer?->name ?? __('sale.customer_removed') }}</x-ui.definition-item>
@@ -121,12 +121,12 @@
         <div class="mt-8 overflow-x-auto">
             <div class="mb-3 flex items-center justify-between gap-3">
                 <h2 class="text-lg font-semibold">{{ __('sale.items') }}</h2>
-                <span class="text-sm text-[#5f6368]">{{ $sale->lines->count() }} {{ __('sale.items_count') }}</span>
+                <span class="text-sm text-[var(--ui-text-muted)]">{{ $sale->lines->count() }} {{ __('sale.items_count') }}</span>
             </div>
 
-            <table class="min-w-full text-sm">
+            <x-ui.table :caption="__('sale.title')">
                 <thead>
-                    <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                    <tr class="border-b border-[var(--ui-border)] text-left text-[var(--ui-text-muted)]">
                         <th class="px-3 py-3">{{ __('sale.product') }}</th>
                         <th class="px-3 py-3">{{ __('sale.quantity') }}</th>
                         <th class="px-3 py-3">{{ __('sale.unit_price') }}</th>
@@ -135,19 +135,19 @@
                 </thead>
                 <tbody>
                     @forelse ($sale->lines as $line)
-                        <tr class="border-b border-[#f1f3f4]">
+                        <tr class="border-b border-[var(--ui-border)]">
                             <td class="px-3 py-4">{{ $line->product?->sku ?? '—' }} - {{ $line->product?->description ?? '—' }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">{{ number_format($line->quantity, 6, ',', '.') }}</td>
-                            <td class="px-3 py-4 text-[#5f6368]">R$ {{ number_format($line->unit_price, 2, ',', '.') }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ number_format($line->quantity, 6, ',', '.') }}</td>
+                            <td class="px-3 py-4 text-[var(--ui-text-muted)]">R$ {{ number_format($line->unit_price, 2, ',', '.') }}</td>
                             <td class="px-3 py-4 font-semibold">R$ {{ number_format($line->quantity * $line->unit_price, 2, ',', '.') }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-3 py-8 text-center text-[#5f6368]">{{ __('sale.empty_items') }}</td>
+                            <td colspan="4" class="px-3 py-8 text-center text-[var(--ui-text-muted)]">{{ __('sale.empty_items') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
+            </x-ui.table>
         </div>
     </x-ui.panel>
 </div>

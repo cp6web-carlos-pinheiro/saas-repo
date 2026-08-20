@@ -8,16 +8,16 @@
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
             <h1 class="font-display text-3xl font-bold">{{ __('inventory_web.balances') }}</h1>
-            <p class="mt-1 text-sm text-[#5f6368]">{{ __('inventory_web.balances_description') }}</p>
+            <p class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ __('inventory_web.balances_description') }}</p>
         </div>
-        <x-ui.button :href="route('inventory.movements.create')" variant="brand-primary" class="rounded-full">{{ __('inventory_web.new_movement') }}</x-ui.button>
+        <x-ui.button :href="route('inventory.movements.create')" variant="primary" class="rounded-full">{{ __('inventory_web.new_movement') }}</x-ui.button>
     </div>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <form method="GET" class="grid gap-3 md:grid-cols-3">
             <x-ui.select name="warehouse_id" select2="false">
                 <option value="">{{ __('inventory_web.all_warehouses') }}</option>
@@ -31,13 +31,13 @@
                     <option value="{{ $product->id }}" @selected($productId === $product->id)>{{ $product->sku }} — {{ $product->description }}</option>
                 @endforeach
             </x-ui.select>
-            <x-ui.button type="submit" variant="surface-muted" class="rounded-xl">{{ __('inventory_web.filter') }}</x-ui.button>
+            <x-ui.button type="submit" variant="secondary" class="rounded-xl">{{ __('inventory_web.filter') }}</x-ui.button>
         </form>
 
         <div class="mt-6 overflow-x-auto">
-            <table class="min-w-full text-sm">
+            <x-ui.table :caption="__('inventory_web.balances')">
                 <thead>
-                    <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                    <tr class="border-b border-[var(--ui-border)] text-left text-[var(--ui-text-muted)]">
                         <x-ui.sortable-header column="warehouse" :label="__('inventory_web.warehouse')" :sort="$sort" :direction="$direction" />
                         <x-ui.sortable-header column="product" :label="__('inventory_web.product')" :sort="$sort" :direction="$direction" />
                         <x-ui.sortable-header class="text-right" column="qty_available" :label="__('inventory_web.available')" :sort="$sort" :direction="$direction" />
@@ -49,12 +49,12 @@
                 </thead>
                 <tbody>
                     @forelse ($balances as $balance)
-                        <tr class="border-b border-[#f1f3f4]"><td class="px-3 py-4">{{ $balance->warehouse?->code }} — {{ $balance->warehouse?->name }}</td><td class="px-3 py-4">{{ $balance->product?->sku }} — {{ $balance->product?->description }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_available, 3, ',', '.') }} {{ $balance->product?->unit?->code }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_reserved, 3, ',', '.') }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_inspection, 3, ',', '.') }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_in_transit, 3, ',', '.') }}</td><td class="px-3 py-4 text-[#5f6368]">{{ $balance->last_movement_at?->format('d/m/Y H:i') ?? '—' }}</td></tr>
+                        <tr class="border-b border-[var(--ui-border)]"><td class="px-3 py-4">{{ $balance->warehouse?->code }} — {{ $balance->warehouse?->name }}</td><td class="px-3 py-4">{{ $balance->product?->sku }} — {{ $balance->product?->description }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_available, 3, ',', '.') }} {{ $balance->product?->unit?->code }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_reserved, 3, ',', '.') }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_inspection, 3, ',', '.') }}</td><td class="px-3 py-4 text-right">{{ number_format($balance->qty_in_transit, 3, ',', '.') }}</td><td class="px-3 py-4 text-[var(--ui-text-muted)]">{{ $balance->last_movement_at?->format('d/m/Y H:i') ?? '—' }}</td></tr>
                     @empty
-                        <tr><td colspan="7" class="px-3 py-10 text-center text-[#5f6368]">{{ __('inventory_web.empty_balances') }}</td></tr>
+                        <tr><td colspan="7" class="px-3 py-10 text-center text-[var(--ui-text-muted)]">{{ __('inventory_web.empty_balances') }}</td></tr>
                     @endforelse
                 </tbody>
-            </table>
+            </x-ui.table>
         </div>
         <div class="mt-6">{{ $balances->links() }}</div>
     </x-ui.panel>
