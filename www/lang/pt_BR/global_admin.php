@@ -5,6 +5,8 @@ return [
     'home' => 'Início',
     'welcome_title' => 'Bem-vindo à área de Administração',
     'eyebrow' => 'Acesso restrito',
+    'remember' => 'Manter conectado',
+    'sign_in' => 'Entrar',
     'search' => 'Buscar por nome ou e-mail',
     'filter' => 'Buscar',
     'empty' => 'Nenhum administrador encontrado.',

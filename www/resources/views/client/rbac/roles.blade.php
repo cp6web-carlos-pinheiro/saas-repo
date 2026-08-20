@@ -5,13 +5,11 @@
 
 @section('client-content')
 <div class="w-full p-5 md:p-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="font-display text-3xl font-bold">{{ __('ui.rbac_roles') }}</h1>
-            <p class="mt-2 text-sm text-[var(--ui-text-muted)]">{{ __('rbac.role_permissions') }} + {{ __('rbac.role_users') }}</p>
-        </div>
-        <x-ui.button :href="route('company-access.rbac.roles.create')" variant="primary" class="rounded-full">{{ __('rbac.new_role') }}</x-ui.button>
-    </div>
+    <x-ui.page-heading :title="__('ui.rbac_roles')" :subtitle="__('rbac.role_permissions').' + '.__('rbac.role_users')">
+        <x-slot:actions>
+            <x-ui.button :href="route('company-access.rbac.roles.create')" variant="primary" class="rounded-full">{{ __('rbac.new_role') }}</x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-heading>
 
     @if (session('status'))
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
@@ -41,7 +39,7 @@
                                 <div class="flex flex-wrap gap-2">
                                     <x-ui.button :href="route('company-access.rbac.roles.show', $role)" variant="secondary" class="rounded-full text-xs">{{ __('rbac.details') }}</x-ui.button>
                                     @if ($isAdministratorRole)
-                                        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">{{ __('rbac.master_role_locked') }}</span>
+                                        <x-ui.badge variant="neutral" size="sm">{{ __('rbac.master_role_locked') }}</x-ui.badge>
                                     @else
                                         <x-ui.button :href="route('company-access.rbac.roles.edit', $role)" variant="primary" class="rounded-full text-xs">{{ __('rbac.update') }}</x-ui.button>
                                     @endif

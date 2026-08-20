@@ -44,7 +44,7 @@
                 @endif
 
                 @if (filled($subtitle))
-                    <p class="mt-2 text-sm text-slate-500">{{ $subtitle }}</p>
+                    <p class="mt-2 text-sm text-[var(--ui-text-muted)]">{{ $subtitle }}</p>
                 @endif
             @endif
         </div>
