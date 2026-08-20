@@ -8,8 +8,8 @@
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ __('production.scheduling.result') }}</h1>
         <div class="flex flex-wrap gap-3">
-            <x-ui.button :href="route('production.scheduling.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
-            <x-ui.button :href="route('production.scheduling.edit', ['run' => $runKey])" variant="material-edit" class="rounded-full">{{ __('production.scheduling.edit_parameters') }}</x-ui.button>
+            <x-ui.button :href="route('production.scheduling.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+            <x-ui.button :href="route('production.scheduling.edit', ['run' => $runKey])" variant="primary" class="rounded-full">{{ __('production.scheduling.edit_parameters') }}</x-ui.button>
         </div>
     </div>
 
@@ -17,7 +17,7 @@
         <x-ui.alert class="mt-5" variant="success">{{ session('status') }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6">
         <x-ui.definition-grid>
             <x-ui.definition-item :label="__('production.scheduling.reference_date')">{{ $input['reference_date'] ?? '—' }}</x-ui.definition-item>
             <x-ui.definition-item :label="__('production.scheduling.mode')">{{ __('ui.scheduling_mode_'.($input['mode'] ?? 'finite')) }}</x-ui.definition-item>
@@ -27,16 +27,16 @@
         </x-ui.definition-grid>
     </x-ui.panel>
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6">
         <h2 class="font-display text-xl font-bold">{{ __('production.scheduling.calculated_sequence') }}</h2>
         <div class="mt-4 space-y-4">
             @foreach (($result['orders'] ?? []) as $scheduledOrder)
-                <div class="rounded-xl border border-[#dadce0] p-4">
+                <div class="rounded-xl border border-[var(--ui-border)] p-4">
                     <div class="font-medium">{{ $scheduledOrder['order_number'] ?? '—' }} | {{ __('production.scheduling.sale', ['reference' => $scheduledOrder['sales_order_reference'] ?? '—']) }} | {{ __('ui.scheduling_mode_'.($scheduledOrder['mode'] ?? 'finite')) }} | {{ __('ui.scheduling_direction_'.($scheduledOrder['direction'] ?? 'forward')) }}</div>
                     <div class="mt-2 overflow-x-auto">
-                        <table class="min-w-full text-sm">
+                        <x-ui.table :caption="__('ui.module_scheduling')">
                             <thead>
-                                <tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                                <tr class="border-b border-[var(--ui-border)] text-left text-[var(--ui-text-muted)]">
                                     <th class="px-2 py-1">{{ __('production.sequence') }}</th>
                                     <th class="px-2 py-1">{{ __('production.operation') }}</th>
                                     <th class="px-2 py-1">{{ __('production.scheduling.center') }}</th>
@@ -47,7 +47,7 @@
                             </thead>
                             <tbody>
                                 @foreach (($scheduledOrder['operations'] ?? []) as $operation)
-                                    <tr class="border-b border-[#f1f3f4]">
+                                    <tr class="border-b border-[var(--ui-border)]">
                                         <td class="px-2 py-1">{{ $operation['sequence'] ?? '—' }}</td>
                                         <td class="px-2 py-1">{{ $operation['operation_no'] ?? '—' }} - {{ $operation['operation_name'] ?? '—' }}</td>
                                         <td class="px-2 py-1">{{ $operation['work_center_id'] ?? '—' }}</td>
@@ -57,7 +57,7 @@
                                     </tr>
                                 @endforeach
                             </tbody>
-                        </table>
+                        </x-ui.table>
                     </div>
                 </div>
             @endforeach

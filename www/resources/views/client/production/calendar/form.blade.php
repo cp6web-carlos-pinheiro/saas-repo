@@ -9,14 +9,14 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ $editing ? __('production.calendar.edit') : __('production.calendar.new') }}</h1>
-        <x-ui.button :href="$editing ? route('production.calendar.show', $day) : route('production.calendar.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('production.calendar.show', $day) : route('production.calendar.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ $editing ? route('production.calendar.update', $day) : route('production.calendar.store') }}" class="space-y-5">
             @csrf
             @if ($editing)
@@ -45,14 +45,14 @@
                 <x-ui.input class="mt-2" name="notes" maxlength="255" :value="old('notes', $day?->notes)" />
             </label>
 
-            <label class="inline-flex items-center gap-2 text-sm">
-                <input type="hidden" name="is_working_day" value="0" />
-                <input type="checkbox" name="is_working_day" value="1" @checked((bool) old('is_working_day', $day?->is_working_day ?? true)) /> {{ __('production.work_centers.working_day') }}
-            </label>
+            <div>
+                <x-ui.input type="hidden" name="is_working_day" value="0" unstyled />
+                <x-ui.checkbox name="is_working_day" value="1" :checked="(bool) old('is_working_day', $day?->is_working_day ?? true)">{{ __('production.work_centers.working_day') }}</x-ui.checkbox>
+            </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('production.calendar.show', $day) : route('production.calendar.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ $editing ? __('production.save') : __('production.calendar.create') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('production.calendar.show', $day) : route('production.calendar.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" class="rounded-full" :full="true">{{ $editing ? __('production.save') : __('production.calendar.create') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>

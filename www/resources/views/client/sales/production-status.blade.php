@@ -15,46 +15,42 @@
         $formatQuantity = static fn (float|int $quantity): string => rtrim(rtrim(number_format((float) $quantity, 6, ',', '.'), '0'), ',');
         $formatMoney = static fn (float|int $amount): string => 'R$ '.number_format((float) $amount, 2, ',', '.');
         $statusPresentation = static fn (string $status): array => match ($status) {
-            'completed' => [__('sale.production_status.completed'), 'bg-[#e6f4ea] text-[#137333]'],
-            'in_progress' => [__('sale.production_status.in_progress'), 'bg-[#e8f0fe] text-[#174ea6]'],
-            'planned' => [__('sale.production_status.planned'), 'bg-[#fef7e0] text-[#8a5a00]'],
-            'available' => [__('sale.production_status.available'), 'bg-[#e6f4ea] text-[#137333]'],
-            default => [__('sale.production_status.forecast'), 'bg-[#f3e8fd] text-[#7627bb]'],
+            'completed' => [__('sale.production_status.completed'), 'bg-[var(--ui-success-soft)] text-[var(--ui-success)]'],
+            'in_progress' => [__('sale.production_status.in_progress'), 'bg-[var(--ui-primary-soft)] text-[var(--ui-primary-text)]'],
+            'planned' => [__('sale.production_status.planned'), 'bg-[var(--ui-warning-soft)] text-[var(--ui-warning-text)]'],
+            'available' => [__('sale.production_status.available'), 'bg-[var(--ui-success-soft)] text-[var(--ui-success)]'],
+            default => [__('sale.production_status.forecast'), 'bg-[var(--ui-info-soft)] text-[var(--ui-info)]'],
         };
         $readinessPresentation = match ($analysis['readiness']) {
-            'ready' => [__('sale.production_status.readiness_ready'), 'bg-[#e6f4ea] text-[#137333]', 'bg-[#34a853]'],
-            'in_progress' => [__('sale.production_status.readiness_in_progress'), 'bg-[#e8f0fe] text-[#174ea6]', 'bg-[#1a73e8]'],
-            'blocked_materials' => [__('sale.production_status.readiness_blocked_materials'), 'bg-[#fce8e6] text-[#b3261e]', 'bg-[#d93025]'],
-            'at_risk' => [__('sale.production_status.readiness_at_risk'), 'bg-[#fce8e6] text-[#b3261e]', 'bg-[#d93025]'],
-            default => [__('sale.production_status.readiness_unscheduled'), 'bg-[#fef7e0] text-[#8a5a00]', 'bg-[#f9ab00]'],
+            'ready' => [__('sale.production_status.readiness_ready'), 'bg-[var(--ui-success-soft)] text-[var(--ui-success)]', 'bg-[var(--ui-success)]'],
+            'in_progress' => [__('sale.production_status.readiness_in_progress'), 'bg-[var(--ui-primary-soft)] text-[var(--ui-primary-text)]', 'bg-[var(--ui-primary)]'],
+            'blocked_materials' => [__('sale.production_status.readiness_blocked_materials'), 'bg-[var(--ui-danger-soft)] text-[var(--ui-danger)]', 'bg-[var(--ui-danger)]'],
+            'at_risk' => [__('sale.production_status.readiness_at_risk'), 'bg-[var(--ui-danger-soft)] text-[var(--ui-danger)]', 'bg-[var(--ui-danger)]'],
+            default => [__('sale.production_status.readiness_unscheduled'), 'bg-[var(--ui-warning-soft)] text-[var(--ui-warning-text)]', 'bg-[var(--ui-warning)]'],
         };
     @endphp
 
     <div>
-        <p class="text-sm font-semibold uppercase tracking-wide text-[#5f6368]">{{ __('sale.reference_label', ['id' => $sale->id]) }}</p>
+        <p class="text-sm font-semibold uppercase tracking-wide text-[var(--ui-text-muted)]">{{ __('sale.reference_label', ['id' => $sale->id]) }}</p>
         <div class="mt-1 flex flex-wrap items-center justify-between gap-4">
             <h1 class="font-display text-3xl font-bold">{{ __('sale.production_status.title') }}</h1>
             <div class="flex flex-wrap items-center justify-end gap-1 print:hidden" role="group" aria-label="{{ __('sale.production_status.report_actions') }}">
-                <a class="ui-icon-button border border-[#dadce0] bg-white" href="{{ route('sales.production-status.export', [$sale, 'xlsx']) }}" title="{{ __('sale.production_status.export_excel') }}" aria-label="{{ __('sale.production_status.export_excel') }}">
+                <a class="ui-icon-button border border-[var(--ui-border)] bg-[var(--ui-surface)]" href="{{ route('sales.production-status.export', [$sale, 'xlsx']) }}" title="{{ __('sale.production_status.export_excel') }}" aria-label="{{ __('sale.production_status.export_excel') }}">
                     <x-ui.icon name="chart-bar" />
                 </a>
-                <a class="ui-icon-button border border-[#dadce0] bg-white" href="{{ route('sales.production-status.export', [$sale, 'pdf']) }}" title="{{ __('sale.production_status.export_pdf') }}" aria-label="{{ __('sale.production_status.export_pdf') }}">
+                <a class="ui-icon-button border border-[var(--ui-border)] bg-[var(--ui-surface)]" href="{{ route('sales.production-status.export', [$sale, 'pdf']) }}" title="{{ __('sale.production_status.export_pdf') }}" aria-label="{{ __('sale.production_status.export_pdf') }}">
                     <x-ui.icon name="receipt" />
                 </a>
-                <button type="button" class="ui-icon-button border border-[#dadce0] bg-white" title="{{ __('sale.production_status.print') }}" aria-label="{{ __('sale.production_status.print') }}" onclick="window.print()">
-                    <x-ui.icon name="printer" />
-                </button>
-                <button type="button" class="ui-icon-button border border-[#dadce0] bg-white" title="{{ __('sale.production_status.share') }}" aria-label="{{ __('sale.production_status.share') }}" data-share-report>
-                    <x-ui.icon name="share" />
-                </button>
-                <a class="ui-icon-button border border-[#dadce0] bg-white" href="{{ route('sales.production-status', $sale) }}" title="{{ __('sale.production_status.refresh') }}" aria-label="{{ __('sale.production_status.refresh') }}">
+                <x-ui.icon-button type="button" icon="printer" variant="outline" :label="__('sale.production_status.print')" onclick="window.print()" />
+                <x-ui.icon-button type="button" icon="share" variant="outline" :label="__('sale.production_status.share')" data-share-report />
+                <a class="ui-icon-button border border-[var(--ui-border)] bg-[var(--ui-surface)]" href="{{ route('sales.production-status', $sale) }}" title="{{ __('sale.production_status.refresh') }}" aria-label="{{ __('sale.production_status.refresh') }}">
                     <x-ui.icon name="refresh" />
                 </a>
-                <span class="mx-2 h-6 w-px bg-[#dadce0]" aria-hidden="true"></span>
-                <x-ui.button :href="route('sales.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+                <span class="mx-2 h-6 w-px bg-[var(--ui-border)]" aria-hidden="true"></span>
+                <x-ui.button :href="route('sales.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             </div>
         </div>
-        <p class="mt-2 text-sm text-[#5f6368]">{{ __('sale.production_status.subtitle', ['customer' => $sale->customer?->name ?? __('sale.customer_removed')]) }}</p>
+        <p class="mt-2 text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.subtitle', ['customer' => $sale->customer?->name ?? __('sale.customer_removed')]) }}</p>
     </div>
 
     <x-ui.tabs class="mt-6" :label="__('sale.production_status.tabs_label')" data-production-tabs>
@@ -87,34 +83,34 @@
         </x-ui.tabs.list>
 
         <x-ui.tabs.panel id="production-status-panel-summary" labelledby="production-status-tab-summary" :active="true">
-    <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+    <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
         <div class="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-center">
             <div>
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="rounded-full px-3 py-1.5 text-sm font-semibold {{ $readinessPresentation[1] }}">{{ $readinessPresentation[0] }}</span>
-                    <span class="text-xs text-[#5f6368]">{{ __('sale.production_status.last_updated', ['date' => \Illuminate\Support\Carbon::parse($analysis['last_updated_at'])->format('d/m/Y H:i')]) }}</span>
+                    <span class="text-xs text-[var(--ui-text-muted)]">{{ __('sale.production_status.last_updated', ['date' => \Illuminate\Support\Carbon::parse($analysis['last_updated_at'])->format('d/m/Y H:i')]) }}</span>
                 </div>
                 <div class="mt-4 flex items-end justify-between gap-4">
                     <div>
-                        <div class="text-sm text-[#5f6368]">{{ __('sale.production_status.fulfillment_progress') }}</div>
+                        <div class="text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.fulfillment_progress') }}</div>
                         <div class="mt-1 text-3xl font-bold">{{ number_format($analysis['progress_percent'], 1, ',', '.') }}%</div>
                     </div>
                     <div class="text-right">
-                        <div class="text-sm text-[#5f6368]">{{ __('sale.production_status.projected_completion') }}</div>
+                        <div class="text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.projected_completion') }}</div>
                         <div class="mt-1 font-semibold">{{ $analysis['projected_completion'] ? \Illuminate\Support\Carbon::parse($analysis['projected_completion'])->format('d/m/Y') : __('sale.production_status.not_scheduled') }}</div>
                     </div>
                 </div>
-                <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-[#e8eaed]"><div class="h-full rounded-full {{ $readinessPresentation[2] }}" style="width: {{ $analysis['progress_percent'] }}%"></div></div>
+                <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-[var(--ui-border)]"><div class="h-full rounded-full {{ $readinessPresentation[2] }}" style="width: {{ $analysis['progress_percent'] }}%"></div></div>
             </div>
-            <div class="border-[#dadce0] lg:border-l lg:pl-6">
-                <div class="text-sm text-[#5f6368]">{{ __('sale.production_status.cost_variance') }}</div>
-                <div class="mt-1 text-2xl font-bold {{ $analysis['costs']['variance'] > 0 ? 'text-[#b3261e]' : 'text-[#137333]' }}">{{ $formatMoney($analysis['costs']['variance']) }}</div>
-                <div class="mt-1 text-xs text-[#5f6368]">{{ $analysis['costs']['variance_percent'] !== null ? number_format($analysis['costs']['variance_percent'], 1, ',', '.').'%' : '—' }}</div>
+            <div class="border-[var(--ui-border)] lg:border-l lg:pl-6">
+                <div class="text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.cost_variance') }}</div>
+                <div class="mt-1 text-2xl font-bold {{ $analysis['costs']['variance'] > 0 ? 'text-[var(--ui-danger)]' : 'text-[var(--ui-success)]' }}">{{ $formatMoney($analysis['costs']['variance']) }}</div>
+                <div class="mt-1 text-xs text-[var(--ui-text-muted)]">{{ $analysis['costs']['variance_percent'] !== null ? number_format($analysis['costs']['variance_percent'], 1, ',', '.').'%' : '—' }}</div>
             </div>
         </div>
     </x-ui.panel>
 
-    <x-ui.panel class="mt-4 border-[#dadce0] shadow-none" padding="p-5">
+    <x-ui.panel class="mt-4 border-[var(--ui-border)] shadow-none" padding="p-5">
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
             @foreach ([
                 ['promised_date', $analysis['schedule']['promised_date']],
@@ -122,15 +118,15 @@
                 ['planned_end', $analysis['schedule']['planned_end']],
                 ['projected_completion', $analysis['schedule']['projected_completion']],
             ] as [$label, $date])
-                <div><div class="text-xs text-[#5f6368]">{{ __('sale.production_status.'.$label) }}</div><div class="mt-1 font-semibold">{{ $date ? \Illuminate\Support\Carbon::parse($date)->format('d/m/Y') : '—' }}</div></div>
+                <div><div class="text-xs text-[var(--ui-text-muted)]">{{ __('sale.production_status.'.$label) }}</div><div class="mt-1 font-semibold">{{ $date ? \Illuminate\Support\Carbon::parse($date)->format('d/m/Y') : '—' }}</div></div>
             @endforeach
-            <div><div class="text-xs text-[#5f6368]">{{ __('sale.production_status.days_late') }}</div><div class="mt-1 font-semibold {{ $analysis['schedule']['days_late'] > 0 ? 'text-[#b3261e]' : 'text-[#137333]' }}">{{ $analysis['schedule']['days_late'] }}</div></div>
-            <div><div class="text-xs text-[#5f6368]">{{ __('sale.production_status.limiting_material') }}</div><div class="mt-1 font-semibold">{{ data_get($analysis, 'schedule.limiting_material.sku', '—') }}</div></div>
+            <div><div class="text-xs text-[var(--ui-text-muted)]">{{ __('sale.production_status.days_late') }}</div><div class="mt-1 font-semibold {{ $analysis['schedule']['days_late'] > 0 ? 'text-[var(--ui-danger)]' : 'text-[var(--ui-success)]' }}">{{ $analysis['schedule']['days_late'] }}</div></div>
+            <div><div class="text-xs text-[var(--ui-text-muted)]">{{ __('sale.production_status.limiting_material') }}</div><div class="mt-1 font-semibold">{{ data_get($analysis, 'schedule.limiting_material.sku', '—') }}</div></div>
         </div>
         @if ($analysis['schedule']['critical_path'])
-            <div class="mt-4 border-t border-[#dadce0] pt-3 text-sm text-[#5f6368]">{{ __('sale.production_status.critical_path') }}:
+            <div class="mt-4 border-t border-[var(--ui-border)] pt-3 text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.critical_path') }}:
                 @if ($capabilities['read_production_order'])
-                    <a class="font-semibold text-[#174ea6] hover:underline" href="{{ route('production.orders.show', $analysis['schedule']['critical_path']['order_id']) }}">{{ $analysis['schedule']['critical_path']['order_number'] }} · {{ $analysis['schedule']['critical_path']['product'] }}</a>
+                    <a class="font-semibold text-[var(--ui-primary-text)] hover:underline" href="{{ route('production.orders.show', $analysis['schedule']['critical_path']['order_id']) }}">{{ $analysis['schedule']['critical_path']['order_number'] }} · {{ $analysis['schedule']['critical_path']['product'] }}</a>
                 @else
                     <strong>{{ $analysis['schedule']['critical_path']['order_number'] }} · {{ $analysis['schedule']['critical_path']['product'] }}</strong>
                 @endif
@@ -138,26 +134,26 @@
         @endif
     </x-ui.panel>
 
-    <label class="mt-4 inline-flex items-center gap-2 text-sm text-[#5f6368] print:hidden"><input type="checkbox" class="rounded" data-auto-refresh> {{ __('sale.production_status.auto_refresh') }}</label>
+    <div class="mt-4 print:hidden"><x-ui.checkbox data-auto-refresh>{{ __('sale.production_status.auto_refresh') }}</x-ui.checkbox></div>
 
     <div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         @foreach ([
-            ['completed', $analysis['counts']['completed'], 'text-[#137333]'],
-            ['in_progress', $analysis['counts']['in_progress'], 'text-[#174ea6]'],
-            ['planned', $analysis['counts']['planned'], 'text-[#8a5a00]'],
-            ['forecast', $analysis['counts']['forecast'], 'text-[#7627bb]'],
+            ['completed', $analysis['counts']['completed'], 'text-[var(--ui-success)]'],
+            ['in_progress', $analysis['counts']['in_progress'], 'text-[var(--ui-primary-text)]'],
+            ['planned', $analysis['counts']['planned'], 'text-[var(--ui-warning-text)]'],
+            ['forecast', $analysis['counts']['forecast'], 'text-[var(--ui-info)]'],
         ] as [$status, $count, $tone])
-            <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5">
-                <div class="text-sm text-[#5f6368]">{{ __('sale.production_status.'.$status) }}</div>
+            <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-5">
+                <div class="text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.'.$status) }}</div>
                 <div class="mt-1 text-3xl font-bold {{ $tone }}">{{ $count }}</div>
             </x-ui.panel>
         @endforeach
-        <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5">
-            <div class="text-sm text-[#5f6368]">{{ __('sale.production_status.estimated_cost') }}</div>
+        <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-5">
+            <div class="text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.estimated_cost') }}</div>
             <div class="mt-1 text-xl font-bold">{{ $formatMoney($analysis['costs']['estimated_total']) }}{{ $analysis['costs']['estimated_incomplete'] ? '*' : '' }}</div>
         </x-ui.panel>
-        <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5">
-            <div class="text-sm text-[#5f6368]">{{ __('sale.production_status.actual_cost') }}</div>
+        <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-5">
+            <div class="text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.actual_cost') }}</div>
             <div class="mt-1 text-xl font-bold">{{ $formatMoney($analysis['costs']['actual_total']) }}{{ $analysis['costs']['actual_incomplete'] ? '*' : '' }}</div>
         </x-ui.panel>
     </div>
@@ -166,7 +162,7 @@
         <x-ui.alert class="mt-4" variant="warning">{{ __('sale.production_status.partial_cost_hint') }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-4 border-[#dadce0] shadow-none" padding="p-5">
+    <x-ui.panel class="mt-4 border-[var(--ui-border)] shadow-none" padding="p-5">
         <h2 class="font-semibold">{{ __('sale.production_status.cost_breakdown') }}</h2>
         <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
             @foreach ([
@@ -178,13 +174,13 @@
                 ['actual_machine', $analysis['costs']['actual_machine']],
                 ['actual_scrap', $analysis['costs']['actual_scrap']],
             ] as [$label, $amount])
-                <div><div class="text-xs text-[#5f6368]">{{ __('sale.production_status.'.$label) }}</div><div class="mt-1 font-semibold">{{ $formatMoney($amount) }}</div></div>
+                <div><div class="text-xs text-[var(--ui-text-muted)]">{{ __('sale.production_status.'.$label) }}</div><div class="mt-1 font-semibold">{{ $formatMoney($amount) }}</div></div>
             @endforeach
         </div>
-        <div class="mt-4 grid gap-4 border-t border-[#dadce0] pt-4 sm:grid-cols-3">
-            <div><div class="text-xs text-[#5f6368]">{{ __('sale.production_status.sales_amount') }}</div><div class="mt-1 font-bold">{{ $formatMoney($analysis['costs']['sales_amount']) }}</div></div>
-            <div><div class="text-xs text-[#5f6368]">{{ __('sale.production_status.estimated_margin') }}</div><div class="mt-1 font-bold {{ $analysis['costs']['estimated_margin'] >= 0 ? 'text-[#137333]' : 'text-[#b3261e]' }}">{{ $formatMoney($analysis['costs']['estimated_margin']) }}</div></div>
-            <div><div class="text-xs text-[#5f6368]">{{ __('sale.production_status.estimated_margin_percent') }}</div><div class="mt-1 font-bold">{{ $analysis['costs']['estimated_margin_percent'] !== null ? number_format($analysis['costs']['estimated_margin_percent'], 1, ',', '.').'%' : '—' }}</div></div>
+        <div class="mt-4 grid gap-4 border-t border-[var(--ui-border)] pt-4 sm:grid-cols-3">
+            <div><div class="text-xs text-[var(--ui-text-muted)]">{{ __('sale.production_status.sales_amount') }}</div><div class="mt-1 font-bold">{{ $formatMoney($analysis['costs']['sales_amount']) }}</div></div>
+            <div><div class="text-xs text-[var(--ui-text-muted)]">{{ __('sale.production_status.estimated_margin') }}</div><div class="mt-1 font-bold {{ $analysis['costs']['estimated_margin'] >= 0 ? 'text-[var(--ui-success)]' : 'text-[var(--ui-danger)]' }}">{{ $formatMoney($analysis['costs']['estimated_margin']) }}</div></div>
+            <div><div class="text-xs text-[var(--ui-text-muted)]">{{ __('sale.production_status.estimated_margin_percent') }}</div><div class="mt-1 font-bold">{{ $analysis['costs']['estimated_margin_percent'] !== null ? number_format($analysis['costs']['estimated_margin_percent'], 1, ',', '.').'%' : '—' }}</div></div>
         </div>
     </x-ui.panel>
 
@@ -197,7 +193,7 @@
                 data-production-tab-panel="{{ $tab }}"
                 data-production-tab-url="{{ route('sales.production-status.tab', [$sale, $tab]) }}"
             >
-                <div class="rounded-xl border border-[#dadce0] bg-white p-8 text-center text-sm text-[#5f6368]" data-production-tab-placeholder>
+                <div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-8 text-center text-sm text-[var(--ui-text-muted)]" data-production-tab-placeholder>
                     {{ __('sale.production_status.tab_select_hint') }}
                 </div>
             </x-ui.tabs.panel>
@@ -216,17 +212,17 @@
             'cost' => __('sale.production_status.filter_cost'),
             'structure_rate' => __('sale.production_status.filter_structure_rate'),
         ] as $filter => $label)
-            <button type="button" class="rounded-full border border-[#dadce0] bg-white px-3 py-1.5 text-sm font-medium text-[#5f6368] transition hover:bg-[#f1f3f4] aria-pressed:border-[#1a73e8] aria-pressed:bg-[#e8f0fe] aria-pressed:text-[#174ea6]" data-production-filter="{{ $filter }}" aria-pressed="{{ $filter === 'all' ? 'true' : 'false' }}">{{ $label }}</button>
+            <x-ui.button type="button" variant="secondary" size="sm" class="rounded-full aria-pressed:border-[var(--ui-primary)] aria-pressed:bg-[var(--ui-primary-soft)] aria-pressed:text-[var(--ui-primary-text)]" data-production-filter="{{ $filter }}" aria-pressed="{{ $filter === 'all' ? 'true' : 'false' }}">{{ $label }}</x-ui.button>
         @endforeach
     </div>
-    <p class="mt-4 hidden rounded-xl border border-[#dadce0] bg-white p-6 text-center text-sm text-[#5f6368]" data-production-filter-empty>{{ __('sale.production_status.filter_empty') }}</p>
+    <p class="mt-4 hidden rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-6 text-center text-sm text-[var(--ui-text-muted)]" data-production-filter-empty>{{ __('sale.production_status.filter_empty') }}</p>
 
     <div class="mt-6 space-y-4">
         @forelse ($analysis['items'] as $item)
             @php([$itemStatusLabel, $itemStatusClasses] = $statusPresentation($item['production_status']))
             <details
                 id="sale-line-{{ $item['line_id'] }}"
-                class="group overflow-hidden rounded-2xl border border-[#dadce0] bg-white shadow-sm"
+                class="group overflow-hidden rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-surface)] shadow-sm"
                 data-production-item
                 data-status="{{ $item['production_status'] }}"
                 data-shortage="{{ $item['counts']['materials_short'] > 0 ? 'true' : 'false' }}"
@@ -236,24 +232,24 @@
                 data-cost-incomplete="{{ $item['costs']['estimated_incomplete'] || $item['costs']['actual_incomplete'] ? 'true' : 'false' }}"
                 data-structure-rate="{{ $item['missing_boms'] !== [] || collect($item['production_orders'])->contains('missing_routing', true) || collect($item['production_orders'])->flatMap(fn ($order) => data_get($order, 'costs.rate_evidence', []))->contains('rate', null) ? 'true' : 'false' }}"
             >
-                <summary class="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 p-5 transition hover:bg-[#f8fafd] md:px-6 [&::-webkit-details-marker]:hidden">
+                <summary class="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 p-5 transition hover:bg-[var(--ui-surface-muted)] md:px-6 [&::-webkit-details-marker]:hidden">
                     <div class="flex min-w-0 items-center gap-4">
-                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f1f3f4] text-lg transition group-open:rotate-90" aria-hidden="true">›</span>
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--ui-surface-hover)] text-lg transition group-open:rotate-90" aria-hidden="true">›</span>
                         <div class="min-w-0">
-                            <div class="font-semibold text-[#202124]">{{ $item['sku'] }} - {{ $item['description'] }}</div>
-                            <div class="mt-1 text-sm text-[#5f6368]">{{ __('sale.production_status.sold_quantity', ['quantity' => $formatQuantity($item['quantity']), 'unit' => $item['unit']]) }}</div>
+                            <div class="font-semibold text-[var(--ui-text)]">{{ $item['sku'] }} - {{ $item['description'] }}</div>
+                            <div class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.sold_quantity', ['quantity' => $formatQuantity($item['quantity']), 'unit' => $item['unit']]) }}</div>
                         </div>
                     </div>
                     <div class="flex flex-wrap items-center justify-end gap-2">
                         <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $itemStatusClasses }}">{{ $itemStatusLabel }}</span>
-                        <span class="rounded-full border border-[#dadce0] px-3 py-1 text-xs text-[#5f6368]">{{ __('sale.production_status.orders_count', ['count' => count($item['production_orders'])]) }}</span>
+                        <span class="rounded-full border border-[var(--ui-border)] px-3 py-1 text-xs text-[var(--ui-text-muted)]">{{ __('sale.production_status.orders_count', ['count' => count($item['production_orders'])]) }}</span>
                         @if ($item['counts']['materials_short'] > 0)
-                            <span class="rounded-full bg-[#fce8e6] px-3 py-1 text-xs font-semibold text-[#b3261e]">{{ __('sale.production_status.material_shortages', ['count' => $item['counts']['materials_short']]) }}</span>
+                            <span class="rounded-full bg-[var(--ui-danger-soft)] px-3 py-1 text-xs font-semibold text-[var(--ui-danger)]">{{ __('sale.production_status.material_shortages', ['count' => $item['counts']['materials_short']]) }}</span>
                         @endif
                     </div>
                 </summary>
 
-                <div class="border-t border-[#dadce0] bg-[#f8fafd] p-5 md:p-6">
+                <div class="border-t border-[var(--ui-border)] bg-[var(--ui-surface-muted)] p-5 md:p-6">
                     @if ($item['missing_boms'] !== [])
                         <x-ui.alert class="mb-4" variant="warning">{{ __('sale.production_status.missing_bom') }}</x-ui.alert>
                     @endif
@@ -262,16 +258,16 @@
                     @endif
 
                     <div class="grid gap-4 lg:grid-cols-3">
-                        <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5">
+                        <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-5">
                             <h2 class="text-lg font-semibold">{{ __('sale.production_status.finished_product_coverage') }}</h2>
                             @if ($item['coverage'])
                                 <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
-                                    <div><dt class="text-[#5f6368]">{{ __('sale.materials.required') }}</dt><dd class="mt-1 font-semibold">{{ $formatQuantity($item['coverage']['required_quantity']) }} {{ $item['unit'] }}</dd></div>
-                                    <div><dt class="text-[#5f6368]">{{ __('sale.materials.already_linked') }}</dt><dd class="mt-1 font-semibold text-[#137333]">{{ $formatQuantity($item['coverage']['linked_quantity']) }} {{ $item['unit'] }}</dd></div>
-                                    <div><dt class="text-[#5f6368]">{{ __('sale.materials.available_to_link') }}</dt><dd class="mt-1 font-semibold text-[#137333]">{{ $formatQuantity($item['coverage']['available_to_link']) }} {{ $item['unit'] }}</dd></div>
-                                    <div><dt class="text-[#5f6368]">{{ __('sale.materials.need_to_produce') }}</dt><dd class="mt-1 font-semibold {{ $item['coverage']['quantity_to_produce'] > 0 ? 'text-[#174ea6]' : 'text-[#137333]' }}">{{ $formatQuantity($item['coverage']['quantity_to_produce']) }} {{ $item['unit'] }}</dd></div>
+                                    <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.materials.required') }}</dt><dd class="mt-1 font-semibold">{{ $formatQuantity($item['coverage']['required_quantity']) }} {{ $item['unit'] }}</dd></div>
+                                    <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.materials.already_linked') }}</dt><dd class="mt-1 font-semibold text-[var(--ui-success)]">{{ $formatQuantity($item['coverage']['linked_quantity']) }} {{ $item['unit'] }}</dd></div>
+                                    <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.materials.available_to_link') }}</dt><dd class="mt-1 font-semibold text-[var(--ui-success)]">{{ $formatQuantity($item['coverage']['available_to_link']) }} {{ $item['unit'] }}</dd></div>
+                                    <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.materials.need_to_produce') }}</dt><dd class="mt-1 font-semibold {{ $item['coverage']['quantity_to_produce'] > 0 ? 'text-[var(--ui-primary-text)]' : 'text-[var(--ui-success)]' }}">{{ $formatQuantity($item['coverage']['quantity_to_produce']) }} {{ $item['unit'] }}</dd></div>
                                 </dl>
-                                <div class="mt-4 border-t border-[#dadce0] pt-3 text-xs text-[#5f6368]">
+                                <div class="mt-4 border-t border-[var(--ui-border)] pt-3 text-xs text-[var(--ui-text-muted)]">
                                     <div class="font-semibold">{{ __('sale.materials.warehouses') }}</div>
                                     @forelse ($item['coverage']['warehouses'] as $warehouse)
                                         <div class="mt-1">{{ $warehouse['code'] }} · {{ $formatQuantity($warehouse['quantity']) }} {{ $item['unit'] }}</div>
@@ -282,25 +278,25 @@
                             @endif
                         </x-ui.panel>
 
-                        <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5">
+                        <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-5">
                             <h2 class="text-lg font-semibold">{{ __('sale.production_status.costs') }}</h2>
                             <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.estimated_material') }}</dt><dd class="mt-1 font-semibold">{{ $formatMoney($item['costs']['estimated_material']) }}</dd></div>
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.estimated_production') }}</dt><dd class="mt-1 font-semibold">{{ $formatMoney($item['costs']['estimated_production']) }}</dd></div>
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.actual_material') }}</dt><dd class="mt-1 font-semibold">{{ $formatMoney($item['costs']['actual_material']) }}</dd></div>
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.actual_production') }}</dt><dd class="mt-1 font-semibold">{{ $formatMoney($item['costs']['actual_production']) }}</dd></div>
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.estimated_per_unit') }}</dt><dd class="mt-1 font-semibold">{{ $item['costs']['estimated_per_unit'] !== null ? $formatMoney($item['costs']['estimated_per_unit']) : '—' }}</dd></div>
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.actual_per_unit') }}</dt><dd class="mt-1 font-semibold">{{ $item['costs']['actual_per_unit'] !== null ? $formatMoney($item['costs']['actual_per_unit']) : '—' }}</dd></div>
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.cost_variance') }}</dt><dd class="mt-1 font-semibold">{{ $formatMoney($item['costs']['variance']) }}</dd></div>
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.variance_percent') }}</dt><dd class="mt-1 font-semibold">{{ $item['costs']['variance_percent'] !== null ? number_format($item['costs']['variance_percent'], 1, ',', '.').'%' : '—' }}</dd></div>
-                                <div class="col-span-2 border-t border-[#dadce0] pt-3">
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.estimated_material') }}</dt><dd class="mt-1 font-semibold">{{ $formatMoney($item['costs']['estimated_material']) }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.estimated_production') }}</dt><dd class="mt-1 font-semibold">{{ $formatMoney($item['costs']['estimated_production']) }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.actual_material') }}</dt><dd class="mt-1 font-semibold">{{ $formatMoney($item['costs']['actual_material']) }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.actual_production') }}</dt><dd class="mt-1 font-semibold">{{ $formatMoney($item['costs']['actual_production']) }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.estimated_per_unit') }}</dt><dd class="mt-1 font-semibold">{{ $item['costs']['estimated_per_unit'] !== null ? $formatMoney($item['costs']['estimated_per_unit']) : '—' }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.actual_per_unit') }}</dt><dd class="mt-1 font-semibold">{{ $item['costs']['actual_per_unit'] !== null ? $formatMoney($item['costs']['actual_per_unit']) : '—' }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.cost_variance') }}</dt><dd class="mt-1 font-semibold">{{ $formatMoney($item['costs']['variance']) }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.variance_percent') }}</dt><dd class="mt-1 font-semibold">{{ $item['costs']['variance_percent'] !== null ? number_format($item['costs']['variance_percent'], 1, ',', '.').'%' : '—' }}</dd></div>
+                                <div class="col-span-2 border-t border-[var(--ui-border)] pt-3">
                                     <div class="flex justify-between gap-3"><dt>{{ __('sale.production_status.estimated_total') }}</dt><dd class="font-bold">{{ $formatMoney($item['costs']['estimated_total']) }}{{ $item['costs']['estimated_incomplete'] ? '*' : '' }}</dd></div>
                                     <div class="mt-2 flex justify-between gap-3"><dt>{{ __('sale.production_status.actual_total') }}</dt><dd class="font-bold">{{ $formatMoney($item['costs']['actual_total']) }}{{ $item['costs']['actual_incomplete'] ? '*' : '' }}</dd></div>
                                 </div>
                             </dl>
-                            <details class="mt-4 border-t border-[#dadce0] pt-3 text-xs">
-                                <summary class="cursor-pointer font-semibold text-[#174ea6]">{{ __('sale.production_status.cost_evidence') }}</summary>
-                                <div class="mt-2 space-y-1 text-[#5f6368]">
+                            <details class="mt-4 border-t border-[var(--ui-border)] pt-3 text-xs">
+                                <summary class="cursor-pointer font-semibold text-[var(--ui-primary-text)]">{{ __('sale.production_status.cost_evidence') }}</summary>
+                                <div class="mt-2 space-y-1 text-[var(--ui-text-muted)]">
                                     @foreach ($item['costs']['evidence']['materials'] as $evidence)
                                         <div>{{ $evidence['sku'] }} · {{ $evidence['unit_cost'] !== null ? $formatMoney($evidence['unit_cost']) : __('sale.production_status.no_price') }} · {{ $evidence['reference'] ?? '—' }}</div>
                                     @endforeach
@@ -311,33 +307,33 @@
                             </details>
                         </x-ui.panel>
 
-                        <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5">
+                        <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-5">
                             <h2 class="text-lg font-semibold">{{ __('sale.production_status.item_summary') }}</h2>
                             <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.completed') }}</dt><dd class="mt-1 text-2xl font-bold text-[#137333]">{{ $item['counts']['completed'] }}</dd></div>
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.in_progress') }}</dt><dd class="mt-1 text-2xl font-bold text-[#174ea6]">{{ $item['counts']['in_progress'] }}</dd></div>
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.planned') }}</dt><dd class="mt-1 text-2xl font-bold text-[#8a5a00]">{{ $item['counts']['planned'] }}</dd></div>
-                                <div><dt class="text-[#5f6368]">{{ __('sale.production_status.forecast') }}</dt><dd class="mt-1 text-2xl font-bold text-[#7627bb]">{{ $item['counts']['forecast'] }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.completed') }}</dt><dd class="mt-1 text-2xl font-bold text-[var(--ui-success)]">{{ $item['counts']['completed'] }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.in_progress') }}</dt><dd class="mt-1 text-2xl font-bold text-[var(--ui-primary-text)]">{{ $item['counts']['in_progress'] }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.planned') }}</dt><dd class="mt-1 text-2xl font-bold text-[var(--ui-warning-text)]">{{ $item['counts']['planned'] }}</dd></div>
+                                <div><dt class="text-[var(--ui-text-muted)]">{{ __('sale.production_status.forecast') }}</dt><dd class="mt-1 text-2xl font-bold text-[var(--ui-info)]">{{ $item['counts']['forecast'] }}</dd></div>
                             </dl>
                         </x-ui.panel>
                     </div>
 
-                    <div class="mt-6 rounded-xl border border-[#dadce0] bg-white p-4">
+                    <div class="mt-6 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-4">
                         <h2 class="font-semibold">{{ __('sale.production_status.product_tree') }}</h2>
-                        <p class="mt-1 text-sm text-[#5f6368]">{{ __('sale.production_status.product_tree_hint') }}</p>
+                        <p class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.product_tree_hint') }}</p>
                         <ul class="mt-4 space-y-2">
                             @include('client.sales._production-tree-node', ['node' => $item['tree']])
                         </ul>
                     </div>
 
-                    <div class="mt-6 overflow-hidden rounded-xl border border-[#dadce0] bg-white">
-                        <div class="border-b border-[#dadce0] p-4">
+                    <div class="mt-6 overflow-hidden rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)]">
+                        <div class="border-b border-[var(--ui-border)] p-4">
                             <h2 class="font-semibold">{{ __('sale.production_status.production_orders') }}</h2>
-                            <p class="mt-1 text-sm text-[#5f6368]">{{ __('sale.production_status.production_orders_hint') }}</p>
+                            <p class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.production_orders_hint') }}</p>
                         </div>
                         <div class="overflow-x-auto">
-                            <table class="min-w-full text-sm">
-                                <thead><tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                            <x-ui.table :caption="__('sale.production_status.title')">
+                                <thead><tr class="border-b border-[var(--ui-border)] text-left text-[var(--ui-text-muted)]">
                                     <th class="px-4 py-3">{{ __('sale.production_status.level') }}</th>
                                     <th class="px-4 py-3">{{ __('sale.production_status.order') }}</th>
                                     <th class="px-4 py-3">{{ __('sale.product') }}</th>
@@ -349,11 +345,11 @@
                                 <tbody>
                                     @forelse (array_merge($item['production_orders'], $item['forecasts']) as $order)
                                         @php([$orderStatusLabel, $orderStatusClasses] = $statusPresentation($order['status_group']))
-                                        <tr class="border-b border-[#f1f3f4] align-top">
-                                            <td class="px-4 py-4 text-[#5f6368]">{{ $order['level'] }}</td>
+                                        <tr class="border-b border-[var(--ui-border)] align-top">
+                                            <td class="px-4 py-4 text-[var(--ui-text-muted)]">{{ $order['level'] }}</td>
                                             <td class="px-4 py-4 font-medium">
                                                 @if ($order['id'] && $capabilities['read_production_order'])
-                                                    <a class="text-[#174ea6] hover:underline" href="{{ route('production.orders.show', $order['id']) }}">{{ $order['order_number'] }}</a>
+                                                    <a class="text-[var(--ui-primary-text)] hover:underline" href="{{ route('production.orders.show', $order['id']) }}">{{ $order['order_number'] }}</a>
                                                 @elseif ($order['id'])
                                                     {{ $order['order_number'] }}
                                                 @else
@@ -363,10 +359,10 @@
                                             <td class="px-4 py-4" style="padding-left: {{ 1 + min((int) $order['level'], 5) * 0.75 }}rem">{{ $order['sku'] }} - {{ $order['description'] }}</td>
                                             <td class="px-4 py-4"><span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $orderStatusClasses }}">{{ $orderStatusLabel }}</span></td>
                                             <td class="min-w-44 px-4 py-4">
-                                                <div class="h-2 overflow-hidden rounded-full bg-[#e8eaed]"><div class="h-full rounded-full bg-[#1a73e8]" style="width: {{ $order['progress_percent'] }}%"></div></div>
-                                                <div class="mt-1 text-xs text-[#5f6368]">{{ $formatQuantity($order['quantity_produced']) }} / {{ $formatQuantity($order['quantity_planned']) }} {{ $order['unit'] }}</div>
+                                                <div class="h-2 overflow-hidden rounded-full bg-[var(--ui-border)]"><div class="h-full rounded-full bg-[var(--ui-primary)]" style="width: {{ $order['progress_percent'] }}%"></div></div>
+                                                <div class="mt-1 text-xs text-[var(--ui-text-muted)]">{{ $formatQuantity($order['quantity_produced']) }} / {{ $formatQuantity($order['quantity_planned']) }} {{ $order['unit'] }}</div>
                                             </td>
-                                            <td class="px-4 py-4 text-xs text-[#5f6368]">{{ $order['scheduled_start'] ? \Illuminate\Support\Carbon::parse($order['scheduled_start'])->format('d/m/Y') : '—' }} → {{ $order['scheduled_end'] ? \Illuminate\Support\Carbon::parse($order['scheduled_end'])->format('d/m/Y') : '—' }}</td>
+                                            <td class="px-4 py-4 text-xs text-[var(--ui-text-muted)]">{{ $order['scheduled_start'] ? \Illuminate\Support\Carbon::parse($order['scheduled_start'])->format('d/m/Y') : '—' }} → {{ $order['scheduled_end'] ? \Illuminate\Support\Carbon::parse($order['scheduled_end'])->format('d/m/Y') : '—' }}</td>
                                             <td class="px-4 py-4 text-right">
                                                 @if (! $order['id'] && $capabilities['create_production_order'])
                                                     <x-ui.button
@@ -377,43 +373,43 @@
                                                             'quantity_planned' => $order['quantity_planned'],
                                                             'dependency_level' => $order['level'],
                                                         ])"
-                                                        variant="material-versions"
+                                                        variant="info"
                                                         size="sm"
                                                         class="rounded-full whitespace-nowrap"
                                                     >{{ __('sale.production_status.create_order') }}</x-ui.button>
                                                 @endif
                                                 @if ($order['id'] && $capabilities['read_production_order'])
-                                                    <a class="ml-2 inline-flex rounded-full border border-[#dadce0] px-3 py-1.5 text-xs font-semibold text-[#174ea6]" href="{{ route('production.orders.show', $order['id']) }}">{{ __('sale.production_status.open_order') }}</a>
+                                                    <a class="ml-2 inline-flex rounded-full border border-[var(--ui-border)] px-3 py-1.5 text-xs font-semibold text-[var(--ui-primary-text)]" href="{{ route('production.orders.show', $order['id']) }}">{{ __('sale.production_status.open_order') }}</a>
                                                 @endif
                                                 @if ($order['id'] && $capabilities['reschedule_production_order'] && ! in_array($order['status'], ['COMPLETED', 'CANCELLED'], true))
                                                     <details class="relative mt-2 inline-block text-left">
-                                                        <summary class="cursor-pointer list-none rounded-full border border-[#dadce0] px-3 py-1.5 text-xs font-semibold text-[#174ea6]">{{ __('sale.production_status.reschedule') }}</summary>
-                                                        <form method="POST" action="{{ route('production.orders.reschedule', $order['id']) }}" class="absolute right-0 z-20 mt-2 w-72 space-y-3 rounded-xl border border-[#dadce0] bg-white p-4 text-left shadow-xl">
+                                                        <summary class="cursor-pointer list-none rounded-full border border-[var(--ui-border)] px-3 py-1.5 text-xs font-semibold text-[var(--ui-primary-text)]">{{ __('sale.production_status.reschedule') }}</summary>
+                                                        <form method="POST" action="{{ route('production.orders.reschedule', $order['id']) }}" class="absolute right-0 z-20 mt-2 w-72 space-y-3 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-4 text-left shadow-xl">
                                                             @csrf
-                                                            <label class="block text-xs">{{ __('sale.production_status.planned_start') }}<input class="mt-1 w-full rounded-lg border border-[#dadce0] p-2" type="date" name="scheduled_start_date" value="{{ $order['scheduled_start'] }}" required></label>
-                                                            <label class="block text-xs">{{ __('sale.production_status.planned_end') }}<input class="mt-1 w-full rounded-lg border border-[#dadce0] p-2" type="date" name="scheduled_end_date" value="{{ $order['scheduled_end'] }}" required></label>
-                                                            <button class="w-full rounded-full bg-[#1a73e8] px-3 py-2 text-xs font-semibold text-white" type="submit">{{ __('sale.production_status.save_schedule') }}</button>
+                                                            <x-ui.field :label="__('sale.production_status.planned_start')" for="scheduled_start_date"><x-ui.input id="scheduled_start_date" type="date" name="scheduled_start_date" :value="$order['scheduled_start']" required /></x-ui.field>
+                                                            <x-ui.field :label="__('sale.production_status.planned_end')" for="scheduled_end_date"><x-ui.input id="scheduled_end_date" type="date" name="scheduled_end_date" :value="$order['scheduled_end']" required /></x-ui.field>
+                                                            <x-ui.button class="w-full rounded-full" variant="primary" size="sm" type="submit">{{ __('sale.production_status.save_schedule') }}</x-ui.button>
                                                         </form>
                                                     </details>
                                                 @endif
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="7" class="px-4 py-8 text-center text-[#5f6368]">{{ __('sale.production_status.no_orders') }}</td></tr>
+                                        <tr><td colspan="7" class="px-4 py-8 text-center text-[var(--ui-text-muted)]">{{ __('sale.production_status.no_orders') }}</td></tr>
                                     @endforelse
                                 </tbody>
-                            </table>
+                            </x-ui.table>
                         </div>
                     </div>
 
-                    <div class="mt-6 overflow-hidden rounded-xl border border-[#dadce0] bg-white">
-                        <div class="border-b border-[#dadce0] p-4">
+                    <div class="mt-6 overflow-hidden rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)]">
+                        <div class="border-b border-[var(--ui-border)] p-4">
                             <h2 class="font-semibold">{{ __('sale.production_status.materials') }}</h2>
-                            <p class="mt-1 text-sm text-[#5f6368]">{{ __('sale.production_status.materials_hint') }}</p>
+                            <p class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.materials_hint') }}</p>
                         </div>
                         <div class="overflow-x-auto">
-                            <table class="min-w-full text-sm">
-                                <thead><tr class="border-b border-[#dadce0] text-left text-[#5f6368]">
+                            <x-ui.table :caption="__('sale.production_status.title')">
+                                <thead><tr class="border-b border-[var(--ui-border)] text-left text-[var(--ui-text-muted)]">
                                     <th class="px-4 py-3">{{ __('sale.product') }}</th>
                                     <th class="px-4 py-3">{{ __('sale.production_status.required') }}</th>
                                     <th class="px-4 py-3">{{ __('sale.production_status.reserved_quantity') }}</th>
@@ -427,16 +423,16 @@
                                 </tr></thead>
                                 <tbody>
                                     @forelse ($item['materials'] as $material)
-                                        <tr class="border-b border-[#f1f3f4]">
+                                        <tr class="border-b border-[var(--ui-border)]">
                                             <td class="px-4 py-4 font-medium">{{ $material['sku'] }} - {{ $material['description'] }}</td>
                                             <td class="px-4 py-4">{{ $formatQuantity($material['required_quantity']) }} {{ $material['unit'] }}</td>
-                                            <td class="px-4 py-4 text-[#137333]">{{ $formatQuantity($material['reserved_quantity']) }}</td>
+                                            <td class="px-4 py-4 text-[var(--ui-success)]">{{ $formatQuantity($material['reserved_quantity']) }}</td>
                                             <td class="px-4 py-4">{{ $formatQuantity($material['available_quantity']) }}</td>
                                             <td class="px-4 py-4">{{ $formatQuantity($material['in_production']) }}</td>
                                             <td class="px-4 py-4">{{ $formatQuantity($material['in_purchase']) }}</td>
                                             <td class="px-4 py-4">{{ $formatQuantity($material['received_quantity']) }}</td>
-                                            <td class="px-4 py-4 font-semibold {{ $material['net_shortage'] > 0 ? 'text-[#b3261e]' : 'text-[#137333]' }}">{{ $formatQuantity($material['net_shortage']) }}</td>
-                                            <td class="px-4 py-4 text-xs">{{ $material['unit_cost'] !== null ? $formatMoney($material['unit_cost']) : '—' }}<div class="mt-1 text-[#5f6368]">{{ $material['cost_reference'] ?? '' }}</div></td>
+                                            <td class="px-4 py-4 font-semibold {{ $material['net_shortage'] > 0 ? 'text-[var(--ui-danger)]' : 'text-[var(--ui-success)]' }}">{{ $formatQuantity($material['net_shortage']) }}</td>
+                                            <td class="px-4 py-4 text-xs">{{ $material['unit_cost'] !== null ? $formatMoney($material['unit_cost']) : '—' }}<div class="mt-1 text-[var(--ui-text-muted)]">{{ $material['cost_reference'] ?? '' }}</div></td>
                                             <td class="px-4 py-4 text-right">
                                                 <div class="flex min-w-44 flex-col items-end gap-2">
                                                 @if ($material['net_shortage'] > 0 && $material['recommended_action'] === 'BUY' && $capabilities['create_purchase_requisition'])
@@ -448,7 +444,7 @@
                                                             'quantity' => $material['net_shortage'],
                                                             'warehouse_id' => data_get($material, 'warehouses.0.id'),
                                                         ])"
-                                                        variant="material-versions"
+                                                        variant="info"
                                                         size="sm"
                                                         class="rounded-full whitespace-nowrap"
                                                     >{{ __('sale.production_status.create_requisition') }}</x-ui.button>
@@ -456,33 +452,33 @@
                                                 @if ($material['available_quantity'] > 0 && $capabilities['reserve_stock'] && data_get($material, 'warehouses.0.id'))
                                                     <form method="POST" action="{{ route('sales.production-status.reserve', $sale) }}">
                                                         @csrf
-                                                        <input type="hidden" name="sale_line_id" value="{{ $item['line_id'] }}">
-                                                        <input type="hidden" name="product_id" value="{{ $material['product_id'] }}">
-                                                        <input type="hidden" name="warehouse_id" value="{{ data_get($material, 'warehouses.0.id') }}">
-                                                        <input type="hidden" name="quantity" value="{{ min($material['available_quantity'], (float) data_get($material, 'warehouses.0.quantity', 0)) }}">
-                                                        <button class="rounded-full border border-[#dadce0] px-3 py-1.5 text-xs font-semibold text-[#174ea6]" type="submit">{{ __('sale.production_status.reserve_stock') }}</button>
+                                                        <x-ui.input type="hidden" name="sale_line_id" :value="$item['line_id']" unstyled />
+                                                        <x-ui.input type="hidden" name="product_id" :value="$material['product_id']" unstyled />
+                                                        <x-ui.input type="hidden" name="warehouse_id" :value="data_get($material, 'warehouses.0.id')" unstyled />
+                                                        <x-ui.input type="hidden" name="quantity" :value="min($material['available_quantity'], (float) data_get($material, 'warehouses.0.quantity', 0))" unstyled />
+                                                        <x-ui.button class="rounded-full" variant="outline" size="sm" type="submit">{{ __('sale.production_status.reserve_stock') }}</x-ui.button>
                                                     </form>
                                                 @endif
                                                 @if ($capabilities['read_purchase_order'])
                                                     @foreach ($material['purchase_orders'] as $purchaseOrder)
-                                                        <a class="text-xs font-semibold text-[#174ea6] hover:underline" href="{{ route('purchasing.orders.show', $purchaseOrder['id']) }}">{{ __('sale.production_status.open_purchase_order') }} {{ $purchaseOrder['number'] }}</a>
+                                                        <a class="text-xs font-semibold text-[var(--ui-primary-text)] hover:underline" href="{{ route('purchasing.orders.show', $purchaseOrder['id']) }}">{{ __('sale.production_status.open_purchase_order') }} {{ $purchaseOrder['number'] }}</a>
                                                     @endforeach
                                                 @endif
                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="10" class="px-4 py-8 text-center text-[#5f6368]">{{ __('sale.production_status.no_materials') }}</td></tr>
+                                        <tr><td colspan="10" class="px-4 py-8 text-center text-[var(--ui-text-muted)]">{{ __('sale.production_status.no_materials') }}</td></tr>
                                     @endforelse
                                 </tbody>
-                            </table>
+                            </x-ui.table>
                         </div>
                     </div>
                 </div>
             </details>
         @empty
-            <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-8">
-                <p class="text-center text-[#5f6368]">{{ __('sale.empty_items') }}</p>
+            <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-8">
+                <p class="text-center text-[var(--ui-text-muted)]">{{ __('sale.empty_items') }}</p>
             </x-ui.panel>
         @endforelse
     </div>
@@ -492,21 +488,21 @@
     @if (($productionStatusTab ?? null) === 'timeline')
     @fragment('production-status-timeline')
     @if ($analysis['timeline'] !== [])
-        <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+        <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
             <h2 class="text-lg font-semibold">{{ __('sale.production_status.timeline') }}</h2>
             <ol class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 @foreach ($analysis['timeline'] as $event)
-                    <li class="relative rounded-xl border border-[#dadce0] bg-[#f8fafd] p-4 pl-5">
-                        <span class="absolute bottom-4 left-0 top-4 w-1 rounded-r-full bg-[#1a73e8]" aria-hidden="true"></span>
-                        <div class="text-xs text-[#5f6368]">{{ \Illuminate\Support\Carbon::parse($event['date'])->format('d/m/Y H:i') }}</div>
+                    <li class="relative rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface-muted)] p-4 pl-5">
+                        <span class="absolute bottom-4 left-0 top-4 w-1 rounded-r-full bg-[var(--ui-primary)]" aria-hidden="true"></span>
+                        <div class="text-xs text-[var(--ui-text-muted)]">{{ \Illuminate\Support\Carbon::parse($event['date'])->format('d/m/Y H:i') }}</div>
                         <div class="mt-1 text-sm font-semibold">{{ __('sale.production_status.timeline_events.'.$event['type'], ['order' => $event['order_number'] ?? '']) }}</div>
                     </li>
                 @endforeach
             </ol>
         </x-ui.panel>
     @else
-        <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-8">
-            <p class="text-center text-[#5f6368]">{{ __('sale.production_status.timeline_empty') }}</p>
+        <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-8">
+            <p class="text-center text-[var(--ui-text-muted)]">{{ __('sale.production_status.timeline_empty') }}</p>
         </x-ui.panel>
     @endif
     @endfragment
@@ -515,44 +511,44 @@
     @if (($productionStatusTab ?? null) === 'tracking')
     @fragment('production-status-tracking')
     <div class="mt-6 grid gap-6 lg:grid-cols-2 print:hidden">
-        <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+        <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
             <h2 class="text-lg font-semibold">{{ __('sale.production_status.comments_responsible') }}</h2>
             @if ($capabilities['manage_tracking'])
                 <form method="POST" action="{{ route('sales.production-status.tracking', $sale) }}" class="mt-4 space-y-4">
                     @csrf
                     <div class="grid gap-4 sm:grid-cols-2">
-                        <label class="text-sm">{{ __('sale.production_status.promised_date') }}<input class="mt-1 w-full rounded-xl border border-[#dadce0] p-2.5" type="date" name="promised_date" value="{{ old('promised_date', $analysis['tracking']['promised_date']) }}"></label>
+                    <x-ui.field :label="__('sale.production_status.promised_date')" for="promised_date"><x-ui.input id="promised_date" type="date" name="promised_date" :value="old('promised_date', $analysis['tracking']['promised_date'])" /></x-ui.field>
                         <label class="text-sm">{{ __('sale.production_status.responsible') }}
-                            <select class="mt-1 w-full rounded-xl border border-[#dadce0] p-2.5" name="responsible_user_id">
+                            <x-ui.select class="mt-1 w-full" name="responsible_user_id">
                                 <option value="">{{ __('sale.production_status.no_responsible') }}</option>
                                 @foreach ($responsibleUsers as $responsible)
                                     <option value="{{ $responsible->id }}" @selected((int) old('responsible_user_id', $analysis['tracking']['responsible_user_id']) === (int) $responsible->id)>{{ $responsible->name }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </label>
                     </div>
-                    <label class="block text-sm">{{ __('sale.production_status.new_comment') }}<textarea class="mt-1 w-full rounded-xl border border-[#dadce0] p-3" name="comment" rows="3" maxlength="2000"></textarea></label>
-                    <button class="rounded-full bg-[#1a73e8] px-4 py-2 text-sm font-semibold text-white" type="submit">{{ __('sale.production_status.save_tracking') }}</button>
+                    <x-ui.field :label="__('sale.production_status.new_comment')" for="tracking_comment"><x-ui.textarea id="tracking_comment" name="comment" rows="3" maxlength="2000"></x-ui.textarea></x-ui.field>
+                    <x-ui.button class="rounded-full" variant="primary" type="submit">{{ __('sale.production_status.save_tracking') }}</x-ui.button>
                 </form>
             @else
-                <p class="mt-3 text-sm text-[#5f6368]">{{ $analysis['tracking']['responsible_name'] ?? __('sale.production_status.no_responsible') }}</p>
+                <p class="mt-3 text-sm text-[var(--ui-text-muted)]">{{ $analysis['tracking']['responsible_name'] ?? __('sale.production_status.no_responsible') }}</p>
             @endif
-            <div class="mt-5 space-y-3 border-t border-[#dadce0] pt-4">
+            <div class="mt-5 space-y-3 border-t border-[var(--ui-border)] pt-4">
                 @forelse ($analysis['tracking']['comments'] as $comment)
-                    <article class="rounded-xl bg-[#f8fafd] p-3"><div class="text-xs text-[#5f6368]">{{ $comment['user_name'] ?? '—' }} · {{ \Illuminate\Support\Carbon::parse($comment['created_at'])->format('d/m/Y H:i') }}</div><p class="mt-1 whitespace-pre-line text-sm">{{ $comment['text'] }}</p></article>
+                    <article class="rounded-xl bg-[var(--ui-surface-muted)] p-3"><div class="text-xs text-[var(--ui-text-muted)]">{{ $comment['user_name'] ?? '—' }} · {{ \Illuminate\Support\Carbon::parse($comment['created_at'])->format('d/m/Y H:i') }}</div><p class="mt-1 whitespace-pre-line text-sm">{{ $comment['text'] }}</p></article>
                 @empty
-                    <p class="text-sm text-[#5f6368]">{{ __('sale.production_status.no_comments') }}</p>
+                    <p class="text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.no_comments') }}</p>
                 @endforelse
             </div>
         </x-ui.panel>
 
-        <x-ui.panel class="border-[#dadce0] shadow-none" padding="p-5 md:p-6">
+        <x-ui.panel class="border-[var(--ui-border)] shadow-none" padding="p-5 md:p-6">
             <h2 class="text-lg font-semibold">{{ __('sale.production_status.change_history') }}</h2>
             <ol class="mt-4 space-y-3">
                 @forelse ($analysis['history'] as $history)
-                    <li class="border-l-2 border-[#1a73e8] pl-3"><div class="text-xs text-[#5f6368]">{{ $history['date'] ? \Illuminate\Support\Carbon::parse($history['date'])->format('d/m/Y H:i') : '—' }}</div><div class="mt-1 text-sm font-medium">{{ __('sale.production_status.history_events.'.str_replace('.', '_', $history['event'])) }}</div></li>
+                    <li class="border-l-2 border-[var(--ui-primary)] pl-3"><div class="text-xs text-[var(--ui-text-muted)]">{{ $history['date'] ? \Illuminate\Support\Carbon::parse($history['date'])->format('d/m/Y H:i') : '—' }}</div><div class="mt-1 text-sm font-medium">{{ __('sale.production_status.history_events.'.str_replace('.', '_', $history['event'])) }}</div></li>
                 @empty
-                    <li class="text-sm text-[#5f6368]">{{ __('sale.production_status.no_history') }}</li>
+                    <li class="text-sm text-[var(--ui-text-muted)]">{{ __('sale.production_status.no_history') }}</li>
                 @endforelse
             </ol>
         </x-ui.panel>
@@ -610,7 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         panel.dataset.loading = 'true';
         panel.setAttribute('aria-busy', 'true');
-        panel.innerHTML = `<div class="rounded-xl border border-[#dadce0] bg-white p-8 text-center text-sm text-[#5f6368]">${@json(__('sale.production_status.tab_loading'))}</div>`;
+        panel.innerHTML = `<div class="rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-8 text-center text-sm text-[var(--ui-text-muted)]">${@json(__('sale.production_status.tab_loading'))}</div>`;
 
         try {
             const response = await fetch(panel.dataset.productionTabUrl, {
@@ -623,12 +619,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tab === 'items') initializeProductionItems(panel);
         } catch (error) {
             const errorBox = document.createElement('div');
-            errorBox.className = 'rounded-xl border border-[#f6aea9] bg-[#fce8e6] p-8 text-center text-sm text-[#b3261e]';
+            errorBox.className = 'rounded-xl border border-[var(--ui-danger)] bg-[var(--ui-danger-soft)] p-8 text-center text-sm text-[var(--ui-danger)]';
             const message = document.createElement('p');
             message.textContent = @json(__('sale.production_status.tab_load_error'));
             const retry = document.createElement('button');
             retry.type = 'button';
-            retry.className = 'mt-3 rounded-full border border-[#b3261e] px-4 py-2 font-semibold';
+            retry.className = 'mt-3 rounded-full border border-[var(--ui-danger)] px-4 py-2 font-semibold';
             retry.textContent = @json(__('sale.production_status.tab_retry'));
             retry.addEventListener('click', () => loadProductionTab(button));
             errorBox.append(message, retry);

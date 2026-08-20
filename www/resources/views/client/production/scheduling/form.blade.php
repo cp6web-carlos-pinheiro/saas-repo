@@ -9,14 +9,14 @@
 <div class="w-full p-5 md:p-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <h1 class="font-display text-3xl font-bold">{{ $editing ? __('production.scheduling.edit') : __('production.scheduling.new') }}</h1>
-        <x-ui.button :href="$editing ? route('production.scheduling.show', ['run' => $runKey]) : route('production.scheduling.index')" variant="material-back" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
+        <x-ui.button :href="$editing ? route('production.scheduling.show', ['run' => $runKey]) : route('production.scheduling.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
     </div>
 
     @if ($errors->any())
         <x-ui.alert class="mt-5" variant="error">{{ $errors->first() }}</x-ui.alert>
     @endif
 
-    <x-ui.panel class="mt-6 border-[#dadce0] shadow-none" padding="p-6 md:p-8">
+    <x-ui.panel class="mt-6 border-[var(--ui-border)] shadow-none" padding="p-6 md:p-8">
         <form method="POST" action="{{ $editing ? route('production.scheduling.update', ['run' => $runKey]) : route('production.scheduling.run') }}" class="space-y-5">
             @csrf
             @if ($editing)
@@ -51,18 +51,18 @@
 
             @php($selectedOrders = collect(old('production_order_ids', $input['production_order_ids'] ?? []))->map(static fn ($id) => (int) $id)->all())
             <label class="block text-sm font-medium">{{ __('ui.scheduling_production_orders_multi') }}
-                <select class="ui-select mt-2 w-full" name="production_order_ids[]" multiple size="10" required>
+                <x-ui.select class="mt-2 w-full" name="production_order_ids[]" multiple size="10" required data-search="on">
                     @foreach ($orders as $order)
                         <option value="{{ $order->id }}" @selected(in_array((int) $order->id, $selectedOrders, true))>
                             {{ $order->order_number }} | {{ __('production.scheduling.sale', ['reference' => $order->sales_order_reference ?? '—']) }} | {{ __('ui.production_order_status_'.$order->status) }} | {{ optional($order->scheduled_end_date)->format('d/m/Y') }}
                         </option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </label>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-                <x-ui.button :href="$editing ? route('production.scheduling.show', ['run' => $runKey]) : route('production.scheduling.index')" variant="material-back" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
-                <x-ui.button type="submit" variant="brand-primary" class="rounded-full" :full="true">{{ __('ui.scheduling_run') }}</x-ui.button>
+                <x-ui.button :href="$editing ? route('production.scheduling.show', ['run' => $runKey]) : route('production.scheduling.index')" variant="secondary" class="rounded-full" :full="true">{{ __('ui.back') }}</x-ui.button>
+                <x-ui.button type="submit" variant="primary" class="rounded-full" :full="true">{{ __('ui.scheduling_run') }}</x-ui.button>
             </div>
         </form>
     </x-ui.panel>
