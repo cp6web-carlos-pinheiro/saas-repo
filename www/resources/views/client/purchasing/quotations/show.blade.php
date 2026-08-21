@@ -10,11 +10,7 @@
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('purchasing.quotations.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             <x-ui.button :href="route('purchasing.quotations.edit', $quotation)" variant="primary" class="rounded-full">{{ __('purchase_quotation.edit') }}</x-ui.button>
-            <form method="POST" action="{{ route('purchasing.quotations.destroy', $quotation) }}" data-admin-delete-confirm data-admin-name="{{ $quotation->quotation_number }}" data-confirm-title="{{ __('purchase_quotation.confirm_delete_title') }}" data-confirm-text="{{ __('purchase_quotation.confirm_delete_text') }}" data-confirm-confirm="{{ __('purchase_quotation.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('purchase_quotation.confirm_delete_cancel') }}">
-                @csrf
-                @method('DELETE')
-                <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('purchase_quotation.remove') }}</x-ui.button>
-            </form>
+            <x-ui.confirm-button :action="route('purchasing.quotations.destroy', $quotation)" method="DELETE" class="rounded-full" :label="__('purchase_quotation.remove')" :confirm-title="__('purchase_quotation.confirm_delete_title')" :confirm-text="__('purchase_quotation.confirm_delete_text', ['name' => $quotation->quotation_number])" :confirm-label="__('purchase_quotation.confirm_delete_confirm')" :cancel-label="__('purchase_quotation.confirm_delete_cancel')" />
         </div>
         </x-slot:actions>
     </x-ui.page-heading>

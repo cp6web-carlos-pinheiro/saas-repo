@@ -15,11 +15,7 @@
             @endif
 
             @if ($version->status !== 'APPROVED')
-                <form method="POST" action="{{ route('products.versions.destroy', [$product, $version]) }}" data-admin-delete-confirm data-admin-name="{{ $product->sku }} v{{ $version->version_number }}" data-confirm-title="{{ __('product.confirm_delete_title') }}" data-confirm-text="{{ __('product.confirm_delete_text') }}" data-confirm-confirm="{{ __('product.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('product.confirm_delete_cancel') }}">
-                    @csrf
-                    @method('DELETE')
-                    <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('product.version_remove') }}</x-ui.button>
-                </form>
+                <x-ui.confirm-button :action="route('products.versions.destroy', [$product, $version])" method="DELETE" class="rounded-full" :label="__('product.version_remove')" :confirm-title="__('product.confirm_delete_title')" :confirm-text="__('product.confirm_delete_text')" :confirm-label="__('product.confirm_delete_confirm')" :cancel-label="__('product.confirm_delete_cancel')" />
             @endif
         </div>
         </x-slot:actions>

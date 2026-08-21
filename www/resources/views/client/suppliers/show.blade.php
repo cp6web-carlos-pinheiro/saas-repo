@@ -11,11 +11,7 @@
             <x-ui.button :href="route('purchasing.suppliers.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             <x-ui.button :href="route('purchasing.suppliers.edit', $supplier)" variant="primary" class="rounded-full">{{ __('supplier.edit') }}</x-ui.button>
 
-            <form method="POST" action="{{ route('purchasing.suppliers.destroy', $supplier) }}" data-admin-delete-confirm data-admin-name="{{ $supplier->name }}" data-confirm-title="{{ __('supplier.confirm_delete_title') }}" data-confirm-text="{{ __('supplier.confirm_delete_text') }}" data-confirm-confirm="{{ __('supplier.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('supplier.confirm_delete_cancel') }}">
-                @csrf
-                @method('DELETE')
-                <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('supplier.remove') }}</x-ui.button>
-            </form>
+            <x-ui.confirm-button :action="route('purchasing.suppliers.destroy', $supplier)" method="DELETE" class="rounded-full" :label="__('supplier.remove')" :confirm-title="__('supplier.confirm_delete_title')" :confirm-text="__('supplier.confirm_delete_text', ['name' => $supplier->name])" :confirm-label="__('supplier.confirm_delete_confirm')" :cancel-label="__('supplier.confirm_delete_cancel')" />
         </div>
         </x-slot:actions>
     </x-ui.page-heading>

@@ -66,7 +66,7 @@ Para a construção naval, prefira o vocabulário já agrupado no catálogo: emb
   - `x-ui.empty-state` — ícone, título, descrição e ações para estados vazios de listagens.
   - `x-ui.row-actions` — agrupa ícones de ação no fim de uma linha de tabela.
   - `x-ui.editor-toolbar` — toolbar para editores de conteúdo (ex.: tutoriais).
-  - `x-ui.confirm-button` — ação destrutiva com formulário + confirmação acessível (`data-ui-confirm`, tratado com SweetAlert2 e classes `.ui-swal-*` em tokens semânticos; substitui o padrão anterior restrito a `data-admin-delete-confirm`/`.g-swal-*`, que continua funcionando).
+  - `x-ui.confirm-button` — ação destrutiva com formulário + confirmação acessível (`data-ui-confirm`, tratado com SweetAlert2 e classes `.ui-swal-*` em tokens semânticos). É o padrão único para exclusão em toda a área cliente; o mecanismo anterior (`data-admin-delete-confirm`/`.g-swal-*`) foi removido.
   - Paginação: `resources/views/vendor/pagination/ui.blade.php`, registrada em `AppServiceProvider` via `Paginator::defaultView()`. Toda chamada existente a `$paginator->links()` passa a usar o componente `.ui-pagination` automaticamente, sem alterar controllers, filtros ou query string.
 - Mapeamento usado durante a migração das variantes antigas para as variantes semânticas:
 

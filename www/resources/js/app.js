@@ -706,49 +706,6 @@ if (designSystemSidebarShell && designSystemSidebar && designSystemSidebarToggle
 	applyDesignSystemSidebarState();
 }
 
-const adminDeleteForms = document.querySelectorAll('form[data-admin-delete-confirm]');
-
-for (const form of adminDeleteForms) {
-	form.addEventListener('submit', async (event) => {
-		if (form.dataset.confirmed === 'true') {
-			return;
-		}
-
-		event.preventDefault();
-
-		const adminName = form.dataset.adminName ?? '';
-		const title = form.dataset.confirmTitle ?? 'Confirm deletion';
-		const bodyTemplate = form.dataset.confirmText ?? 'You are about to delete :name.';
-		const bodyText = bodyTemplate.replace(':name', adminName);
-		const confirmLabel = form.dataset.confirmConfirm ?? 'Delete';
-		const cancelLabel = form.dataset.confirmCancel ?? 'Cancel';
-
-		const result = await Swal.fire({
-			title,
-			text: bodyText,
-			icon: 'warning',
-			showCancelButton: true,
-			focusCancel: true,
-			confirmButtonText: confirmLabel,
-			cancelButtonText: cancelLabel,
-			customClass: {
-				popup: 'g-swal-popup',
-				title: 'g-swal-title',
-				htmlContainer: 'g-swal-body',
-				actions: 'g-swal-actions',
-				confirmButton: 'g-swal-confirm',
-				cancelButton: 'g-swal-cancel',
-			},
-			buttonsStyling: false,
-		});
-
-		if (result.isConfirmed) {
-			form.dataset.confirmed = 'true';
-			HTMLFormElement.prototype.submit.call(form);
-		}
-	});
-}
-
 // Generic destructive-confirmation for the Layout System: any form or link carrying
 // data-ui-confirm shows an accessible SweetAlert2 dialog themed with --ui-* tokens
 // before it submits/navigates. Replaces one-off confirm() calls and admin-only variants.
@@ -1704,12 +1661,12 @@ for (const form of adminReverseForms) {
 			confirmButtonText: confirmLabel,
 			cancelButtonText: cancelLabel,
 			customClass: {
-				popup: 'g-swal-popup',
-				title: 'g-swal-title',
-				htmlContainer: 'g-swal-body',
-				actions: 'g-swal-actions',
-				confirmButton: 'g-swal-confirm',
-				cancelButton: 'g-swal-cancel',
+				popup: 'ui-swal-popup',
+				title: 'ui-swal-title',
+				htmlContainer: 'ui-swal-body',
+				actions: 'ui-swal-actions',
+				confirmButton: 'ui-swal-confirm',
+				cancelButton: 'ui-swal-cancel',
 			},
 			buttonsStyling: false,
 		});

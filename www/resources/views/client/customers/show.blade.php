@@ -11,11 +11,7 @@
             <x-ui.button :href="route('customers.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             <x-ui.button :href="route('customers.edit', $customer)" variant="primary" class="rounded-full">{{ __('customer.edit') }}</x-ui.button>
 
-            <form method="POST" action="{{ route('customers.destroy', $customer) }}" data-admin-delete-confirm data-admin-name="{{ $customer->name }}" data-confirm-title="{{ __('customer.confirm_delete_title') }}" data-confirm-text="{{ __('customer.confirm_delete_text') }}" data-confirm-confirm="{{ __('customer.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('customer.confirm_delete_cancel') }}">
-                @csrf
-                @method('DELETE')
-                <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('customer.remove') }}</x-ui.button>
-            </form>
+            <x-ui.confirm-button :action="route('customers.destroy', $customer)" method="DELETE" class="rounded-full" :label="__('customer.remove')" :confirm-title="__('customer.confirm_delete_title')" :confirm-text="__('customer.confirm_delete_text', ['name' => $customer->name])" :confirm-label="__('customer.confirm_delete_confirm')" :cancel-label="__('customer.confirm_delete_cancel')" />
         </div>
         </x-slot:actions>
     </x-ui.page-heading>

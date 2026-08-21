@@ -10,11 +10,7 @@
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('inventory.warehouses.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             <x-ui.button :href="route('inventory.warehouses.edit', $warehouse)" variant="primary" class="rounded-full">{{ __('warehouse.edit') }}</x-ui.button>
-            <form method="POST" action="{{ route('inventory.warehouses.destroy', $warehouse) }}" data-admin-delete-confirm data-admin-name="{{ $warehouse->name }}" data-confirm-title="{{ __('warehouse.confirm_delete_title') }}" data-confirm-text="{{ __('warehouse.confirm_delete_text') }}" data-confirm-confirm="{{ __('warehouse.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('warehouse.confirm_delete_cancel') }}">
-                @csrf
-                @method('DELETE')
-                <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('warehouse.remove') }}</x-ui.button>
-            </form>
+            <x-ui.confirm-button :action="route('inventory.warehouses.destroy', $warehouse)" method="DELETE" class="rounded-full" :label="__('warehouse.remove')" :confirm-title="__('warehouse.confirm_delete_title')" :confirm-text="__('warehouse.confirm_delete_text', ['name' => $warehouse->name])" :confirm-label="__('warehouse.confirm_delete_confirm')" :cancel-label="__('warehouse.confirm_delete_cancel')" />
         </div>
         </x-slot:actions>
     </x-ui.page-heading>

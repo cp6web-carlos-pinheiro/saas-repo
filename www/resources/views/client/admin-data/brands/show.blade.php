@@ -10,11 +10,7 @@
         <div class="flex flex-wrap gap-3">
             <x-ui.button :href="route('admin-data.brands.index')" variant="secondary" class="rounded-full">{{ __('ui.back') }}</x-ui.button>
             <x-ui.button :href="route('admin-data.brands.edit', $brand)" variant="primary" class="rounded-full">{{ __('admin_data_brands.edit') }}</x-ui.button>
-            <form method="POST" action="{{ route('admin-data.brands.destroy', $brand) }}" data-admin-delete-confirm data-admin-name="{{ $brand->name }}" data-confirm-title="{{ __('admin_data.confirm_delete_title') }}" data-confirm-text="{{ __('admin_data.confirm_delete_text') }}" data-confirm-confirm="{{ __('admin_data.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('admin_data.confirm_delete_cancel') }}">
-                @csrf
-                @method('DELETE')
-                <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('admin_data_brands.remove') }}</x-ui.button>
-            </form>
+            <x-ui.confirm-button :action="route('admin-data.brands.destroy', $brand)" method="DELETE" class="rounded-full" :label="__('admin_data_brands.remove')" :confirm-title="__('admin_data.confirm_delete_title')" :confirm-text="__('admin_data.confirm_delete_text', ['name' => $brand->name])" :confirm-label="__('admin_data.confirm_delete_confirm')" :cancel-label="__('admin_data.confirm_delete_cancel')" />
         </div>
         </x-slot:actions>
     </x-ui.page-heading>

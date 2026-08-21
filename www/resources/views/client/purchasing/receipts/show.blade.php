@@ -16,11 +16,7 @@
                 </form>
             @else
                 <x-ui.button :href="route('purchasing.receipts.edit', $receipt)" variant="primary" class="rounded-full">{{ __('purchase_receipt.edit') }}</x-ui.button>
-                <form method="POST" action="{{ route('purchasing.receipts.destroy', $receipt) }}" data-admin-delete-confirm data-admin-name="{{ $receipt->receipt_number }}" data-confirm-title="{{ __('purchase_receipt.confirm_delete_title') }}" data-confirm-text="{{ __('purchase_receipt.confirm_delete_text') }}" data-confirm-confirm="{{ __('purchase_receipt.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('purchase_receipt.confirm_delete_cancel') }}">
-                    @csrf
-                    @method('DELETE')
-                    <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('purchase_receipt.remove') }}</x-ui.button>
-                </form>
+                <x-ui.confirm-button :action="route('purchasing.receipts.destroy', $receipt)" method="DELETE" class="rounded-full" :label="__('purchase_receipt.remove')" :confirm-title="__('purchase_receipt.confirm_delete_title')" :confirm-text="__('purchase_receipt.confirm_delete_text', ['name' => $receipt->receipt_number])" :confirm-label="__('purchase_receipt.confirm_delete_confirm')" :cancel-label="__('purchase_receipt.confirm_delete_cancel')" />
             @endif
         </div>
         </x-slot:actions>

@@ -35,6 +35,7 @@ final class LayoutSystemComplianceTest extends TestCase
 
             foreach ([
                 'legacy button variant' => '/variant=["\'](?:brand-primary|material-(?:back|edit|remove|versions)|surface-muted)["\']/',
+                'legacy destructive confirm attribute' => '/data-admin-delete-confirm\b/',
                 'legacy client class' => '/\bind-[A-Za-z0-9_-]+/',
                 'inline row navigation' => '/(?:onclick="window\.location|onkeydown="[^"]*window\.location)/',
                 'direct Tailwind palette' => '/\b(?:bg|text|border)-(?:slate|gray|red|blue)-[0-9]{2,3}\b/',

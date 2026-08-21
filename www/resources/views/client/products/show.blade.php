@@ -12,11 +12,7 @@
             <x-ui.button :href="route('products.versions', ['product_id' => $product->id])" variant="info" class="rounded-full">{{ __('ui.product_versions') }}</x-ui.button>
             <x-ui.button :href="route('products.edit', $product)" variant="primary" class="rounded-full">{{ __('product.edit') }}</x-ui.button>
 
-            <form method="POST" action="{{ route('products.destroy', $product) }}" data-admin-delete-confirm data-admin-name="{{ $product->sku }}" data-confirm-title="{{ __('product.confirm_delete_title') }}" data-confirm-text="{{ __('product.confirm_delete_text') }}" data-confirm-confirm="{{ __('product.confirm_delete_confirm') }}" data-confirm-cancel="{{ __('product.confirm_delete_cancel') }}">
-                @csrf
-                @method('DELETE')
-                <x-ui.button type="submit" variant="danger" class="rounded-full">{{ __('product.remove') }}</x-ui.button>
-            </form>
+            <x-ui.confirm-button :action="route('products.destroy', $product)" method="DELETE" class="rounded-full" :label="__('product.remove')" :confirm-title="__('product.confirm_delete_title')" :confirm-text="__('product.confirm_delete_text')" :confirm-label="__('product.confirm_delete_confirm')" :cancel-label="__('product.confirm_delete_cancel')" />
         </div>
         </x-slot:actions>
     </x-ui.page-heading>
