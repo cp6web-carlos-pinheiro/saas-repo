@@ -36,7 +36,7 @@
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <x-ui.field label="{{ __('purchase_requisition.required_date') }}" for="required-date" :error="$errors->first('required_date')">
-                    <x-ui.input type="date" name="required_date" :value="old('required_date', $requisition?->required_date?->format('Y-m-d') ?? $initialValues['required_date'])" class="mt-2"  id="required-date" :aria-describedby="$errors->has('required_date') ? 'required-date-error' : null"/>
+                    <x-ui.date-picker name="required_date" :value="old('required_date', $requisition?->required_date?->format('Y-m-d') ?? $initialValues['required_date'])" class="mt-2" id="required-date" :aria-describedby="$errors->has('required_date') ? 'required-date-error' : null" />
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('purchase_requisition.status') }}" for="status" :required="true" :error="$errors->first('status')">
@@ -100,8 +100,8 @@
                                     </x-ui.select>
 
                                     <x-ui.input type="number" step="0.000001" min="0.000001" name="items[{{ $index }}][quantity]" :value="old('items.'.$index.'.quantity', $item['quantity'] ?? 1)" required />
-                                    <x-ui.input type="date" name="items[{{ $index }}][need_by_date]" :value="old('items.'.$index.'.need_by_date', $item['need_by_date'] ?? now()->addDays(7)->toDateString())" required />
-                                    <x-ui.input type="date" name="items[{{ $index }}][order_date]" :value="old('items.'.$index.'.order_date', $item['order_date'] ?? now()->toDateString())" required />
+                                    <x-ui.date-picker name="items[{{ $index }}][need_by_date]" :value="old('items.'.$index.'.need_by_date', $item['need_by_date'] ?? now()->addDays(7)->toDateString())" required />
+                                    <x-ui.date-picker name="items[{{ $index }}][order_date]" :value="old('items.'.$index.'.order_date', $item['order_date'] ?? now()->toDateString())" required />
 
                                     <x-ui.icon-button type="button" icon="trash" variant="danger" data-pr-remove-item :label="__('purchase_requisition.remove_item')" />
                                 </div>
@@ -141,8 +141,8 @@
             @endforeach
         </x-ui.select>
         <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity]" value="1" required />
-        <x-ui.input type="date" name="items[__INDEX__][need_by_date]" value="{{ now()->addDays(7)->toDateString() }}" required />
-        <x-ui.input type="date" name="items[__INDEX__][order_date]" value="{{ now()->toDateString() }}" required />
+        <x-ui.date-picker name="items[__INDEX__][need_by_date]" value="{{ now()->addDays(7)->toDateString() }}" required />
+        <x-ui.date-picker name="items[__INDEX__][order_date]" value="{{ now()->toDateString() }}" required />
         <x-ui.icon-button type="button" icon="trash" variant="danger" data-pr-remove-item :label="__('purchase_requisition.remove_item')" />
     </div>
 </template>

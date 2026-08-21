@@ -31,11 +31,11 @@
             @endif
 
             <x-ui.field label="{{ __('product.effective_from') }}" for="effective_from" :error="$errors->first('effective_from')">
-                <x-ui.input id="effective_from" type="date" name="effective_from" :value="old('effective_from', $version?->effective_from?->format('Y-m-d'))"  :aria-describedby="$errors->has('effective_from') ? 'effective_from-error' : null"/>
+                <x-ui.date-picker id="effective_from" name="effective_from" :value="old('effective_from', $version?->effective_from?->format('Y-m-d'))" :aria-describedby="$errors->has('effective_from') ? 'effective_from-error' : null" />
             </x-ui.field>
 
             <x-ui.field label="{{ __('product.effective_to') }}" for="effective_to" :error="$errors->first('effective_to')">
-                <x-ui.input id="effective_to" type="date" name="effective_to" :value="old('effective_to', $version?->effective_to?->format('Y-m-d'))"  :aria-describedby="$errors->has('effective_to') ? 'effective_to-error' : null"/>
+                <x-ui.date-picker id="effective_to" name="effective_to" :value="old('effective_to', $version?->effective_to?->format('Y-m-d'))" :aria-describedby="$errors->has('effective_to') ? 'effective_to-error' : null" />
             </x-ui.field>
 
             <x-ui.field label="{{ __('product.compatibility_rule') }}" for="compatibility_rule" :required="true" :error="$errors->first('compatibility_rule')">

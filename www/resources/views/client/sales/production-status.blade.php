@@ -387,8 +387,8 @@
                                                         <summary class="cursor-pointer list-none rounded-full border border-[var(--ui-border)] px-3 py-1.5 text-xs font-semibold text-[var(--ui-primary-text)]">{{ __('sale.production_status.reschedule') }}</summary>
                                                         <form method="POST" action="{{ route('production.orders.reschedule', $order['id']) }}" class="absolute right-0 z-20 mt-2 w-72 space-y-3 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-4 text-left shadow-xl">
                                                             @csrf
-                                                            <x-ui.field :label="__('sale.production_status.planned_start')" for="scheduled_start_date"><x-ui.input id="scheduled_start_date" type="date" name="scheduled_start_date" :value="$order['scheduled_start']" required /></x-ui.field>
-                                                            <x-ui.field :label="__('sale.production_status.planned_end')" for="scheduled_end_date"><x-ui.input id="scheduled_end_date" type="date" name="scheduled_end_date" :value="$order['scheduled_end']" required /></x-ui.field>
+                                                            <x-ui.field :label="__('sale.production_status.planned_start')" for="scheduled_start_date"><x-ui.date-picker id="scheduled_start_date" name="scheduled_start_date" :value="$order['scheduled_start']" required /></x-ui.field>
+                                                            <x-ui.field :label="__('sale.production_status.planned_end')" for="scheduled_end_date"><x-ui.date-picker id="scheduled_end_date" name="scheduled_end_date" :value="$order['scheduled_end']" required /></x-ui.field>
                                                             <x-ui.button class="w-full rounded-full" variant="primary" size="sm" type="submit">{{ __('sale.production_status.save_schedule') }}</x-ui.button>
                                                         </form>
                                                     </details>
@@ -518,7 +518,7 @@
                 <form method="POST" action="{{ route('sales.production-status.tracking', $sale) }}" class="mt-4 space-y-4">
                     @csrf
                     <div class="grid gap-4 sm:grid-cols-2">
-                    <x-ui.field :label="__('sale.production_status.promised_date')" for="promised_date"><x-ui.input id="promised_date" type="date" name="promised_date" :value="old('promised_date', $analysis['tracking']['promised_date'])" /></x-ui.field>
+                    <x-ui.field :label="__('sale.production_status.promised_date')" for="promised_date"><x-ui.date-picker id="promised_date" name="promised_date" :value="old('promised_date', $analysis['tracking']['promised_date'])" /></x-ui.field>
                         <label class="text-sm">{{ __('sale.production_status.responsible') }}
                             <x-ui.select class="mt-1 w-full" name="responsible_user_id">
                                 <option value="">{{ __('sale.production_status.no_responsible') }}</option>

@@ -49,11 +49,11 @@
 
             <div class="grid gap-5 sm:grid-cols-3">
                 <x-ui.field label="{{ __('purchase_quotation.quotation_date') }}" for="quotation-date" :required="true" :error="$errors->first('quotation_date')">
-                    <x-ui.input type="date" name="quotation_date" :value="old('quotation_date', $quotation?->quotation_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required  id="quotation-date" :aria-describedby="$errors->has('quotation_date') ? 'quotation-date-error' : null"/>
+                    <x-ui.date-picker name="quotation_date" :value="old('quotation_date', $quotation?->quotation_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required id="quotation-date" :aria-describedby="$errors->has('quotation_date') ? 'quotation-date-error' : null" />
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('purchase_quotation.valid_until') }}" for="valid-until" :error="$errors->first('valid_until')">
-                    <x-ui.input type="date" name="valid_until" :value="old('valid_until', $quotation?->valid_until?->format('Y-m-d'))" class="mt-2"  id="valid-until" :aria-describedby="$errors->has('valid_until') ? 'valid-until-error' : null"/>
+                    <x-ui.date-picker name="valid_until" :value="old('valid_until', $quotation?->valid_until?->format('Y-m-d'))" class="mt-2" id="valid-until" :aria-describedby="$errors->has('valid_until') ? 'valid-until-error' : null" />
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('purchase_quotation.status') }}" for="status" :required="true" :error="$errors->first('status')">

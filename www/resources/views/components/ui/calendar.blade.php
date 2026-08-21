@@ -5,6 +5,7 @@
     'selected' => null,
     'min' => null,
     'max' => null,
+    'disabled' => false,
 ])
 
 @php
@@ -20,6 +21,7 @@
     data-ui-calendar-selected="{{ $selected }}"
     @if($min) data-ui-calendar-min="{{ $min }}" @endif
     @if($max) data-ui-calendar-max="{{ $max }}" @endif
+    @if($disabled) data-ui-calendar-disabled="true" @endif
 >
     <div class="ui-calendar-header">
         <button type="button" class="ui-icon-button" data-ui-calendar-previous aria-label="Mês anterior"><x-ui.icon name="chevron-left" size="sm" /></button>
@@ -27,7 +29,7 @@
         <button type="button" class="ui-icon-button" data-ui-calendar-next aria-label="Próximo mês"><x-ui.icon name="chevron-left" size="sm" class="rotate-180" /></button>
     </div>
     <div class="ui-calendar-weekdays" aria-hidden="true">
-        @foreach (['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as $weekday)<span>{{ $weekday }}</span>@endforeach
+        @for ($weekday = 0; $weekday < 7; $weekday++)<span data-ui-calendar-weekday="{{ $weekday }}"></span>@endfor
     </div>
     <div class="ui-calendar-grid" role="grid" aria-label="Calendário" data-ui-calendar-grid></div>
     @if($name)<input type="hidden" name="{{ $name }}" value="{{ $selected }}" data-ui-calendar-input>@endif

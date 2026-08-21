@@ -50,11 +50,11 @@
 
             <div class="grid gap-5 sm:grid-cols-3">
                 <x-ui.field label="{{ __('purchase_order.order_date') }}" for="order-date" :required="true" :error="$errors->first('order_date')">
-                    <x-ui.input type="date" name="order_date" :value="old('order_date', $order?->order_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required  id="order-date" :aria-describedby="$errors->has('order_date') ? 'order-date-error' : null"/>
+                    <x-ui.date-picker name="order_date" :value="old('order_date', $order?->order_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required id="order-date" :aria-describedby="$errors->has('order_date') ? 'order-date-error' : null" />
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('purchase_order.expected_delivery_date') }}" for="expected-delivery-date" :error="$errors->first('expected_delivery_date')">
-                    <x-ui.input type="date" name="expected_delivery_date" :value="old('expected_delivery_date', $order?->expected_delivery_date?->format('Y-m-d'))" class="mt-2"  id="expected-delivery-date" :aria-describedby="$errors->has('expected_delivery_date') ? 'expected-delivery-date-error' : null"/>
+                    <x-ui.date-picker name="expected_delivery_date" :value="old('expected_delivery_date', $order?->expected_delivery_date?->format('Y-m-d'))" class="mt-2" id="expected-delivery-date" :aria-describedby="$errors->has('expected_delivery_date') ? 'expected-delivery-date-error' : null" />
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('purchase_order.status') }}" for="status" :required="true" :error="$errors->first('status')">
@@ -109,8 +109,8 @@
 
                                     <x-ui.input type="number" step="0.000001" min="0.000001" name="items[{{ $index }}][quantity]" :value="old('items.'.$index.'.quantity', $item['quantity'] ?? 1)" required />
                                     <x-ui.input type="text" name="items[{{ $index }}][unit_price]" :value="old('items.'.$index.'.unit_price', $item['unit_price'] ?? '0,00')" data-currency-mask="brl" inputmode="decimal" />
-                                    <x-ui.input type="date" name="items[{{ $index }}][need_by_date]" :value="old('items.'.$index.'.need_by_date', $item['need_by_date'] ?? '')" />
-                                    <x-ui.input type="date" name="items[{{ $index }}][promised_date]" :value="old('items.'.$index.'.promised_date', $item['promised_date'] ?? '')" />
+                                    <x-ui.date-picker name="items[{{ $index }}][need_by_date]" :value="old('items.'.$index.'.need_by_date', $item['need_by_date'] ?? '')" />
+                                    <x-ui.date-picker name="items[{{ $index }}][promised_date]" :value="old('items.'.$index.'.promised_date', $item['promised_date'] ?? '')" />
 
                                     <x-ui.icon-button type="button" icon="trash" variant="danger" data-po-remove-item :label="__('purchase_order.remove_item')" />
                                 </div>
@@ -141,8 +141,8 @@
         </x-ui.select>
         <x-ui.input type="number" step="0.000001" min="0.000001" name="items[__INDEX__][quantity]" value="1" required />
         <x-ui.input type="text" name="items[__INDEX__][unit_price]" value="0,00" data-currency-mask="brl" inputmode="decimal" />
-        <x-ui.input type="date" name="items[__INDEX__][need_by_date]" />
-        <x-ui.input type="date" name="items[__INDEX__][promised_date]" />
+        <x-ui.date-picker name="items[__INDEX__][need_by_date]" />
+        <x-ui.date-picker name="items[__INDEX__][promised_date]" />
         <x-ui.icon-button type="button" icon="trash" variant="danger" data-po-remove-item :label="__('purchase_order.remove_item')" />
     </div>
 </template>

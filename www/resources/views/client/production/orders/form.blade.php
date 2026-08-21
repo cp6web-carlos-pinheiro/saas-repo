@@ -51,11 +51,11 @@
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('production.orders.scheduled_start') }}" for="scheduled-start-date" :error="$errors->first('scheduled_start_date')">
-                    <x-ui.input name="scheduled_start_date" type="date" :value="old('scheduled_start_date', $initialValues['scheduled_start_date'])" class="mt-2"  id="scheduled-start-date" :aria-describedby="$errors->has('scheduled_start_date') ? 'scheduled-start-date-error' : null"/>
+                    <x-ui.date-picker name="scheduled_start_date" :value="old('scheduled_start_date', $initialValues['scheduled_start_date'])" class="mt-2" id="scheduled-start-date" :aria-describedby="$errors->has('scheduled_start_date') ? 'scheduled-start-date-error' : null" />
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('production.orders.scheduled_end') }}" for="scheduled-end-date" :error="$errors->first('scheduled_end_date')">
-                    <x-ui.input name="scheduled_end_date" type="date" :value="old('scheduled_end_date', $initialValues['scheduled_end_date'])" class="mt-2"  id="scheduled-end-date" :aria-describedby="$errors->has('scheduled_end_date') ? 'scheduled-end-date-error' : null"/>
+                    <x-ui.date-picker name="scheduled_end_date" :value="old('scheduled_end_date', $initialValues['scheduled_end_date'])" class="mt-2" id="scheduled-end-date" :aria-describedby="$errors->has('scheduled_end_date') ? 'scheduled-end-date-error' : null" />
                 </x-ui.field>
             </div>
 

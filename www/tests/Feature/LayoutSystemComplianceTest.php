@@ -25,6 +25,21 @@ final class LayoutSystemComplianceTest extends TestCase
         $this->assertStringContainsString('aria-describedby="code-error"', $error);
     }
 
+    public function test_date_picker_preserves_native_form_and_accessibility_contracts(): void
+    {
+        $html = Blade::render('<x-ui.date-picker id="delivery-date" name="delivery_date" value="2026-08-18" min="2026-08-04" max="2026-08-31" required aria-describedby="delivery-date-hint" />');
+
+        $this->assertStringContainsString('id="delivery-date"', $html);
+        $this->assertStringContainsString('type="date"', $html);
+        $this->assertStringContainsString('name="delivery_date"', $html);
+        $this->assertStringContainsString('value="2026-08-18"', $html);
+        $this->assertStringContainsString('min="2026-08-04"', $html);
+        $this->assertStringContainsString('max="2026-08-31"', $html);
+        $this->assertStringContainsString('required', $html);
+        $this->assertStringContainsString('aria-describedby="delivery-date-hint"', $html);
+        $this->assertStringContainsString('data-ui-date-picker', $html);
+    }
+
     public function test_functional_views_do_not_reintroduce_legacy_visual_contracts(): void
     {
         $violations = [];
@@ -36,6 +51,7 @@ final class LayoutSystemComplianceTest extends TestCase
             foreach ([
                 'legacy button variant' => '/variant=["\'](?:brand-primary|material-(?:back|edit|remove|versions)|surface-muted)["\']/',
                 'legacy destructive confirm attribute' => '/data-admin-delete-confirm\b/',
+                'native date field outside date picker' => '/<x-ui\.input\b[^>]*\btype=["\']date["\']/',
                 'legacy client class' => '/\bind-[A-Za-z0-9_-]+/',
                 'inline row navigation' => '/(?:onclick="window\.location|onkeydown="[^"]*window\.location)/',
                 'direct Tailwind palette' => '/\b(?:bg|text|border)-(?:slate|gray|red|blue)-[0-9]{2,3}\b/',

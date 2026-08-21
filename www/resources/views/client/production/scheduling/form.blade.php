@@ -26,7 +26,7 @@
 
             <div class="grid gap-5 lg:grid-cols-4">
                 <x-ui.field label="{{ __('ui.scheduling_reference_date') }}" for="reference-date" :error="$errors->first('reference_date')">
-                    <x-ui.input class="mt-2" type="date" name="reference_date" :value="old('reference_date', $input['reference_date'] ?? now()->toDateString())"  id="reference-date" :aria-describedby="$errors->has('reference_date') ? 'reference-date-error' : null"/>
+                    <x-ui.date-picker class="mt-2" name="reference_date" :value="old('reference_date', $input['reference_date'] ?? now()->toDateString())" id="reference-date" :aria-describedby="$errors->has('reference_date') ? 'reference-date-error' : null" />
                 </x-ui.field>
                 <x-ui.field label="{{ __('ui.scheduling_mode') }}" for="mode" :error="$errors->first('mode')">
                     <x-ui.select class="mt-2" name="mode" data-search="off" id="mode" :aria-describedby="$errors->has('mode') ? 'mode-error' : null">

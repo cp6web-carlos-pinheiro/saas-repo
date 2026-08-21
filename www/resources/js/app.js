@@ -1310,7 +1310,12 @@ const calendarDateToIso = (date) => {
 	return `${year}-${month}-${day}`;
 };
 
+const uiLocale = document.documentElement.lang || undefined;
+
 const initializeUiCalendar = (calendar) => {
+	if (calendar.dataset.uiCalendarInitialized === 'true') return;
+	calendar.dataset.uiCalendarInitialized = 'true';
+
 	const grid = calendar.querySelector('[data-ui-calendar-grid]');
 	const heading = calendar.querySelector('[data-ui-calendar-heading]');
 	const input = calendar.querySelector('[data-ui-calendar-input]');
@@ -1322,6 +1327,12 @@ const initializeUiCalendar = (calendar) => {
 		return;
 	}
 
+	for (const weekday of calendar.querySelectorAll('[data-ui-calendar-weekday]')) {
+		const weekdayIndex = Number(weekday.dataset.uiCalendarWeekday);
+		const date = new Date(Date.UTC(2021, 7, 1 + weekdayIndex));
+		weekday.textContent = new Intl.DateTimeFormat(uiLocale, { weekday: 'short', timeZone: 'UTC' }).format(date);
+	}
+
 	const renderCalendar = () => {
 		const year = visibleDate.getUTCFullYear();
 		const month = visibleDate.getUTCMonth();
@@ -1330,7 +1341,7 @@ const initializeUiCalendar = (calendar) => {
 		const today = new Date();
 		const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-		heading.textContent = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(visibleDate);
+		heading.textContent = new Intl.DateTimeFormat(uiLocale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(visibleDate);
 		grid.replaceChildren();
 
 		for (let index = 0; index < 42; index += 1) {
@@ -1347,12 +1358,12 @@ const initializeUiCalendar = (calendar) => {
 			dayButton.textContent = String(date.getUTCDate());
 			dayButton.dataset.date = iso;
 			dayButton.setAttribute('role', 'gridcell');
-			dayButton.setAttribute('aria-label', new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeZone: 'UTC' }).format(date));
+			dayButton.setAttribute('aria-label', new Intl.DateTimeFormat(uiLocale, { dateStyle: 'long', timeZone: 'UTC' }).format(date));
 			dayButton.classList.toggle('is-outside', isOutside);
 			dayButton.classList.toggle('is-today', iso === todayIso);
 			dayButton.classList.toggle('is-selected', iso === selected);
 			dayButton.setAttribute('aria-selected', iso === selected ? 'true' : 'false');
-			dayButton.disabled = Boolean(isDisabled);
+			dayButton.disabled = Boolean(isDisabled) || calendar.dataset.uiCalendarDisabled === 'true';
 
 			dayButton.addEventListener('click', () => {
 				selected = iso;
@@ -1380,13 +1391,20 @@ const initializeUiCalendar = (calendar) => {
 		visibleDate = new Date(Date.UTC(visibleDate.getUTCFullYear(), visibleDate.getUTCMonth() + 1, 1));
 		renderCalendar();
 	});
+	calendar.addEventListener('ui:set-date', (event) => {
+		selected = event.detail?.value || '';
+		calendar.dataset.uiCalendarSelected = selected;
+
+		if (selected) {
+			const [year, month] = selected.split('-').map(Number);
+			visibleDate = new Date(Date.UTC(year, month - 1, 1));
+		}
+
+		renderCalendar();
+	});
 
 	renderCalendar();
 };
-
-for (const calendar of document.querySelectorAll('[data-ui-calendar]')) {
-	initializeUiCalendar(calendar);
-}
 
 const closeUiDatePicker = (datePicker) => {
 	const trigger = datePicker?.querySelector('[data-ui-date-picker-trigger]');
@@ -1398,10 +1416,32 @@ const closeUiDatePicker = (datePicker) => {
 	}
 };
 
-for (const datePicker of document.querySelectorAll('[data-ui-date-picker]')) {
+const formatUiDatePickerValue = (value) => {
+	if (!value) return '';
+
+	const date = new Date(`${value}T00:00:00Z`);
+	return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat(uiLocale, { dateStyle: 'medium', timeZone: 'UTC' }).format(date);
+};
+
+const initializeUiDatePicker = (datePicker) => {
+	if (datePicker.dataset.uiDatePickerInitialized === 'true') return;
+	datePicker.dataset.uiDatePickerInitialized = 'true';
+
 	const trigger = datePicker.querySelector('[data-ui-date-picker-trigger]');
 	const panel = datePicker.querySelector('[data-ui-date-picker-panel]');
 	const label = datePicker.querySelector('[data-ui-date-picker-label]');
+	const input = datePicker.querySelector('[data-ui-date-picker-input]');
+	const calendar = datePicker.querySelector('[data-ui-calendar]');
+	const clearButton = datePicker.querySelector('[data-ui-date-picker-clear]');
+	const syncFromInput = () => {
+		if (!(input instanceof HTMLInputElement)) return;
+
+		if (label instanceof HTMLElement) {
+			label.textContent = formatUiDatePickerValue(input.value) || label.dataset.placeholder || '';
+		}
+
+		calendar?.dispatchEvent(new CustomEvent('ui:set-date', { detail: { value: input.value } }));
+	};
 
 	trigger?.addEventListener('click', () => {
 		const shouldOpen = trigger.getAttribute('aria-expanded') !== 'true';
@@ -1417,15 +1457,61 @@ for (const datePicker of document.querySelectorAll('[data-ui-date-picker]')) {
 	datePicker.addEventListener('ui:date-selected', (event) => {
 		const value = event.detail?.value;
 
-		if (value && label instanceof HTMLElement) {
-			const date = new Date(`${value}T00:00:00Z`);
-			label.textContent = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeZone: 'UTC' }).format(date);
+		if (value && input instanceof HTMLInputElement) {
+			input.value = value;
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+			input.dispatchEvent(new Event('change', { bubbles: true }));
+			trigger?.removeAttribute('aria-invalid');
+			trigger?.classList.remove('is-invalid');
 		}
 
 		closeUiDatePicker(datePicker);
 		trigger?.focus();
 	});
-}
+
+	input?.addEventListener('input', syncFromInput);
+
+	input?.addEventListener('invalid', (event) => {
+		event.preventDefault();
+		trigger?.setAttribute('aria-invalid', 'true');
+		trigger?.classList.add('is-invalid');
+		trigger?.focus();
+	});
+
+	clearButton?.addEventListener('click', () => {
+		if (!(input instanceof HTMLInputElement)) return;
+
+		input.value = '';
+		input.dispatchEvent(new Event('input', { bubbles: true }));
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+		closeUiDatePicker(datePicker);
+		trigger?.focus();
+	});
+
+	input?.form?.addEventListener('reset', () => setTimeout(syncFromInput));
+};
+
+const initializeUiDateControls = (root = document) => {
+	const calendars = root instanceof Element && root.matches('[data-ui-calendar]')
+		? [root]
+		: root.querySelectorAll('[data-ui-calendar]');
+	const datePickers = root instanceof Element && root.matches('[data-ui-date-picker]')
+		? [root]
+		: root.querySelectorAll('[data-ui-date-picker]');
+
+	for (const calendar of calendars) initializeUiCalendar(calendar);
+	for (const datePicker of datePickers) initializeUiDatePicker(datePicker);
+};
+
+initializeUiDateControls();
+
+new MutationObserver((mutations) => {
+	for (const mutation of mutations) {
+		for (const node of mutation.addedNodes) {
+			if (node instanceof Element) initializeUiDateControls(node);
+		}
+	}
+}).observe(document.body, { childList: true, subtree: true });
 
 document.addEventListener('click', (event) => {
 	if (!(event.target instanceof Element)) return;

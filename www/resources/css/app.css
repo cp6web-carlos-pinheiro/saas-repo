@@ -1127,6 +1127,9 @@ html[data-theme='dark'] {
     .ui-calendar-day:disabled { cursor: not-allowed; opacity: 0.3; }
 
     .ui-date-picker { @apply relative; }
+    .ui-date-picker-native {
+        @apply pointer-events-none absolute h-px w-px overflow-hidden opacity-0;
+    }
     .ui-date-picker-trigger {
         @apply flex min-h-12 w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm transition;
         color: var(--ui-text);
@@ -1135,11 +1138,18 @@ html[data-theme='dark'] {
     }
     .ui-date-picker-trigger:hover { border-color: var(--ui-text-subtle); }
     .ui-date-picker-trigger:focus-visible { outline: none; border-color: var(--ui-primary); box-shadow: 0 0 0 3px var(--ui-focus); }
+    .ui-date-picker-trigger.is-invalid,
+    .ui-date-picker-trigger[aria-invalid="true"] { border-color: var(--ui-danger); }
+    .ui-date-picker-trigger:disabled { cursor: not-allowed; opacity: 0.6; }
     .ui-date-picker-panel {
         @apply absolute left-0 top-[calc(100%+0.5rem)] z-[80];
         width: min(24rem, calc(100vw - 2rem));
         box-shadow: var(--ui-shadow-lg);
     }
+    .ui-date-picker-actions { @apply -mt-2 flex justify-end rounded-b-2xl border border-t-0 px-4 pb-3; background: var(--ui-surface); border-color: var(--ui-border); }
+    .ui-date-picker-clear { @apply rounded-lg px-2 py-1 text-xs font-bold transition; color: var(--ui-primary); }
+    .ui-date-picker-clear:hover { background: var(--ui-primary-soft); }
+    .ui-date-picker-clear:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ui-focus); }
 
     .ui-chart { @apply min-w-0 rounded-2xl border p-4; background: var(--ui-surface); border-color: var(--ui-border); }
     .ui-chart-caption { @apply mb-4 flex items-center justify-between gap-3 text-sm; color: var(--ui-text); }

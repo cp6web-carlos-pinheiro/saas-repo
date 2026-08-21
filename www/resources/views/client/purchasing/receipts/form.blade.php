@@ -50,7 +50,7 @@
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <x-ui.field label="{{ __('purchase_receipt.receipt_date') }}" for="receipt-date" :required="true" :error="$errors->first('receipt_date')">
-                    <x-ui.input type="date" name="receipt_date" :value="old('receipt_date', $receipt?->receipt_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required  id="receipt-date" :aria-describedby="$errors->has('receipt_date') ? 'receipt-date-error' : null"/>
+                    <x-ui.date-picker name="receipt_date" :value="old('receipt_date', $receipt?->receipt_date?->format('Y-m-d') ?? now()->format('Y-m-d'))" class="mt-2" required id="receipt-date" :aria-describedby="$errors->has('receipt_date') ? 'receipt-date-error' : null" />
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('purchase_receipt.status') }}" for="status" :required="true" :error="$errors->first('status')">

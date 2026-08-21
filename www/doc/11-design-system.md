@@ -27,7 +27,7 @@ O próprio catálogo também é o modelo de página do produto: header global, m
 - Botões oferecem variantes semânticas, três tamanhos, ícones e estados de loading, desabilitado e somente leitura por `aria-disabled`.
 - Inputs aceitam prefixo, sufixo e ícone no início ou final. Selects pesquisáveis usam o Select2 já instalado, por meio de `data-search="on"`.
 - Componentes compostos incluem accordion, attachment, badge, button group, calendar, chart, collapsible, data table, date picker, input group, item e tooltip. O button group padrão mantém os botões unidos, com cantos retos nas divisórias internas e o mesmo raio dos botões no contorno externo; oferece tons `primary`, `outline` e `surface`.
-- Date Picker reutiliza Calendar em um popover; Data Table evolui a Table existente com filtro, ordenação e paginação local.
+- Date Picker reutiliza Calendar em um popover e preserva um `input[type=date]` nativo para submissão, validação, limites e eventos. Suporta campos obrigatórios, desabilitados, somente leitura, limpeza de opcionais e conteúdo adicionado dinamicamente; é o padrão para datas nas views funcionais. Data Table evolui a Table existente com filtro, ordenação e paginação local.
 - Células da Data Table podem habilitar cópia e edição inline. Salvar dispara `ui:table-cell-updated`; a integração da tela deve persistir a alteração no backend.
 - Gráficos são SVG/CSS acessíveis com uma tabela equivalente para leitores de tela, sem adicionar uma biblioteca gráfica à primeira versão. O componente oferece barras verticais, linha, área, barras horizontais e donut.
 - Modais suportam `sm`, `md`, `lg`, `xl`, `full` e `sheet`, com fechamento por Escape, foco contido e retorno ao elemento acionador.

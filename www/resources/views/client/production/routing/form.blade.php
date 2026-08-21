@@ -38,10 +38,10 @@
                     <x-ui.input class="mt-2" name="version_number" type="number" min="1" :value="old('version_number', $version?->version_number)" required  id="version-number" :aria-describedby="$errors->has('version_number') ? 'version-number-error' : null"/>
                 </x-ui.field>
                 <x-ui.field label="{{ __('production.effective_from') }}" for="effective-from" :error="$errors->first('effective_from')">
-                    <x-ui.input class="mt-2" name="effective_from" type="date" :value="old('effective_from', optional($version?->effective_from)->format('Y-m-d'))"  id="effective-from" :aria-describedby="$errors->has('effective_from') ? 'effective-from-error' : null"/>
+                    <x-ui.date-picker class="mt-2" name="effective_from" :value="old('effective_from', optional($version?->effective_from)->format('Y-m-d'))" id="effective-from" :aria-describedby="$errors->has('effective_from') ? 'effective-from-error' : null" />
                 </x-ui.field>
                 <x-ui.field label="{{ __('production.effective_to') }}" for="effective-to" :error="$errors->first('effective_to')">
-                    <x-ui.input class="mt-2" name="effective_to" type="date" :value="old('effective_to', optional($version?->effective_to)->format('Y-m-d'))"  id="effective-to" :aria-describedby="$errors->has('effective_to') ? 'effective-to-error' : null"/>
+                    <x-ui.date-picker class="mt-2" name="effective_to" :value="old('effective_to', optional($version?->effective_to)->format('Y-m-d'))" id="effective-to" :aria-describedby="$errors->has('effective_to') ? 'effective-to-error' : null" />
                 </x-ui.field>
             </div>
 

@@ -59,7 +59,7 @@
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('sale.sale_date') }}" for="sale-date" :required="true" :error="$errors->first('sale_date')">
-                    <x-ui.input name="sale_date" type="date" :value="old('sale_date', $sale?->sale_date?->format('Y-m-d') ?? now()->toDateString())" required @class(['mt-2', 'border-[var(--ui-danger)]' => $errors->has('sale_date'), 'border-[var(--ui-border)]' => ! $errors->has('sale_date')])  id="sale-date" :aria-describedby="$errors->has('sale_date') ? 'sale-date-error' : null"/>
+                    <x-ui.date-picker name="sale_date" :value="old('sale_date', $sale?->sale_date?->format('Y-m-d') ?? now()->toDateString())" required class="mt-2" id="sale-date" :aria-describedby="$errors->has('sale_date') ? 'sale-date-error' : null" />
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('sale.status') }}" for="status" :required="true" :error="$errors->first('status')">

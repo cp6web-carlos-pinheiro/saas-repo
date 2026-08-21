@@ -38,10 +38,10 @@
             <form method="POST" action="{{ route('production.routing.approve', $version) }}" class="mt-6 grid gap-3 sm:grid-cols-3">
                 @csrf
                 <label class="block text-sm font-medium">Vigencia inicial
-                    <x-ui.input class="mt-2" type="date" name="effective_from" :value="old('effective_from', optional($version->effective_from)->format('Y-m-d'))" required />
+                    <x-ui.date-picker class="mt-2" name="effective_from" :value="old('effective_from', optional($version->effective_from)->format('Y-m-d'))" required />
                 </label>
                 <label class="block text-sm font-medium">Vigencia final
-                    <x-ui.input class="mt-2" type="date" name="effective_to" :value="old('effective_to', optional($version->effective_to)->format('Y-m-d'))" />
+                    <x-ui.date-picker class="mt-2" name="effective_to" :value="old('effective_to', optional($version->effective_to)->format('Y-m-d'))" />
                 </label>
                 <div class="flex items-end">
                     <x-ui.button type="submit" variant="primary" class="rounded-full" :full="true">{{ __('production.routing.approve') }}</x-ui.button>

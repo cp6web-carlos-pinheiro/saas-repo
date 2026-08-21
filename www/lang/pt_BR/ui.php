@@ -49,6 +49,8 @@ return [
     'language' => 'Idioma',
     'save' => 'Salvar',
     'cancel' => 'Cancelar',
+    'select_date' => 'Selecione uma data',
+    'clear_date' => 'Limpar data',
     'edit' => 'Editar',
     'copy' => 'Copiar',
     'copied' => 'Copiado',

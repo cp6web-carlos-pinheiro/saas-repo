@@ -26,10 +26,10 @@
                 </x-ui.select>
             </label>
             <label class="block text-sm font-medium">{{ __('production.calendar.from') }}
-                <x-ui.input class="mt-2" type="date" name="from_date" :value="$fromDate" required />
+                <x-ui.date-picker class="mt-2" name="from_date" :value="$fromDate" required />
             </label>
             <label class="block text-sm font-medium">{{ __('production.calendar.until') }}
-                <x-ui.input class="mt-2" type="date" name="to_date" :value="$toDate" required />
+                <x-ui.date-picker class="mt-2" name="to_date" :value="$toDate" required />
             </label>
             <div class="flex items-end">
                 <x-ui.button type="submit" variant="secondary" class="rounded-full" :full="true">{{ __('production.filter') }}</x-ui.button>

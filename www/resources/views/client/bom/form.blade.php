@@ -67,11 +67,11 @@
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('bom.effective_from') }}" for="effective_from" :error="$errors->first('effective_from')">
-                    <x-ui.input id="effective_from" type="date" name="effective_from" :value="old('effective_from', $bom?->effective_from?->format('Y-m-d'))"  :aria-describedby="$errors->has('effective_from') ? 'effective_from-error' : null"/>
+                    <x-ui.date-picker id="effective_from" name="effective_from" :value="old('effective_from', $bom?->effective_from?->format('Y-m-d'))" :aria-describedby="$errors->has('effective_from') ? 'effective_from-error' : null" />
                 </x-ui.field>
 
                 <x-ui.field label="{{ __('bom.effective_to') }}" for="effective_to" :error="$errors->first('effective_to')">
-                    <x-ui.input id="effective_to" type="date" name="effective_to" :value="old('effective_to', $bom?->effective_to?->format('Y-m-d'))"  :aria-describedby="$errors->has('effective_to') ? 'effective_to-error' : null"/>
+                    <x-ui.date-picker id="effective_to" name="effective_to" :value="old('effective_to', $bom?->effective_to?->format('Y-m-d'))" :aria-describedby="$errors->has('effective_to') ? 'effective_to-error' : null" />
                 </x-ui.field>
 
                 <x-ui.field class="md:col-span-3" label="{{ __('bom.description') }}" for="description" :error="$errors->first('description')">

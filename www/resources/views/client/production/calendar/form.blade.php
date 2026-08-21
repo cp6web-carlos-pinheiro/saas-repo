@@ -35,7 +35,7 @@
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <x-ui.field label="{{ __('production.date') }}" for="calendar-date" :required="true" :error="$errors->first('calendar_date')">
-                    <x-ui.input class="mt-2" type="date" name="calendar_date" :value="old('calendar_date', optional($day?->calendar_date)->format('Y-m-d'))" required  id="calendar-date" :aria-describedby="$errors->has('calendar_date') ? 'calendar-date-error' : null"/>
+                    <x-ui.date-picker class="mt-2" name="calendar_date" :value="old('calendar_date', optional($day?->calendar_date)->format('Y-m-d'))" required id="calendar-date" :aria-describedby="$errors->has('calendar_date') ? 'calendar-date-error' : null" />
                 </x-ui.field>
                 <x-ui.field label="{{ __('production.calendar.available_capacity') }}" for="available-capacity" :error="$errors->first('available_capacity')">
                     <x-ui.input class="mt-2" type="number" step="0.01" min="0" name="available_capacity" :value="old('available_capacity', $day?->available_capacity)"  id="available-capacity" :aria-describedby="$errors->has('available_capacity') ? 'available-capacity-error' : null"/>
